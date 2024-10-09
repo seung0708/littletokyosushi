@@ -1,15 +1,15 @@
 // /components/ui/Sidebar.tsx
 import Link from "next/link"
-import { Home, ShoppingCart, Package, Users, LineChart, Settings } from "lucide-react"
-import Badge from "@/app/components/ui/badge"
-import {Card, CardDescription, CardTitle} from "@/app/components/ui/card"
+import { Home, ShoppingCart, SquareMenu, Users, LineChart, Settings } from "lucide-react"
+import { Badge } from "@/components/ui/badge"
+
 
 export default function Sidebar() {
   return (
     <aside className="hidden h-full w-60 bg-gray-100 p-4 border-r md:flex md:flex-col">
       {/* Header */}
       <Link href="/dashboard" className="flex items-center gap-3 text-lg font-bold text-gray-800 mb-4">
-        <Package className="w-5 h-5" /> Acme Inc
+        Little Tokyo Sushi
       </Link>
 
       {/* Main Navigation */}
@@ -18,7 +18,7 @@ export default function Sidebar() {
           {[
             { label: 'Dashboard', icon: <Home />, link: '/dashboard' },
             { label: 'Orders', icon: <ShoppingCart />, link: '/orders', badge: 4 },
-            { label: 'Live Orders', icon: <Package />, link: '/live-orders' },
+            { label: 'Products', icon: <SquareMenu />, link: '/products' },
             { label: 'Employees', icon: <Users />, link: '/employees' },
             { label: 'Analytics', icon: <LineChart />, link: '/analytics' },
           ].map((item) => (
