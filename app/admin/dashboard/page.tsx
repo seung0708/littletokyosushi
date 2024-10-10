@@ -4,6 +4,8 @@ import { Button } from '@/components/ui/button'
 import { DollarSign, Users, CreditCard, Activity, ArrowUpRight, } from 'lucide-react'
 import { Card, CardHeader, CardTitle, CardContent, CardDescription } from '@/components/ui/card'
 import { Table, TableHeader, TableRow, TableHead, TableCell, TableBody } from '@/components/ui/table'
+import { Avatar, AvatarFallback, AvatarImage} from '@radix-ui/react-avatar'
+
 const DashboardPage: React.FC = () => {
     return(
       <section className="flex flex-1 flex-col gap-4 p-4 md:gap-8 md:p-8">
