@@ -1,10 +1,12 @@
 import categories, {Category} from './categories';
 
-interface Product {
+
+export interface Product {
     id: number, 
     title: string, 
     description: string, 
     price: number,
+    quantity: number,
     images: string[], 
     category: Category
 }
@@ -15,7 +17,8 @@ export const products: Product[] = [
         title: 'Salmon Combo',
         description: '8 pieces of Salmon Sushi & 4 pieces of Salmon Roll',
         price: 18.00, 
-        images: ['../assets/images/SalmonCombo.png'],
+        quantity: 8,
+        images: ['/../assets/images/SalmonCombo.png'],
         category: categories[1]
     }, 
     {
@@ -23,7 +26,8 @@ export const products: Product[] = [
         title: 'Toro Combo',
         description: '8 pieces of Toro Sushi and 4 pieces of Tuna roll',
         price: 20.50, 
-        images: ['../assets/images/ToroCombo.png'],
+        quantity: 2,
+        images: ['/../assets/images/'],
         category: categories[1]
     },
     {
@@ -31,7 +35,8 @@ export const products: Product[] = [
         title: 'Deluxe Matsu',
         description: '9 pieces of assorted sushi and 4 pieces of tuna roll',
         price: 20.50, 
-        images: ['../assets/images/DeluxeMatsu.png'],
+        quantity: 4,
+        images: ['/../assets/images/DeluxeMatsu.png'],
         category: categories[1]
     },
     {
@@ -39,7 +44,8 @@ export const products: Product[] = [
         title: 'Toro Salmon Combo',
         description: '4 pieces of Toro Sushi, 4 pieces of Salmon Sushi and 4 pieces of Tuna Roll',
         price: 20.50, 
-        images: ['../assets/images/DeluxeMatsu.png'],
+        quantity: 2,
+        images: ['/../assets/images/ToroSalmonCombo.png'],
         category: categories[1]
     },
 
