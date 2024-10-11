@@ -2,7 +2,7 @@ import Image from "next/image";
 
 const About: React.FC = () => {
     return (
-        <section className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-4 items-center">
+        <section className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-4 items-center mb-16">
             <div>
                 <h2 className="text-4xl mb-6">About us</h2>
                 <p className="text-xl">Located inside the Little Tokyo Marketplace, we are a small family-owned sushi takeout restaurant serving quality sushi and rolls everyday</p>
