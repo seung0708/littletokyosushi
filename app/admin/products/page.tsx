@@ -1,4 +1,4 @@
-import TabsComponent from '@/app/components/tabscomponent'
+import TabsComponent from '../components/tabscomponent'
 import React from 'react'
 
 const ProductPage: React.FC = () => {

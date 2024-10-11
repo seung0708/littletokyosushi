@@ -1,6 +1,6 @@
 import {ReactNode} from 'react';
-import Sidebar from '../components/sidebar';
-import Header from '../components/header';
+import Sidebar from './components/sidebar'
+import Header from './components/header';
 
 export default function AdminLayout({children}: { children: ReactNode }) {
     return (

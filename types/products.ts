@@ -18,7 +18,7 @@ export const products: Product[] = [
         description: '8 pieces of Salmon Sushi & 4 pieces of Salmon Roll',
         price: 18.00, 
         quantity: 8,
-        images: ['/../assets/images/SalmonCombo.png'],
+        images: ['/assets/images/SalmonCombo.png'],
         category: categories[1]
     }, 
     {
@@ -27,7 +27,7 @@ export const products: Product[] = [
         description: '8 pieces of Toro Sushi and 4 pieces of Tuna roll',
         price: 20.50, 
         quantity: 2,
-        images: ['/../assets/images/'],
+        images: ['/assets/images/ToroCombo.png'],
         category: categories[1]
     },
     {
@@ -36,7 +36,7 @@ export const products: Product[] = [
         description: '9 pieces of assorted sushi and 4 pieces of tuna roll',
         price: 20.50, 
         quantity: 4,
-        images: ['/../assets/images/DeluxeMatsu.png'],
+        images: ['/assets/images/DeluxeMatsu.png'],
         category: categories[1]
     },
     {
@@ -45,7 +45,7 @@ export const products: Product[] = [
         description: '4 pieces of Toro Sushi, 4 pieces of Salmon Sushi and 4 pieces of Tuna Roll',
         price: 20.50, 
         quantity: 2,
-        images: ['/../assets/images/ToroSalmonCombo.png'],
+        images: ['/assets/images/ToroSalmonCombo.png'],
         category: categories[1]
     },
 
