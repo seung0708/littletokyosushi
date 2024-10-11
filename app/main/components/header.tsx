@@ -16,8 +16,8 @@ export default function Header() {
             <div className="flex items-center gap-2">
                 <Navbar isToggle={isToggle} />
                 <button className="relative bg-red-500 p-3 rounded-full">
-                    <ShoppingBag size={18} />
-                    <span className="absolute top-1 left-7">0</span>
+                    <ShoppingBag className='me-1' size={18} />
+                    <span className="absolute top-1 left-7 ms-1">0</span>
                 </button>
                 <button onClick={() => setIsToggle(!isToggle)} className="sm:hidden">
                     <Menu/>

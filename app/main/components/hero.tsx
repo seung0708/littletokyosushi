@@ -2,7 +2,7 @@ import Image from "next/image"
 import Link from "next/link"
 const Hero: React.FC = () => {
     return (
-        <section id="hero" className="flex flex-col md:flex-row max-w-7xl mx-auto p-4">
+        <section id="hero" className="flex flex-col md:flex-row max-w-7xl mx-auto p-4 mb-8">
             <div className="w-full flex justify-center items-center mb-6 md:mb-0">
                 <Image 
                     className="object-cover w-full max-w-xs md:max-w-sm lg:max-w-md" // Smaller image sizes for different breakpoints
