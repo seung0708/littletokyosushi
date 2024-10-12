@@ -28,6 +28,7 @@
     "@supabase/auth-helpers-nextjs": "^0.10.0",
     "@supabase/ssr": "^0.5.1",
     "@supabase/supabase-js": "^2.45.4",
+    "@tailwindcss/aspect-ratio": "^0.4.2",
     "@testing-library/react": "^16.0.1",
     "@testing-library/user-event": "^14.5.2",
     "class-variance-authority": "^0.7.0",
@@ -38,10 +39,12 @@
     "lucide-react": "^0.451.0",
     "next": "14.2.14",
     "notenv": "^2.0.3",
+    "prettier": "^3.3.3",
     "react": "^18",
     "react-dom": "^18",
     "tailwind-merge": "^2.5.3",
-    "tailwindcss-animate": "^1.0.7"
+    "tailwindcss-animate": "^1.0.7",
+    "tailwindcss-aspect-ratio": "^3.0.0"
   },
   "devDependencies": {
     "@types/node": "^20",
