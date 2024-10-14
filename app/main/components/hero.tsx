@@ -2,19 +2,14 @@ import Image from "next/image"
 import Link from "next/link"
 const Hero: React.FC = () => {
     return (
-        <section id="hero" className="relative isolate bg-hero-image1 bg-center bg-no-repeat sm:bg-cover px-6 py-0 lg:px-8">
+        <section id="hero" className="relative isolate bg-hero-image1 bg-center bg-no-repeat sm:bg-cover px-6 py-0 lg:px-8 mb-0 sm:mb-20">
             <div className="absolute inset-0 bg-gray-900 opacity-50"></div>
             <div className="relative z-10 mx-auto max-w-2xl py-32 sm:py-48 lg:py-56">
-                <div className="hidden sm:mb-8 sm:flex sm:justify-center">
-                    <div className="relative rounded-full px-3 py-1 text-sm leading-6 ring-1 ring-gray-900/10 hover:ring-gray-900/20">
-                        Anouncing our next round of funding.
-                    </div>
-                </div>
                 <div className="text-center">
-                    <h1 className="text-balance font-bold tracking-tight text-4xl sm:text-6xl">Data to enrich your online business</h1>
-                    <p className="mt-6 text-lg leading-8">Anim aute id magna aliqua ad ad non deserunt. </p>
+                    <h1 className="text-balance font-bold tracking-tight text-4xl sm:text-6xl">LITTLE TOKYO SUSHI</h1>
+                    <p className="mt-6 text-xl leading-8">The only sushi takeout restaurant serving a variety of sushi and rolls</p>
                     <div className="mt-10 flex items-center justify-center gap-x-6">
-                        <a href='#' className="rounded-md bg-red-500 px-3.5 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-red-400 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:oultine-red-500">Get Started</a>
+                        <a href='#' className="rounded-md bg-red-500 px-3.5 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-red-400 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:oultine-red-500">Order Now</a>
                     </div>
                 </div>
             </div>

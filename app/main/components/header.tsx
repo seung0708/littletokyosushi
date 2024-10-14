@@ -14,7 +14,7 @@ export default function Header() {
     return (
         <>
             {/* Header */}
-            <header className="relative text-white-400 z-10">
+            <header className="relative text-white-400 z-10 mb-0 sm:mb-20">
                 {/* <p className="flex h-10 items-center justify-center bg-indigo-600 px-4 text-sm font-medium text-white sm:px-6 lg:px-8">
                     Get free delivery on orders over $100
                 </p> */}
@@ -79,7 +79,7 @@ export default function Header() {
                                 <div className="hidden lg:flex lg:flex-1 lg:items-center lg:justify-center lg:space-x-6">
                                     <a href="#" className="text-sm font-medium text-white-700">About</a>
                                     <a href="#" className="text-sm font-medium text-white-700">Contact</a>
-                                    <a href="#" className="text-sm font-medium text-white-700">Menu</a>
+                                    <a href="/menu" className="text-sm font-medium text-white-700">Menu</a>
                                     <span className="h-6 w-px bg-gray-200" aria-hidden="true"></span>
                                 </div>
                                 <div className="ml-4 flow-root lg:ml-6">
