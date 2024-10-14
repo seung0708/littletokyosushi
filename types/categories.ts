@@ -11,4 +11,4 @@ const categories: Category[] = [
     { id: 5, name: 'party trays' },
 ];
 
-export default categories
+export default categories;

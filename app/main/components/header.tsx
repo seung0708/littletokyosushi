@@ -66,12 +66,12 @@ export default function Header() {
                                 )}
                             </div>
                             <div className="flex justify-center ml-auto lg:ml-0">
-                                <a href="#">
-                                    <span className="sr-only">Your Company</span>
+                                <a href="/">
+                                    <span className="sr-only">Little Tokyo Sushi</span>
                                     <img
                                         className="h-11 w-auto"
                                         src={'/assets/images/logo.png'}
-                                        alt=""
+                                        alt="logo"
                                     />
                                 </a>
                             </div>
