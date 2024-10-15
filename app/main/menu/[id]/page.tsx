@@ -9,8 +9,8 @@ const ProductDetailsPage: React.FC = () => {
 
     const product = products.find(product => product.id === Number(id));
 
-    const nextSlide = () => setActiveIndex((prev) => (prev + 1));
-    const prevSlide = () => setActiveIndex((prev) => (prev - 1));
+    const nextSlide = () => setActiveIndex((prev) => (prev + 1) % product.images.length);
+    const prevSlide = () => setActiveIndex((prev) => (prev - 1 + product.images.length) % product.images.length);
 
 
     if(!product) return <p>Product Not Found</p>;
@@ -21,33 +21,43 @@ const ProductDetailsPage: React.FC = () => {
             <div className="relative h-56 overflow-hidden rounded-lg md:h-96">
                 {product.images.map((image, index) => (
                     <div key={index} className={`duration-700 ease-in-out ${index === activeIndex ? '' : 'hidden'}`} data-carousel-item>
-                        <img src={image} className="absolute block w-full -translate-x-1/2 -translate-y-1/2 top-1/2 left-1/2" />
+                        <img src={image} className="absolute block w-full -translate-x-1/2 -translate-y-1/2 top-1/2 left-1/2" alt={`Slide ${index + 1}`} />
                     </div>
                 ))}
-                <div className="absolute z-30 flex -translate-x-1/2 bottom-5 left-1/2 space-x-3 rtl:space-x-reverse">
+
+                {/* Slide Indicators */}
+                <div className="absolute z-30 flex -translate-x-1/2 bottom-5 left-1/2 space-x-3">
                     {product.images.map((_, index) => (
                         <button
                             key={index}
                             type="button"
-                            className="w-3 h-3 rounded-full"
+                            className={`w-3 h-3 rounded-full ${activeIndex === index ? 'bg-white' : 'bg-gray-300'}`}
                             aria-label={`Slide ${index + 1}`}
                             onClick={() => setActiveIndex(index)}
                         ></button>
                     ))}
                 </div>
-                <button onClick={prevSlide} className="absolute top-0 start-0 z-30 flex items-center justify-center h-full px-4 cursor-pointer group focus:outline-none" data-carousel-prev>
-                    <span className="inline-flex items-center justify-center w-10 h-10 rounded-full bg-white/30 dark:bg-gray-800/30 group-hover:bg-white/50 dark:group-hover:bg-gray-800/60 group-focus:ring-4 group-focus:ring-white dark:group-focus:ring-gray-800/70 group-focus:outline-none">
-                        <svg className="w-4 h-4 text-gray dark:text-gray-800 rtl:rotate-180" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 6 10">
-                            <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 1 1 5l4 4" />
-                        </svg>
-                    </span>
+
+                {/* Previous Button */}
+                <button
+                    onClick={prevSlide}
+                    className="absolute top-1/2 left-4 z-30 flex items-center justify-center h-10 w-10 bg-black bg-opacity-50 rounded-full cursor-pointer transform -translate-y-1/2"
+                    aria-label="Previous Slide"
+                >
+                    <svg className="w-6 h-6 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 6 10">
+                        <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 1L1 5l4 4" />
+                    </svg>
                 </button>
-                <button onClick={nextSlide} type="button" className="absolute top-0 end-0 z-30 flex items-center justify-center h-full px-4 cursor-pointer group focus:outline-none" data-carousel-next>
-                    <span className="inline-flex items-center justify-center w-10 h-10 rounded-full">
-                        <svg className="w-4 h-4 text-white dark:text-gray-800 rtl:rotate-180" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 6 10">
-                            <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="m1 9 4-4-4-4" />
-                        </svg>
-                    </span>
+
+                {/* Next Button */}
+                <button
+                    onClick={nextSlide}
+                    className="absolute top-1/2 right-4 z-30 flex items-center justify-center h-10 w-10 bg-black bg-opacity-50 rounded-full cursor-pointer transform -translate-y-1/2"
+                    aria-label="Next Slide"
+                >
+                    <svg className="w-6 h-6 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 6 10">
+                        <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M1 9l4-4-4-4" />
+                    </svg>
                 </button>
             </div>
         </div>
@@ -66,20 +76,21 @@ const ProductDetailsPage: React.FC = () => {
                     <div key={modifierGroup.id}>
                         <h3 className='mt-4'>{modifierGroup.name}:</h3>
                         {modifierGroup.modifiers.map(modifier => (
-                             <div className="flex items-center space-x-3 space-y-2">
-                             <label aria-label="White" className="relative -m-0.5 flex cursor-pointer items-center justify-center rounded-full p-0.5 ring-gray-400 focus:outline-none">
-                               <input type="radio" name="color-choice" value="White" className="sr-only"/>
-                               <span aria-hidden="true" className="h-8 w-8 rounded-full border border-black border-opacity-10 bg-white"></span>
-                             </label>
+                            <div className="flex items-center space-x-3 space-y-2">
+                            {modifierGroup.max < 2 ? (
+                                <label aria-label="White" className="relative -m-0.5 flex cursor-pointer items-center justify-center rounded-full p-0.5 ring-gray-400 focus:outline-none">
+                                <input type="radio" name="color-choice" value="White" className="sr-only" required/>
+                                <span aria-hidden="true" className="h-5 w-5 me-3 my-2 rounded-full border border-black border-opacity-10 bg-white"></span>
+                                 {modifier.name}
+                              </label>
+                            ): (
+                                <label aria-label="White" className="relative -m-0.5 flex cursor-pointer items-center justify-center rounded-full p-0.5 ring-gray-400 focus:outline-none">
+                                <input type="checkbox" name="color-choice" value="White" className="sr-only" required />
+                                <span aria-hidden="true" className="h-5 w-5 me-3 my-2 border border-black border-opacity-10 bg-white"></span>
+                                 {modifier.name}
+                              </label>
+                            )}
                              
-                             <label aria-label="Gray" className="relative -m-0.5 flex cursor-pointer items-center justify-center rounded-full p-0.5 ring-gray-400 focus:outline-none">
-                               <input type="radio" name="color-choice" value="Gray" className="sr-only" />
-                               <span aria-hidden="true" className="">{modifier.name}</span>
-                             </label>
-                             <label aria-label="Black" className="relative -m-0.5 flex cursor-pointer items-center justify-center rounded-full p-0.5 ring-gray-900 focus:outline-none">
-                               <input type="radio" name="color-choice" value="Black" className="sr-only" />
-                               <span aria-hidden="true" className="h-8 w-8 rounded-full border border-black border-opacity-10 bg-gray-900"></span>
-                             </label>
                            </div>
                         ))}
                     </div>

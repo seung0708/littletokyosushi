@@ -14,7 +14,7 @@ export default function Header() {
     return (
         <>
             {/* Header */}
-            <header className="relative text-white-400 z-10 mb-0 sm:mb-20">
+            <header className="max-w-7xl mx-auto relative text-white-400 z-10 mb-0 sm:mb-20">
                 {/* <p className="flex h-10 items-center justify-center bg-indigo-600 px-4 text-sm font-medium text-white sm:px-6 lg:px-8">
                     Get free delivery on orders over $100
                 </p> */}
@@ -83,7 +83,7 @@ export default function Header() {
                                     <span className="h-6 w-px bg-gray-200" aria-hidden="true"></span>
                                 </div>
                                 <div className="ml-4 flow-root lg:ml-6">
-                                    <a href="#" className="group -m-2 flex items-center p-2">
+                                    <a href="/cart" className="group -m-2 flex items-center p-2">
                                         <svg
                                             className="h-6 w-6 flex-shrink-0 text-white-900"
                                             fill="none"
