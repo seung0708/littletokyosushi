@@ -1,5 +1,5 @@
 import categories, { Category } from './categories';
-
+import { Modifier, ModifierGroup } from './modifiers';
 export interface Product {
     id: number; 
     title: string; 
@@ -7,7 +7,8 @@ export interface Product {
     price: number;
     quantity: number;
     images: string[]; 
-    category: Category; // This should be a single Category object
+    category: Category;
+    modifierGroups?: ModifierGroup[];
 }
 
 export const products: Product[] = [
@@ -17,7 +18,7 @@ export const products: Product[] = [
         description: '8 pieces of Salmon Sushi & 4 pieces of Salmon Roll',
         price: 18.00, 
         quantity: 8,
-        images: ['/assets/images/SalmonCombo.png'],
+        images: ['/assets/images/SalmonCombo.png', '/assets/images/SalmonCombo.png', '/assets/images/SalmonCombo.png','/assets/images/SalmonCombo.png'],
         category: categories[0]
     }, 
     {
@@ -26,7 +27,7 @@ export const products: Product[] = [
         description: '8 pieces of Toro Sushi and 4 pieces of Tuna roll',
         price: 20.50, 
         quantity: 2,
-        images: ['/assets/images/ToroCombo.png'],
+        images: ['/assets/images/ToroCombo.png','/assets/images/ToroCombo.png', '/assets/images/ToroCombo.png','/assets/images/ToroCombo.png'],
         category: categories[0]
     },
     {
@@ -35,7 +36,7 @@ export const products: Product[] = [
         description: '9 pieces of assorted sushi and 4 pieces of tuna roll',
         price: 20.50, 
         quantity: 4,
-        images: ['/assets/images/DeluxeMatsu.png'],
+        images: ['/assets/images/DeluxeMatsu.png','/assets/images/DeluxeMatsu.png','/assets/images/DeluxeMatsu.png','/assets/images/DeluxeMatsu.png','/assets/images/DeluxeMatsu.png'],
         category: categories[0]
     },
     {
@@ -44,7 +45,7 @@ export const products: Product[] = [
         description: '4 pieces of Toro Sushi, 4 pieces of Salmon Sushi and 4 pieces of Tuna Roll',
         price: 20.50, 
         quantity: 2,
-        images: ['/assets/images/ToroSalmonCombo.png'],
+        images: ['/assets/images/ToroSalmonCombo.png', '/assets/images/ToroSalmonCombo.png', '/assets/images/ToroSalmonCombo.png', '/assets/images/ToroSalmonCombo.png'],
         category: categories[0]
     },
     {
@@ -53,8 +54,20 @@ export const products: Product[] = [
         description: "Your choice of either a Salmon Avocado Crunch Roll or Shrimp Tempura Crunch Roll with 6 pieces of Avocado Roll and 6 pieces of Salmon Roll Includes Ginger, Wasabi, and Soy Sauce",
         price: 20.00, 
         quantity: 2,
-        images: ['/assets/images/Salmon Avocado  Shrimp Tempura Avocado Medley.png'],
-        category: categories[0]
+        images: ['/assets/images/Salmon Avocado  Shrimp Tempura Avocado Medley.png', '/assets/images/Salmon Avocado  Shrimp Tempura Avocado Medley.png', '/assets/images/Salmon Avocado  Shrimp Tempura Avocado Medley.png', '/assets/images/Salmon Avocado  Shrimp Tempura Avocado Medley.png', ],
+        category: categories[0],
+        modifierGroups: [
+            {
+               id: 1, 
+               name: 'Your Choice of Roll',
+               min: 1, 
+               max: 1,
+               modifiers: [
+                    { id: 1, name: 'Salmon Avocado Roll', price: 0.00},
+                    {id: 2, name: 'Shrimp Tempura Roll', price: 0.00}
+               ]
+            }
+        ]
     },
     {
         id: 6, 
@@ -62,8 +75,36 @@ export const products: Product[] = [
         description: '7 pieces of Assorted Sushi, 4 pieces of Salmon/Tuna roll, and 4 pieces of Cucumber Roll',
         price: 15.50, 
         quantity: 12,
-        images: ['/assets/images/Little Tokyo Sushi (2).png'],
-        category: categories[0]
+        images: ['/assets/images/Little Tokyo Sushi (2).png', '/assets/images/Little Tokyo Sushi (2).png', '/assets/images/Little Tokyo Sushi (2).png','/assets/images/Little Tokyo Sushi (2).png'],
+        category: categories[0],
+        modifierGroups: [
+            {
+                id: 2, 
+                name: 'Your Choice of Sushi Combination',
+                min:1,
+                max:1,
+                modifiers: [
+                    {id:3, name: '2 Salmon Sushi and 1 Tuna Sushi', price: 0.00},
+                    {id:4, name: '2 Tuna Sushi and 1 Salmon Sushi', price: 0.00}
+                ]
+            }, 
+            {
+                id: 3,
+                name: 'Your Choice of 4 Sushi', 
+                min: 4, 
+                max: 4, 
+                modifiers: [
+                    {id: 5, name: 'Albacore', price: 0.00},
+                    {id: 6, name: 'Baby Scallop', price: 0.00},
+                    {id: 7, name: 'Ebi', price: 0.00},
+                    {id: 8, name: 'Ika', price: 0.00},
+                    {id: 9, name: 'Saba', price: 0.00},
+                    {id: 10, name: 'Tako', price: 0.00},
+                    {id: 11, name: 'Tilapia', price: 0.00},
+                    {id: 12, name: 'Unagi', price: 0.00}
+                ]
+            }
+        ]
     },
     {
         id: 7, 
@@ -71,8 +112,30 @@ export const products: Product[] = [
         description: '2 pieces of Salmon Sushi, 2 pieces of Tuna Sushi, 4 pieces of Salmon Roll or 4 pieces of Tuna Roll, and 4 pieces of California Roll or Salmon Avocado Roll',
         price: 17.50, 
         quantity: 10,
-        images: ['/assets/images/Sushi Cham.png'],
-        category: categories[0]
+        images: ['/assets/images/Sushi Cham.png', '/assets/images/Sushi Cham.png','/assets/images/Sushi Cham.png','/assets/images/Sushi Cham.png'],
+        category: categories[0],
+        modifierGroups: [
+            {
+                id: 4,
+                name: 'Your Choice of Sushi',
+                min: 1,
+                max: 1,
+                modifiers: [
+                    {id: 13, name: '2 Salmon Sushi and 2 Tuna Sushi', price: 0.00},
+                    {id: 14, name: '4 Salmon Sushi', price: 0.00},
+                ]
+            }, 
+            {
+                id: 5,
+                name: 'Your Choice of Roll',
+                min: 1,
+                max: 1,
+                modifiers: [
+                    {id: 15, name: 'California Roll', price: 0.00},
+                    {id: 16, name: 'Spicy Tuna Roll', price: 0.00},
+                ]
+            }
+        ]
     },
     {
         id: 8, 
@@ -80,8 +143,37 @@ export const products: Product[] = [
         description: '2 pieces of Salmon Sushi, 2 pieces of Tuna Sushi, 2 pieces of Your Choice, and 3 pieces of California Roll',
         price: 16.50, 
         quantity: 2,
-        images: ['/assets/images/Yorker Sushi.png'],
-        category: categories[0]
+        images: ['/assets/images/Yorker Sushi.png', '/assets/images/Yorker Sushi.png', '/assets/images/Yorker Sushi.png','/assets/images/Yorker Sushi.png'],
+        category: categories[0],
+        modifierGroups: [
+            {
+                id: 6,
+                name: 'Your Choice of Sushi',
+                min: 1,
+                max: 1,
+                modifiers: [
+                    {id: 15, name: 'Albacore', price: 0.00},
+                    {id: 16, name: 'Baby Scallop', price: 0.00},
+                    {id: 17, name: 'Ebi', price: 0.00},
+                    {id: 18, name: 'Ika', price: 0.00},
+                    {id: 19, name: 'Saba', price: 0.00},
+                    {id: 20, name: 'Tako', price: 0.00},
+                    {id: 21, name: 'Tilapia', price: 0.00},
+                    {id: 22, name: 'Unagi', price: 0.00},
+                    {id: 23, name: 'Salmon', price: 0.00},
+                    {id: 24, name: 'Tuna', price: 0.00}
+                ]
+            }, {
+                id: 7,
+                name: 'Select Your Roll of Choice',
+                min: 1,
+                max: 1,
+                modifiers: [
+                    {id: 25, name: 'California', price: 0.00},
+                    {id: 26, name: 'Spicy Tuna', price: 0.00}
+                ]
+            }
+        ]
     },
     {
         id: 9, 
@@ -89,7 +181,7 @@ export const products: Product[] = [
         description: "3 Tuna & 3 Salmon Rolls, Inari Sushi, Shibazuke(Pickled Eggplant), 3 kinds of Sushi (1 Salmon, 1 Tuna, and 1 Customer's choice), and Eel with a drizzle of Eel sauce over rice",
         price: 16.00, 
         quantity: 8,
-        images: ['/assets/images/Shokado-B.png'],
+        images: ['/assets/images/Shokado-B.png', '/assets/images/Shokado-B.png', '/assets/images/Shokado-B.png', '/assets/images/Shokado-B.png', '/assets/images/Shokado-B.png'],
         category: categories[0]
     },
     {
@@ -98,7 +190,7 @@ export const products: Product[] = [
         description: "6 pieces of Tuna Sushi",
         price: 14.00, 
         quantity: 1,
-        images: ['/assets/images/Tuna Sushi.png'],
+        images: ['/assets/images/Tuna Sushi.png', '/assets/images/Tuna Sushi.png', '/assets/images/Tuna Sushi.png', '/assets/images/Tuna Sushi.png'],
         category: categories[1]
     },
     {
@@ -107,7 +199,7 @@ export const products: Product[] = [
         description: "6 pieces of Makerel Sushi",
         price: 12.00, 
         quantity: 1,
-        images: ['/assets/images/Makerel Sushi.png'],
+        images: ['/assets/images/Makerel Sushi.png', '/assets/images/Makerel Sushi.png','/assets/images/Makerel Sushi.png', '/assets/images/Makerel Sushi.png'],
         category: categories[1]
     },
 
@@ -117,7 +209,7 @@ export const products: Product[] = [
         description: "3 pieces of Tuna Sushi and 3 pieces of Salmon Sushi",
         price: 14.50, 
         quantity: 2,
-        images: ['/assets/images/Tuna Salmon Sushi.png'],
+        images: ['/assets/images/Tuna Salmon Sushi.png', '/assets/images/Tuna Salmon Sushi.png', '/assets/images/Tuna Salmon Sushi.png', '/assets/images/Tuna Salmon Sushi.png'],
         category: categories[1]
     },
     {
@@ -126,7 +218,7 @@ export const products: Product[] = [
         description: "6 pieces of Inari(Tofu) Sushi",
         price: 11.00, 
         quantity: 2,
-        images: ['/assets/images/Inari.png'],
+        images: ['/assets/images/Inari.png', '/assets/images/Inari.png', '/assets/images/Inari.png','/assets/images/Inari.png'],
         category: categories[1]
     },
     {
@@ -135,7 +227,7 @@ export const products: Product[] = [
         description: "6 Pieces of Unagi(Eel) Sushi",
         price: 13.00, 
         quantity: 1,
-        images: ['/assets/images/Unagi Sushi.png'],
+        images: ['/assets/images/Unagi Sushi.png', '/assets/images/Unagi Sushi.png','/assets/images/Unagi Sushi.png','/assets/images/Unagi Sushi.png'],
         category: categories[1]
     },
     {
@@ -144,7 +236,7 @@ export const products: Product[] = [
         description: "3 pieces of Tuna Sushi & 3 pieces of Unagi(Eel) Sushi",
         price: 14.00, 
         quantity: 1,
-        images: ['/assets/images/Tuna Unagi Sushi.png'],
+        images: ['/assets/images/Tuna Unagi Sushi.png','/assets/images/Tuna Unagi Sushi.png','/assets/images/Tuna Unagi Sushi.png','/assets/images/Tuna Unagi Sushi.png'],
         category: categories[1]
     },
     {
@@ -153,7 +245,7 @@ export const products: Product[] = [
         description: "3 pieces of Salmon Sushi & 3 pieces of Unagi(Eel) Sushi",
         price: 16.00, 
         quantity: 1,
-        images: ['/assets/images/Salmon Unagi.png'],
+        images: ['/assets/images/Salmon Unagi.png', '/assets/images/Salmon Unagi.png','/assets/images/Salmon Unagi.png','/assets/images/Salmon Unagi.png'],
         category: categories[1]
     },
     {
@@ -171,7 +263,7 @@ export const products: Product[] = [
         description: "Rice bowl topped with Tuna, Tilapia, Unagi, Shrimp, Tamago, Salmon Roe, Yuzu Masago, Masago, Seaweed Salad, and Radish Sprouts",
         price: 16.00, 
         quantity: 2,
-        images: ['/assets/images/Chirashi.png'],
+        images: ['/assets/images/Chirashi.png', '/assets/images/Chirashi.png','/assets/images/Chirashi.png','/assets/images/Chirashi.png','/assets/images/Chirashi.png'],
         category: categories[2]
     },
     {
@@ -180,7 +272,7 @@ export const products: Product[] = [
         description: "Rice bowl with Salmon on top, Tilapia, Radish Sprouts, and Green Onions",
         price: 15.00, 
         quantity: 2,
-        images: ['/assets/images/Salmon Bowl.png'],
+        images: ['/assets/images/Salmon Bowl.png', '/assets/images/Salmon Bowl.png','/assets/images/Salmon Bowl.png','/assets/images/Salmon Bowl.png','/assets/images/Salmon Bowl.png'],
         category: categories[2]
     },
     {
@@ -189,7 +281,7 @@ export const products: Product[] = [
         description: "Rice bowl with Spicy Tuna on top, Tilapia, Radish Sprouts, and Green Onions",
         price: 15.00, 
         quantity: 2,
-        images: ['/assets/images/Salmon Spicy Tuna Bowl.png'],
+        images: ['/assets/images/Salmon Spicy Tuna Bowl.png', '/assets/images/Salmon Spicy Tuna Bowl.png', '/assets/images/Salmon Spicy Tuna Bowl.png','/assets/images/Salmon Spicy Tuna Bowl.png'],
         category: categories[2]
     },
     {
@@ -198,7 +290,7 @@ export const products: Product[] = [
         description: "3 Tuna & 3 Salmon Rolls, Inari Sushi, Shibazuke(Pickled Eggplant), 3 kinds of Sushi (1 Salmon, 1 Tuna, and 1 Customer's choice), and Eel with a drizzle of Eel sauce over rice",
         price: 15.00, 
         quantity: 2,
-        images: ['/assets/images/Spicy Tuna Bowl.png'],
+        images: ['/assets/images/Spicy Tuna Bowl.png','/assets/images/Spicy Tuna Bowl.png','/assets/images/Spicy Tuna Bowl.png','/assets/images/Spicy Tuna Bowl.png'],
         category: categories[2]
     },
     {
@@ -207,7 +299,7 @@ export const products: Product[] = [
         description: "Rice bowl with Unagi, a Drizzle of Eel Sauce, and Tamago",
         price: 11.50, 
         quantity: 2,
-        images: ['/assets/images/Unagi Bowl.png'],
+        images: ['/assets/images/Unagi Bowl.png', '/assets/images/Unagi Bowl.png', '/assets/images/Unagi Bowl.png', '/assets/images/Unagi Bowl.png'],
         category: categories[2]
     },
     {
@@ -216,7 +308,7 @@ export const products: Product[] = [
         description: "8 pieces of California Roll with Salmon on top",
         price: 16.50, 
         quantity: 2,
-        images: ['/assets/images/Alaskan Roll(1).png'],
+        images: ['/assets/images/Alaskan Roll(1).png', '/assets/images/Alaskan Roll(1).png','/assets/images/Alaskan Roll(1).png','/assets/images/Alaskan Roll(1).png','/assets/images/Alaskan Roll(1).png'],
         category: categories[3]
     },
     {
@@ -234,7 +326,7 @@ export const products: Product[] = [
         description: "8 piece California Roll with Salmon, Yellowtail, Shrimp, Tilapia, Tuna, and Avocado on top",
         price: 11.50, 
         quantity: 2,
-        images: ['/assets/images/Rainbow Roll.png'],
+        images: ['/assets/images/Rainbow Roll.png', '/assets/images/Rainbow Roll.png','/assets/images/Rainbow Roll.png', '/assets/images/Rainbow Roll.png'],
         category: categories[3]
     },
     {
