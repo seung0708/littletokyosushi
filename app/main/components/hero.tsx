@@ -2,16 +2,15 @@ import Image from "next/image"
 import Link from "next/link"
 const Hero: React.FC = () => {
     return (
-        <section id="hero" className="relative isolate bg-hero-image1 bg-center bg-no-repeat sm:bg-cover px-6 py-0 lg:px-8 mb-0 sm:mb-20">
-            <div className="absolute inset-0 bg-gray-900 opacity-50"></div>
-            <div className="relative z-10 mx-auto max-w-2xl py-32 sm:py-48 lg:py-56">
-                <div className="text-center">
-                    <h1 className="text-balance font-bold tracking-tight text-4xl sm:text-6xl">LITTLE TOKYO SUSHI</h1>
-                    <p className="mt-6 text-xl leading-8">The only sushi takeout restaurant serving a variety of sushi and rolls</p>
-                    <div className="mt-10 flex items-center justify-center gap-x-6">
-                        <a href='#' className="rounded-md bg-red-500 px-3.5 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-red-400 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:oultine-red-500">Order Now</a>
-                    </div>
-                </div>
+        <section id="hero" className="relative bg-gray-950 text-white">
+            <div aria-hidden='true' className="absolute inset-0 overflow-hidden">
+                <img className="h-full w-full object-cover object-center" src={'/assets/images/hero1.png'}/>
+            </div>
+            <div className="absolute inset-0 bg-black opacity-50"></div>
+            <div className="relative mx-auto flex max-w-3xl flex-col items-center px-6 py-32 text-center sm:py-64 lg:px-0">
+            <h1 className="text-4xl font-bold tracking-tight lg:text-6xl">LITTLE TOKYO SUSHI</h1>
+                <p className="mt-4 text-xl">The only sushi takeout restaurant serving a variety of sushi and rolls</p>
+                <a href='/menu' className="mt-8 inline-block rounded-md border border-transparent bg-red-500 px-8 py-3 text-base font-bold hover:bg-red-300">Order Now</a>
             </div>
         </section>
     )

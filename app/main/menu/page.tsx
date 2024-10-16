@@ -9,7 +9,7 @@ const MenuPage: React.FC = () => {
     const filteredProducts = selectedCategory ? products.filter(product => product.category.id === selectedCategory) : products;
     
     return (
-        <section id="menu" className="max-w-7xl mx-auto mt-20 sm:mt-0">
+        <section id="menu" className="py-24 sm:py-32">
             <div className="categories flex flex-wrap sm:flex-nowrap justify-center gap-2 sm:gap-5">
                 {categories.map(category => (
                     <button className="bg-red-500 hover:bg-red-700 active:bg-red-700 focus:outline-none focus:ring focus:ring-red-300 px-4 py-1 rounded-full" key={category.id} onClick={() => setSelectedCategory(category.id)}>{category.name}</button>

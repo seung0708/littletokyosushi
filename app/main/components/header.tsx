@@ -14,13 +14,13 @@ export default function Header() {
     return (
         <>
             {/* Header */}
-            <header className="max-w-7xl mx-auto relative text-white-400 z-10 mb-0 sm:mb-20">
+            <header className="relative bg-gray-900 text-white z-10">
                 {/* <p className="flex h-10 items-center justify-center bg-indigo-600 px-4 text-sm font-medium text-white sm:px-6 lg:px-8">
                     Get free delivery on orders over $100
                 </p> */}
 
-                <nav aria-label="Top" className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-                    <div className="border-b border-gray-200">
+                <nav aria-label="Top" className="px-8 py-1 sm:py-1.5 sm:px-12 lg:px-16">
+                    <div className="">
                         <div className="flex h-16 items-center">
                             <div className="relative lg:hidden">
                                 <button
@@ -76,13 +76,22 @@ export default function Header() {
                                 </a>
                             </div>
                             <div className="ml-auto flex items-center">
-                                <div className="hidden lg:flex lg:flex-1 lg:items-center lg:justify-center lg:space-x-6">
-                                    <a href="#" className="text-sm font-medium text-white-700">About</a>
-                                    <a href="#" className="text-sm font-medium text-white-700">Contact</a>
-                                    <a href="/menu" className="text-sm font-medium text-white-700">Menu</a>
+                                <div className="hidden lg:flex lg:items-center lg:justify-center lg:space-x-14 text-white text-lg">
+                                    <a href="#about" className="relative inline-block group">
+                                        About
+                                        <span className='absolute left-0 -bottom-1 w-full h-0.5 bg-red-500 transition-all duration-300 transform scale-x-0 group-hover:scale-x-100'></span>
+                                    </a>
+                                    <a href="#contact" className="relative inline-block group">
+                                        Contact
+                                        <span className='absolute left-0 -bottom-1 w-full h-0.5 bg-red-500 transition-all duration-300 transform scale-x-0 group-hover:scale-x-100'></span>
+                                    </a>
+                                    <a href="/menu" className="relative inline-block group">
+                                        Menu
+                                        <span className='absolute left-0 -bottom-1 w-full h-0.5 bg-red-500 transition-all duration-300 transform scale-x-0 group-hover:scale-x-100'></span>
+                                    </a>
                                     <span className="h-6 w-px bg-gray-200" aria-hidden="true"></span>
                                 </div>
-                                <div className="ml-4 flow-root lg:ml-6">
+                                <div className="ml-4 flow-root lg:ml-10">
                                     <a href="/cart" className="group -m-2 flex items-center p-2">
                                         <svg
                                             className="h-6 w-6 flex-shrink-0 text-white-900"
