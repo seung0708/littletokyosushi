@@ -55,11 +55,14 @@ const config: Config = {
   			lg: 'var(--radius)',
   			md: 'calc(var(--radius) - 2px)',
   			sm: 'calc(var(--radius) - 4px)'
-  		},
-		backgroundImage: {
-			'hero-image1': "url('/assets/images/hero1.png')"
-		}
-  	}
+  		}
+  	},
+	screens: {
+		'sm': '481px',
+		'md': '769px',
+		'lg':'1280px',
+		'xl': '1281px'
+	}
   },
   plugins: [
 	require("tailwindcss-animate"),

@@ -121,17 +121,17 @@ export default function Header() {
 
             {/* Mobile Menu Overlay */}
             {isOpen && (
-                <div className="fixed inset-x-0 top-16 z-40 bg-gray-900 shadow-lg" role="dialog" aria-modal="true">
+                <div className="fixed inset-x-0 top-16 z-40 bg-gray-900 text-white px-12" role="dialog" aria-modal="true">
                     <div className="flex flex-col p-4">
-                        <ul role="list" aria-labelledby="women-clothing-heading-mobile" className="flex flex-col space-y-4 text-white-800">
+                        <ul role="list" aria-labelledby="women-clothing-heading-mobile" className="flex flex-col space-y-4">
                             <li>
-                                <a href="#" >About</a>
+                                <a href="/#about" onClick={toggleMenu}>About</a>
                             </li>
                             <li>
-                                <a href="#">Contact Us</a>
+                                <a href="/#contact" onClick={toggleMenu}>Contact Us</a>
                             </li>
                             <li>
-                                <a href="#">Menu</a>
+                                <a href="/menu" onClick={toggleMenu}>Menu</a>
                             </li>
                         </ul>
                     </div>
