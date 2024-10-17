@@ -1,18 +1,6 @@
 import type { Metadata } from "next";
-import localFont from "next/font/local";
+import { poppins } from "./ui/fonts";
 import "./globals.css";
-
-// Local font definitions
-const geistSans = localFont({
-  src: "./fonts/GeistVF.woff",
-  variable: "--font-geist-sans",
-  weight: "100 900",
-});
-const geistMono = localFont({
-  src: "./fonts/GeistMonoVF.woff",
-  variable: "--font-geist-mono",
-  weight: "100 900",
-});
 
 // Metadata for the page
 export const metadata: Metadata = {
@@ -28,7 +16,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <title>{metadata.title as string}</title>
         <meta name="description" content={metadata.description as string} />
       </head>
-      <body className={`h-screen ${geistSans.variable} ${geistMono.variable} antialiased`}>
+      <body className={`h-screen ${poppins.className} antialiased`}>
         {children}
       </body>
     </html>

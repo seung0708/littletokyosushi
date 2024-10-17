@@ -1,4 +1,13 @@
+'use client'
+import { useRouter } from "next/navigation"
+
 const CartPage: React.FC = () => {
+    const router = useRouter();
+
+    const handleClick = () => {
+        router.push('/checkout')
+    }
+
     return (
         <div className="mx-auto max-w-7xl px-4 pb-24 sm:px-6 lg:max-w-7xl lg:px-8">
             <h1 className="text-3xl font-bold tracking-tight text-white sm:text-4xl">Shopping Cart</h1>
@@ -192,7 +201,7 @@ const CartPage: React.FC = () => {
                         </div>
                     </dl>
                     <div className="mt-6">
-                        <button type="submit" className="w-full rounded-md border border-transparent bg-red-500 px-4 py-3 text-base font-medium text-white shadow-sm hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 focus:ring-offset-gray-50">Checkout</button>
+                        <button onClick={handleClick} type="button" className="w-full rounded-md border border-transparent bg-red-500 px-4 py-3 text-base font-medium text-white shadow-sm hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 focus:ring-offset-gray-50">Checkout</button>
                     </div>
                 </section>
             </form>
