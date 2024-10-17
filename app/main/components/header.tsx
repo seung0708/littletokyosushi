@@ -3,6 +3,8 @@ import {useState} from 'react';
 import Image from "next/image"
 import Navbar from "./navigation"
 import { ShoppingBag, Menu } from "lucide-react";
+import { Button } from '@/app/ui/buttons';
+import Svg from '@/app/ui/svg';
 
 export default function Header() {
     const [isOpen, setIsOpen] = useState(false);
@@ -15,108 +17,8 @@ export default function Header() {
         <>
             {/* Header */}
             <header className="relative bg-gray-900 text-white z-10">
-                {/* <p className="flex h-10 items-center justify-center bg-indigo-600 px-4 text-sm font-medium text-white sm:px-6 lg:px-8">
-                    Get free delivery on orders over $100
-                </p> */}
-
-                <nav aria-label="Top" className="px-8 py-1 sm:py-1.5 sm:px-12 lg:px-16">
-                    <div className="">
-                        <div className="flex h-16 items-center">
-                            <div className="relative lg:hidden">
-                                <button
-                                    type="button"
-                                    className="rounded-md p-2 text-white-900"
-                                    onClick={toggleMenu}
-                                >
-                                    <span className="absolute -inset-0.5"></span>
-                                    <span className="sr-only">Open menu</span>
-                                    <svg
-                                        className="h-6 w-6"
-                                        fill="none"
-                                        viewBox="0 0 24 24"
-                                        strokeWidth="1.5"
-                                        stroke="currentColor"
-                                        aria-hidden="true"
-                                        data-slot="icon"
-                                    >
-                                        <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" />
-                                    </svg>
-                                </button>
-
-                                {/* Close Button Positioned Over Hamburger */}
-                                {isOpen && (
-                                   <button
-                                    type="button"
-                                    className="absolute inset-0 z-20 bg-gray-900 flex items-center justify-center rounded-md p-2 text-white-900"
-                                    onClick={toggleMenu}
-                                    >
-                                   <span className="sr-only">Close menu</span>
-                                   <svg
-                                       className="h-6 w-6"
-                                       fill="none"
-                                       viewBox="0 0 24 24"
-                                       strokeWidth="1.5"
-                                       stroke="currentColor"
-                                       aria-hidden="true"
-                                       data-slot="icon"
-                                   >
-                                       <path strokeLinecap="round" strokeLinejoin="round" d="M6 18 18 6M6 6l12 12" />
-                                   </svg>
-                               </button>
-                                )}
-                            </div>
-                            <div className="flex justify-center ml-auto lg:ml-0">
-                                <a href="/">
-                                    <span className="sr-only">Little Tokyo Sushi</span>
-                                    <img
-                                        className="h-11 w-auto"
-                                        src={'/assets/images/logo.png'}
-                                        alt="logo"
-                                    />
-                                </a>
-                            </div>
-                            <div className="ml-auto flex items-center">
-                                <div className="hidden lg:flex lg:items-center lg:justify-center lg:space-x-14 text-white text-lg">
-                                    <a href="/#about" className="relative inline-block group">
-                                        About
-                                        <span className='absolute left-0 -bottom-1 w-full h-0.5 bg-red-500 transition-all duration-300 transform scale-x-0 group-hover:scale-x-100'></span>
-                                    </a>
-                                    <a href="/#contact" className="relative inline-block group">
-                                        Contact
-                                        <span className='absolute left-0 -bottom-1 w-full h-0.5 bg-red-500 transition-all duration-300 transform scale-x-0 group-hover:scale-x-100'></span>
-                                    </a>
-                                    <a href="/menu" className="relative inline-block group">
-                                        Menu
-                                        <span className='absolute left-0 -bottom-1 w-full h-0.5 bg-red-500 transition-all duration-300 transform scale-x-0 group-hover:scale-x-100'></span>
-                                    </a>
-                                    <span className="h-6 w-px bg-gray-200" aria-hidden="true"></span>
-                                </div>
-                                <div className="ml-4 flow-root lg:ml-10">
-                                    <a href="/cart" className="group -m-2 flex items-center p-2">
-                                        <svg
-                                            className="h-6 w-6 flex-shrink-0 text-white-900"
-                                            fill="none"
-                                            viewBox="0 0 24 24"
-                                            strokeWidth="1.5"
-                                            stroke="currentColor"
-                                            aria-hidden="true"
-                                            data-slot="icon"
-                                        >
-                                            <path
-                                                strokeLinecap="round"
-                                                strokeLinejoin="round"
-                                                d="M15.75 10.5V6a3.75 3.75 0 1 0-7.5 0v4.5m11.356-1.993 1.263 12c.07.665-.45 1.243-1.119 1.243H4.25a1.125 1.125 0 0 1-1.12-1.243l1.264-12A1.125 1.125 0 0 1 5.513 7.5h12.974c.576 0 1.059.435 1.119 1.007ZM8.625 10.5a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Zm7.5 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Z"
-                                            />
-                                        </svg>
-                                        <span className="ml-2 text-sm font-medium text-white-900">0</span>
-                                        <span className="sr-only">items in cart, view bag</span>
-                                    </a>
-                                </div>
-                            </div>
-                        </div>
-                       
-                    </div>
-                </nav>
+                <Navbar toggleMenu={toggleMenu} isOpen={isOpen} aria-label="Top" className='px-8 py-1 sm:py-1.5 sm:px-12 lg:px-16'/>
+                    
             </header>
 
             {/* Mobile Menu Overlay */}

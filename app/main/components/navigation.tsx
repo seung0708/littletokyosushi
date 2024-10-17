@@ -1,41 +1,39 @@
-import Link from "next/link";
+import NavLinks from "@/app/ui/navbar/nav-links";
+import HamburgerMenu from "@/app/ui/navbar/hamburger-menu";
+import CloseMenu from "@/app/ui/navbar/close-menu";
+import Logo from "@/app/ui/navbar/logo";
+import CartIcon from "@/app/ui/navbar/cart-icon";
 
 interface NavbarProps {
-    isToggle:boolean
+    className?: string,
+    isOpen: boolean
+    toggleMenu: () => void
+
 }
 
-const Navbar: React.FC<NavbarProps> = ({isToggle}) => {
+const Navbar: React.FC<NavbarProps> = ({className, isOpen, toggleMenu}) => {
+
+
     return(
-        <>
-        <nav className='hidden sm:flex items-center gap-3 m-4 sm'>
-            <ul className="flex gap-3">
-                <li>
-                    <Link href='#about'>About</Link>
-                </li>
-                <li>
-                    <Link href='#about'>Menu</Link>
-                </li>
-                <li>
-                    <Link href='#contact'>Contact</Link>
-                </li>
-            </ul>
+        <nav className={className}>
+            <div className="">
+                <div className="flex h-16 items-center">
+                    <div className="relative lg:hidden">
+                        <HamburgerMenu toggleMenu={toggleMenu} />
+                        {isOpen && (
+                        <CloseMenu toggleMenu={toggleMenu} />
+                        )}
+                    </div>
+                    <div className="flex justify-center ml-auto lg:ml-0">
+                       <Logo />
+                    </div>
+                    <div className="ml-auto flex items-center">
+                        <NavLinks />
+                        <CartIcon />
+                    </div>
+                </div>
+            </div>
         </nav>
-        {isToggle && (
-            <nav className="absolute top-20 left-0 w-full bg-gray-900 shadow-lg p-4 sm:hidden">
-                <ul className="flex flex-col space-y-4">
-                    <li>
-                        <Link href='#about'>About</Link>
-                    </li>
-                    <li>
-                        <Link href='#about'>Menu</Link>
-                    </li>
-                    <li>
-                        <Link href='#contact'>Contact</Link>
-                    </li>
-                </ul>
-            </nav>
-        )}
-        </>
     )
 }
 
