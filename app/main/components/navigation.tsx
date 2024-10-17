@@ -1,8 +1,8 @@
-import NavLinks from "@/app/ui/navbar/nav-links";
-import HamburgerMenu from "@/app/ui/navbar/hamburger-menu";
-import CloseMenu from "@/app/ui/navbar/close-menu";
-import Logo from "@/app/ui/navbar/logo";
-import CartIcon from "@/app/ui/navbar/cart-icon";
+import NavLinks from "@/app/ui/nav/nav-links";
+import HamburgerMenu from "@/app/ui/nav/hamburger-menu";
+import CloseMenu from "@/app/ui/nav/close-menu";
+import Logo from "@/app/ui/nav/logo";
+import CartIcon from "@/app/ui/nav/cart-icon";
 
 interface NavbarProps {
     className?: string,
@@ -28,7 +28,10 @@ const Navbar: React.FC<NavbarProps> = ({className, isOpen, toggleMenu}) => {
                        <Logo />
                     </div>
                     <div className="ml-auto flex items-center">
-                        <NavLinks />
+                        <div className="hidden lg:flex lg:items-center lg:justify-center lg:space-x-14 text-white text-lg">
+                            <NavLinks className="relative inline-block group" showSpan={true} />
+                            <span className="h-6 w-px bg-gray-200" aria-hidden="true"></span>
+                        </div>
                         <CartIcon />
                     </div>
                 </div>

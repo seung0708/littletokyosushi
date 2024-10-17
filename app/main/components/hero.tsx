@@ -17,22 +17,3 @@ const Hero: React.FC = () => {
 }
 
 export default Hero
-
-{/* <div className="w-full flex justify-center items-center mb-6 md:mb-0">
-<Image 
-    className="object-cover w-full max-w-xs md:max-w-sm lg:max-w-md" // Smaller image sizes for different breakpoints
-    src={'/assets/images/sushi 1.png'} 
-    width={400} 
-    height={100} 
-    alt="sushi hero image 1" 
-/>
-</div>
-<div className="w-full md:w-1/2 mt-4 md:mt-0">
-<h2 className="text-3xl md:text-4xl lg:text-5xl">SUSHI</h2>
-<h2 className="text-3xl md:text-4xl lg:text-5xl mt-2">MADE</h2>
-<h2 className="text-3xl md:text-4xl lg:text-5xl mt-2">FRESH DAILY</h2>
-<p className="mt-4 text-base md:text-lg">At Little Tokyo Sushi, we pride ourselves in making all of our sushi with high-quality fish and ingredients.</p>
-<Link href='/menu'>
-    <button className="mt-8 p-3 bg-red-500 text-white rounded-lg">Order Now</button>
-</Link>
-</div> */}

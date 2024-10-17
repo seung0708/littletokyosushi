@@ -1,9 +1,13 @@
 'use client';
 import {useState} from 'react';
 import { useRouter } from "next/navigation";
-import { products, Product} from "@/types/products"
+import {Product} from "@/types/products"
 
-const MenuItems: React.FC = () => {
+interface MenuItemsProps {
+    products: Product[]
+}
+
+const MenuItems: React.FC<MenuItemsProps> = ({products}) => {
     const router = useRouter();
     
     const openProductDetails = (id: number) => {
