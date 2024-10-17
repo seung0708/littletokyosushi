@@ -77,11 +77,11 @@ export default function Header() {
                             </div>
                             <div className="ml-auto flex items-center">
                                 <div className="hidden lg:flex lg:items-center lg:justify-center lg:space-x-14 text-white text-lg">
-                                    <a href="#about" className="relative inline-block group">
+                                    <a href="/#about" className="relative inline-block group">
                                         About
                                         <span className='absolute left-0 -bottom-1 w-full h-0.5 bg-red-500 transition-all duration-300 transform scale-x-0 group-hover:scale-x-100'></span>
                                     </a>
-                                    <a href="#contact" className="relative inline-block group">
+                                    <a href="/#contact" className="relative inline-block group">
                                         Contact
                                         <span className='absolute left-0 -bottom-1 w-full h-0.5 bg-red-500 transition-all duration-300 transform scale-x-0 group-hover:scale-x-100'></span>
                                     </a>

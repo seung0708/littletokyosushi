@@ -83,15 +83,15 @@ const ProductDetailsPage: React.FC= () => {
                                     </svg>
                                 </button>
                                 
-                                <div className='sm:col-span-8 lg:col-span-7'>
+                                <div className='h-full sm:col-span-8 lg:col-span-7'>
                                     <h2 className='text-xl font-medium text-gray-900 sm:pr-12'>{product.title}</h2>
                                     <div aria-labelledby='information-heading' className='mt-1'>
                                         <h3 id='information-heading' className='sr-only'>Menu item information</h3>
                                         <p className='font-medium text-gray-900'>${product.price.toFixed(2)}</p>
                                     </div>
-                                    <div aria-labelledby='options-heading' className='mt-8'>
+                                    <div aria-labelledby='options-heading' className='h-5/6'>
                                         <h3 id='options-heading' className='sr-only'>Menu item options</h3>
-                                        <form>
+                                        <form className='h-full flex flex-col'>
                                         {!product.modifierGroups ? 
                                         (
                                             <></>
@@ -100,12 +100,12 @@ const ProductDetailsPage: React.FC= () => {
                                         product.modifierGroups.map(modifierGroup => (
                                              
                                             (   
-                                                <fieldset aria-label=''>
+                                                <fieldset aria-label='' className='flex-grow'>
                                                     <legend className='text-sm font-medium'>{modifierGroup.name}</legend>
                                                         <div className='mt-3 flex flex-col items-start'>
                                                         {modifierGroup.modifiers.map(modifier => (
                                                             <>
-                                                            <label aria-label='' className='relative flex cursor-pointer justify-center rounded-full p-0.5 ring-gray-900 focus:outline-none'>
+                                                            <label aria-label='' className='relative flex cursor-pointer justify-center rounded-full p-2 ring-gray-900 focus:outline-none'>
                                                                 <input type={modifierGroup.max < 2 ? 'radio' : 'checkbox'} name='sushi-choice' value={modifier.name} className='sr-only' />
                                                                 <span aria-hidden='true' className={`h-4 w-4 ${modifierGroup.max < 2 ? 'rounded-full' : 'rounded-sm'} border border-black`}></span>
                                                                 <span>{modifier.name}</span>
@@ -118,7 +118,7 @@ const ProductDetailsPage: React.FC= () => {
                                             )
                                         ))
                                         }
-                                        <button type='submit' className='mt-8 flex w-full items-center justify-center rounded-md border border-transparent bg-indigo-600 px-8 py-3 text-base font-medium text-white hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2'>Add to Bag</button>
+                                        <button type='submit' className='w-full rounded-md border border-transparent bg-indigo-600 px-8 py-3 text-base font-medium text-white hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2'>Add to Bag</button>
                                     </form>
                                 </div>
                             </div>
