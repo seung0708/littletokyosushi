@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { poppins } from "./ui/fonts";
+import { poppins } from "./main/components/ui/fonts";
 import "./globals.css";
 
 // Metadata for the page
