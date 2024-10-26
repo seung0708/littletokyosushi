@@ -1,7 +1,10 @@
+import { LoginForm } from '../components/loginform';
 
-import { LoginForm } from '../components/auth/loginform';
+interface LoginPageProps {
+    onSignIn: (token: string) => void;
+}
 
-const LoginPage = () => {
+const LoginPage: React.FC<LoginPageProps> = ({onSignIn}) => {
 
     return (
         <div className='flex items-center justify-center min-h-screen bg-gray-100'>
@@ -10,7 +13,7 @@ const LoginPage = () => {
                     <h3 className='text-2xl font-semibold leading-none tracking-tight'>Login</h3>
                     <p className='text-sm text-muted-foreground'>Enter your email below to login to your account.</p>
                 </div>
-                <LoginForm  />
+                <LoginForm  onSignIn={onSignIn} />
             </div>
         </div>
     )

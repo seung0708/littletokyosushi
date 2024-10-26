@@ -1,5 +1,5 @@
 import { ReactNode } from 'react';
-import AuthProvider from './components/auth/authprovider';
+import AuthProvider from './(auth)/components/authprovider';
 import AdminDashboard from './page';
 
 export default function AdminLayout({children}: { children: ReactNode }) {
