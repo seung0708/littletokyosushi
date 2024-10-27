@@ -6,8 +6,7 @@ import { Badge } from "@/components/ui/badge"
 
 export default function Sidebar() {
   return (
-    <aside className="hidden h-full w-60 bg-gray-100 p-4 border-r md:flex md:flex-col">
-      {/* Header */}
+    <aside className="hidden border-2 w-60 bg-gray-100 p-4 border-r md:flex md:flex-col">
       <Link href="/dashboard" className="flex items-center gap-3 text-lg font-bold text-gray-800 mb-4">
         Little Tokyo Sushi
       </Link>
@@ -16,11 +15,11 @@ export default function Sidebar() {
       <nav className="flex-grow">
         <ul className="space-y-3">
           {[
-            { label: 'Dashboard', icon: <Home />, link: '/dashboard' },
+            { label: 'Dashboard', icon: <Home />, link: '/' },
             { label: 'Orders', icon: <ShoppingCart />, link: '/orders', badge: 4 },
             { label: 'Products', icon: <SquareMenu />, link: '/products' },
             { label: 'Employees', icon: <Users />, link: '/employees' },
-            { label: 'Analytics', icon: <LineChart />, link: '/analytics' },
+            { label: 'Reports', icon: <LineChart />, link: '/reports' },
           ].map((item) => (
             <li key={item.label}>
               <Link
@@ -37,19 +36,18 @@ export default function Sidebar() {
           ))}
         </ul>
       </nav>
-
-      {/* Spacer to push Settings to the bottom */}
       <div className="mt-auto" />
 
-      {/* Settings Link at the bottom */}
-      <div className="mt-4"> {/* Add some spacing above Settings */}
+      <div className="mt-4"> 
         <Link
           href="/settings"
           className="flex items-center p-2 text-gray-700 rounded-lg hover:bg-gray-200"
         >
           <Settings className="w-5 h-5" /> Settings
         </Link>
+        
       </div>
     </aside>
+    
   )
 }
