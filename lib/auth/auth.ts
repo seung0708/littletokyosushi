@@ -22,3 +22,12 @@ export const signUpWithEmail = async (email:string, password: string, role: stri
     revalidatePath('/', 'layout')
     redirect('/login')
 }
+
+export async function logout () {
+    const { error } = await supabase.auth.signOut();
+    
+    if (error) {
+      redirect('/error')
+    } 
+    redirect('/admin')
+  }
