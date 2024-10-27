@@ -1,6 +1,6 @@
 import React from 'react';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from '@/components/ui/card';
-import { ProductsTable } from '../../components/products/productstable';
+import { ProductsTable } from './productstable';
 
 const ProductsCard: React.FC = () => {
     return (

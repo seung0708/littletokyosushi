@@ -1,7 +1,7 @@
 import { TableRow, TableCell } from "@/components/ui/table";
 import Image from "next/image";
 import { Badge } from "@/components/ui/badge";
-import ActionsMenu from "../actionsmenu";
+import ActionsMenu from "../../components/actionsmenu";
 import {Product} from '../../../../types/products'
 
 interface ProductRowProps {

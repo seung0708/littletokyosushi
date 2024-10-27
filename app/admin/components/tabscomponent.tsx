@@ -1,6 +1,6 @@
 import React from 'react';
 import { Tabs, TabsContent } from '@/components/ui/tabs';
-import ProductsCard from './products/productscard';
+import ProductsCard from '../products/components/productscard';
 import { ActionButtons } from './actionbuttons';
 import TabsListComponent from './tabsList';
 

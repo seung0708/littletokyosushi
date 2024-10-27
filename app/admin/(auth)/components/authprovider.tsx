@@ -1,54 +1,40 @@
 'use client'
 
-import { useEffect, useState } from 'react';
-import { useRouter } from 'next/navigation';
-import LoginPage from '../login/page';
+import {createContext, useContext, useEffect, useState} from 'react';
+import {useRouter, usePathname} from 'next/navigation';
+import { supabase } from '@/lib/supabase/client';
 
-const AuthProvider = ({ children }: { children: React.ReactNode }) => {
-    const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null); // null to indicate loading
-    const router = useRouter();
 
-    const checkAuthentication = () => {
-        const token = localStorage.getItem('token');
-        setIsAuthenticated(!!token);
-    };
+interface AuthContextType {
+    session: any;
+    loading: boolean; 
+}
 
-    const signIn = (token: string) => {
-        localStorage.setItem('token', token);
-        setIsAuthenticated(true);
-        router.push('/'); // Redirect to home or dashboard after sign-in
-    };
+const AuthContext = createContext<AuthContextType | null>(null);
 
-    const signOut = () => {
-        localStorage.removeItem('token');
-        setIsAuthenticated(false);
-        router.push('/login'); // Redirect to login page after sign-out
-    };
+export const AuthProvider = ({ children }: {children: React.ReactNode }) => {
+    const [session, setSesion] = useState(null);
+    const [loading, setLoading] = useState(true);
+    const router = useRouter(); 
+    const pathName = usePathname();
 
     useEffect(() => {
-        checkAuthentication();
-    }, []);
+        const {data: authListener} = supabase.auth.onAuthStateChange((_, session) => {
+            setSesion(session); 
+            setLoading(false);
+        });
 
-    useEffect(() => {
-        if (isAuthenticated === false) {
-            router.push('/login'); // Redirect if not authenticated
+        if(session && pathName === '/login') {
+            router.push('/');
         }
-    }, [isAuthenticated, router]);
-
-    if (isAuthenticated === null) {
-        return <div>Loading...</div>; // Show loading indicator while checking authentication
-    }
+        return () => authListener?.subscription.unsubscribe();
+    }, [router, session]);
 
     return (
-        <>
-            {isAuthenticated ? (
-                children
-            ) : (
-                <LoginPage onSignIn={signIn} />
-            )}
-        </>
+        <AuthContext.Provider value={{session, loading}}>
+            {children}
+        </AuthContext.Provider>
     );
 };
 
-
-export default AuthProvider;
+export const useAuth = () => useContext(AuthContext);

@@ -1,8 +1,6 @@
 import { redirect } from "next/navigation";
-import { createClient } from "../supabase/client";
+import { supabase } from "../supabase/client";
 import { revalidatePath } from "next/cache";
-
-const supabase = createClient();
 
 export const loginWithEmail = async (email: string, password: string) => {
     return await supabase.auth.signInWithPassword({email, password});
