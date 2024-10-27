@@ -43,6 +43,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children}) => {
     }
 
     if (!session) {
+        router.push('/');
         return <LoginForm />; // Render LoginForm when there's no session
     }
 
