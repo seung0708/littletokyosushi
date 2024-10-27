@@ -1,6 +1,6 @@
 'use client'
 
-import { logout } from "@/app/actions/admin/auth-actions"
+import { logout } from "@/lib/auth/auth";
 
 import {DropdownMenu, DropdownMenuContent, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger, DropdownMenuItem} from "@/components/ui/dropdown-menu"
 import { User } from "lucide-react"
@@ -13,7 +13,6 @@ export default function DropDownMenuComponent() {
   const handleLogout = async () => {
     try {
       await logout();
-      localStorage.removeItem('token')
     } catch(error) {
       console.log(error)
     }

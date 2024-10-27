@@ -13,8 +13,7 @@ interface AuthContextType {
 }
 
 interface AuthProviderProps {
-    children: React.ReactNode
-    onSignIn: (token: string) => void;
+    children: React.ReactNode;
 }
 
 const AuthContext = createContext<AuthContextType | null>(null);
@@ -23,8 +22,10 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children}) => {
     const [session, setSesion] = useState<Session | null>(null);
     const [loading, setLoading] = useState(true);
     const router = useRouter(); 
+    const pathname = usePathname()
 
     useEffect(() => {
+        console.log(session)
         const {data: authListener} = supabase.auth.onAuthStateChange((_, session) => {
             setSesion(session); 
             setLoading(false);
@@ -34,7 +35,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children}) => {
             router.push('/');
         } 
         return () => authListener?.subscription.unsubscribe();
-    }, [router, session]);
+    }, []);
 
      // Render the LoginForm if not loading and there's no session
      if (loading) {

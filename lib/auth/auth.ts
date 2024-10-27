@@ -20,7 +20,6 @@ export const signUpWithEmail = async (email:string, password: string, role: stri
     if(error) redirect('/')
 
     revalidatePath('/', 'layout')
-    redirect('/login')
 }
 
 export async function logout () {
@@ -29,5 +28,5 @@ export async function logout () {
     if (error) {
       redirect('/error')
     } 
-    redirect('/admin')
+    revalidatePath('/', 'layout')
   }
