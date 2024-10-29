@@ -1,5 +1,5 @@
 import { redirect } from "next/navigation";
-import { supabase } from "../supabase/client";
+import { supabase } from "../../utils/supabase/client";
 import { revalidatePath } from "next/cache";
 import exp from "constants";
 
@@ -39,16 +39,10 @@ export const loginWithEmail = async (email: string, password: string) => {
     return { userData, session: data.session }
 }
 
-export const signUpWithEmail = async (email:string, password: string, role: string) => {
-    console.log(email, password, role)
+export const signUpWithEmail = async (email:string, password: string) => {
+    console.log(email, password)
     const {data, error} = await supabase.auth.signUp({email, password})
     console.log(data, error)
-
-    const {error: roleError} = await supabase.from('auth.users').update({role}).eq('id', data?.user?.id)
-
-    if(roleError) {
-        console.log(roleError)
-    }
 
     if(error) redirect('/')
 
@@ -65,8 +59,12 @@ export async function logout () {
 }
 
 export async function forgotPassword(email: string) {
-    await supabase.auth.resetPasswordForEmail(email, {
-        redirectTo: 'https://example.co/update-password',
-    })
-      
+   return await supabase.auth.resetPasswordForEmail(email, {
+    redirectTo: 'http://admin.localhost:3000/update-password'
+   });
+
+}
+
+export async function updateUserPassword(password: string) {
+    return await supabase.auth.updateUser({ password });
 }

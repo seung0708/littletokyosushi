@@ -2,7 +2,7 @@
 
 import {createContext, useContext, useEffect, useState} from 'react';
 import {useRouter, usePathname} from 'next/navigation';
-import { supabase } from '@/lib/supabase/client';
+import { supabase } from '@/utils/supabase/client';
 import { Session } from '@supabase/supabase-js';
 import { LoginForm } from './loginform';
 
@@ -42,10 +42,10 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children}) => {
         return <div className='flex justify-center items-center'>Loading...</div>; // Optional: You can show a loading spinner here
     }
 
-    if (!session) {
-        router.push('/');
-        return <LoginForm />; // Render LoginForm when there's no session
-    }
+    // if (!session) {
+    //     router.push('/');
+    //     return <LoginForm />; // Render LoginForm when there's no session
+    // }
 
     return (
         <AuthContext.Provider value={{session, loading}}>

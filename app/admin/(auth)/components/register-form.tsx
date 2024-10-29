@@ -4,7 +4,7 @@ import React, {useState} from 'react';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { signUpWithEmail } from '@/lib/auth/auth';
+import { signUpWithEmail } from '@/utils/auth/auth';
 
 
 export const RegisterForm: React.FC = () => {
@@ -15,7 +15,7 @@ export const RegisterForm: React.FC = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault(); 
-    await signUpWithEmail(email, password, role)
+    await signUpWithEmail(email, password)
   }
 
 
@@ -29,10 +29,6 @@ export const RegisterForm: React.FC = () => {
         <div className="grid gap-2">
           <Label className='' htmlFor="password">Password</Label>
           <Input id="password" type="password" value={password} onChange={(e) => setPassword(e.target.value)} required />
-        </div>
-        <div className="grid gap-2">
-          <Label className='' htmlFor="role">Role</Label>
-          <Input id="password" type="text" value={role} onChange={(e) => setRole(e.target.value)} required />
         </div>
         <Button type='submit'  className="mt-3 w-full">Register</Button>
       </form>

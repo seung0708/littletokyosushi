@@ -1,6 +1,6 @@
 'use client'
 
-import { logout } from "@/lib/auth/auth";
+import { logout } from "@/utils/auth/auth";
 
 import {DropdownMenu, DropdownMenuContent, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger, DropdownMenuItem} from "@/components/ui/dropdown-menu"
 import { User } from "lucide-react"
