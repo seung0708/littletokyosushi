@@ -4,10 +4,8 @@ import React, {useState} from 'react';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { forgotPassword, loginWithEmail } from '@/lib/auth/auth';
+import { forgotPassword, loginWithEmail } from '@/utils/auth/auth';
 import { useRouter } from 'next/navigation';
-import Link from 'next/link';
-
 
 export const LoginForm: React.FC = () => {
   const [email, setEmail] = useState('');
@@ -47,9 +45,8 @@ export const LoginForm: React.FC = () => {
   }
 
   return (
-      <div className='flex items-center justify-center min-h-screen bg-gray-100'>
-        
-        <div className="rounded-lg border bg-card text-card-foreground shadow-sm w-full max-w-sm mx-auto p-6">
+    <div className='flex items-center justify-center min-h-screen bg-gray-100'>    
+      <div className="rounded-lg border bg-card text-card-foreground shadow-sm w-full max-w-sm mx-auto p-6">
         {error && (
           <p>{error}</p>
         )} 
@@ -74,27 +71,27 @@ export const LoginForm: React.FC = () => {
             <Button type='button' onClick={() => setIsResetting(true)}>Forgot Password?</Button>
           </div>
           </>
-            )
-            : 
-            (
-            <>
-            <div className='flex flex-col space-y-1.5 p-6'>    
-              <h3 className='text-2xl font-semibold leading-none tracking-tight'>Reset Password</h3>
-              <p className='text-sm text-muted-foreground'>Enter your email below to reset your password</p>
+          )
+          : 
+          (
+          <>
+          <div className='flex flex-col space-y-1.5 p-6'>    
+            <h3 className='text-2xl font-semibold leading-none tracking-tight'>Reset Password</h3>
+            <p className='text-sm text-muted-foreground'>Enter your email below to reset your password</p>
+          </div>
+          <div className="p-6 pt-0 grid gap-4">
+            <form onSubmit={handleForgotPassword}>
+              <div className="grid gap-2">
+              <Label htmlFor="email">Email</Label>
+              <Input className='mb-3' id="email" type="email" value={resetEmail} onChange={(e) => setResetEmail(e.target.value)} placeholder="m@example.com" required />
+              <Button type='submit'>Send Reset Email</Button>
             </div>
-            <div className="p-6 pt-0 grid gap-4">
-              <form onSubmit={handleForgotPassword}>
-                <div className="grid gap-2">
-                <Label htmlFor="email">Email</Label>
-                <Input className='mb-3' id="email" type="email" value={resetEmail} onChange={(e) => setResetEmail(e.target.value)} placeholder="m@example.com" required />
-                <Button type='submit'>Send Reset Email</Button>
-              </div>
-              </form>
-            </div>
-            </>
-            )
-            }
-        </div>
+            </form>
+          </div>
+          </>
+          )
+        }
       </div>
+    </div>
   );
 };

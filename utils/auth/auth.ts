@@ -1,7 +1,7 @@
 import { redirect } from "next/navigation";
 import { supabase } from "../../utils/supabase/client";
 import { revalidatePath } from "next/cache";
-import exp from "constants";
+
 
 export const loginWithEmail = async (email: string, password: string) => {
      // Attempt to sign in the user with email and password
@@ -39,14 +39,20 @@ export const loginWithEmail = async (email: string, password: string) => {
     return { userData, session: data.session }
 }
 
-export const signUpWithEmail = async (email:string, password: string) => {
+export const signUpWithEmail = async (name: string, role: string, email:string, password: string) => {
     console.log(email, password)
-    const {data, error} = await supabase.auth.signUp({email, password})
-    console.log(data, error)
+    const {data: {user}, error} = await supabase.auth.signUp({email, password})
+    if(user) {
+        const {data, error} = await supabase.from('employees').insert({
+            id: user.id, 
+            email: user.email, 
 
-    if(error) redirect('/')
+            
+        })
+    }
+    
 
-    revalidatePath('/', 'layout')
+
 }
 
 export async function logout () {
