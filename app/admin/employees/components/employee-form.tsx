@@ -14,13 +14,28 @@ import { ChevronDown } from "lucide-react";
 
 
 export default function EmployeeForm() {
-    const [selectedRole, setSelectedRole] = useState<string | null>(null);
-    const [name, setName] = useState('');
-    const [email, setEmail] = useState('');
-    const [password, setPassword] = useState('')
+    const [selectedRole, setSelectedRole] = useState('');
+    const [formData, setFormData] = useState({
+        firstName: '', 
+        lastName: '',
+        email: '',
+        password: ''
+    })
 
-    const addEmployee = (e: React.FormEvent) => {
+    const handleChange = (e: any) => {
+        const {name, value} = e.target;
+        setFormData({
+            ...formData, 
+            [name]:value
+        });
+    }
+
+    const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
+        const {firstName, lastName, email, password} = formData; 
+
+        console.log(email )
+
 
     }
 
@@ -28,7 +43,7 @@ export default function EmployeeForm() {
         if (selectedItems.length > 0) {
             setSelectedRole(selectedItems[0].value); // Only handle the first selected role
         } else {
-            setSelectedRole(null); // Clear selection if none
+            setSelectedRole(''); // Clear selection if none
         }
     };
 
@@ -57,7 +72,7 @@ export default function EmployeeForm() {
                 onSelect={handleSelectionChange}
             />
             <div>
-                {selectedRole === 'admin' || selectedRole === 'manager' ? <AdminManagerForm /> : null}
+                {selectedRole === 'admin' || selectedRole === 'manager' ? <AdminManagerForm formData={formData} onChange={handleChange} onSubmit={handleSubmit}  /> : null}
                 {selectedRole === 'staff' ? <StaffForm /> : null}
             </div>
         </div>

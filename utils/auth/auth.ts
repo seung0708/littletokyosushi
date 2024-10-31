@@ -39,20 +39,9 @@ export const loginWithEmail = async (email: string, password: string) => {
     return { userData, session: data.session }
 }
 
-export const signUpWithEmail = async (name: string, role: string, email:string, password: string) => {
+export const signUpWithEmail = async (first_name: string, last_name: string, email:string, password: string, role: string) => {
     console.log(email, password)
-    const {data: {user}, error} = await supabase.auth.signUp({email, password})
-    if(user) {
-        const {data, error} = await supabase.from('employees').insert({
-            id: user.id, 
-            email: user.email, 
-
-            
-        })
-    }
-    
-
-
+   
 }
 
 export async function logout () {
