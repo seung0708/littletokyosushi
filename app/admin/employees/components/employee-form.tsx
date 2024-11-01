@@ -33,8 +33,8 @@ export default function EmployeeForm() {
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         const {firstName, lastName, email, password} = formData; 
-
-        console.log(email )
+        await signUpWithEmail(firstName, lastName, email, password, selectedRole); 
+        
 
 
     }

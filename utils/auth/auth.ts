@@ -40,7 +40,22 @@ export const loginWithEmail = async (email: string, password: string) => {
 }
 
 export const signUpWithEmail = async (first_name: string, last_name: string, email:string, password: string, role: string) => {
-    console.log(email, password)
+    console.log(first_name, last_name, email, password, role); 
+    const {data: {user}, error} = await supabase.auth.signUp({email, password});
+    
+    if(user) {
+        const {data, error} = await supabase.from('employees').insert({
+            id: user.id, 
+            email, 
+            first_name,
+            last_name,
+            role
+        });
+        if (error) {
+            console.log(error);
+        }
+        console.log(data)
+    }
    
 }
 

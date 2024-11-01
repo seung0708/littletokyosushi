@@ -23,7 +23,7 @@ const AdminManagerForm: React.FC<AdminManagerFormProps> = ({formData, onSubmit, 
             </div>
             <div className="grid gap-2">
                 <Label htmlFor="lastName"> Last Name</Label>
-                <Input className='mb-3' id="last_name" name="lastName" type="text" placeholder="Enter First Name" value={formData.lastName} onChange={onChange} required />
+                <Input className='mb-3' id="last_name" name="lastName" type="text" placeholder="Enter Last Name" value={formData.lastName} onChange={onChange} required />
             </div>
             <div className="grid gap-2">
                 <Label htmlFor="email">Email</Label>

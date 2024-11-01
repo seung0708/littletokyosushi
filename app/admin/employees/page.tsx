@@ -1,3 +1,5 @@
+'use client'
+
 import Link from "next/link";
 
 
@@ -7,12 +9,25 @@ import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import {Card, CardContent, CardDescription, CardFooter, CardHeader,CardTitle} from "@/components/ui/card"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
-import { createClient } from "@/utils/supabase/server";
+import { supabase } from "@/utils/supabase/client";
 import { useEffect, useState } from "react";
 
-const EmployeesPage: React.FC = async () => {
-    const supabase = createClient();
-    const {data, error} = await supabase.from('employees').select('email, first_name, last_name, role')
+const EmployeesPage: React.FC = () => {
+    const [employees, setEmployees] = useState([]);
+    //const supabase = createClient();
+
+    useEffect(() => {
+      const fetchData = async () => {
+        const {data, error} = await supabase.from('employees').select('email, first_name, last_name, role');
+        const {data: {user}, error2} =  await supabase.auth.getUser();
+        console.log(user)
+        console.log(data, error)
+        setEmployees(data)
+        
+      }
+      fetchData();
+    },[])
+
     return(
         <Tabs defaultValue="week">
             <TabsContent value="week">
@@ -38,7 +53,7 @@ const EmployeesPage: React.FC = async () => {
                       </TableRow>
                     </TableHeader>
                     <TableBody>
-                    {data?.map(employee => (
+                    {employees?.map(employee => (
                         <TableRow className="bg-accent">
                           <TableCell className="hidden sm:table-cell">
                             <div className="font-medium">{`${employee.first_name} ${employee.last_name}`}</div>
