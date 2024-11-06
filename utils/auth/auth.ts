@@ -39,25 +39,49 @@ export const loginWithEmail = async (email: string, password: string) => {
     return { userData, session: data.session }
 }
 
-export const signUpWithEmail = async (first_name: string, last_name: string, email:string, password: string, role: string) => {
-    console.log(first_name, last_name, email, password, role); 
-    const {data: {user}, error} = await supabase.auth.signUp({email, password});
+const checkExistingEmployee = async (userId: string) => {
+    const { data, error } = await supabase.from('employees').select('id').eq('id', userId);
+    return data && data.length > 0;
+};
+
+export const signUpWithEmail = async (first_name: string, last_name: string, email: string, password: string, role: string) => {
+    const { data: { user }, error } = await supabase.auth.signUp({ email, password });
     
-    if(user) {
-        const {data, error} = await supabase.from('employees').insert({
-            id: user.id, 
-            email, 
-            first_name,
-            last_name,
-            role
-        });
-        if (error) {
-            console.log(error);
+    if (user) {
+        const employeeExists = await checkExistingEmployee(user.id);
+
+        if (!employeeExists) {
+            const { data, error: insertError } = await supabase.from('employees').insert({
+                id: user.id,
+                email,
+                first_name,
+                last_name,
+            });
+
+            if (insertError) {
+                console.error('Error inserting employee data:', insertError);
+            } else {
+                console.log('Employee data inserted:', data);
+            }
+
+            const { data: roleData, error: roleError } = await supabase.from('employee_roles').insert({
+                user_id: user.id,
+                role: role,
+            });
+
+            if (roleError) {
+                console.error('Error assigning role:', roleError);
+            } else {
+                console.log('Role assigned:', roleData);
+            }
+        } else {
+            console.log('Employee already exists.');
         }
-        console.log(data)
+    } else {
+        console.error('Error during sign-up:', error);
     }
-   
-}
+};
+
 
 export async function logout () {
     const { error } = await supabase.auth.signOut();

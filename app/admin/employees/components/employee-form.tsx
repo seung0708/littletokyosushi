@@ -3,7 +3,7 @@
 import { signUpWithEmail } from "@/utils/auth/auth";
 
 import AdminManagerForm from "./adminmanagerform";
-import StaffForm from "../staffform";
+import StaffForm from "./staffform";
 import FilterDropdown from "../../components/filterdropdown";
 
 
@@ -33,6 +33,7 @@ export default function EmployeeForm() {
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         const {firstName, lastName, email, password} = formData; 
+        
         await signUpWithEmail(firstName, lastName, email, password, selectedRole); 
         
 

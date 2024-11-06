@@ -12,19 +12,39 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { supabase } from "@/utils/supabase/client";
 import { useEffect, useState } from "react";
 
+interface Employee {
+  id: string; 
+  first_name: string;
+  last_name: string; 
+  email: string; 
+  employee_roles: {role:string}[];
+  role?: string
+}
+
 const EmployeesPage: React.FC = () => {
-    const [employees, setEmployees] = useState([]);
+  const [employees, setEmployees] = useState<Employee[]>([]);
+
     //const supabase = createClient();
 
     useEffect(() => {
       const fetchData = async () => {
-        const {data, error} = await supabase.from('employees').select('email, first_name, last_name, role');
-        const {data: {user}, error2} =  await supabase.auth.getUser();
-        console.log(user)
-        console.log(data, error)
-        setEmployees(data)
-        
-      }
+        const { data: employeesData, error: fetchError } = await supabase
+          .from('employees')
+          .select('id, first_name, last_name, email, employee_roles(role)');
+  
+        if (fetchError) {
+          console.error('Issue fetching employees', fetchError);
+          return;
+        }
+  
+        // Process the data to include the role directly on the employee object
+        const employeesWithRoles = employeesData?.map((employee: any) => ({
+          ...employee,
+          role: employee.employee_roles?.[0]?.role ?? 'Unknown' // Default to 'Unknown' if no role
+        }));
+  
+        setEmployees(employeesWithRoles || []);
+      };
       fetchData();
     },[])
 
@@ -64,7 +84,7 @@ const EmployeesPage: React.FC = () => {
                           </Badge>
                           </TableCell>
                           <TableCell className="hidden md:table-cell">
-                          <div className="mt-1"> {/* Adjust the margin here as needed */}
+                          <div className="mt-1"> 
                           {employee.role}
                           </div>
                           </TableCell>
