@@ -2,6 +2,7 @@ import { redirect } from "next/navigation";
 import { supabase } from "../../utils/supabase/client";
 import { revalidatePath } from "next/cache";
 
+import {User} from '@/types/users';
 
 export const loginWithEmail = async (email: string, password: string) => {
      // Attempt to sign in the user with email and password
@@ -39,48 +40,38 @@ export const loginWithEmail = async (email: string, password: string) => {
     return { userData, session: data.session }
 }
 
-const checkExistingEmployee = async (userId: string) => {
-    const { data, error } = await supabase.from('employees').select('id').eq('id', userId);
-    return data && data.length > 0;
-};
 
 export const signUpWithEmail = async (first_name: string, last_name: string, email: string, password: string, role: string) => {
-    const { data: { user }, error } = await supabase.auth.signUp({ email, password });
-    
-    if (user) {
-        const employeeExists = await checkExistingEmployee(user.id);
+    const { data: user, error: signupError } = await supabase.auth.signUp({
+        email,
+        password,
+        options: {
+          data: {
+            first_name,
+            last_name,
+          },
+        },
+      });
 
-        if (!employeeExists) {
-            const { data, error: insertError } = await supabase.from('employees').insert({
-                id: user.id,
-                email,
-                first_name,
-                last_name,
-            });
-
-            if (insertError) {
-                console.error('Error inserting employee data:', insertError);
-            } else {
-                console.log('Employee data inserted:', data);
-            }
-
-            const { data: roleData, error: roleError } = await supabase.from('employee_roles').insert({
-                user_id: user.id,
-                role: role,
-            });
-
-            if (roleError) {
-                console.error('Error assigning role:', roleError);
-            } else {
-                console.log('Role assigned:', roleData);
-            }
-        } else {
-            console.log('Employee already exists.');
-        }
-    } else {
-        console.error('Error during sign-up:', error);
+    if(signupError) {
+        console.error('Error signing up: ', signupError.message)
     }
+    // console.log(user)
+    // if (user) {
+    //     updateUserRole(user.id, role);
+    // }
+
 };
+
+const updateUserRole = async (userId: number, role: string) => {
+    const {data: roles, error: roleError} = await supabase.from('roles').select('id').eq('name', role).single();
+
+    console.log(roles)
+
+    if(roleError) console.error('Error fetching new role: ', roleError.message);
+
+    const {data, error} = await supabase.from('user_role').update({user_id: userId, role_id: roles?.id})
+}
 
 
 export async function logout () {

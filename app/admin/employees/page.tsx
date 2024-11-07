@@ -11,42 +11,51 @@ import {Card, CardContent, CardDescription, CardFooter, CardHeader,CardTitle} fr
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { supabase } from "@/utils/supabase/client";
 import { useEffect, useState } from "react";
-
-interface Employee {
-  id: string; 
-  first_name: string;
-  last_name: string; 
-  email: string; 
-  employee_roles: {role:string}[];
-  role?: string
-}
+import Users from '@/types/users';
 
 const EmployeesPage: React.FC = () => {
-  const [employees, setEmployees] = useState<Employee[]>([]);
+  const [employees, setEmployees] = useState<Users[]>([]);
 
     //const supabase = createClient();
 
     useEffect(() => {
       const fetchData = async () => {
-        const { data: employeesData, error: fetchError } = await supabase
-          .from('employees')
-          .select('id, first_name, last_name, email, employee_roles(role)');
-  
+        const { data: usersData, error: fetchError } = await supabase
+          .from('users')
+          .select(`
+            id, 
+            first_name, 
+            last_name, 
+            email, 
+            user_role (
+              role_id,
+              roles (
+                name
+              )
+            )
+          `);
+    
         if (fetchError) {
-          console.error('Issue fetching employees', fetchError);
+          console.error('Error fetching users with roles', fetchError);
           return;
         }
-  
-        // Process the data to include the role directly on the employee object
-        const employeesWithRoles = employeesData?.map((employee: any) => ({
-          ...employee,
-          role: employee.employee_roles?.[0]?.role ?? 'Unknown' // Default to 'Unknown' if no role
-        }));
-  
+    
+        // Process the data to include roles directly on the employee object
+        const employeesWithRoles = usersData?.map((user: any) => {
+          const roles = user.user_role?.map((userRole: any) => userRole.roles?.name) || ['Unknown']; // Default to 'Unknown' if no roles
+          return {
+            ...user,
+            role: roles.join(', ') // Join multiple roles if a user has more than one role
+          };
+        });
+    
         setEmployees(employeesWithRoles || []);
       };
+    
       fetchData();
-    },[])
+    }, []);
+    
+    
 
     return(
         <Tabs defaultValue="week">
