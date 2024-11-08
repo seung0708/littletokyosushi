@@ -2,8 +2,6 @@ import { redirect } from "next/navigation";
 import { supabase } from "../../utils/supabase/client";
 import { revalidatePath } from "next/cache";
 
-import {User} from '@/types/users';
-
 export const loginWithEmail = async (email: string, password: string) => {
      // Attempt to sign in the user with email and password
      const { data, error } = await supabase.auth.signInWithPassword({
@@ -31,7 +29,7 @@ export const loginWithEmail = async (email: string, password: string) => {
         .select('*')
         .eq('id', user.id) // Match with auth_user_id
         .single();
-
+    
     // Handle error if the user data could not be fetched
     if (fetchError && fetchError.code !== 'PGRST202') {
         throw new Error(fetchError.message);
@@ -42,36 +40,48 @@ export const loginWithEmail = async (email: string, password: string) => {
 
 
 export const signUpWithEmail = async (first_name: string, last_name: string, email: string, password: string, role: string) => {
-    const { data: user, error: signupError } = await supabase.auth.signUp({
-        email,
-        password,
-        options: {
-          data: {
-            first_name,
-            last_name,
-          },
-        },
-      });
+    const { data: {user}, error: signupError } = await supabase.auth.signUp({ 
+         email, 
+         password,
+         options: {
+            data: {
+                first_name, 
+                last_name
+            }
+         }
+     });
 
     if(signupError) {
         console.error('Error signing up: ', signupError.message)
     }
-    // console.log(user)
-    // if (user) {
-    //     updateUserRole(user.id, role);
-    // }
+
+    await supabase.rpc('insert_into_employees_table', {
+        id: user?.id,
+        first_name,
+        last_name,
+        email: email
+    });
+
+    //console.log(role) 
+    const {data, error: fetchError} = await supabase.from('roles').select('id').eq('name', role)
+
+    console.log(data, fetchError)
+    const roleId: number = data[0].id
+    console.log(roleId)
+
+    const {data: insertRole, error: errorRole} = await supabase.from('employee_roles').insert({employee_id: user?.id, role_id: roleId})
+
+    console.log(insertRole, errorRole)
 
 };
 
-const updateUserRole = async (userId: number, role: string) => {
-    const {data: roles, error: roleError} = await supabase.from('roles').select('id').eq('name', role).single();
+export const updateUserandUserRole = async (id: string, first_name: string, last_name: string, email: string) => {
+    console.log(id, first_name, last_name, email)
+    const {data, error: userError} = await supabase.from('users').insert({auth_id: id, first_name, last_name, email});
 
-    console.log(roles)
-
-    if(roleError) console.error('Error fetching new role: ', roleError.message);
-
-    const {data, error} = await supabase.from('user_role').update({user_id: userId, role_id: roles?.id})
+    console.log(data, userError)
 }
+
 
 
 export async function logout () {

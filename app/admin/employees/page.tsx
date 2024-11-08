@@ -11,45 +11,39 @@ import {Card, CardContent, CardDescription, CardFooter, CardHeader,CardTitle} fr
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { supabase } from "@/utils/supabase/client";
 import { useEffect, useState } from "react";
-import Users from '@/types/users';
+
+interface Employee {
+  id: string;
+  first_name: string;
+  last_name: string;
+  email: string;
+  roles: Array<{name: string}>; // This will store the role names
+}
+
+interface Role {
+  name: string;
+}
+
 
 const EmployeesPage: React.FC = () => {
-  const [employees, setEmployees] = useState<Users[]>([]);
+  const [employees, setEmployees] = useState<Employee[]>([]);
 
     //const supabase = createClient();
 
     useEffect(() => {
       const fetchData = async () => {
-        const { data: usersData, error: fetchError } = await supabase
-          .from('users')
-          .select(`
-            id, 
-            first_name, 
-            last_name, 
-            email, 
-            user_role (
-              role_id,
-              roles (
-                name
-              )
-            )
-          `);
-    
-        if (fetchError) {
-          console.error('Error fetching users with roles', fetchError);
-          return;
-        }
-    
-        // Process the data to include roles directly on the employee object
-        const employeesWithRoles = usersData?.map((user: any) => {
-          const roles = user.user_role?.map((userRole: any) => userRole.roles?.name) || ['Unknown']; // Default to 'Unknown' if no roles
-          return {
-            ...user,
-            role: roles.join(', ') // Join multiple roles if a user has more than one role
-          };
-        });
-    
-        setEmployees(employeesWithRoles || []);
+        const { data: employees, error: employeesError } = await supabase
+        .from('employees')
+        .select(`
+          id,
+          first_name,
+          last_name,
+          email,
+          roles(name)
+        `);
+        console.log(employees)
+        setEmployees(employees || []);
+
       };
     
       fetchData();
@@ -94,7 +88,7 @@ const EmployeesPage: React.FC = () => {
                           </TableCell>
                           <TableCell className="hidden md:table-cell">
                           <div className="mt-1"> 
-                          {employee.role}
+                          {employee.roles.map(role => role.name)}
                           </div>
                           </TableCell>
                         </TableRow>
