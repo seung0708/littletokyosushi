@@ -5,11 +5,11 @@ import { ChevronLeft, PlusCircle, Upload } from "lucide-react"
 import { Badge } from "@/components/ui/badge"
 import { Label } from "@/components/ui/label"
 import { Input } from "@/components/ui/input"
-import { Textarea } from "@/components/ui/textarea"
+
 import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from "@/components/ui/card"
 import { Table, TableHeader, TableRow, TableHead, TableCell, TableBody} from "@/components/ui/table"
-import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group"
-import { Select, SelectTrigger, SelectContent, SelectItem, SelectValue } from "@/components/ui/select"
+// import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group"
+// import { Select, SelectTrigger, SelectContent, SelectItem, SelectValue } from "@/components/ui/select"
 
 const EditProductPage = () => {
     return (
@@ -45,7 +45,7 @@ const EditProductPage = () => {
                                         </div>
                                         <div className="grid gap-3">
                                             <Label htmlFor="description">Description</Label>
-                                            <Textarea id="description" defaultValue="Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam auctor, nisl nec ultricies ultricies, nunc nisl ultricies nunc, nec ultricies nunc nisl nec nunc." className="min-h-32" />
+                                            <textarea id="description" defaultValue="Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam auctor, nisl nec ultricies ultricies, nunc nisl ultricies nunc, nec ultricies nunc nisl nec nunc." className="min-h-32" />
                                         </div>
                                     </div>
                                 </CardContent>
@@ -86,13 +86,6 @@ const EditProductPage = () => {
                                                         defaultValue="99.99"
                                                     />
                                                 </TableCell>
-                                                <TableCell>
-                                                    <ToggleGroup type="single" defaultValue="s" variant="outline">
-                                                        <ToggleGroupItem value="s">S</ToggleGroupItem>
-                                                        <ToggleGroupItem value="m">M</ToggleGroupItem>
-                                                        <ToggleGroupItem value="l">L</ToggleGroupItem>
-                                                    </ToggleGroup>
-                                                </TableCell>
                                             </TableRow>
                                             <TableRow>
                                                 <TableCell className="font-semibold">GGPC-002</TableCell>
@@ -103,13 +96,6 @@ const EditProductPage = () => {
                                                 <TableCell>
                                                     <Label htmlFor="price-2" className="sr-only">Price</Label>
                                                     <Input id="price-2" type="number" defaultValue="99.99" />
-                                                </TableCell>
-                                                <TableCell>
-                                                    <ToggleGroup type="single" defaultValue="m" variant="outline">
-                                                        <ToggleGroupItem value="s">S</ToggleGroupItem>
-                                                        <ToggleGroupItem value="m">M</ToggleGroupItem>
-                                                        <ToggleGroupItem value="l">L</ToggleGroupItem>
-                                                    </ToggleGroup>
                                                 </TableCell>
                                             </TableRow>
                                     
@@ -131,31 +117,12 @@ const EditProductPage = () => {
                                     <div className="grid gap-6 sm:grid-cols-3">
                                         <div className="grid gap-3">
                                             <Label htmlFor="category">Category</Label>
-                                            <Select>
-                                                <SelectTrigger id="category" aria-label="Select category">
-                                                    <SelectValue placeholder="Select category" />
-                                                </SelectTrigger>
-                                                <SelectContent>
-                                                    <SelectItem value="clothing">Clothing</SelectItem>
-                                                    <SelectItem value="electronics">Electronics</SelectItem>
-                                                    <SelectItem value="accessories">Accessories</SelectItem>
-                                                </SelectContent>
-                                            </Select>
+
                                         </div>
                                         <div className="grid gap-3">
                                             <Label htmlFor="subcategory">
                                                 Subcategory (optional)
                                             </Label>
-                                            <Select>
-                                                <SelectTrigger id="subcategory" aria-label="Select subcategory" >
-                                                    <SelectValue placeholder="Select subcategory" />
-                                                </SelectTrigger>
-                                                <SelectContent>
-                                                    <SelectItem value="t-shirts">T-Shirts</SelectItem>
-                                                    <SelectItem value="hoodies">Hoodies</SelectItem>
-                                                    <SelectItem value="sweatshirts">Sweatshirts</SelectItem>
-                                                </SelectContent>
-                                            </Select>
                                         </div>
                                     </div>
                                 </CardContent>
@@ -170,16 +137,6 @@ const EditProductPage = () => {
                                     <div className="grid gap-6">
                                         <div className="grid gap-3">
                                             <Label htmlFor="status">Status</Label>
-                                            <Select>
-                                                <SelectTrigger id="status" aria-label="Select status">
-                                                    <SelectValue placeholder="Select status" />
-                                                </SelectTrigger>
-                                                <SelectContent>
-                                                    <SelectItem value="draft">Draft</SelectItem>
-                                                    <SelectItem value="published">Active</SelectItem>
-                                                    <SelectItem value="archived">Archived</SelectItem>
-                                                </SelectContent>
-                                            </Select>
                                         </div>
                                     </div>
                                 </CardContent>

@@ -8,30 +8,31 @@ interface ProductRowProps {
   product: Product
 }
 
-const ProductRow: React.FC<ProductRowProps> = ({product}) => {
+const ProductRow: React.FC<ProductRowProps> = ({item}) => {
+    console.log()
     return (
       <TableRow>
-        <TableCell className="hidden sm:table-cell">
-          <Image
-            alt="Product image"
-            className="aspect-square rounded-md object-cover"
-            src={product.images[0]}
-            height="64"
-            width="64"
-          />
-        </TableCell>
-        <TableCell className="font-medium">{product.title}</TableCell>
         <TableCell>
           <Badge>Draft</Badge>
         </TableCell>
-        <TableCell className="hidden md:table-cell">{product.price}</TableCell>
-        <TableCell className="hidden md:table-cell">{product.quantity}</TableCell>
-        <TableCell className="hidden md:table-cell"></TableCell>
+        <TableCell className="hidden sm:table-cell">
+          <img
+            alt="Product image"
+            className="aspect-square rounded-md object-cover"
+            src={`${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/menu-items/${item.image_url}`}
+            
+          />
+        </TableCell>
+        <TableCell className="font-medium">{item.name}</TableCell>
+        <TableCell className="font-medium">{item.description}</TableCell>
+        <TableCell className="hidden md:table-cell">{item.price.toFixed(2)}</TableCell>
+        <TableCell className="hidden md:table-cell">{item.inventories.map(inventory => inventory.quantity_in_stock)}</TableCell>
+
         <TableCell>
-          <ActionsMenu id={product.id} />
+          <ActionsMenu id={item.id} />
         </TableCell>
       </TableRow>
     );
 };
 
-export default ProductRow
+export default ProductRow;

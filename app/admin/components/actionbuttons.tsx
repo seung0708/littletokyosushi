@@ -5,7 +5,6 @@ import { File, ListFilter, PlusCircle } from "lucide-react";
 export const ActionButtons: React.FC = () => {
     return (
       <div className="ml-auto flex items-center gap-2">
-        <FilterDropdown />
         <ExportButton />
         <AddProductButton />
       </div>
