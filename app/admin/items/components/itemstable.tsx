@@ -3,7 +3,7 @@ import { supabase } from '@/utils/supabase/client';
 import { useEffect, useState } from 'react';
 import { Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from '@/components/ui/table'
 import {products} from '../../../../types/products'
-import ProductRow from './productsrow';
+import ProductRow from './itemsrow';
 
 export const ProductsTable: React.FC = () => {
     const [items, setItems] = useState([]);

@@ -17,7 +17,7 @@ export default function Sidebar() {
           {[
             { label: 'Dashboard', icon: <Home />, link: '/' },
             { label: 'Orders', icon: <ShoppingCart />, link: '/orders', badge: 4 },
-            { label: 'Products', icon: <SquareMenu />, link: '/products' },
+            { label: 'Items', icon: <SquareMenu />, link: '/items' },
             { label: 'Employees', icon: <Users />, link: '/employees' },
             { label: 'Reports', icon: <LineChart />, link: '/reports' },
           ].map((item) => (

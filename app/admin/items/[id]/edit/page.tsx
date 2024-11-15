@@ -1,4 +1,6 @@
-import { useRouter } from "next/router"
+'use client';
+
+import Link from "next/link"
 import Image from "next/image"
 import { Button } from "@/components/ui/button"
 import { ChevronLeft, PlusCircle, Upload } from "lucide-react"
@@ -8,20 +10,37 @@ import { Input } from "@/components/ui/input"
 
 import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from "@/components/ui/card"
 import { Table, TableHeader, TableRow, TableHead, TableCell, TableBody} from "@/components/ui/table"
+import { useEffect, useState } from "react";
+import { supabase } from "@/utils/supabase/client";
 // import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group"
 // import { Select, SelectTrigger, SelectContent, SelectItem, SelectValue } from "@/components/ui/select"
 
-const EditProductPage = () => {
+const EditProductPage = ({params}) => {
+    const {id} = params;
+    const [item, setItem] = useState(null);
+
+    useEffect(() => {
+        const fetchItem = async () => {
+            const {data, error} = await supabase.from('menu_items').select('*').eq('id', id).single();
+            console.log(data)
+            setItem(data);
+        }
+
+        fetchItem();
+    },[]);
+
     return (
         <section className="flex min-h-screen w-full flex-col bg-muted/40">
             <div className="grid flex-1 items-start gap-4 p-4 sm:px-6 sm:py-0 md:gap-8">
                 <div className="mx-auto grid max-w-[59rem] flex-1 auto-rows-max gap-4">
                     <div className="flex items-center gap-4">
-                        <Button variant="outline" size="icon" className="h-7 w-7">
-                            <ChevronLeft className="h-4 w-4" />
-                            <span className="sr-only">Back</span>
-                        </Button>
-                        <h1 className="flex-1 shrink-0 whitespace-nowrap text-xl font-semibold tracking-tight sm:grow-0">Pro Controller</h1>
+                        <Link href={'/items'}>
+                            <Button variant="outline" size="icon" className="h-7 w-7">
+                                <ChevronLeft className="h-4 w-4" />
+                                <span className="sr-only">Back</span>
+                            </Button>
+                        </Link>
+                        <h1 className="flex-1 shrink-0 whitespace-nowrap text-xl font-semibold tracking-tight sm:grow-0">{item?.name}</h1>
                         <Badge variant="outline" className="ml-auto sm:ml-0"> In stock</Badge>
                         <div className="hidden items-center gap-2 md:ml-auto md:flex">
                             <Button variant="outline" size="sm">Discard</Button>

@@ -9,7 +9,6 @@ interface ProductRowProps {
 }
 
 const ProductRow: React.FC<ProductRowProps> = ({item}) => {
-    console.log()
     return (
       <TableRow>
         <TableCell>

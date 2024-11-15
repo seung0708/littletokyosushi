@@ -1,5 +1,6 @@
 import React from 'react';
-import { Link, MoreHorizontal } from 'lucide-react';
+import Link from 'next/link';
+import {MoreHorizontal } from 'lucide-react';
 import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuLabel, DropdownMenuItem } from '@/components/ui/dropdown-menu';
 import { Button } from '@/components/ui/button';
 
@@ -18,7 +19,9 @@ const ActionsMenu: React.FC<ActionMenuProps> = ({id}) => {
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end">
           <DropdownMenuLabel>Actions</DropdownMenuLabel>
-            <DropdownMenuItem asChild><Link href={`/products/edit/${id}`}>Edit</Link></DropdownMenuItem>
+            <DropdownMenuItem asChild>
+              <Link href={`/items/${id}/edit`}>Edit</Link>
+            </DropdownMenuItem>
           <DropdownMenuItem>Delete</DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>
