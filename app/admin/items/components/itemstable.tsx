@@ -2,10 +2,12 @@
 import { supabase } from '@/utils/supabase/client';
 import { useEffect, useState } from 'react';
 import { Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from '@/components/ui/table'
-import {products} from '../../../../types/products'
 import ProductRow from './itemsrow';
+import { Pagination, PaginationContent, PaginationPrevious } from '@/components/ui/pagination';
 
-export const ProductsTable: React.FC = () => {
+const ItemsTable: React.FC = ({searchParams}: {searchParams: {page: string | undefined}}) => {
+    const rowsPerPage = 10;
+    const currentPage = searchParams?.page ? parseInt(searchParams.page) : 1;
     const [items, setItems] = useState([]);
 
     useEffect(() => {
@@ -22,6 +24,7 @@ export const ProductsTable: React.FC = () => {
     }, []);
 
     return (
+      <>
       <Table>
         <TableHeader>
           <TableRow>
@@ -40,6 +43,13 @@ export const ProductsTable: React.FC = () => {
            {items.map(item => <ProductRow key={item.id} item={item} />)}
         </TableBody>
       </Table>
+      <Pagination>
+        <PaginationContent>
+          
+        </PaginationContent>
+      </Pagination>
+      </>
     );
   };
   
+export default ItemsTable;

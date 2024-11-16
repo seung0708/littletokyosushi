@@ -1,10 +1,13 @@
+'use client'
 // /components/ui/Sidebar.tsx
 import Link from "next/link"
 import { Home, ShoppingCart, SquareMenu, Users, LineChart, Settings } from "lucide-react"
 import { Badge } from "@/components/ui/badge"
-
+import { usePathname } from "next/navigation"
+import clsx from "clsx"
 
 export default function Sidebar() {
+  const pathname = usePathname();
   return (
     <aside className="hidden border-2 w-60 bg-gray-100 p-4 border-r md:flex md:flex-col">
       <Link href="/dashboard" className="flex items-center gap-3 text-lg font-bold text-gray-800 mb-4">
@@ -24,7 +27,11 @@ export default function Sidebar() {
             <li key={item.label}>
               <Link
                 href={item.link}
-                className="flex items-center justify-between p-2 text-gray-700 rounded-lg hover:bg-gray-200"
+                className={clsx(
+                  'flex items-center justify-between p-2 text-gray-700 rounded-lg', 
+                  {
+                    'bg-gray-400 text-gray-800' : pathname === item.link
+                  })}
               >
                 <div className="flex items-center gap-2">
                   {item.icon}

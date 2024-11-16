@@ -1,5 +1,5 @@
-import Sidebar from "./components/sidebar";
-import Header from "./components/header/header";
+import Sidebar from "./admin-ui/sidebar";
+import Header from "./admin-ui/header";
 import { ReactNode } from "react";
 
 
