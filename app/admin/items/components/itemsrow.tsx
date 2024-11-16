@@ -5,10 +5,11 @@ import ActionsMenu from "../../components/actionsmenu";
 import {Product} from '../../../../types/products'
 
 interface ProductRowProps {
-  product: Product
+  item: Product
 }
 
-const ProductRow: React.FC<ProductRowProps> = ({item}) => {
+const ProductRow: React.FC = ({item}) => {
+
     return (
       <TableRow>
         <TableCell>
@@ -18,7 +19,7 @@ const ProductRow: React.FC<ProductRowProps> = ({item}) => {
           <img
             alt="Product image"
             className="aspect-square rounded-md object-cover"
-            src={`${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/menu-items/${item.image_url}`}
+            src={`${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/menu-items/${item.categories.name}/${item.image_url[0]}`}
             
           />
         </TableCell>

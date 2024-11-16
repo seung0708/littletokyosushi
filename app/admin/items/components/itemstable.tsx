@@ -10,7 +10,7 @@ export const ProductsTable: React.FC = () => {
 
     useEffect(() => {
       const fetchMenuItems = async () => {
-        const {data, error} = await supabase.from('menu_items').select('*, inventories(*)');
+        const {data, error} = await supabase.from('menu_items').select('*, inventories(*), categories(*)');
         if (error) {
           console.error(error)
         }
