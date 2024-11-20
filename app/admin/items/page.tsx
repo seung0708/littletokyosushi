@@ -1,6 +1,6 @@
 import Link from 'next/link'
 import { Tabs, TabsContent} from '@/components/ui/tabs'
-import { AddButton } from '../admin-ui/actionbuttons'
+import { AddButton } from '../ui/actionbuttons'
 
 import React from 'react'
 import ItemsTable from './components/itemstable'

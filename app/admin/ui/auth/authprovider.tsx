@@ -37,11 +37,6 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children}) => {
         return () => authListener?.subscription.unsubscribe();
     }, []);
 
-     // Render the LoginForm if not loading and there's no session
-     if (loading) {
-        return <div className='flex justify-center items-center'>Loading...</div>; // Optional: You can show a loading spinner here
-    }
-
     if (!session) {
         router.push('/');
         return <LoginForm />; // Render LoginForm when there's no session

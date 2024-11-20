@@ -2,7 +2,7 @@
 
 import { signUpWithEmail } from "@/utils/auth/auth";
 
-import FilterDropdown from "../../admin-ui/filterdropdown";
+import FilterDropdown from "../../ui/filterdropdown";
 
 
 import { useState } from "react";
