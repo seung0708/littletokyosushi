@@ -5,9 +5,7 @@ import { Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from '@
 import ProductRow from './itemsrow';
 import { Pagination, PaginationContent, PaginationPrevious } from '@/components/ui/pagination';
 
-const ItemsTable: React.FC = ({searchParams}: {searchParams: {page: string | undefined}}) => {
-    const rowsPerPage = 10;
-    const currentPage = searchParams?.page ? parseInt(searchParams.page) : 1;
+const ItemsTable: React.FC = () => {
     const [items, setItems] = useState([]);
 
     useEffect(() => {
@@ -15,9 +13,10 @@ const ItemsTable: React.FC = ({searchParams}: {searchParams: {page: string | und
         const {data, error} = await supabase.from('menu_items').select('*, inventories(*), categories(*)');
         if (error) {
           console.error(error)
+        } else {
+          setItems(data) 
         }
-        console.log(data)
-        setItems(data)
+     
       }
 
       fetchMenuItems();
@@ -43,11 +42,6 @@ const ItemsTable: React.FC = ({searchParams}: {searchParams: {page: string | und
            {items.map(item => <ProductRow key={item.id} item={item} />)}
         </TableBody>
       </Table>
-      <Pagination>
-        <PaginationContent>
-          
-        </PaginationContent>
-      </Pagination>
       </>
     );
   };

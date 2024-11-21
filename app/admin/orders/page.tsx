@@ -1,16 +1,6 @@
-import { Badge } from "@/components/ui/badge"
-import { Button } from "@/components/ui/button"
-import {Card, CardContent, CardDescription, CardFooter, CardHeader,CardTitle} from "@/components/ui/card"
-import { DropdownMenu, DropdownMenuCheckboxItem, DropdownMenuContent,   DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
-
-import { Separator } from "@/components/ui/separator"
-import { Progress } from "@/components/ui/progress"
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { ChevronLeft, ChevronRight, Copy, CreditCard, ListFilter, MoreVertical, Truck, File } from "lucide-react"
-import OrderSummary from "./components/order-summary"
-import OrdersList from "./components/orders-list"
-import RecentOrder from "./components/recent-order"
+import OrderSummary from "../ui/orders/order-summary"
+import OrdersList from "../ui/orders/orders-list"
+import RecentOrder from "../ui/orders/recent-order"
 
 const OrdersPage: React.FC = () => {
     return (

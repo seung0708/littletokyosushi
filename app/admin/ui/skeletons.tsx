@@ -20,6 +20,26 @@ export function CardSkeleton() {
     )
 }
 
+export function ItemsListSkeleton() {
+  return (
+    <Table className={`${shimmer}`}>
+      <TableHeader>
+        <TableRow>
+          <TableHead></TableHead>
+          <TableHead className="hidden w-[100px] sm:table-cell"></TableHead>
+          <TableHead></TableHead>
+          <TableHead></TableHead>
+          <TableHead className="hidden md:table-cell"></TableHead>
+          <TableHead className="hidden md:table-cell"></TableHead>
+          <TableHead></TableHead>
+        </TableRow>
+      </TableHeader>
+      <TableBody>
+      </TableBody>
+  </Table>
+  )
+}
+
 export function RecentSalesSkeleton() {
     return (
         <Card x-chunk="dashboard-01-chunk-5">
