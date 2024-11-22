@@ -9,31 +9,55 @@ import {
     PaginationNext,
     PaginationPrevious,
   } from "@/components/ui/pagination"
-import { usePathname } from "next/navigation";
-import { getCurrentPage } from "../../lib/utils";
-  
+import { usePathname, useSearchParams } from "next/navigation";
+import { generatePagination } from "../../lib/utils";
 
 export default function ItemsPagination ({totalPages}: {totalPages: number}) {
     const pathname = usePathname();
-    const currentPage = getCurrentPage() || 1
+    const searchParams = useSearchParams();
+    const currentPage = Number(searchParams.get('page')) || 1;
+
     const createPageURL = (pageNumber: number | string) => {
-        return `${pathname}?page=${pageNumber}`;
-    }
+        const params = new URLSearchParams(searchParams);
+        params.set('page', pageNumber?.toString());
+        return `${pathname}?${params.toString()}`;
+    };
+
+    const allPages = generatePagination(currentPage, totalPages);
 
     return (
         <Pagination>
             <PaginationContent>
                 <PaginationItem>
-                    <PaginationPrevious href={(currentPage - 1).toString()} />
+                    <PaginationPrevious href={createPageURL(currentPage - 1)} />
                 </PaginationItem>
                 <PaginationItem>
-                    <PaginationLink href="#">1</PaginationLink>
+                    {allPages.map((page, index) => {
+                        let position: 'first' | 'last' | 'single' | 'middle' | undefined;
+
+                        if (index === 0) position = 'first';
+                        if (index === allPages.length - 1) position = 'last';
+                        if (allPages.length === 1) position = 'single';
+                        if (page === '...') position = 'middle';
+
+                        return (
+                            <PaginationLink 
+                                href={createPageURL(page)}
+                                isActive={currentPage === page}
+                            >
+                                {page}
+                            </PaginationLink>
+                        )
+                    })}
+                    
                 </PaginationItem>
                 <PaginationItem>
                     <PaginationEllipsis />
                 </PaginationItem>
                 <PaginationItem>
-                    <PaginationNext href="#" />
+                    <PaginationNext 
+                        href={createPageURL(currentPage + 1)} 
+                    />
                 </PaginationItem>
             </PaginationContent>
         </Pagination>

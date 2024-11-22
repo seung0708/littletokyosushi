@@ -1,28 +1,17 @@
-'use client';
-import { supabase } from '@/utils/supabase/client';
-import { useEffect, useState } from 'react';
+
 import { Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from '@/components/ui/table'
 import ProductRow from './itemsrow';
-import { Pagination, PaginationContent, PaginationPrevious } from '@/components/ui/pagination';
+import { fetchFilteredItems } from '../../lib/supabase/items-data';
 
-const ItemsTable: React.FC = () => {
-    const [items, setItems] = useState([]);
-
-    useEffect(() => {
-      const fetchMenuItems = async () => {
-        const {data, error} = await supabase.from('menu_items').select('*, inventories(*), categories(*)');
-        if (error) {
-          console.error(error)
-        } else {
-          setItems(data) 
-        }
-     
-      }
-
-      fetchMenuItems();
-    }, []);
-
-    return (
+export default async function ItemsTable({
+  query, 
+  currentPage
+}: {
+  query: string, 
+  currentPage: number
+}) {
+  const items = await fetchFilteredItems(query, currentPage)
+  return (
       <>
       <Table>
         <TableHeader>
@@ -46,4 +35,3 @@ const ItemsTable: React.FC = () => {
     );
   };
   
-export default ItemsTable;

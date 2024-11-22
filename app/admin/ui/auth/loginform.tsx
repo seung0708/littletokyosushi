@@ -22,7 +22,7 @@ export const LoginForm: React.FC = () => {
         const { userData, session } = await loginWithEmail(email, password);
         
         if (session) {
-            router.push('/dashboard');
+            router.push('/');
             setError(null); // Clear any previous error
         }
     } catch (err) {
