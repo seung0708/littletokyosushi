@@ -21,7 +21,7 @@ export default function SearchBar() {
         params.delete('query');
       }
       replace(`${pathname}?${params.toString()}`);
-    })
+    },300)
 
     return (
         <div className="relative ml-auto flex-1 md:grow-0">

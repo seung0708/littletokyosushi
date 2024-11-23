@@ -13,6 +13,7 @@ export default function DropDownMenuComponent() {
   const handleLogout = async () => {
     try {
       await logout();
+      router.push('/')
     } catch(error) {
       console.log(error)
     }

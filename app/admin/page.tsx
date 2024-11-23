@@ -26,7 +26,7 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({children}) => {
                 const {data: {session}} = await supabase.auth.getSession()
                 setSession(session);
                 setIsLoading(false)
-                //console.log(session);
+                console.log(session);
             } catch(error) {
                 console.log('Failed to get session', error);
             } 

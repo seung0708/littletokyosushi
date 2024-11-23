@@ -3,21 +3,22 @@ import { Tabs, TabsContent} from '@/components/ui/tabs'
 import { AddButton } from '../ui/actionbuttons'
 
 import ItemsTable from '@/app/admin/ui/items/itemstable';
-import { Suspense } from 'react';
+import { Suspense, useEffect } from 'react';
 import { ItemsListSkeleton } from '../ui/skeletons';
 import { fetchMenuItemsPages } from '../lib/supabase/items-data';
 import ItemsPagination from '../ui/items/pagination';
 import SearchBar from '../ui/searchbar';
 
-const ItemsPage = async (props: {
+export default async function ItemsPage (props: {
     searchParams?: Promise<{
         query?: string;
         page?: string;
     }>;
-}) => {
+}) {
+
     const searchParams = await props.searchParams;
     const query = searchParams?.query || '';
-    const currentPage = Number(searchParams?.page);
+    const currentPage = Number(searchParams?.page) || 1;
     const totalPages = await fetchMenuItemsPages(query); 
     return(
         <section className='grid flex-1 items-start gap-4 p-4 sm:px-6 sm:py-0 md:gap-8'>
@@ -38,5 +39,3 @@ const ItemsPage = async (props: {
         </section>
     )
 }
-
-export default ItemsPage

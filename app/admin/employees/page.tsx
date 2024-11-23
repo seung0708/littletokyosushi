@@ -31,6 +31,12 @@ const EmployeesPage: React.FC = () => {
     //const supabase = createClient();
 
     useEffect(() => {
+
+      const fetchMenuCount = async () => {
+        const {count} = await supabase.from('menu_items').select('*', {count: 'exact'})
+        console.log(count)
+      }
+
       const fetchData = async () => {
         const { data: employees, error: employeesError } = await supabase
         .from('employees')
@@ -47,6 +53,7 @@ const EmployeesPage: React.FC = () => {
       };
     
       fetchData();
+      fetchMenuCount()
     }, []);
     
     

@@ -66,7 +66,7 @@ export const signUpWithEmail = async (first_name: string, last_name: string, ema
     const {data, error: fetchError} = await supabase.from('roles').select('id').eq('name', role)
 
     console.log(data, fetchError)
-    const roleId: number = data[0].id
+    const roleId: number = data?.[0].id
     console.log(roleId)
 
     const {data: insertRole, error: errorRole} = await supabase.from('employee_roles').insert({employee_id: user?.id, role_id: roleId})
@@ -90,7 +90,6 @@ export async function logout () {
     if (error) {
       redirect('/error')
     } 
-    revalidatePath('/', 'layout')
 }
 
 export async function forgotPassword(email: string) {
