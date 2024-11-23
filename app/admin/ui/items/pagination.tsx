@@ -29,9 +29,6 @@ export default function ItemsPagination ({totalPages}: {totalPages: number}) {
         <Pagination>
             <PaginationContent>
                 <PaginationItem>
-                    <PaginationPrevious href={createPageURL(currentPage - 1)} />
-                </PaginationItem>
-                <PaginationItem>
                     {allPages.map((page, index) => {
                         let position: 'first' | 'last' | 'single' | 'middle' | undefined;
 
@@ -50,14 +47,6 @@ export default function ItemsPagination ({totalPages}: {totalPages: number}) {
                         )
                     })}
                     
-                </PaginationItem>
-                <PaginationItem>
-                    <PaginationEllipsis />
-                </PaginationItem>
-                <PaginationItem>
-                    <PaginationNext 
-                        href={createPageURL(currentPage + 1)} 
-                    />
                 </PaginationItem>
             </PaginationContent>
         </Pagination>

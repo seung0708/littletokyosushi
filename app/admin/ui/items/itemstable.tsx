@@ -28,7 +28,7 @@ export default async function ItemsTable({
           </TableRow>
         </TableHeader>
         <TableBody>
-           {items.map(item => <ProductRow key={item.id} item={item} />)}
+           {items?.map(item => <ProductRow key={item.id} item={item} />)}
         </TableBody>
       </Table>
       </>
