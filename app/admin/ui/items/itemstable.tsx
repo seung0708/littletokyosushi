@@ -2,6 +2,7 @@
 import { Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from '@/components/ui/table'
 import ProductRow from './itemsrow';
 import { fetchFilteredItems } from '../../lib/supabase/items-data';
+import { Product } from '@/types/definitions';
 
 export default async function ItemsTable({
   query, 
@@ -11,6 +12,7 @@ export default async function ItemsTable({
   currentPage: number
 }) {
   const items = await fetchFilteredItems(query, currentPage)
+  
   return (
       <>
       <Table>
@@ -28,7 +30,7 @@ export default async function ItemsTable({
           </TableRow>
         </TableHeader>
         <TableBody>
-           {items?.map(item => <ProductRow key={item.id} item={item} />)}
+           {items?.map((item: Product) => <ProductRow key={item.id} item={item} />)}
         </TableBody>
       </Table>
       </>

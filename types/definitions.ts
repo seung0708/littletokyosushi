@@ -1,6 +1,5 @@
 export interface Category {
-    id: number;
-    name: string;
+    category_name: string;
 }
 
 export default interface Inventory {
@@ -15,7 +14,10 @@ export interface Product {
     price: number;
     category_id: number;
     is_available: boolean;
+    special_instructions: string;
     image_url: string[]; 
-    category: Category;
-    inventory: Inventory[];
+    category_name: string
+    quantity_in_stock: number ;
+    low_stock_threshold: number;
+    sync_status: boolean
 }

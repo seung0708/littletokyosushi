@@ -10,7 +10,6 @@ type ProductRowProps = {
 }
 
 const ProductRow: React.FC<ProductRowProps> = ({item}) => {
-  //console.log(item)
   return (
     <TableRow>
       <TableCell>
@@ -20,13 +19,13 @@ const ProductRow: React.FC<ProductRowProps> = ({item}) => {
         <img
           alt="Product image"
           className="aspect-square rounded-md object-cover"
-          src={`${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/menu-items/${item?.category?.name}${item.image_url?.[0]}`}
+          src={`${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/menu-items/${item?.category_name}${item.image_url?.[0]}`}
         />
       </TableCell>
       <TableCell className="font-medium">{item.name}</TableCell>
       <TableCell className="font-medium ">{item.description}</TableCell>
       <TableCell className="hidden md:table-cell">{item.price.toFixed(2)}</TableCell>
-      <TableCell className="hidden md:table-cell">{item?.inventory[0].quantity_in_stock}</TableCell>
+      <TableCell className="hidden md:table-cell">{item?.quantity_in_stock}</TableCell>
       <TableCell>
         <ActionsMenu id={item.id} />
       </TableCell>
