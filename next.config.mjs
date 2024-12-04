@@ -14,7 +14,7 @@ const nextConfig = {
           },
           {
             source: '/',
-            destination: '/admin/dashboard',
+            destination: '/admin',
             has: [{ type: 'host', value: 'admin.localhost' }]
           },
           {

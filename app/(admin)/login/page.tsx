@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 
 import {login} from './actions';
 
-export default function Page() {
+export default function LoginPage() {
     return (
         <div className='flex items-center justify-center min-h-screen bg-gray-100'>    
         <div className="rounded-lg border bg-card text-card-foreground shadow-sm w-full max-w-sm mx-auto p-6">
