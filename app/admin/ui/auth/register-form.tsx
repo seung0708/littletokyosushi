@@ -17,7 +17,7 @@ export const RegisterForm: React.FC = () => {
     e.preventDefault(); 
     await signUpWithEmail(email, password)
   }
-
+ 
 
   return (
     <div className="p-6 pt-0 grid gap-4">

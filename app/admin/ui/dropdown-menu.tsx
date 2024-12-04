@@ -1,23 +1,14 @@
-'use client'
-
-import { logout } from "@/utils/auth/auth";
+import { logout } from "../login/actions"
 
 import {DropdownMenu, DropdownMenuContent, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger, DropdownMenuItem} from "@/components/ui/dropdown-menu"
 import { User } from "lucide-react"
 import { Button } from "@/components/ui/button"
-import { useRouter } from "next/navigation"
+import { redirect, useRouter } from "next/navigation"
+import { revalidatePath } from "next/cache";
+import { createClient } from "@/utils/supabase/server";
 
 export default function DropDownMenuComponent() {
-  const router = useRouter(); 
 
-  const handleLogout = async () => {
-    try {
-      await logout();
-      router.push('/')
-    } catch(error) {
-      console.log(error)
-    }
-  }
 
 
     return (
@@ -28,13 +19,6 @@ export default function DropDownMenuComponent() {
           size="icon"
           className="overflow-hidden rounded-full"
         >
-          {/* <Image
-            src="/placeholder-user.jpg"
-            width={36}
-            height={36}
-            alt="Avatar"
-            className="overflow-hidden rounded-full"
-          /> */}
         <User />
         </Button>
       </DropdownMenuTrigger>
@@ -42,9 +26,9 @@ export default function DropDownMenuComponent() {
         <DropdownMenuLabel>My Account</DropdownMenuLabel>
         <DropdownMenuSeparator />
         <DropdownMenuItem>
-          <Button onClick={handleLogout}>
-            Logout
-          </Button>
+        <form>
+          <Button formAction={logout}>Logout</Button>
+        </form>
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>

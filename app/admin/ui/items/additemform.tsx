@@ -1,21 +1,21 @@
 import { Form, FormControl, FormField, FormItem, FormLabel } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { z } from 'zod';
-const formSchema = z.object({
-    name: z.string(), 
-    description: z.string(),
-    price: z.number(),
-    category: z.string()
-})
+import { ItemFormData } from "@/types/definitions";
+import { useForm } from "react-hook-form";
+import { z, ZodType } from 'zod';
+
+export const ItemSchema: ZodType<ItemFormData> = z
+    .object({
+        item_name: z.string(), 
+        image_url: 
+        description: z.string(), 
+    })
 
 export default function AddItem() {
-
-    const onSumbit = (values: z.infer<typeof formSchema>) => {
-        
-    }
+    const {register, handleSubmit, formState: {errors}, setError} = useForm<FormData>();
     return (
         <Form>
-            <form onSubmit={for}>
+            <form>
             <FormField />
                 <FormItem>
                     <FormLabel>Name:</FormLabel>

@@ -1,6 +1,5 @@
 import MobileNav from "./mobile-nav"
 import BreadCrumbNav from "./breadcrumb-nav"
-import SearchBar from "./searchbar"
 import DropDownMenuComponent from "./dropdown-menu"
 
 export default function Header() {

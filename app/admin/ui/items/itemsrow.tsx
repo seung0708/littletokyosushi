@@ -19,7 +19,7 @@ const ProductRow: React.FC<ProductRowProps> = ({item}) => {
         <img
           alt="Product image"
           className="aspect-square rounded-md object-cover"
-          src={`${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/menu-items/${item?.category_name}${item.image_url?.[0]}`}
+          src={`${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/menu-items/${item?.category_name}${item.image_urls?.[0]}`}
         />
       </TableCell>
       <TableCell className="font-medium">{item.name}</TableCell>

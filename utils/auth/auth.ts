@@ -1,6 +1,5 @@
 import { redirect } from "next/navigation";
 import { supabase } from "../../utils/supabase/client";
-import { revalidatePath } from "next/cache";
 
 export const loginWithEmail = async (email: string, password: string) => {
      // Attempt to sign in the user with email and password
@@ -25,7 +24,7 @@ export const loginWithEmail = async (email: string, password: string) => {
 
     // Check if user exists in the users table
     const { data: userData, error: fetchError } = await supabase
-        .from('users')
+        .from('employees')
         .select('*')
         .eq('id', user.id) // Match with auth_user_id
         .single();
@@ -86,19 +85,4 @@ export const updateUserandUserRole = async (id: string, first_name: string, last
 
 export async function logout () {
     const { error } = await supabase.auth.signOut();
-    
-    if (error) {
-      redirect('/error')
-    } 
-}
-
-export async function forgotPassword(email: string) {
-   return await supabase.auth.resetPasswordForEmail(email, {
-    redirectTo: 'http://admin.localhost:3000/update-password'
-   });
-
-}
-
-export async function updateUserPassword(password: string) {
-    return await supabase.auth.updateUser({ password });
 }

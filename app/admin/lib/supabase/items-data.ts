@@ -1,6 +1,6 @@
-'use server';
-import { Category, Product } from "@/types/definitions";
-import { supabase } from "@/utils/supabase/server";
+import { createClient } from "@/utils/supabase/server";
+
+const supabase = createClient();
 
 const ITEMS_PER_PAGE = 8;
 export async function fetchFilteredItems(query: string, currentPage: number) {
@@ -11,7 +11,7 @@ export async function fetchFilteredItems(query: string, currentPage: number) {
             items_per_page: ITEMS_PER_PAGE, 
             offset_val: offset
         })
-        //console.log( data, error)
+        console.log(data, error)
         return data;
 
     } catch (error) {
@@ -21,6 +21,7 @@ export async function fetchFilteredItems(query: string, currentPage: number) {
 
 export async function fetchMenuItemsPages(query: string)  {
     const {data, error} = await supabase.rpc('get_items_count', {query})
+    //console.log(data, error)
     const totalPages = Math.ceil(Number(data) / ITEMS_PER_PAGE);
     return totalPages;
     

@@ -1,8 +1,8 @@
 'use client'
-import { products } from "@/types/products"
+import { Product } from "@/types/definitions"
 
 const PopularItems: React.FC = () => {
-    const topThree = products.slice(0,3);
+    //const topThree = products.slice(0,3);
 
     return (
         <section aria-labelledby="popular-items">
@@ -14,7 +14,7 @@ const PopularItems: React.FC = () => {
                     </a>
                 </div>
                 <div className="mx-auto mt-6 grid grid-cols-1 md:grid-cols-3 justify-items-center">
-                {topThree.map((product) => (
+                {/* {topThree.map((product) => (
                     <a href={`menu/${product.id}`} key={product.id}>
                         <div className="w-48 sm:w-56 md:w-64 lg:w-72 group relative rounded-md " >
                             <div className="w-full overflow-hidden rounded-md">
@@ -27,7 +27,7 @@ const PopularItems: React.FC = () => {
                             </div>
                         </div>
                     </a>
-                ))}
+                ))} */}
             </div>
         </div>
     </section>

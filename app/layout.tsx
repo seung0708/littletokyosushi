@@ -16,7 +16,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <title>{metadata.title as string}</title>
         <meta name="description" content={metadata.description as string} />
       </head>
-      <body className={`h-screen ${poppins.className} antialiased`}>
+      <body className={`h-screen ${poppins.className}`}>
         {children}
       </body>
     </html>
