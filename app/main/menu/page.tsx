@@ -1,7 +1,6 @@
 'use client';
 import {useState} from 'react';
-import { products } from "@/types/products"
-import categories, {Category}  from "@/types/categories"
+import { Product, Category } from "@/types/definitions"
 import MenuItems from "../components/menuItems"
 
 const MenuPage: React.FC = () => {

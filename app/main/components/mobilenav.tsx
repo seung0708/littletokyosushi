@@ -18,7 +18,7 @@ const MobileNav: React.FC<MobileNavProps> = ({toggleMenu, isOpen}) => {
                 </ul>
             </div>
         </div>
-        )}
+        )} 
         </>
     )
 }

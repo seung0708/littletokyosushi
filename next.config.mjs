@@ -4,7 +4,7 @@ const nextConfig = {
         return [
           {
             source: '/',
-            destination: '/main/home',
+            destination: '/main',
             has: [{ type: 'host', value: 'localhost' }]
           },
           {

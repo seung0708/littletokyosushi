@@ -3,8 +3,6 @@ import {useState} from 'react';
 import Image from "next/image"
 import Navbar from "./navigation"
 import { ShoppingBag, Menu } from "lucide-react";
-import { Button } from '@/app/ui/buttons';
-import Svg from '@/app/ui/svg';
 import MobileNav from './mobilenav';
 
 export default function Header() {
@@ -16,7 +14,6 @@ export default function Header() {
 
     return (
         <>
-            {/* Header */}
             <header className="relative bg-gray-900 text-white z-10">
                 <Navbar toggleMenu={toggleMenu} isOpen={isOpen} aria-label="Top" className='px-8 py-1 sm:py-1.5 sm:px-12 lg:px-16'/>
                     
