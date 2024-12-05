@@ -1,4 +1,4 @@
-import { logout } from "../login/actions"
+import { logout } from "../auth/actions"
 
 import {DropdownMenu, DropdownMenuContent, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger, DropdownMenuItem} from "@/components/ui/dropdown-menu"
 import { User } from "lucide-react"

@@ -57,12 +57,12 @@ const config: Config = {
   			sm: 'calc(var(--radius) - 4px)'
   		}
   	},
-	screens: {
-		'sm': '481px',
-		'md': '769px',
-		'lg':'1280px',
-		'xl': '1281px'
-	}
+  	screens: {
+  		sm: '481px',
+  		md: '769px',
+  		lg: '1280px',
+  		xl: '1281px'
+  	}
   },
   plugins: [
 	require("tailwindcss-animate"),

@@ -1,6 +1,6 @@
 import Sidebar from "./ui/sidebar";
 import Header from "./ui/header";
-import { LoginForm } from "./ui/auth/loginform";
+import { LoginForm } from "./ui/loginform";
 
 import { createClient } from "@/utils/supabase/server";
 
