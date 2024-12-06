@@ -2,7 +2,7 @@ import Sidebar from "./ui/sidebar";
 import Header from "./ui/header";
 import { LoginForm } from "./ui/loginform";
 
-import { createClient } from "@/utils/supabase/server";
+import { createClient } from "@/lib/supabase/server";
 
 
 export default async function AdminLayout({children}: { children: React.ReactNode }) {

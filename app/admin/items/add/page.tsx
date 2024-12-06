@@ -1,9 +1,9 @@
-'use client'
+import AddNewItemForm from "@/components/admin/addnewItemform"
 
-export default function AddNewItemForm() {
+export default function AddNewItemPage() {
     return (
         <div>
-            Add new form
+            <AddNewItemForm />
         </div>
     )
 }

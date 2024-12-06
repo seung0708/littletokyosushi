@@ -10,7 +10,7 @@ import {
     PaginationPrevious,
   } from "@/components/ui/pagination"
 import { usePathname, useSearchParams } from "next/navigation";
-import { generatePagination } from "../../lib/utils";
+import { generatePagination } from "../../utils/utils";
 
 export default function ItemsPagination ({totalPages}: {totalPages: number}) {
     const pathname = usePathname();

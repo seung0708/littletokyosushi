@@ -1,5 +1,5 @@
 import { redirect } from "next/navigation";
-import { supabase } from "../../utils/supabase/client";
+import { supabase } from "../../lib/supabase/client";
 
 export const loginWithEmail = async (email: string, password: string) => {
      // Attempt to sign in the user with email and password

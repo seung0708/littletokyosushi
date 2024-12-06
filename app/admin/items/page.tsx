@@ -1,13 +1,13 @@
 import Link from 'next/link'
 import { Tabs, TabsContent} from '@/components/ui/tabs'
-import { AddButton } from '../ui/actionbuttons'
+import { AddButton } from '@/components/admin/actionbuttons'
 
-import ItemsTable from '@/app/admin/ui/items/itemstable';
+import ItemsTable from '@/components/admin/itemstable';
 import { Suspense, useEffect } from 'react';
-import { ItemsListSkeleton } from '../ui/skeletons';
+import { ItemsListSkeleton } from '@/components/admin/skeletons';
 import { fetchMenuItemsPages } from '../lib/supabase/items-data';
-import ItemsPagination from '../ui/items/pagination';
-import SearchBar from '../ui/searchbar';
+import ItemsPagination from '@/components/admin/pagination';
+import SearchBar from '@/components/admin/searchbar';
 
 export default async function ItemsPage (props: {
     searchParams?: Promise<{

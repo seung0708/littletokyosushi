@@ -5,7 +5,7 @@ import { User } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { redirect, useRouter } from "next/navigation"
 import { revalidatePath } from "next/cache";
-import { createClient } from "@/utils/supabase/server";
+import { createClient } from "@/lib/supabase/server";
 
 export default function DropDownMenuComponent() {
 

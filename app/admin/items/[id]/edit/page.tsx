@@ -11,7 +11,7 @@ import { Input } from "@/components/ui/input"
 import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from "@/components/ui/card"
 import { Table, TableHeader, TableRow, TableHead, TableCell, TableBody} from "@/components/ui/table"
 import { useEffect, useState } from "react";
-import { supabase } from "@/utils/supabase/client";
+import { supabase } from "@/lib/supabase/client";
 // import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group"
 // import { Select, SelectTrigger, SelectContent, SelectItem, SelectValue } from "@/components/ui/select"
 

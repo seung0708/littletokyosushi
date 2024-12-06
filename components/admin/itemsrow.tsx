@@ -1,6 +1,4 @@
 import { TableRow, TableCell } from "@/components/ui/table";
-import Image from "next/image";
-import { Badge } from "@/components/ui/badge";
 import ActionsMenu from "../actionsmenu";
 import {Product} from '../../../../types/definitions';
 
@@ -12,14 +10,11 @@ type ProductRowProps = {
 const ProductRow: React.FC<ProductRowProps> = ({item}) => {
   return (
     <TableRow>
-      <TableCell>
-        <Badge>Draft</Badge>
-      </TableCell>
       <TableCell className="hidden sm:table-cell">
         <img
           alt="Product image"
           className="aspect-square rounded-md object-cover"
-          src={`${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/menu-items/${item?.category_name}${item.image_urls?.[0]}`}
+          src={`${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/menu-items/${item.image_urls?.[0]}`}
         />
       </TableCell>
       <TableCell className="font-medium">{item.name}</TableCell>

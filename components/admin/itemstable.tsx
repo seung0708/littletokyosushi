@@ -18,7 +18,6 @@ export default async function ItemsTable({
       <Table>
         <TableHeader>
           <TableRow>
-            <TableHead>Status</TableHead>
             <TableHead className="hidden w-[100px] sm:table-cell">
               <span>Image</span>
             </TableHead>

@@ -1,6 +1,6 @@
-import OrderSummary from "../ui/orders/order-summary"
-import OrdersList from "../ui/orders/orders-list"
-import RecentOrder from "../ui/orders/recent-order"
+import OrderSummary from "../ui/order-summary"
+import OrdersList from "../ui/orders-list"
+import RecentOrder from "../ui/recent-order"
 
 const OrdersPage: React.FC = () => {
     return (
