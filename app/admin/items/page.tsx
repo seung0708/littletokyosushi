@@ -5,7 +5,7 @@ import { AddButton } from '@/components/admin/actionbuttons'
 import ItemsTable from '@/components/admin/itemstable';
 import { Suspense, useEffect } from 'react';
 import { ItemsListSkeleton } from '@/components/admin/skeletons';
-import { fetchMenuItemsPages } from '../lib/supabase/items-data';
+import { fetchMenuItemsPages } from '@/lib/services/items';
 import ItemsPagination from '@/components/admin/pagination';
 import SearchBar from '@/components/admin/searchbar';
 

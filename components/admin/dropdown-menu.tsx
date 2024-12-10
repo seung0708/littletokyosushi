@@ -1,14 +1,31 @@
-import { logout } from "../auth/actions"
-
+'use client'
 import {DropdownMenu, DropdownMenuContent, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger, DropdownMenuItem} from "@/components/ui/dropdown-menu"
 import { User } from "lucide-react"
 import { Button } from "@/components/ui/button"
-import { redirect, useRouter } from "next/navigation"
-import { revalidatePath } from "next/cache";
-import { createClient } from "@/lib/supabase/server";
+import { useRouter } from "next/navigation"
+import { useEffect, useState } from "react"
+
 
 export default function DropDownMenuComponent() {
+    const [isLoggedOut, setIsLoggedOut] = useState(false)
+    const router = useRouter()
 
+    useEffect(() => {
+      if (isLoggedOut) router.push('/login')
+    }, [isLoggedOut])
+    
+    const handleSignout = async() => {
+      const response = await fetch('http://admin.localhost:3000/api/auth/signout', {
+        method: 'POST', 
+        credentials: 'include'
+      })
+
+      const responseData = await response.json(); 
+      console.log(responseData)
+      if(responseData) {
+        setIsLoggedOut(true)
+      }
+    }
 
 
     return (
@@ -26,9 +43,7 @@ export default function DropDownMenuComponent() {
         <DropdownMenuLabel>My Account</DropdownMenuLabel>
         <DropdownMenuSeparator />
         <DropdownMenuItem>
-        <form>
-          <Button formAction={logout}>Logout</Button>
-        </form>
+          <Button onClick={handleSignout}>Logout</Button>
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>

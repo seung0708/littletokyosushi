@@ -18,12 +18,12 @@ export default function Sidebar() {
       <nav className="flex-grow">
         <ul className="space-y-3">
           {[
-            { label: 'Dashboard', icon: <Home />, link: '/' },
+            { label: 'Dashboard', icon: <Home />, link: '/dashboard' },
             { label: 'Orders', icon: <ShoppingCart />, link: '/orders', badge: 4 },
             { label: 'Items', icon: <SquareMenu />, link: '/items' },
             // { label: 'Employees', icon: <Users />, link: '/employees' },
             // { label: 'Reports', icon: <LineChart />, link: '/reports' },
-          ].map((item) => (
+          ].map((item) => ( 
             <li key={item.label}>
               <Link
                 href={item.link}

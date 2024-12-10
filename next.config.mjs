@@ -2,6 +2,7 @@
 const nextConfig = {
     async rewrites() {
         return [
+          // Main site (localhost)
           {
             source: '/',
             destination: '/main',
@@ -12,9 +13,20 @@ const nextConfig = {
             destination: '/main/:path*',
             has: [{ type: 'host', value: 'localhost' }]
           },
+          // Admin site (admin.localhost)
           {
             source: '/',
-            destination: '/admin',
+            destination: '/login',
+            has: [{ type: 'host', value: 'admin.localhost' }]
+          },
+          {
+            source: '/login',
+            destination: '/login',
+            has: [{ type: 'host', value: 'admin.localhost' }]
+          },
+          {
+            source: '/dashboard',
+            destination: '/admin/dashboard',
             has: [{ type: 'host', value: 'admin.localhost' }]
           },
           {
@@ -27,4 +39,3 @@ const nextConfig = {
 };
 
 export default nextConfig;
-

@@ -1,16 +1,19 @@
 'use client';
-import {login} from '@/app/admin/auth/actions';
 import { Form, FormControl, FormField, FormItem, FormLabel } from '@/components/ui/form';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { useForm } from 'react-hook-form';
-import { loginFormSchema } from '../lib/validations';
+import { loginFormSchema } from '@/schema-validations/adminLogin';
 import { zodResolver } from "@hookform/resolvers/zod"
 import { z } from 'zod';
+import { useEffect, useState } from 'react';
+import { useRouter } from 'next/navigation';
 
 
 export const LoginForm: React.FC = () => {
+  const [error, setError] = useState('')
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const router = useRouter()
   const form = useForm<z.infer<typeof loginFormSchema>>({
       resolver: zodResolver(loginFormSchema),
       defaultValues: {
@@ -19,19 +22,31 @@ export const LoginForm: React.FC = () => {
       }
   });
 
-  const onSubmit = async (data: z.infer<typeof loginFormSchema>) => {
-    const formData = new FormData();
-    formData.set('email', data.email); 
-    formData.set('password', data.password); 
+  useEffect(() => {
+    console.log('isLoggedIn', isLoggedIn)
+    if(isLoggedIn) router.push('/dashboard')
+  }, [isLoggedIn])
 
-    const response = await login(formData);
+  const handleLogin = async (data: z.infer<typeof loginFormSchema>) => {
+    const response = await fetch('http://admin.localhost:3000/api/auth/login', {
+      method: 'POST', 
+      headers: {
+        'Content-Type': 'application/json'
+      }, 
+      body: JSON.stringify(data)
+    })
 
-    console.log(response)
-
+    const responseData = await response.json(); 
+    console.log(responseData)
+    if(!response.ok) {
+      setError(responseData.error || 'Invalid email or password'); 
+    } else {
+      setIsLoggedIn(true)
+    }
   }
 
   return (
-    <div className='flex items-center justify-center min-h-screen bg-gray-100'>    
+    <div className='flex items-center justify-center min-h-screen'>    
         <div className="rounded-lg border bg-card text-card-foreground shadow-sm w-full max-w-sm mx-auto p-6">
           <div className='flex flex-col space-y-1.5 p-6'>    
             <h3 className='text-2xl font-semibold leading-none tracking-tight'>Login</h3>
@@ -39,7 +54,7 @@ export const LoginForm: React.FC = () => {
           </div>
           <div className="p-6 pt-0 grid gap-4">
             <Form {...form}>
-              <form onSubmit={form.handleSubmit(onSubmit)}>
+              <form onSubmit={form.control.handleSubmit(handleLogin)}>
               <FormField 
                 control={form.control}
                 name="email"
@@ -56,6 +71,7 @@ export const LoginForm: React.FC = () => {
                   </FormItem>
                 )}
               />
+              {form.control._formState.errors.email && <p>{form.control._formState.errors.email.message}</p> }
               <FormField 
                 control={form.control}
                 name="password"

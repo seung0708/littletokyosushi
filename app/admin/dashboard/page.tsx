@@ -1,8 +1,8 @@
-import TotalRevenue from "./ui/total-revenue";
-import TotalSales from "./ui/total-sales";
-import Active from "./ui/active";
-import Transactions from "./ui/transactions";
-import RecentSales from "./ui/recent-sales";
+import TotalRevenue from "@/components/admin/total-revenue";
+import TotalSales from "@/components/admin/total-sales";
+import Active from "@/components/admin/active";
+import Transactions from "@/components/admin/transactions";
+import RecentSales from "@/components/admin/recent-sales";
 
 const DashboardPage: React.FC = () => {
     return(

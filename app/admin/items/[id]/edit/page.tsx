@@ -11,23 +11,42 @@ import { Input } from "@/components/ui/input"
 import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from "@/components/ui/card"
 import { Table, TableHeader, TableRow, TableHead, TableCell, TableBody} from "@/components/ui/table"
 import { useEffect, useState } from "react";
-import { supabase } from "@/lib/supabase/client";
-// import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group"
-// import { Select, SelectTrigger, SelectContent, SelectItem, SelectValue } from "@/components/ui/select"
 
-const EditProductPage = ({params}) => {
+interface EditProductPageProps {
+    params: {
+        id: string
+    }
+}
+
+const EditProductPage = ({params}: EditProductPageProps) => {
+    const [isLoading, setIsLoading] = useState(false);
     const {id} = params;
+    console.log(id)
     const [item, setItem] = useState(null);
 
     useEffect(() => {
         const fetchItem = async () => {
-            const {data, error} = await supabase.from('menu_items').select('*').eq('id', id).single();
-            console.log(data)
-            setItem(data);
+            try {
+                setIsLoading(true);
+                const response = await fetch(`/api/items/${id}`);   
+                const data = await response.json();
+                if(!response.ok) {
+                    throw new Error('Failed to fetch item');
+                }
+                setItem(data);
+            } catch (error) {
+                console.error(error);
+            } finally {
+                setIsLoading(false);
+            }
         }
 
         fetchItem();
-    },[]);
+    },[id]);
+
+    if(!item) {
+        return <div>Loading...</div>;
+    }
 
     return (
         <section className="flex min-h-screen w-full flex-col bg-muted/40">
@@ -40,7 +59,7 @@ const EditProductPage = ({params}) => {
                                 <span className="sr-only">Back</span>
                             </Button>
                         </Link>
-                        <h1 className="flex-1 shrink-0 whitespace-nowrap text-xl font-semibold tracking-tight sm:grow-0">{item?.name}</h1>
+                        <h1 className="flex-1 shrink-0 whitespace-nowrap text-xl font-semibold tracking-tight sm:grow-0"></h1>
                         <Badge variant="outline" className="ml-auto sm:ml-0"> In stock</Badge>
                         <div className="hidden items-center gap-2 md:ml-auto md:flex">
                             <Button variant="outline" size="sm">Discard</Button>
@@ -201,7 +220,7 @@ const EditProductPage = ({params}) => {
                                     </div>
                                 </CardContent>
                             </Card>
-                            <Card x-chunk="dashboard-07-chunk-5">
+                            {/* <Card x-chunk="dashboard-07-chunk-5">
                                 <CardHeader>
                                     <CardTitle>Archive Product</CardTitle>
                                     <CardDescription>Lipsum dolor sit amet, consectetur adipiscing elit.</CardDescription>
@@ -211,7 +230,7 @@ const EditProductPage = ({params}) => {
                                     <Button size="sm" variant="secondary">Archive Product
                                     </Button>
                                 </CardContent>
-                            </Card>
+                            </Card> */}
                         </div>
                     </div>
                     <div className="flex items-center justify-center gap-2 md:hidden">

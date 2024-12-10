@@ -1,6 +1,6 @@
 import { TableRow, TableCell } from "@/components/ui/table";
-import ActionsMenu from "../actionsmenu";
-import {Product} from '../../../../types/definitions';
+import ActionsMenu from "./actionsmenu";
+import {Product} from '@/types/definitions';
 
 type ProductRowProps = {
   item: Product; 

@@ -1,7 +1,7 @@
 
 import { Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from '@/components/ui/table'
 import ProductRow from './itemsrow';
-import { fetchFilteredItems } from '../../lib/supabase/items-data';
+import { fetchFilteredItems } from '@/lib/services/items';
 import { Product } from '@/types/definitions';
 
 export default async function ItemsTable({

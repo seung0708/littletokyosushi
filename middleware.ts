@@ -1,8 +1,31 @@
-import { type NextRequest } from 'next/server'
+import { type NextRequest, NextResponse } from 'next/server'
 import { updateSession } from '@/lib/supabase/middleware'
+import { createClient } from '@/lib/supabase/server'
 
 export async function middleware(request: NextRequest) {
-  return await updateSession(request)
+  // Get hostname (e.g. admin.localhost:3000, localhost:3000, etc.)
+  const hostname = request.headers.get('host')
+  const path = request.nextUrl.pathname
+
+  // Only apply auth protection to admin subdomain
+  if (hostname?.startsWith('admin.')) {
+    // Skip auth check for these paths
+    const publicPaths = ['/login', '/api/auth/login']
+    if (publicPaths.includes(path)) {
+      return NextResponse.next()
+    }
+
+    // Check authentication for protected routes
+    const response = NextResponse.next()
+    const supabase = createClient()
+    const { data: { session } } = await supabase.auth.getSession()
+
+    if (!session) {
+      return NextResponse.redirect(new URL('/login', request.url))
+    }
+
+    return response
+  }
 }
 
 export const config = {
