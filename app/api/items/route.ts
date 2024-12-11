@@ -2,6 +2,9 @@ import { createClient } from '@/lib/supabase/server';
 import { revalidatePath } from 'next/cache';
 import { NextResponse } from 'next/server';
 
+const ITEMS_PER_PAGE = 8;
+
+// Helper functions
 async function fetchCategoryId(supabase: any, category: string) {
     const { data, error } = await supabase
         .from("categories")
@@ -24,6 +27,177 @@ async function uploadImageToStorage(supabase: any, base64Image: string, filename
     return data.path;
 }
 
+// GET handler for both list and single item
+export async function GET(
+    request: Request,
+    { params }: { params: { id: string } } = { params: { id: '' } }
+) {
+    const supabase = await createClient();
+    const { searchParams } = new URL(request.url);
+    const id = searchParams.get('id');
+
+    try {
+        // Check authentication first
+        const { data: { user } } = await supabase.auth.getUser();
+        console.log('Auth check - User:', user?.email);
+        
+        if (!user) {
+            console.log('No user found');
+            return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+        }
+
+        // Get employee record
+        const { data: employeeData, error: employeeError } = await supabase
+            .from('employees')
+            .select('id')
+            .eq('id', user.id)
+            .single();
+
+        if (employeeError || !employeeData) {
+            console.log('No employee record found:', employeeError);
+            return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+        }
+
+        // Check admin role using employee ID
+        const { data: roleData, error: roleError } = await supabase
+            .from('employees')
+            .select(`
+                employee_roles (
+                    roles (
+                        name
+                    )
+                )
+            `)
+            .eq('id', employeeData.id)
+            .single();
+
+        const hasAdminRole = roleData?.employee_roles?.some(
+            (er: any) => er.roles?.name === 'admin'
+        );
+
+        if (roleError || !hasAdminRole) {
+            return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+        }
+
+        // If ID is provided, fetch single item
+        if (id) {
+            console.log('Fetching single item with ID:', id);
+            const { data: item, error } = await supabase
+                .from('menu_items')
+                .select(`
+                    *,
+                    categories (
+                        name
+                    )
+                `)
+                .eq('id', id)
+                .single();
+
+            if (error) {
+                console.error('Error fetching item:', error);
+                return NextResponse.json(
+                    { error: 'Failed to fetch item' },
+                    { status: 500 }
+                );
+            }
+
+            // Transform the data to match the Product type
+            const transformedItem = {
+                id: item.id,
+                name: item.name,
+                description: item.description,
+                price: item.price,
+                category_id: item.category_id,
+                is_available: item.is_available,
+                special_instructions: item.special_instructions || '',
+                image_urls: item.image_urls || [],
+                category_name: item.categories?.name || '',
+                quantity_in_stock: 0,
+                low_stock_threshold: 0,
+                sync_status: false
+            };
+
+            return NextResponse.json({ item: transformedItem });
+        }
+
+        // Otherwise, fetch list of items
+        const query = searchParams.get('query') || '';
+        const page = parseInt(searchParams.get('page') || '1');
+        const offset = (page - 1) * ITEMS_PER_PAGE;
+
+        let queryBuilder = supabase
+            .from('menu_items')
+            .select(`
+                *,
+                categories (
+                    name
+                )
+            `);
+
+        if (query) {
+            queryBuilder = queryBuilder.ilike('name', `%${query}%`);
+        }
+
+        const { data: items, error: itemsError } = await queryBuilder
+            .range(offset, offset + ITEMS_PER_PAGE - 1)
+            .order('name', { ascending: true });
+
+        if (itemsError) {
+            console.error('Error fetching items:', itemsError);
+            return NextResponse.json(
+                { error: 'Failed to fetch items' },
+                { status: 500 }
+            );
+        }
+
+        // Get total count for pagination
+        let countQuery = supabase
+            .from('menu_items')
+            .select('id', { count: 'exact' });
+
+        if (query) {
+            countQuery = countQuery.ilike('name', `%${query}%`);
+        }
+
+        const { count, error: countError } = await countQuery;
+
+        if (countError) {
+            console.error('Error counting items:', countError);
+            return NextResponse.json(
+                { error: 'Failed to count items' },
+                { status: 500 }
+            );
+        }
+
+        const transformedItems = items.map(item => ({
+            id: item.id,
+            name: item.name,
+            description: item.description,
+            price: item.price,
+            category_id: item.category_id,
+            is_available: item.is_available,
+            special_instructions: item.special_instructions || '',
+            image_urls: item.image_urls || [],
+            category_name: item.categories?.name || '',
+            quantity_in_stock: 0,
+            low_stock_threshold: 0,
+            sync_status: false
+        }));
+
+        return NextResponse.json({
+            items: transformedItems,
+            totalPages: Math.ceil((count || 0) / ITEMS_PER_PAGE)
+        });
+    } catch (error) {
+        console.error('Error in GET handler:', error);
+        return NextResponse.json(
+            { error: 'Failed to fetch items' },
+            { status: 500 }
+        );
+    }
+}
+
+// POST handler
 export async function POST(req: Request) {
     const supabase = await createClient();
     
@@ -99,7 +273,7 @@ export async function POST(req: Request) {
                 description,
                 category_id: categoryId,
                 price,
-                image_url: imagePath
+                image_urls: imagePath
             });
 
         if (insertError) throw insertError;
@@ -116,14 +290,24 @@ export async function POST(req: Request) {
     }
 }
 
-const ITEMS_PER_PAGE = 8;
-export async function GET(request: Request) {
+export async function PATCH(
+    request: Request
+) {
     const supabase = await createClient();
+    const { searchParams } = new URL(request.url);
+    const id = searchParams.get('id');
 
+    if (!id) {
+        return NextResponse.json({ error: 'Item ID is required' }, { status: 400 });
+    }
+    
     try {
         // Check authentication first
         const { data: { user } } = await supabase.auth.getUser();
+        console.log('Auth check - User:', user?.email);
+        
         if (!user) {
+            console.log('No user found');
             return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
         }
 
@@ -131,7 +315,7 @@ export async function GET(request: Request) {
         const { data: employeeData, error: employeeError } = await supabase
             .from('employees')
             .select('id')
-            .eq('auth_id', user.id)
+            .eq('id', user.id)
             .single();
 
         if (employeeError || !employeeData) {
@@ -160,35 +344,31 @@ export async function GET(request: Request) {
             return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
         }
 
-        const {searchParams} = new URL(request.url); 
-        const query = searchParams.get('query') || '';
-        const page = parseInt(searchParams.get('page') || '1'); 
-        const offset = (page - 1) * ITEMS_PER_PAGE;
+        const body = await request.json();
 
-        const [itemsResult, countResult] = await Promise.all([
-            supabase.rpc('get_items', {
-                query: query,
-                items_per_page: ITEMS_PER_PAGE,
-                offset_val: offset
-            }),
-            supabase.rpc('get_items_count', {
-                query: query
+        // Update menu item
+        const { error: menuItemError } = await supabase
+            .from('menu_items')
+            .update({
+                name: body.name,
+                description: body.description,
+                price: body.price,
+                is_available: body.is_available,
+                special_instructions: body.special_instructions,
             })
-        ]);
+            .eq('id', id);
 
-        if(itemsResult.error) throw itemsResult.error;
-        if(countResult.error) throw countResult.error;
+        if (menuItemError) {
+            console.error('Error updating item:', menuItemError);
+            throw menuItemError;
+        }
 
-        const totalPages = Math.ceil(Number(countResult.data) / ITEMS_PER_PAGE);
-        
-        return NextResponse.json({
-            items: itemsResult.data,
-            totalPages
-        });
+        revalidatePath('/items');
+        return NextResponse.json({ message: 'Item updated successfully' });
     } catch (error) {
-        console.error('Error in GET handler:', error);
+        console.error('Error in PATCH handler:', error);
         return NextResponse.json(
-            { error: 'Failed to fetch menu items' },
+            { error: 'Failed to update item' },
             { status: 500 }
         );
     }

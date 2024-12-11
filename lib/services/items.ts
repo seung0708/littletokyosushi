@@ -103,7 +103,7 @@ export async function getItem(id: string): Promise<{ item: Product | null, error
       .select(`
         *,
         categories (
-          category_name
+          name
         ),
         inventories (
           quantity_in_stock,
@@ -114,7 +114,7 @@ export async function getItem(id: string): Promise<{ item: Product | null, error
       .single();
 
     if (error) {
-      console.error('Error fetching item:', error);
+      console.error(item,error);
       return { item: null, error };
     }
 
@@ -128,7 +128,7 @@ export async function getItem(id: string): Promise<{ item: Product | null, error
       is_available: item.is_available,
       special_instructions: item.special_instructions,
       image_urls: item.image_urls,
-      category_name: item.categories?.category_name,
+      category_name: item.categories?.name,
       quantity_in_stock: item.inventories?.[0]?.quantity_in_stock || 0,
       low_stock_threshold: item.inventories?.[0]?.low_stock_threshold || 0,
       sync_status: item.inventories?.[0]?.sync_status || false

@@ -34,8 +34,8 @@ const nextConfig = {
             destination: '/admin/:path*',
             has: [{ type: 'host', value: 'admin.localhost' }]
           }
-        ]
-      }
+        ];
+    }
 };
 
 export default nextConfig;

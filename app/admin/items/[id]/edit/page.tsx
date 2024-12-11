@@ -1,156 +1,208 @@
 'use client';
 
-import { useEffect, useState } from "react"
-import { getItem } from "@/lib/services/items"
-import { Product } from "@/types/definitions"
-import { useForm } from "react-hook-form"
-import { zodResolver } from "@hookform/resolvers/zod"
-import { itemEditSchema, ItemEditFormData } from "@/schema-validations/itemEdit"
-import { Form } from "@/components/ui/form"
-import { Button } from "@/components/ui/button"
-import { ChevronLeft } from "lucide-react"
-import Link from "next/link"
-import { ProductDetailsForm } from "@/components/admin/items/edit/product-details-form"
-import { StockPriceForm } from "@/components/admin/items/edit/stock-price-form"
-import { ItemImages } from "@/components/admin/items/edit/item-images"
-import { CategoryForm } from "@/components/admin/items/edit/category-form"
-import { Header } from "@/components/admin/items/edit/header"
+import { useEffect, useState } from 'react';
+import { useRouter } from 'next/navigation';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { z } from 'zod';
+import { Product } from '@/types/definitions';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
+import { Checkbox } from '@/components/ui/checkbox';
+import { Skeleton } from '@/components/ui/skeleton';
+import { toast } from 'sonner';
 
-interface EditProductPageProps {
-    params: {
-        id: string
-    }
-}
+const formSchema = z.object({
+  name: z.string().min(1, 'Name is required'),
+  description: z.string().min(1, 'Description is required'),
+  price: z.string().min(1, 'Price is required'),
+  is_available: z.boolean(),
+  special_instructions: z.string().optional(),
+  quantity_in_stock: z.string().min(1, 'Quantity is required'),
+  low_stock_threshold: z.string().min(1, 'Low stock threshold is required'),
+});
 
-const EditProductPage = ({ params }: EditProductPageProps) => {
-    const [isLoading, setIsLoading] = useState(true);
-    const [error, setError] = useState<string | null>(null);
-    const [item, setItem] = useState<Product | null>(null);
-    const { id } = params;
+type FormData = z.infer<typeof formSchema>;
 
-    const form = useForm<ItemEditFormData>({
-        resolver: zodResolver(itemEditSchema),
-        defaultValues: {
-            name: "",
-            description: "",
-            price: 0,
-            quantity_in_stock: 0,
-            low_stock_threshold: 0,
-            category_id: 0,
-            is_available: true,
-            special_instructions: "",
-            image_urls: [],
-            category_name: "",
-            sync_status: false
+export default function EditItemPage({ params }: { params: { id: string } }) {
+  const router = useRouter();
+  const [item, setItem] = useState<Product | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+    setValue,
+  } = useForm<FormData>({
+    resolver: zodResolver(formSchema),
+  });
+
+  useEffect(() => {
+    const fetchItem = async () => {
+      try {
+        console.log('Fetching item with ID:', typeof params.id);
+        const response = await fetch(`/api/items?id=${params.id}`, {
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        });
+        const data = await response.json();
+        console.log('Fetched item data:', data);
+        
+        const fetchedItem = data.item;
+        if (fetchedItem) {
+          setItem(fetchedItem);
+          // Set form values
+          setValue('name', fetchedItem.name);
+          setValue('description', fetchedItem.description);
+          setValue('price', fetchedItem.price.toString());
+          setValue('is_available', fetchedItem.is_available);
+          setValue('special_instructions', fetchedItem.special_instructions || '');
+          setValue('quantity_in_stock', fetchedItem.quantity_in_stock.toString());
+          setValue('low_stock_threshold', fetchedItem.low_stock_threshold.toString());
+        } else {
+          throw new Error('No item data in response');
         }
-    });
-
-    useEffect(() => {
-        async function loadItem() {
-            try {
-                setIsLoading(true);
-                const { item: fetchedItem, error } = await getItem(id);
-                
-                if (error) {
-                    throw error;
-                }
-
-                setItem(fetchedItem);
-                // Update form with fetched values
-                if (fetchedItem) {
-                    form.reset({
-                        name: fetchedItem.name,
-                        description: fetchedItem.description,
-                        price: fetchedItem.price,
-                        quantity_in_stock: fetchedItem.quantity_in_stock,
-                        low_stock_threshold: fetchedItem.low_stock_threshold,
-                        category_id: fetchedItem.category_id,
-                        is_available: fetchedItem.is_available,
-                        special_instructions: fetchedItem.special_instructions,
-                        image_urls: fetchedItem.image_urls,
-                        category_name: fetchedItem.category_name,
-                        sync_status: fetchedItem.sync_status
-                    });
-                }
-                setError(null);
-            } catch (err) {
-                console.error('Failed to load item:', err);
-                setError('Failed to load item. Please try again.');
-            } finally {
-                setIsLoading(false);
-            }
-        }
-
-        loadItem();
-    }, [id, form]);
-
-    const onSubmit = async (data: ItemEditFormData) => {
-        try {
-            console.log('Form data:', data);
-            // TODO: Implement update API call
-        } catch (err) {
-            console.error('Failed to update item:', err);
-            setError('Failed to update item. Please try again.');
-        }
+      } catch (error) {
+        console.error('Error fetching item:', error);
+      } finally {
+        setLoading(false);
+      }
     };
 
-    if (isLoading) {
-        return (
-            <div className="flex items-center justify-center min-h-screen">
-                <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-gray-900"></div>
-            </div>
-        );
-    }
+    fetchItem();
+  }, [params.id, setValue]);
 
-    if (error) {
-        return (
-            <div className="flex flex-col items-center justify-center min-h-screen">
-                <div className="text-red-500 mb-4">{error}</div>
-                <Link href="/items">
-                    <Button variant="outline">
-                        <ChevronLeft className="mr-2 h-4 w-4" />
-                        Back to Items
-                    </Button>
-                </Link>
-            </div>
-        );
-    }
+  const onSubmit = async (data: FormData) => {
+    try {
+      const response = await fetch(`/api/items?id=${params.id}`, {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          name: data.name,
+          description: data.description,
+          price: parseFloat(data.price),
+          is_available: data.is_available,
+          special_instructions: data.special_instructions,
+          quantity_in_stock: parseInt(data.quantity_in_stock),
+          low_stock_threshold: parseInt(data.low_stock_threshold),
+        }),
+      });
 
-    if (!item) {
-        return (
-            <div className="flex flex-col items-center justify-center min-h-screen">
-                <div className="text-gray-500 mb-4">Item not found</div>
-                <Link href="/items">
-                    <Button variant="outline">
-                        <ChevronLeft className="mr-2 h-4 w-4" />
-                        Back to Items
-                    </Button>
-                </Link>
-            </div>
-        );
-    }
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Failed to update item');
+      }
 
+      toast.success('Item updated successfully');
+      router.push('/items');
+      router.refresh();
+    } catch (error) {
+      console.error('Error updating item:', error);
+      toast.error('Failed to update item');
+    }
+  };
+
+  if (loading) {
     return (
-        <div className="flex-1 space-y-4 p-4 md:p-8 pt-6">
-            <Form {...form}>
-                <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
-                    <Header form={form} />
-                    
-                    <div className="grid gap-4 md:grid-cols-[2fr_1fr]">
-                        <div className="space-y-4">
-                            <ProductDetailsForm form={form} />
-                            <StockPriceForm form={form} />
-                        </div>
-
-                        <div className="space-y-4">
-                            <ItemImages item={item} />
-                            <CategoryForm form={form} />
-                        </div>
-                    </div>
-                </form>
-            </Form>
-        </div>
+      <div className="space-y-4">
+        <Skeleton className="h-8 w-[200px]" />
+        <Skeleton className="h-12 w-full" />
+        <Skeleton className="h-12 w-full" />
+        <Skeleton className="h-12 w-full" />
+      </div>
     );
-}
+  }
 
-export default EditProductPage;
+  if (!item) {
+    return <div>Item not found</div>;
+  }
+
+  return (
+    <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+      <div>
+        <Label htmlFor="name">Name</Label>
+        <Input id="name" {...register('name')} />
+        {errors.name && (
+          <p className="text-red-500 text-sm">{errors.name.message}</p>
+        )}
+      </div>
+
+      <div>
+        <Label htmlFor="description">Description</Label>
+        <Textarea id="description" {...register('description')} />
+        {errors.description && (
+          <p className="text-red-500 text-sm">{errors.description.message}</p>
+        )}
+      </div>
+
+      <div>
+        <Label htmlFor="price">Price</Label>
+        <Input
+          id="price"
+          type="number"
+          step="0.01"
+          {...register('price')}
+        />
+        {errors.price && (
+          <p className="text-red-500 text-sm">{errors.price.message}</p>
+        )}
+      </div>
+
+      <div>
+        <Label htmlFor="quantity_in_stock">Quantity in Stock</Label>
+        <Input
+          id="quantity_in_stock"
+          type="number"
+          {...register('quantity_in_stock')}
+        />
+        {errors.quantity_in_stock && (
+          <p className="text-red-500 text-sm">{errors.quantity_in_stock.message}</p>
+        )}
+      </div>
+
+      <div>
+        <Label htmlFor="low_stock_threshold">Low Stock Threshold</Label>
+        <Input
+          id="low_stock_threshold"
+          type="number"
+          {...register('low_stock_threshold')}
+        />
+        {errors.low_stock_threshold && (
+          <p className="text-red-500 text-sm">{errors.low_stock_threshold.message}</p>
+        )}
+      </div>
+
+      <div>
+        <Label htmlFor="special_instructions">Special Instructions</Label>
+        <Textarea id="special_instructions" {...register('special_instructions')} />
+        {errors.special_instructions && (
+          <p className="text-red-500 text-sm">
+            {errors.special_instructions.message}
+          </p>
+        )}
+      </div>
+
+      <div className="flex items-center space-x-2">
+        <Checkbox id="is_available" {...register('is_available')} />
+        <Label htmlFor="is_available">Available</Label>
+      </div>
+
+      <div className="flex gap-4">
+        <Button type="submit">Update Item</Button>
+        <Button
+          type="button"
+          variant="outline"
+          onClick={() => router.push('/admin/items')}
+        >
+          Cancel
+        </Button>
+      </div>
+    </form>
+  );
+}

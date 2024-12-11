@@ -7,7 +7,6 @@ import { AddButton } from '@/components/admin/actionbuttons'
 import ItemsTable from '@/components/admin/itemstable';
 import ItemsPagination from '@/components/admin/pagination';
 import SearchBar from '@/components/admin/searchbar';
-import { fetchMenuItemsPages, fetchFilteredItems } from '@/lib/services/items';
 import { Product } from '@/types/definitions';
 import { useSearchParams } from 'next/navigation';
 
@@ -25,15 +24,15 @@ export default function ItemsPage() {
         const query = searchParams.get('query') || '';
         const currentPage = Number(searchParams.get('page')) || 1;
 
-        const { items: fetchedItems, error } = await fetchFilteredItems(query, currentPage);
-        const pages = await fetchMenuItemsPages(query);
+        const response = await fetch(`/api/items?query=${encodeURIComponent(query)}&page=${currentPage}`);
+        const data = await response.json();
         
-        if (error) {
-          throw error;
+        if (!response.ok) {
+          throw new Error(data.error || 'Failed to fetch items');
         }
 
-        setItems(fetchedItems);
-        setTotalPages(pages);
+        setItems(data.items);
+        setTotalPages(data.totalPages);
         setError(null);
       } catch (err) {
         console.error('Failed to load items:', err);
@@ -57,11 +56,9 @@ export default function ItemsPage() {
   return (
     <section className='grid flex-1 items-start gap-4 p-4 sm:px-6 sm:py-0 md:gap-8'>
       <Tabs defaultValue="all">
-        <div className='flex items-center justify-between'>
-          <div className='flex flex-1 items-center space-x-2'>
-            <SearchBar />
-            <Link href={'/items/add'}><AddButton>Add New Item</AddButton></Link>
-          </div>
+        <div className='flex items-center justify-end gap-4'>
+          <SearchBar />
+          <Link href={'/items/add'}><AddButton>Add New Item</AddButton></Link>
         </div>
         <TabsContent value="all">
           <ItemsTable items={items} />

@@ -8,15 +8,6 @@ export async function middleware(request: NextRequest) {
   const response = NextResponse.next()
   const supabase = await createClient()
 
-  // Handle API routes
-  if (path.startsWith('/api/')) {
-    const { data: { user } } = await supabase.auth.getUser()
-    if (!user) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-    }
-    return response
-  }
-
   // Only apply admin auth protection to admin subdomain
   if (hostname?.startsWith('admin.')) {
     //console.log('Checking admin auth for path:', path);
