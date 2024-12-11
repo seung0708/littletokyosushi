@@ -76,7 +76,7 @@ export async function GET(req: Request, { params }: { params: { id: string } }) 
 
         return NextResponse.json(item);
     } catch (error) {
-        console.error('Unexpected error in GET /api/items/[id]:', error);
+        console.error('Unexpected error in GET /api/admin/items/[id]:', error);
         return NextResponse.json(
             { error: 'Internal server error' },
             { status: 500 }

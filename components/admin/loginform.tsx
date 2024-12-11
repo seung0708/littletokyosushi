@@ -1,98 +1,98 @@
 'use client';
-import { Form, FormControl, FormField, FormItem, FormLabel } from '@/components/ui/form';
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { useForm } from 'react-hook-form';
-import { loginFormSchema } from '@/schema-validations/adminLogin';
-import { zodResolver } from "@hookform/resolvers/zod"
-import { z } from 'zod';
-import { useEffect, useState } from 'react';
+
+import { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { createClient } from '@/lib/supabase/client';
+import { z } from 'zod';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
 
+const loginSchema = z.object({
+  email: z.string().email('Invalid email format'),
+  password: z.string().min(6, 'Password must be at least 6 characters'),
+});
 
-export const LoginForm: React.FC = () => {
-  const [error, setError] = useState('')
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
-  const router = useRouter()
-  const form = useForm<z.infer<typeof loginFormSchema>>({
-      resolver: zodResolver(loginFormSchema),
-      defaultValues: {
-        email: "", 
-        password: ""
-      }
+type LoginFormData = z.infer<typeof loginSchema>;
+
+export default function LoginForm() {
+  const [error, setError] = useState<string | null>(null);
+  const [loading, setLoading] = useState(false);
+  const router = useRouter();
+  const supabase = createClient();
+
+  const { register, handleSubmit, formState: { errors } } = useForm<LoginFormData>({
+    resolver: zodResolver(loginSchema),
   });
 
-  useEffect(() => {
-    console.log('isLoggedIn', isLoggedIn)
-    if(isLoggedIn) router.push('/dashboard')
-  }, [isLoggedIn])
+  const onSubmit = async (data: LoginFormData) => {
+    try {
+      setLoading(true);
+      setError(null);
 
-  const handleLogin = async (data: z.infer<typeof loginFormSchema>) => {
-    const response = await fetch('http://admin.localhost:3000/api/auth/login', {
-      method: 'POST', 
-      headers: {
-        'Content-Type': 'application/json'
-      }, 
-      body: JSON.stringify(data)
-    })
+      const { error: signInError } = await supabase.auth.signInWithPassword({
+        email: data.email,
+        password: data.password,
+      });
 
-    const responseData = await response.json(); 
-    console.log(responseData)
-    if(!response.ok) {
-      setError(responseData.error || 'Invalid email or password'); 
-    } else {
-      setIsLoggedIn(true)
+      if (signInError) {
+        throw signInError;
+      }
+
+      // Redirect to admin dashboard on successful login
+      router.push('/admin/items');
+      router.refresh();
+
+    } catch (err) {
+      console.error('Login error:', err);
+      setError(err instanceof Error ? err.message : 'Failed to login');
+    } finally {
+      setLoading(false);
     }
-  }
+  };
 
   return (
-    <div className='flex items-center justify-center min-h-screen'>    
-        <div className="rounded-lg border bg-card text-card-foreground shadow-sm w-full max-w-sm mx-auto p-6">
-          <div className='flex flex-col space-y-1.5 p-6'>    
-            <h3 className='text-2xl font-semibold leading-none tracking-tight'>Login</h3>
-            <p className='text-sm text-muted-foreground'>Enter your email below to login to your account.</p>
-          </div>
-          <div className="p-6 pt-0 grid gap-4">
-            <Form {...form}>
-              <form onSubmit={form.control.handleSubmit(handleLogin)}>
-              <FormField 
-                control={form.control}
-                name="email"
-                render={({field}) => (
-                  <FormItem>
-                    <FormLabel>Email</FormLabel>
-                    <FormControl>
-                      <Input 
-                        placeholder='Enter email...' 
-                        type="email"
-                        {...field} 
-                      />
-                    </FormControl>
-                  </FormItem>
-                )}
-              />
-              {form.control._formState.errors.email && <p>{form.control._formState.errors.email.message}</p> }
-              <FormField 
-                control={form.control}
-                name="password"
-                render={({field}) => (
-                  <FormItem>
-                    <FormLabel>Password</FormLabel>
-                    <FormControl>
-                      <Input 
-                        placeholder='Enter password...' 
-                        type="password"
-                        {...field} 
-                      />
-                    </FormControl>
-                  </FormItem>
-                )}
-              />
-              <Button type="submit" className="mt-3 w-full">Login</Button>
-              </form>
-            </Form>
-          </div>
-        </div>
+    <form onSubmit={handleSubmit(onSubmit)} className="space-y-4 w-full max-w-md mx-auto p-8">
+      <div>
+        <label htmlFor="email" className="block text-sm font-medium text-gray-700">
+          Email
+        </label>
+        <input
+          {...register('email')}
+          type="email"
+          className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+          placeholder="admin@example.com"
+        />
+        {errors.email && (
+          <p className="mt-1 text-sm text-red-600">{errors.email.message}</p>
+        )}
       </div>
+
+      <div>
+        <label htmlFor="password" className="block text-sm font-medium text-gray-700">
+          Password
+        </label>
+        <input
+          {...register('password')}
+          type="password"
+          className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+          placeholder="••••••••"
+        />
+        {errors.password && (
+          <p className="mt-1 text-sm text-red-600">{errors.password.message}</p>
+        )}
+      </div>
+
+      {error && (
+        <div className="text-red-600 text-sm">{error}</div>
+      )}
+
+      <button
+        type="submit"
+        disabled={loading}
+        className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50"
+      >
+        {loading ? 'Logging in...' : 'Login'}
+      </button>
+    </form>
   );
-};
+}

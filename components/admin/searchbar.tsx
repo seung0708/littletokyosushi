@@ -1,39 +1,32 @@
 'use client';
 
-import {useDebouncedCallback} from 'use-debounce';
-
-import { Search } from "lucide-react"
-import { Input } from "@/components/ui/input"
-import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { Input } from "@/components/ui/input";
+import { usePathname, useRouter, useSearchParams } from 'next/navigation';
+import { useDebouncedCallback } from 'use-debounce';
 
 export default function SearchBar() {
-    const searchParams = useSearchParams();
-    const pathname = usePathname(); 
-    const {replace} = useRouter();
+  const searchParams = useSearchParams();
+  const pathname = usePathname();
+  const { replace } = useRouter();
 
-    const handleSearch  = useDebouncedCallback((term: string) => {
-      const params = new URLSearchParams(searchParams);
-      params.set('page', '1');
+  const handleSearch = useDebouncedCallback((term: string) => {
+    const params = new URLSearchParams(searchParams);
+    if (term) {
+      params.set('query', term);
+    } else {
+      params.delete('query');
+    }
+    params.set('page', '1'); // Reset to first page on search
+    replace(`${pathname}?${params.toString()}`);
+  }, 300);
 
-      if(term) {
-        params.set('query', term);
-      } else {
-        params.delete('query');
-      }
-      replace(`${pathname}?${params.toString()}`);
-      
-    },300)
-    
-    return (
-        <div className="relative ml-auto flex-1 md:grow-0">
-      <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-      <Input
-        type="search"
-        placeholder="Search..."
-        className="w-full rounded-lg bg-background pl-8 md:w-[200px] lg:w-[336px]"
-        onChange={e => handleSearch(e.target.value)}
-        defaultValue={searchParams.get('query')?.toString()}
-      />
-    </div>
-    )
+  return (
+    <Input
+      type="text"
+      placeholder="Search items..."
+      onChange={(e) => handleSearch(e.target.value)}
+      defaultValue={searchParams.get('query')?.toString()}
+      className="h-8 w-[150px] lg:w-[250px]"
+    />
+  );
 }

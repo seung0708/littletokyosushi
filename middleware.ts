@@ -1,31 +1,80 @@
 import { type NextRequest, NextResponse } from 'next/server'
-import { updateSession } from '@/lib/supabase/middleware'
 import { createClient } from '@/lib/supabase/server'
 
 export async function middleware(request: NextRequest) {
   // Get hostname (e.g. admin.localhost:3000, localhost:3000, etc.)
   const hostname = request.headers.get('host')
   const path = request.nextUrl.pathname
+  const response = NextResponse.next()
+  const supabase = await createClient()
 
-  // Only apply auth protection to admin subdomain
+  // Handle API routes
+  if (path.startsWith('/api/')) {
+    const { data: { user } } = await supabase.auth.getUser()
+    if (!user) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    }
+    return response
+  }
+
+  // Only apply admin auth protection to admin subdomain
   if (hostname?.startsWith('admin.')) {
+    //console.log('Checking admin auth for path:', path);
+    
     // Skip auth check for these paths
     const publicPaths = ['/login', '/api/auth/login']
     if (publicPaths.includes(path)) {
-      return NextResponse.next()
+      return response
     }
 
     // Check authentication for protected routes
-    const response = NextResponse.next()
-    const supabase = createClient()
-    const { data: { session } } = await supabase.auth.getSession()
-
-    if (!session) {
+    const { data: { user } } = await supabase.auth.getUser()
+    
+    if (!user) {
+      console.log('No user found, redirecting to login');
       return NextResponse.redirect(new URL('/login', request.url))
     }
 
-    return response
+    // First get the employee record
+    const { data: employeeData, error: employeeError } = await supabase
+      .from('employees')
+      .select('id')
+      .eq('id', user.id)
+      .single();
+
+    if (employeeError || !employeeData) {
+      console.log('No employee record found:', employeeError);
+      return NextResponse.redirect(new URL('/login', request.url))
+    }
+
+    // Then check admin role using employee ID
+    const { data: roleData, error: roleError } = await supabase
+      .from('employees')
+      .select(`
+        employee_roles (
+          roles (
+            name
+          )
+        )
+      `)
+      .eq('id', employeeData.id)
+      .single();
+
+    //console.log('Role check:', { roleData, roleError });
+    
+    const hasAdminRole = roleData?.employee_roles?.some(
+      (er: any) => er.roles?.name === 'admin'
+    );
+
+    if (roleError || !hasAdminRole) {
+      console.log('User is not admin, redirecting to login');
+      return NextResponse.redirect(new URL('/login', request.url))
+    }
+
+    //console.log('Admin access granted');
   }
+
+  return response
 }
 
 export const config = {
