@@ -1,7 +1,9 @@
 'use client';
 
-import { Table, TableHeader, TableRow, TableHead, TableBody } from '@/components/ui/table'
+import Link from 'next/link';
 import ProductRow from './itemsrow';
+
+import { Table, TableHeader, TableRow, TableHead, TableBody } from '@/components/ui/table'
 import { Product } from '@/types/definitions';
 
 interface ItemsTableProps {

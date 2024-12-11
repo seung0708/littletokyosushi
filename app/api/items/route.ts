@@ -373,3 +373,82 @@ export async function PATCH(
         );
     }
 }
+
+
+export async function DELETE(
+    request: Request
+) {
+    const supabase = await createClient();
+    const { searchParams } = new URL(request.url);
+    const id = searchParams.get('id');
+
+    if (!id) {
+        return NextResponse.json({ error: 'Item ID is required' }, { status: 400 });
+    }
+    
+    try {
+        // Check authentication first
+        const { data: { user } } = await supabase.auth.getUser();
+        console.log('Auth check - User:', user?.email);
+        
+        if (!user) {
+            console.log('No user found');
+            return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+        }
+
+        // Get employee record
+        const { data: employeeData, error: employeeError } = await supabase
+            .from('employees')
+            .select('id')
+            .eq('id', user.id)
+            .single();
+
+        if (employeeError || !employeeData) {
+            console.log('No employee record found:', employeeError);
+            return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+        }
+
+        // Check admin role using employee ID
+        const { data: roleData, error: roleError } = await supabase
+            .from('employees')
+            .select(`
+                employee_roles (
+                    roles (
+                        name
+                    )
+                )
+            `)
+            .eq('id', employeeData.id)
+            .single();
+
+        const hasAdminRole = roleData?.employee_roles?.some(
+            (er: any) => er.roles?.name === 'admin'
+        );
+
+        if (roleError || !hasAdminRole) {
+            return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+        }
+
+        // Delete menu item
+        const { error: deleteError } = await supabase
+            .from('menu_items')
+            .delete()
+            .eq('id', id);
+
+        if (deleteError) {
+            console.error('Error deleting item:', deleteError);
+            return NextResponse.json(
+                { error: 'Failed to delete item' },
+                { status: 500 }
+            );
+        }
+        revalidatePath('/items');
+        return NextResponse.json({ message: 'Item deleted successfully' });
+    } catch (error) {
+        console.error('Error in DELETE handler:', error);
+        return NextResponse.json(
+            { error: 'Failed to delete item' },
+            { status: 500 }
+        );
+    }
+}

@@ -1,3 +1,4 @@
+'use client'
 import React from 'react';
 import Link from 'next/link';
 import {MoreHorizontal } from 'lucide-react';
@@ -9,6 +10,18 @@ interface ActionMenuProps {
 }
 
 const ActionsMenu: React.FC<ActionMenuProps> = ({id}) => {
+
+  const onDelete = async (id: number) => {
+    const result = await fetch(`/api/items?id=${id}`, {
+      method: 'DELETE',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    });
+    
+    console.log(result);
+  }
+
     return (
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
@@ -22,7 +35,11 @@ const ActionsMenu: React.FC<ActionMenuProps> = ({id}) => {
             <DropdownMenuItem asChild>
               <Link href={`/items/${id}/edit`}>Edit</Link>
             </DropdownMenuItem>
-          <DropdownMenuItem>Delete</DropdownMenuItem>
+          <DropdownMenuItem>
+            <Button variant="ghost" onClick={() => onDelete(id)}>
+              Delete
+            </Button>
+            </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>
     );
