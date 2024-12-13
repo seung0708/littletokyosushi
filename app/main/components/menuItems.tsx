@@ -1,13 +1,14 @@
 'use client';
 import {useState} from 'react';
+import { Items } from '../menu/page';
 import { useRouter } from "next/navigation";
-import {Product} from "@/types/products"
+
 
 interface MenuItemsProps {
-    products: Product[]
+    items: Items[]
 }
 
-const MenuItems: React.FC<MenuItemsProps> = ({products}) => {
+const MenuItems: React.FC<MenuItemsProps> = ({items}) => {
     const router = useRouter();
     
     const openProductDetails = (id: number) => {
@@ -17,15 +18,15 @@ const MenuItems: React.FC<MenuItemsProps> = ({products}) => {
     return (
         <section className="menu__items mt-6">
             <div className="mt-6 grid grid-cols-2 gap-y-6 sm:gap-x-6 md:grid-cols-3">
-            {products.map((product) => (
-                <button onClick={() => openProductDetails(product.id)} key={product.id}>
+            {items.map((item) => (
+                <button onClick={() => openProductDetails(item.id)} key={item.id}>
                     <div className="w-4/5 mx-auto group relative rounded-md" >
                         <div className="w-full overflow-hidden rounded-md">
-                            <img src={product.images[0]} className='h-32 mx-auto sm:h-48 md:h-64 lg:72' alt={`${product.title} image`} />
+                            <img src={`${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/menu-items/${item.image_urls[0]}`} className='h-32 mx-auto sm:h-48 md:h-64 lg:72' alt={`${item.name} image`} />
                         </div>
                         <div className="w-3/5 mx-auto">
-                            <h3 className="text-wrap text-[13px] sm:text-sm md:text-md lg:text-lg"> {product.title}</h3>
-                            <p className="mt-1 text-[13px] sm:text-sm md:text-md lg:text-lg">${product.price.toFixed(2)}</p>
+                            <h3 className="text-wrap text-[13px] sm:text-sm md:text-md lg:text-lg"> {item.name}</h3>
+                            <p className="mt-1 text-[13px] sm:text-sm md:text-md lg:text-lg">${item.price.toFixed(2)}</p>
                         </div>
                     </div>
                 </button>

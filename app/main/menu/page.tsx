@@ -1,35 +1,41 @@
 'use client';
 import {useState, useEffect} from 'react';
-import { Product, Category } from "@/types/definitions"
 import MenuItems from "../components/menuItems"
 import { createClient } from "@/lib/supabase/client";
 
+interface Category {
+    id: number;
+    name: string;
+}
+
+export interface Items {
+    id: number;
+    name: string;
+    description: string;
+    price: number;
+    category_id: number;
+    is_available: boolean;
+    special_instructions: string;
+    image_urls: string[];
+    category_name: string;
+    quantity_in_stock: number;
+    low_stock_threshold: number;
+    sync_status: boolean;
+}
+
 const MenuPage: React.FC = () => {
     const [selectedCategory, setSelectedCategory] = useState<number | null>(null);
-    const [products, setProducts] = useState<Product[]>([]);
+    const [items, setItems] = useState<Items[]>([]);
     const [categories, setCategories] = useState<Category[]>([]);
     const [isLoading, setIsLoading] = useState(true);
 
     useEffect(() => {
         const fetchData = async () => {
             try {
-                const supabase = createClient();
-                
-                // Fetch products
-                const { data: productsData, error: productsError } = await supabase
-                    .from('menu_items')
-                    .select('*');
-                
-                if (productsError) throw productsError;
-                setProducts(productsData || []);
-
-                // Fetch categories
-                const { data: categoriesData, error: categoriesError } = await supabase
-                    .from('categories')
-                    .select('*');
-                
-                if (categoriesError) throw categoriesError;
-                setCategories(categoriesData || []);
+                setIsLoading(true);
+                const response = await fetch('/api/main/items');
+                const data = await response.json();
+                setItems(data)
             } catch (error) {
                 console.error('Error fetching data:', error);
             } finally {
@@ -40,9 +46,32 @@ const MenuPage: React.FC = () => {
         fetchData();
     }, []);
 
-    const filteredProducts = selectedCategory 
-        ? products.filter(product => product.category_id === selectedCategory) 
-        : products;
+    useEffect(() => {
+        const fetchData = async () => {
+            try {
+                setIsLoading(true);
+                const itemsResponse = await fetch('/api/main/items');
+                const items = await itemsResponse.json();
+                console.log(items)
+                setItems(items)
+
+                const categoriesResponse = await fetch('/api/main/categories');
+                const categories = await categoriesResponse.json();
+                console.log(categories)
+                setCategories(categories)
+            } catch (error) {
+                console.error('Error fetching data:', error);
+            } finally {
+                setIsLoading(false);
+            }
+        };
+
+        fetchData();
+    }, []);
+
+    const filteredItems = selectedCategory 
+        ? items.filter(item => item.category_id === selectedCategory) 
+        : items;
     
     if (isLoading) {
         return <div>Loading...</div>;
@@ -57,11 +86,11 @@ const MenuPage: React.FC = () => {
                         key={category?.id} 
                         onClick={() => setSelectedCategory(category?.id)}
                     >
-                        {category.category_name}
+                        {category.name}
                     </button>
                 ))}
             </div>
-            <MenuItems products={filteredProducts} />
+            <MenuItems items={filteredItems} />
         </section>
     )
 }
