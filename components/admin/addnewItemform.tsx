@@ -3,20 +3,27 @@
 import { useForm } from "react-hook-form";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { z } from "zod";
-import { imageSchema } from "@/schema-validations/validations";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 import { toast } from "sonner";
-import { useEffect } from "react";
 import { Select, SelectItem } from "../ui/select";
 import { SelectContent, SelectTrigger, SelectValue } from "@radix-ui/react-select";
+
 type Category = {
     id: number;
     name: string;
 };
+
+const imageSchema =  z.array(
+  z.instanceof(File)
+    .refine(
+      (file) => ["image/png", "image/jpeg", "image/jpg"].includes(file.type),
+      { message: "Invalid image file type" }
+    )
+).min(1, "At least one image is required");
 
 export const addNewItemSchema = z.object({
     name: z.string()
@@ -30,7 +37,7 @@ export const addNewItemSchema = z.object({
       z.number()
         .positive('Price must be greater than 0')
         .finite('Invalid price')),
-    image: imageSchema.optional()
+    images: imageSchema
   })
 
 const AddNewItemForm: React.FC = () => {
@@ -38,6 +45,9 @@ const AddNewItemForm: React.FC = () => {
     const [categories, setCategories] = useState<Category[]>([]);
     const [isLoading, setIsLoading] = useState(false);
     const [isSelectOpen, setIsSelectOpen] = useState(false);
+    const [imagePreviews, setImagePreviews] = useState<string[]>([]);
+    const fileInputRef = useRef<HTMLInputElement>(null);
+
     const form = useForm<z.infer<typeof addNewItemSchema>>({
         resolver: zodResolver(addNewItemSchema), 
         defaultValues: {
@@ -47,23 +57,60 @@ const AddNewItemForm: React.FC = () => {
         }
     })
 
-    useEffect(() => {
-        const fetchCategories = async () => {
-          try {
-            setIsLoading(true);
-            const response = await fetch('/api/categories');
-            const data = await response.json();
+    const handleDragOver = (e: React.DragEvent) => {
+        e.preventDefault();
+        e.stopPropagation();
+    };
+
+    const handleDrop = (e: React.DragEvent) => {
+        e.preventDefault();
+        e.stopPropagation();
+        const files = Array.from(e.dataTransfer.files);
+        if (files.length > 0) {
+            handleFiles(files);
+        }
+    };
+
+    const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+        const files = Array.from(event.target.files || []);
+        if (files.length > 0) {
+            handleFiles(files);
+        }
+    };
+
+    const handleFiles = (files: File[]) => {
+        // Filter for image files
+        const imageFiles = files.filter(file => 
+            ["image/png", "image/jpeg", "image/jpg"].includes(file.type)
+        );
+
+        if (imageFiles.length > 0) {
+            form.setValue('images', imageFiles);
             
-            setCategories(data);
-          } catch (error) {
-            console.error('Error fetching categories:', error);
-          } finally {
-            setIsLoading(false);
-          }
+            // Create preview URLs
+            const newPreviews = imageFiles.map(file => URL.createObjectURL(file));
+            setImagePreviews(prev => [...prev, ...newPreviews]);
+        }
+    };
+
+    const removeImage = (index: number) => {
+        const currentImages = form.getValues('images') || [];
+        const newImages = currentImages.filter((_, i) => i !== index);
+        form.setValue('images', newImages);
+
+        // Remove preview and revoke URL
+        setImagePreviews(prev => {
+            URL.revokeObjectURL(prev[index]);
+            return prev.filter((_, i) => i !== index);
+        });
+    };
+
+    // Cleanup previews on unmount
+    useEffect(() => {
+        return () => {
+            imagePreviews.forEach(url => URL.revokeObjectURL(url));
         };
-    
-        fetchCategories();
-      }, []);
+    }, []);
 
     const onSubmit = async(data: z.infer<typeof addNewItemSchema>) => {
         const formData = new FormData();
@@ -71,8 +118,10 @@ const AddNewItemForm: React.FC = () => {
         formData.set('description', data.description);
         formData.set('category', data.category);
         formData.set('price', data.price.toString());
-        if(data.image) {
-            formData.set('image', data.image);
+        if(data.images) {
+            data.images.forEach((image) => {
+                formData.append('images', image);
+            });
         }
         
         try {
@@ -93,6 +142,24 @@ const AddNewItemForm: React.FC = () => {
             console.error('Error adding item', error);
         }
     }
+
+    useEffect(() => {
+        const fetchCategories = async () => {
+          try {
+            setIsLoading(true);
+            const response = await fetch('/api/categories');
+            const data = await response.json();
+            
+            setCategories(data);
+          } catch (error) {
+            console.error('Error fetching categories:', error);
+          } finally {
+            setIsLoading(false);
+          }
+        };
+    
+        fetchCategories();
+      }, []);
 
     if(isLoading) {
         return <p>Loading...</p>
@@ -186,20 +253,53 @@ const AddNewItemForm: React.FC = () => {
             />
             <FormField
               control={form.control}
-              name="image"
-              render={({field}) => (
+              name="images"
+              render={() => (
                 <FormItem>
-                  <FormLabel>Image</FormLabel>
+                  <FormLabel>Images</FormLabel>
                   <FormMessage />
                   <FormControl>
-                    <Input 
-                      type="file"
-                      onChange={(e) => {
-                        const file = e.target.files?.[0];
-                        if (file) field.onChange(file);
-                      }}
-                    />
+                    <div 
+                      className="border-2 border-dashed border-gray-300 rounded-lg p-6 cursor-pointer hover:border-gray-400 transition-colors"
+                      onDragOver={handleDragOver}
+                      onDrop={handleDrop}
+                      onClick={() => fileInputRef.current?.click()}
+                    >
+                      <Input 
+                        type="file"
+                        ref={fileInputRef}
+                        multiple
+                        onChange={handleFileChange}
+                        className="hidden"
+                        accept="image/png,image/jpeg,image/jpg"
+                      />
+                      <div className="text-center">
+                        <p className="text-sm text-gray-600">Drag and drop images here, or click to select files</p>
+                        <p className="text-xs text-gray-500 mt-1">Supports: PNG, JPEG, JPG</p>
+                      </div>
+                    </div>
                   </FormControl>
+                  {imagePreviews.length > 0 && (
+                    <div className="flex flex-wrap gap-2 mt-4">
+                      {imagePreviews.map((preview, index) => (
+                        <div key={preview} className="relative group inline-block">
+                          <img 
+                            src={preview} 
+                            alt={`Preview ${index + 1}`}
+                            className="h-32 object-contain rounded-lg"
+                          />
+                          <button
+                            type="button"
+                            onClick={() => removeImage(index)}
+                            className="absolute top-1 right-1 bg-red-500 text-white p-1 rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
+                            aria-label="Remove image"
+                          >
+                            ✕
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+                  )}
                 </FormItem>
               )}
             />

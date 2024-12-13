@@ -16,11 +16,11 @@ async function fetchCategoryId(supabase: any, category: string) {
     return data.id;
 }
 
-async function uploadImageToStorage(supabase: any, base64Image: string, filename: string) {
+async function uploadImageToStorage(supabase: any, file: ArrayBuffer, filename: string, contentType: string) {
     const { data, error } = await supabase.storage
         .from("menu-items")
-        .upload(filename, base64Image, {
-            contentType: 'image/jpeg'
+        .upload(filename, file, {
+            contentType: contentType
         });
 
     if (error) throw error;
@@ -246,26 +246,27 @@ export async function POST(req: Request) {
         const description = formData.get('description') as string;
         const category = formData.get('category') as string;
         const price = parseFloat(formData.get('price') as string);
-        const image = formData.get('image') as File;
+        const images = formData.getAll('images') as File[];
 
-        if (!name || !description || !category || !price || !image) {
+        if (!name || !description || !category || !price || !images.length) {
             return NextResponse.json(
                 { error: 'Missing required fields' },
                 { status: 400 }
             );
         }
 
-        // Convert image to base64
-        const imageBuffer = await image.arrayBuffer();
-        const base64Image = Buffer.from(imageBuffer).toString('base64');
-
         // Get category ID
         const categoryId = await fetchCategoryId(supabase, category);
 
-        // Upload image
-        const imagePath = await uploadImageToStorage(supabase, base64Image, `${Date.now()}-${image.name}`);
+        // Upload all images and collect their paths
+        const imagePaths = await Promise.all(
+            images.map(async (image) => {
+                const buffer = await image.arrayBuffer();
+                return uploadImageToStorage(supabase, buffer, image.name, image.type);
+            })
+        );
 
-        // Insert menu item
+        // Insert menu item with image_urls as a JSONB array
         const { error: insertError } = await supabase
             .from('menu_items')
             .insert({
@@ -273,7 +274,7 @@ export async function POST(req: Request) {
                 description,
                 category_id: categoryId,
                 price,
-                image_urls: imagePath
+                image_urls: imagePaths // Supabase will handle the JSONB conversion
             });
 
         if (insertError) throw insertError;
