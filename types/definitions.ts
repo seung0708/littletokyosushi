@@ -18,7 +18,7 @@ export default interface Inventory {
     low_stock_threshold: number;
     sync_status: boolean
 }
-export interface Product {
+export interface Item {
     id: number; 
     name: string; 
     description: string; 

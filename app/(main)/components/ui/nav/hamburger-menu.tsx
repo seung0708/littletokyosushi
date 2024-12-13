@@ -1,11 +1,11 @@
-import { Button } from '@/app/main/components/ui/buttons';
+import { Button } from '@/app/(main)/components/ui/buttons';
 import Svg from '../svg';
 
-interface CloseMenuProps {
+interface HamburgerMenuProps {
     toggleMenu: () => void;   
 }
 
- const CloseMenu: React.FC<CloseMenuProps> = ({toggleMenu}) => {
+ const HamburgerMenu: React.FC<HamburgerMenuProps> = ({toggleMenu}) => {
     return (
         <Button 
             type="button"
@@ -21,4 +21,4 @@ interface CloseMenuProps {
     )
 }
 
-export default CloseMenu;
+export default HamburgerMenu

@@ -1,6 +1,7 @@
 import { createClient } from '@/lib/supabase/server';
 import { revalidatePath } from 'next/cache';
 import { NextResponse } from 'next/server';
+import { checkAdminAuth, transformItem } from '../utils/auth';
 
 const ITEMS_PER_PAGE = 8;
 
@@ -37,46 +38,10 @@ export async function GET(
     const id = searchParams.get('id');
 
     try {
-        // Check authentication first
-        const { data: { user } } = await supabase.auth.getUser();
-        console.log('Auth check - User:', user?.email);
-        
-        if (!user) {
-            console.log('No user found');
-            return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-        }
-
-        // Get employee record
-        const { data: employeeData, error: employeeError } = await supabase
-            .from('employees')
-            .select('id')
-            .eq('id', user.id)
-            .single();
-
-        if (employeeError || !employeeData) {
-            console.log('No employee record found:', employeeError);
-            return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-        }
-
-        // Check admin role using employee ID
-        const { data: roleData, error: roleError } = await supabase
-            .from('employees')
-            .select(`
-                employee_roles (
-                    roles (
-                        name
-                    )
-                )
-            `)
-            .eq('id', employeeData.id)
-            .single();
-
-        const hasAdminRole = roleData?.employee_roles?.some(
-            (er: any) => er.roles?.name === 'admin'
-        );
-
-        if (roleError || !hasAdminRole) {
-            return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+        // Check admin authentication
+        const authResult = await checkAdminAuth();
+        if ('error' in authResult) {
+            return NextResponse.json({ error: authResult.error }, { status: authResult.status });
         }
 
         // If ID is provided, fetch single item
@@ -101,23 +66,14 @@ export async function GET(
                 );
             }
 
-            // Transform the data to match the Product type
-            const transformedItem = {
-                id: item.id,
-                name: item.name,
-                description: item.description,
-                price: item.price,
-                category_id: item.category_id,
-                is_available: item.is_available,
-                special_instructions: item.special_instructions || '',
-                image_urls: item.image_urls || [],
-                category_name: item.categories?.name || '',
-                quantity_in_stock: 0,
-                low_stock_threshold: 0,
-                sync_status: false
-            };
+            if (!item) {
+                return NextResponse.json(
+                    { error: 'Item not found' },
+                    { status: 404 }
+                );
+            }
 
-            return NextResponse.json({ item: transformedItem });
+            return NextResponse.json({ item: transformItem(item) });
         }
 
         // Otherwise, fetch list of items
@@ -169,23 +125,8 @@ export async function GET(
             );
         }
 
-        const transformedItems = items.map(item => ({
-            id: item.id,
-            name: item.name,
-            description: item.description,
-            price: item.price,
-            category_id: item.category_id,
-            is_available: item.is_available,
-            special_instructions: item.special_instructions || '',
-            image_urls: item.image_urls || [],
-            category_name: item.categories?.name || '',
-            quantity_in_stock: 0,
-            low_stock_threshold: 0,
-            sync_status: false
-        }));
-
         return NextResponse.json({
-            items: transformedItems,
+            items: items.map(transformItem),
             totalPages: Math.ceil((count || 0) / ITEMS_PER_PAGE)
         });
     } catch (error) {
@@ -202,43 +143,10 @@ export async function POST(req: Request) {
     const supabase = await createClient();
     
     try {
-        // Check authentication first
-        const { data: { user } } = await supabase.auth.getUser();
-        if (!user) {
-            return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-        }
-
-        // Get employee record
-        const { data: employeeData, error: employeeError } = await supabase
-            .from('employees')
-            .select('id')
-            .eq('id', user.id)
-            .single();
-
-        if (employeeError || !employeeData) {
-            console.log('No employee record found:', employeeError);
-            return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-        }
-
-        // Check admin role using employee ID
-        const { data: roleData, error: roleError } = await supabase
-            .from('employees')
-            .select(`
-                employee_roles (
-                    roles (
-                        name
-                    )
-                )
-            `)
-            .eq('id', employeeData.id)
-            .single();
-
-        const hasAdminRole = roleData?.employee_roles?.some(
-            (er: any) => er.roles?.name === 'admin'
-        );
-
-        if (roleError || !hasAdminRole) {
-            return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+        // Check admin authentication
+        const authResult = await checkAdminAuth();
+        if ('error' in authResult) {
+            return NextResponse.json({ error: authResult.error }, { status: authResult.status });
         }
 
         const formData = await req.formData();
@@ -291,6 +199,7 @@ export async function POST(req: Request) {
     }
 }
 
+// PATCH handler
 export async function PATCH(
     request: Request
 ) {
@@ -303,46 +212,10 @@ export async function PATCH(
     }
     
     try {
-        // Check authentication first
-        const { data: { user } } = await supabase.auth.getUser();
-        console.log('Auth check - User:', user?.email);
-        
-        if (!user) {
-            console.log('No user found');
-            return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-        }
-
-        // Get employee record
-        const { data: employeeData, error: employeeError } = await supabase
-            .from('employees')
-            .select('id')
-            .eq('id', user.id)
-            .single();
-
-        if (employeeError || !employeeData) {
-            console.log('No employee record found:', employeeError);
-            return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-        }
-
-        // Check admin role using employee ID
-        const { data: roleData, error: roleError } = await supabase
-            .from('employees')
-            .select(`
-                employee_roles (
-                    roles (
-                        name
-                    )
-                )
-            `)
-            .eq('id', employeeData.id)
-            .single();
-
-        const hasAdminRole = roleData?.employee_roles?.some(
-            (er: any) => er.roles?.name === 'admin'
-        );
-
-        if (roleError || !hasAdminRole) {
-            return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+        // Check admin authentication
+        const authResult = await checkAdminAuth();
+        if ('error' in authResult) {
+            return NextResponse.json({ error: authResult.error }, { status: authResult.status });
         }
 
         const body = await request.json();
@@ -375,7 +248,7 @@ export async function PATCH(
     }
 }
 
-
+// DELETE handler
 export async function DELETE(
     request: Request
 ) {
@@ -388,46 +261,10 @@ export async function DELETE(
     }
     
     try {
-        // Check authentication first
-        const { data: { user } } = await supabase.auth.getUser();
-        console.log('Auth check - User:', user?.email);
-        
-        if (!user) {
-            console.log('No user found');
-            return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-        }
-
-        // Get employee record
-        const { data: employeeData, error: employeeError } = await supabase
-            .from('employees')
-            .select('id')
-            .eq('id', user.id)
-            .single();
-
-        if (employeeError || !employeeData) {
-            console.log('No employee record found:', employeeError);
-            return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-        }
-
-        // Check admin role using employee ID
-        const { data: roleData, error: roleError } = await supabase
-            .from('employees')
-            .select(`
-                employee_roles (
-                    roles (
-                        name
-                    )
-                )
-            `)
-            .eq('id', employeeData.id)
-            .single();
-
-        const hasAdminRole = roleData?.employee_roles?.some(
-            (er: any) => er.roles?.name === 'admin'
-        );
-
-        if (roleError || !hasAdminRole) {
-            return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+        // Check admin authentication
+        const authResult = await checkAdminAuth();
+        if ('error' in authResult) {
+            return NextResponse.json({ error: authResult.error }, { status: authResult.status });
         }
 
         // Delete menu item

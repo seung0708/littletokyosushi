@@ -1,5 +1,3 @@
-'use client';
-import {useState} from 'react';
 import { Items } from '../menu/page';
 import { useRouter } from "next/navigation";
 

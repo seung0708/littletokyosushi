@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import { Product } from '@/types/definitions';
+import { Item } from '@/types/definitions';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -28,7 +28,7 @@ type FormData = z.infer<typeof formSchema>;
 
 export default function EditItemPage({ params }: { params: { id: string } }) {
   const router = useRouter();
-  const [item, setItem] = useState<Product | null>(null);
+  const [item, setItem] = useState<Item | null>(null);
   const [loading, setLoading] = useState(true);
 
   const {

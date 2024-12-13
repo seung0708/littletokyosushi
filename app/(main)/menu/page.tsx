@@ -35,7 +35,7 @@ const MenuPage: React.FC = () => {
                 setIsLoading(true);
                 const response = await fetch('/api/main/items');
                 const data = await response.json();
-                setItems(data)
+                setItems(data.items)
             } catch (error) {
                 console.error('Error fetching data:', error);
             } finally {
@@ -53,7 +53,7 @@ const MenuPage: React.FC = () => {
                 const itemsResponse = await fetch('/api/main/items');
                 const items = await itemsResponse.json();
                 console.log(items)
-                setItems(items)
+                setItems(items.items)
 
                 const categoriesResponse = await fetch('/api/main/categories');
                 const categories = await categoriesResponse.json();

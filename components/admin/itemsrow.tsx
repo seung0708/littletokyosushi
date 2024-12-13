@@ -1,13 +1,13 @@
 import { TableRow, TableCell } from "@/components/ui/table";
 import ActionsMenu from "./actionsmenu";
-import {Product} from '@/types/definitions';
+import {Item} from '@/types/definitions';
 
-type ProductRowProps = {
-  item: Product; 
+type ItemRowProps = {
+  item: Item; 
 
 }
 
-const ProductRow: React.FC<ProductRowProps> = ({item}) => {
+const ItemRow: React.FC<ItemRowProps> = ({item}) => {
   return (
     <TableRow>
         <TableCell className="hidden sm:table-cell">
@@ -28,4 +28,4 @@ const ProductRow: React.FC<ProductRowProps> = ({item}) => {
   )
 };
 
-export default ProductRow;
+export default ItemRow;

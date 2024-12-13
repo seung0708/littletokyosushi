@@ -1,13 +1,10 @@
-'use client';
-
-import Link from 'next/link';
-import ProductRow from './itemsrow';
+import ItemRow from './itemsrow';
 
 import { Table, TableHeader, TableRow, TableHead, TableBody } from '@/components/ui/table'
-import { Product } from '@/types/definitions';
+import { Item } from '@/types/definitions';
 
 interface ItemsTableProps {
-  items: Product[];
+  items: Item[];
 }
 
 export default function ItemsTable({ items }: ItemsTableProps) {
@@ -26,7 +23,7 @@ export default function ItemsTable({ items }: ItemsTableProps) {
         </TableRow>
       </TableHeader>
       <TableBody>
-        {items?.map((item: Product) => <ProductRow key={item.id} item={item} />)}
+        {items?.map((item: Item) => <ItemRow key={item.id} item={item} />)}
       </TableBody>
     </Table>
   );
