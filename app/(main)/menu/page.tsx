@@ -69,9 +69,7 @@ const MenuPage: React.FC = () => {
         fetchData();
     }, []);
 
-    const filteredItems = selectedCategory 
-        ? items.filter(item => item.category_id === selectedCategory) 
-        : items;
+    const filteredItems = selectedCategory ? items.filter(item => item.category_id === selectedCategory) : items;
     
     if (isLoading) {
         return <div>Loading...</div>;

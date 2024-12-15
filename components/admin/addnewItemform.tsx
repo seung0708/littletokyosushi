@@ -147,7 +147,7 @@ const AddNewItemForm: React.FC = () => {
         const fetchCategories = async () => {
           try {
             setIsLoading(true);
-            const response = await fetch('/api/categories');
+            const response = await fetch('/api/admin/categories');
             const data = await response.json();
             
             setCategories(data);

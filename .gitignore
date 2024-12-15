@@ -41,3 +41,6 @@ next-env.d.ts
 .branches
 .temp
 .env
+
+next.config.js
+next.config.mjs

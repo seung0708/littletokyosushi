@@ -2,6 +2,7 @@
 import {useEffect, useState} from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { Item } from '@/types/definitions';
+import Image from 'next/image';
 
 const ProductDetailsPage: React.FC= () => {
     const [item, setItem] = useState<Item | null>(null);
@@ -61,9 +62,15 @@ const ProductDetailsPage: React.FC= () => {
                             </button>
                             <div className='grid w-full grid-cols-1 items-start'>
                                 {item?.image_urls.map((image, index) => (                           
-                                <div className={`relative w-full aspect-h-2 aspect-w-4 rounded-lg duration-700 ease-in-out ${index === activeIndex ? '' : 'hidden'} border-b`} data-carousel-item>
-                                    <img src={`${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/menu-items/${image}`} className='h-full object-contain object-center -translate-x-1/2 -translate-y-1/2 top-1/2 left-1/2' /> 
-                                     {/* Slide Indicators */}
+                                <div className={`relative w-full aspect-square rounded-lg duration-700 ease-in-out ${index === activeIndex ? '' : 'hidden'} border-b`} data-carousel-item>
+                                    <Image 
+                                        src={`${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/menu-items/${image}`} 
+                                        alt='item image' 
+                                        className='object-cover w-full h-full'
+                                        width={400}
+                                        height={400}
+                                        priority={index === 0}
+                                    /> 
                                 </div>
                                 ))}
                                

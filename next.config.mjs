@@ -26,12 +26,12 @@ const nextConfig = {
           },
           {
             source: '/dashboard',
-            destination: '/admin/dashboard',
+            destination: '/(admin)/dashboard',
             has: [{ type: 'host', value: 'admin.localhost' }]
           },
           {
             source: '/:path*',
-            destination: '/admin/:path*',
+            destination: '/(admin)/:path*',
             has: [{ type: 'host', value: 'admin.localhost' }]
           }
         ];

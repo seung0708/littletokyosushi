@@ -16,7 +16,7 @@ export async function checkAdminAuth() {
         const { data: employeeData, error: employeeError } = await supabase
             .from('employees')
             .select('id')
-            .eq('auth_id', user.id)
+            .eq('id', user.id)
             .single();
 
         if (employeeError || !employeeData) {
