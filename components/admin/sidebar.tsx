@@ -57,9 +57,7 @@ export default function Sidebar() {
               <Link 
                 href="/items"
                 onClick={(e) => {
-                  if (!pathname.startsWith('/items')) {
-                    setOpen(true);
-                  }
+                  setOpen(!open);
                 }}
                 className={clsx(
                   'flex items-center text-gray-700 rounded-lg px-2 w-full', 
@@ -77,13 +75,26 @@ export default function Sidebar() {
                   <Link 
                     href="/items/modifiers"
                     className={clsx(
-                      'flex items-center text-gray-700 rounded-lg px-4 w-full',
+                      'flex items-center text-gray-700 rounded-lg px-10 w-full',
                       {
                         'bg-gray-200 text-gray-800 p-2': pathname === '/items/modifiers'
                       })}
                   >
                     <div className="flex items-center gap-2">
+                    
                       Modifiers
+                    </div>
+                  </Link>
+                  <Link 
+                    href="/items/categories"
+                    className={clsx(
+                      'flex items-center text-gray-700 rounded-lg px-10 w-full',
+                      {
+                        'bg-gray-200 text-gray-800 p-2': pathname === '/items/categories'
+                      })}
+                  >
+                    <div className="flex items-center gap-2">
+                      Categories
                     </div>
                   </Link>
                 </div>

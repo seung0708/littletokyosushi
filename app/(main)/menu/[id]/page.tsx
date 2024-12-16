@@ -4,9 +4,22 @@ import { useParams, useRouter } from 'next/navigation';
 import { Item } from '@/types/definitions';
 import Image from 'next/image';
 
+type Modifiers = {
+    id: number;
+    name: string;
+    min: number;
+    max: number;
+    modifier_options: {
+        id: number;
+        name: string;
+        price: number;
+    }[];
+    };
+
 const ProductDetailsPage: React.FC= () => {
     const [item, setItem] = useState<Item | null>(null);
     const [loading, setLoading] = useState(false);
+    const [modifiers, setModifiers] = useState<Modifiers[]>([]);
     const [activeIndex, setActiveIndex] = useState(0);
     const router = useRouter();
     const {id} = useParams()
@@ -22,7 +35,7 @@ const ProductDetailsPage: React.FC= () => {
                 },
               });
               const data = await response.json();
-              console.log('Fetched item data:', data);
+              //console.log('Fetched item data:', data);
               
               const fetchedItem = data.item;
               if (!fetchedItem) {
@@ -37,6 +50,33 @@ const ProductDetailsPage: React.FC= () => {
         };
         fetchItem();
     },[])
+
+    useEffect(() => {
+        const fetchModifiers = async () => {
+            try {
+              setLoading(true);
+              const response = await fetch(`/api/modifiers/${itemId}`, {
+                headers: {
+                  'Content-Type': 'application/json',
+                },
+              });
+              const data = await response.json();
+              setModifiers(data);
+              console.log('Fetched item data:', data);  
+              
+              const fetchedItem = data.item;
+              if (!fetchedItem) {
+                throw new Error('No item data in response');
+              }
+              setItem(fetchedItem);
+            } catch (error) {
+              console.error('Error fetching item:', error);
+            } finally {
+              setLoading(false);
+            }
+        }    
+        fetchModifiers()
+    }, []);
 
     const closeModal = () => {
         router.push('/menu')
@@ -56,13 +96,13 @@ const ProductDetailsPage: React.FC= () => {
                         <div className='relative flex w-full items-center overflow-hidden bg-white px-4 pb-8 pt-14 shadow-2xl sm:px-6 sm:pt-8 md:p-6 lg:p-8'>
                             <button type='button' onClick={closeModal} className='absolute z-30 right-4 top-4 text-gray-400 hover:text-gray-500 sm:right-6 sm:top-8 md:right-6 md:top-6 lg:right-8 lg:top-8'>
                                 <span className='sr-only'>Close</span>
-                                <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" aria-hidden="true" data-slot="icon">
-                                    <path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12" />
+                                <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor" aria-hidden="true" data-slot="icon">
+                                    <path strokeLinecap="round" strokeLinejoin="round" d="M6 18 18 6M6 6l12 12" />
                                 </svg>
                             </button>
                             <div className='grid w-full grid-cols-1 items-start'>
                                 {item?.image_urls.map((image, index) => (                           
-                                <div className={`relative w-full aspect-square rounded-lg duration-700 ease-in-out ${index === activeIndex ? '' : 'hidden'} border-b`} data-carousel-item>
+                                <div key={index} className={`relative w-full aspect-square rounded-lg duration-700 ease-in-out ${index === activeIndex ? '' : 'hidden'} border-b`} data-carousel-item>
                                     <Image 
                                         src={`${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/menu-items/${image}`} 
                                         alt='item image' 
@@ -85,23 +125,23 @@ const ProductDetailsPage: React.FC= () => {
                                     <div aria-labelledby='options-heading' className=''>
                                         <h3 id='options-heading' className='sr-only'>Menu item options</h3>
                                         <form className='h-full flex flex-col'>
-                                        {/* {!item?.modifierGroups ? 
+                                        {modifiers.length < 1 ? 
                                         (
                                             <></>
                                         )
                                             :
-                                        item?.modifierGroups.map(modifierGroup => (
+                                        modifiers?.map(modifier => (
                                              
                                             (   
                                                 <fieldset aria-label='' className='flex-grow'>
-                                                    <legend className='text-sm font-medium'>{modifierGroup?.name}</legend>
+                                                    <legend className='text-sm font-medium'>{modifier?.name}</legend>
                                                         <div className='mt-3 flex flex-col items-start'>
-                                                        {modifierGroup?.modifiers.map(modifier => (
+                                                        {modifier?.modifier_options.map(option => (
                                                             <>
                                                             <label aria-label='' className='relative flex cursor-pointer justify-center rounded-full p-2 ring-gray-900 focus:outline-none'>
-                                                                <input type={modifierGroup.max < 2 ? 'radio' : 'checkbox'} name='sushi-choice' value={modifier.name} className='sr-only' />
-                                                                <span aria-hidden='true' className={`h-4 w-4 ${modifierGroup.max < 2 ? 'rounded-full' : 'rounded-sm'} border border-black`}></span>
-                                                                <span>{modifier.name}</span>
+                                                                <input type={modifier.max < 2 ? 'radio' : 'checkbox'} name='sushi-choice' value={option.name} className='sr-only' />
+                                                                <span aria-hidden='true' className={`h-4 w-4 ${modifier.max < 2 ? 'rounded-full' : 'rounded-sm'} border border-black`}></span>
+                                                                <span>{option.name}</span>
                                                             </label>
                                                            
                                                             </>
@@ -110,7 +150,7 @@ const ProductDetailsPage: React.FC= () => {
                                                 </fieldset>
                                             )
                                         ))
-                                        } */}
+                                        }
                                         <button type='submit' className='mt-6 w-full rounded-md border border-transparent bg-indigo-600 px-8 py-3 text-base font-medium text-white hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2'>Add to Bag</button>
                                     </form>
                                 </div>
