@@ -1,10 +1,10 @@
 'use client'
-import React, { createContext, useContext, useState } from "react";
+import React, { createContext, useContext, useEffect, useState } from "react";
 
 export interface CartItem  {
     id: string;
     cart_id: string;
-    menu_item_id: number;
+    menu_item_id: number
     quantity: number;
     base_price: number;
     total_price: number;
@@ -25,6 +25,7 @@ export interface CartItemModifierOption {
 
 interface CartContextType {
     cartItems: CartItem[];
+    cartId: string | null;
     addItemToCart: (item: CartItem) => void;
     removeItemFromCart: (id: string) => void;
     updateItemQuantity: (id: string, quantity: number) => void;
@@ -47,9 +48,57 @@ interface CartProviderProps {
 
 export const CartProvider = ({ children }: CartProviderProps) => {
     const [cartItems, setCartItems] = useState<CartItem[]>([]);
+    const [cartId, setCartId] = useState<string | null>(null);
 
-    const addItemToCart = (item: CartItem) => {
-        setCartItems(prevItems => [...prevItems, item]);
+    useEffect(() => {
+        // Try to get existing cart ID from localStorage
+        const storedCartId = localStorage.getItem('cartId');
+        if (storedCartId) {
+            setCartId(storedCartId);
+        }
+
+        const fetchCart = async () => {
+            try {
+                if (!storedCartId) {
+                    // Create new cart if none exists
+                    const response = await fetch('/api/main/cart', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({}),
+                    });
+                    const data = await response.json();
+                    localStorage.setItem('cartId', data.id);
+                    setCartId(data.id);
+                } else {
+                    // Fetch existing cart items
+                    const response = await fetch(`/api/main/cart/${storedCartId}`);
+                    const data = await response.json();
+                    setCartItems(data);
+                }
+            } catch (error) {
+                console.error('Error fetching cart:', error);
+            }
+        };
+
+        fetchCart();
+    }, []);
+
+    const addItemToCart = async (item: CartItem) => {
+        try {
+            const response = await fetch(`/api/main/cart/${cartId}/items`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(item),
+            });
+            const newItem = await response.json();
+            setCartItems([...cartItems, newItem]);
+        } catch (error) {
+            console.error('Error adding item to cart:', error);
+        }
     };
 
     const removeItemFromCart = (id: string) => {
@@ -65,7 +114,7 @@ export const CartProvider = ({ children }: CartProviderProps) => {
     };
 
     return (
-        <CartContext.Provider value={{ cartItems, addItemToCart, removeItemFromCart, updateItemQuantity, clearCart }}>
+        <CartContext.Provider value={{ cartItems, cartId, addItemToCart, removeItemFromCart, updateItemQuantity, clearCart }}>
             {children}
         </CartContext.Provider>
     );
