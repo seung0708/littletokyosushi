@@ -3,27 +3,124 @@ import {useEffect, useState} from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { Item } from '@/types/definitions';
 import Image from 'next/image';
+import { useForm } from 'react-hook-form';
+import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Button } from '@/components/ui/button';
+import { Separator } from '@/components/ui/separator';
+import { MinusIcon, PlusIcon } from "lucide-react";
 
 type Modifiers = {
     id: number;
     name: string;
-    min: number;
-    max: number;
+    min_selections: number;
+    max_selections: number;
+    is_required: boolean;
     modifier_options: {
         id: number;
         name: string;
         price: number;
     }[];
-    };
+};
 
-const ProductDetailsPage: React.FC= () => {
+type FormData = {
+    quantity: string;
+    modifiers: Array<{
+        selectedOptions: string[];
+    }>;
+};
+
+const ItemDetailsPage: React.FC= () => {
     const [item, setItem] = useState<Item | null>(null);
-    const [loading, setLoading] = useState(false);
+    const [loading, setLoading] = useState(true);
     const [modifiers, setModifiers] = useState<Modifiers[]>([]);
-    const [activeIndex, setActiveIndex] = useState(0);
-    const router = useRouter();
+    const [loadingImage, setLoadingImage] = useState(true);
+    const [selectedImage, setSelectedImage] = useState(0);
+
     const {id} = useParams()
     const itemId = Number(id);
+
+    const form = useForm<FormData>({
+        defaultValues: {
+            quantity: "1",
+            modifiers: modifiers?.map(modifier => ({
+                selectedOptions: []
+            })) || []
+        },
+        resolver: async (values) => {
+            const errors: Record<string, any> = {};
+
+            if (!values.quantity || parseInt(values.quantity) < 1) {
+                errors.quantity = {
+                    type: 'required',
+                    message: 'Please enter a valid quantity'
+                };
+            }
+
+            // Only validate modifiers if they exist
+            if (modifiers && modifiers.length > 0) {
+                modifiers.forEach((modifier, index) => {
+                    const selectionCount = values.modifiers?.[index]?.selectedOptions?.length || 0;
+
+                    if (modifier.is_required && selectionCount === 0) {
+                        if (!errors.modifiers) errors.modifiers = {};
+                        if (!errors.modifiers[index]) errors.modifiers[index] = {};
+                        errors.modifiers[index].selectedOptions = {
+                            type: 'required',
+                            message: 'This modifier is required'
+                        };
+                        return false;
+                    }
+
+                    if (selectionCount < modifier.min_selections) {
+                        if (!errors.modifiers) errors.modifiers = {};
+                        if (!errors.modifiers[index]) errors.modifiers[index] = {};
+                        errors.modifiers[index].selectedOptions = {
+                            type: 'min',
+                            message: `Please select at least ${modifier.min_selections} option${modifier.min_selections > 1 ? 's' : ''}`
+                        };
+                        return false;
+                    }
+
+                    if (selectionCount > modifier.max_selections) {
+                        if (!errors.modifiers) errors.modifiers = {};
+                        if (!errors.modifiers[index]) errors.modifiers[index] = {};
+                        errors.modifiers[index].selectedOptions = {
+                            type: 'max',
+                            message: `Please select at most ${modifier.max_selections} option${modifier.max_selections > 1 ? 's' : ''}`
+                        };
+                        return false;
+                    }
+                });
+            }
+
+            return {
+                values,
+                errors: Object.keys(errors).length > 0 ? errors : {}
+            };
+        }
+    });
+
+    useEffect(() => {
+        if (modifiers.length > 0) {
+            console.log('Setting default modifiers:', modifiers);
+            const defaultModifiers = modifiers.map(modifier => ({
+                selectedOptions: []
+            }));
+            form.reset({
+                quantity: "1",
+                modifiers: defaultModifiers,
+            });
+        }
+    }, [modifiers, form]);
+
+    useEffect(() => {
+        const subscription = form.watch((value) => {
+            console.log('Form values changed:', value);
+        });
+        return () => subscription.unsubscribe();
+    }, [form]);
 
     useEffect(() => {
         const fetchItem = async () => {
@@ -35,8 +132,6 @@ const ProductDetailsPage: React.FC= () => {
                 },
               });
               const data = await response.json();
-              //console.log('Fetched item data:', data);
-              
               const fetchedItem = data.item;
               if (!fetchedItem) {
                 throw new Error('No item data in response');
@@ -61,8 +156,9 @@ const ProductDetailsPage: React.FC= () => {
                 },
               });
               const data = await response.json();
+              console.log('Modifier data:', data);
               setModifiers(data);
-              console.log('Fetched item data:', data);  
+              console.log('Fetched modifiers data:', data);  
               
               const fetchedItem = data.item;
               if (!fetchedItem) {
@@ -78,90 +174,280 @@ const ProductDetailsPage: React.FC= () => {
         fetchModifiers()
     }, []);
 
-    const closeModal = () => {
-        router.push('/menu')
-    }
+    const onSubmit = (data: FormData) => {
+        console.log('Form submitted:', {
+            itemId: itemId,
+            quantity: parseInt(data.quantity),
+            modifierSelections: modifiers ? data.modifiers.map((mod, index) => {
+                const selectedOptions = mod.selectedOptions.map(optionId => {
+                    const option = modifiers[index].modifier_options.find(opt => opt.id.toString() === optionId);
+                    return {
+                        optionId: parseInt(optionId),
+                        price: option?.price || 0
+                    };
+                });
+                return {
+                    modifierId: modifiers[index].id,
+                    selectedOptions
+                };
+            }) : []
+        });
+    };
 
-    // const nextSlide = () => setActiveIndex((prev) => (prev + 1) % item?.image_urls.length);
-    // const prevSlide = () => setActiveIndex((prev) => (prev - 1 + item?.image_urls.length) % item?.image_urls.length);
+    const handleImageLoad = () => {
+        setLoadingImage(false);
+    };
 
-
-    return(
-        <section className='realtive z-10' role='dialog' aria-modal='true'>
-            <div className='fixed inset-0 hidden bg-gray-500 bg-opacity-75 transition-opacity md:block' aria-hidden='true'></div>
-             <div className='fixed inset-0 z-10 w-screen overflow-y-auto'>
-                <div className='flex min-h-full items-stretch justify-center text-center md:items-center md:px-2 lg:px-4'>
-                    
-                    <div className='flex w-full transform text-left text-base transition md:my-8 md:max-w-2xl md:px-4 lg:max-w-4xl'>
-                        <div className='relative flex w-full items-center overflow-hidden bg-white px-4 pb-8 pt-14 shadow-2xl sm:px-6 sm:pt-8 md:p-6 lg:p-8'>
-                            <button type='button' onClick={closeModal} className='absolute z-30 right-4 top-4 text-gray-400 hover:text-gray-500 sm:right-6 sm:top-8 md:right-6 md:top-6 lg:right-8 lg:top-8'>
-                                <span className='sr-only'>Close</span>
-                                <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor" aria-hidden="true" data-slot="icon">
-                                    <path strokeLinecap="round" strokeLinejoin="round" d="M6 18 18 6M6 6l12 12" />
-                                </svg>
-                            </button>
-                            <div className='grid w-full grid-cols-1 items-start'>
-                                {item?.image_urls.map((image, index) => (                           
-                                <div key={index} className={`relative w-full aspect-square rounded-lg duration-700 ease-in-out ${index === activeIndex ? '' : 'hidden'} border-b`} data-carousel-item>
-                                    <Image 
-                                        src={`${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/menu-items/${image}`} 
-                                        alt='item image' 
-                                        className='object-cover w-full h-full'
-                                        width={400}
-                                        height={400}
-                                        priority={index === 0}
-                                    /> 
-                                </div>
-                                ))}
-                               
-                                <div className='mt-6 sm:col-span-8 lg:col-span-7'>
-                                    <h2 className='text-xl font-medium text-gray-900 sm:pr-12'>{item?.name}</h2>
-                                    <div aria-labelledby='information-heading' className='mt-1'>
-                                        <div></div>
-                                        <h3 id='information-heading' className='sr-only'>Menu item information</h3>
-                                        <p className='mt-3 font-medium text-gray-900'>{item?.description}</p>
-                                        <p className='mt-3 font-medium text-gray-900'>${item?.price.toFixed(2)}</p>
+    return (
+        <div className="container mx-auto max-w-5xl px-4 py-8">
+            <div className="grid md:grid-cols-2 gap-8 md:gap-12">
+                <div className="space-y-4">
+                    <div className="relative aspect-square overflow-hidden rounded-xl border border-gray-200 bg-gray-50">
+                        {item?.image_urls && item.image_urls[selectedImage] ? (
+                            <>
+                                {loadingImage && (
+                                    <div className="absolute inset-0 flex items-center justify-center bg-gray-100">
+                                        <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent"></div>
                                     </div>
-                                    <div aria-labelledby='options-heading' className=''>
-                                        <h3 id='options-heading' className='sr-only'>Menu item options</h3>
-                                        <form className='h-full flex flex-col'>
-                                        {modifiers.length < 1 ? 
-                                        (
-                                            <></>
-                                        )
-                                            :
-                                        modifiers?.map(modifier => (
-                                             
-                                            (   
-                                                <fieldset aria-label='' className='flex-grow'>
-                                                    <legend className='text-sm font-medium'>{modifier?.name}</legend>
-                                                        <div className='mt-3 flex flex-col items-start'>
-                                                        {modifier?.modifier_options.map(option => (
-                                                            <>
-                                                            <label aria-label='' className='relative flex cursor-pointer justify-center rounded-full p-2 ring-gray-900 focus:outline-none'>
-                                                                <input type={modifier.max < 2 ? 'radio' : 'checkbox'} name='sushi-choice' value={option.name} className='sr-only' />
-                                                                <span aria-hidden='true' className={`h-4 w-4 ${modifier.max < 2 ? 'rounded-full' : 'rounded-sm'} border border-black`}></span>
-                                                                <span>{option.name}</span>
-                                                            </label>
-                                                           
-                                                            </>
-                                                        ))}
-                                                        </div>
-                                                </fieldset>
-                                            )
-                                        ))
-                                        }
-                                        <button type='submit' className='mt-6 w-full rounded-md border border-transparent bg-indigo-600 px-8 py-3 text-base font-medium text-white hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2'>Add to Bag</button>
-                                    </form>
-                                </div>
+                                )}
+                                <Image
+                                    src={`${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/menu-items/${item.image_urls[selectedImage]}`}
+                                    alt={`${item?.name} - View ${selectedImage + 1}`}
+                                    width={500}
+                                    height={500}
+                                    className={`object-cover transition-opacity duration-300 ${loadingImage ? 'opacity-0' : 'opacity-100'}`}
+                                    onLoad={handleImageLoad}
+                                    priority={selectedImage === 0}
+                                />
+                            </>
+                        ) : (
+                            <div className="absolute inset-0 flex items-center justify-center bg-gray-100">
+                                <span className="text-gray-400">No image available</span>
                             </div>
-                        </div>
+                        )}
                     </div>
+                    {item?.image_urls && item.image_urls.length > 1 && (
+                        <div className="grid grid-cols-5 gap-2">
+                            {item.image_urls.map((image, index) => (
+                                <button
+                                    key={index}
+                                    onClick={() => {
+                                        setSelectedImage(index);
+                                        setLoadingImage(true);
+                                    }}
+                                    className={`relative aspect-square overflow-hidden rounded-lg border-2 transition-all
+                                        ${selectedImage === index 
+                                            ? 'border-primary ring-2 ring-primary ring-offset-2' 
+                                            : 'border-gray-200 hover:border-gray-300'
+                                        }`}
+                                >
+                                    <Image
+                                        src={`${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/menu-items/${image}`}
+                                        alt={`${item.name} thumbnail ${index + 1}`}
+                                        fill
+                                        className="object-cover"
+                                        sizes="(max-width: 768px) 20vw, 10vw"
+                                    />
+                                </button>
+                            ))}
+                        </div>
+                    )}
+                </div>
+                <div className="flex flex-col space-y-6">
+                    <div className="space-y-2">
+                        <h1 className="text-3xl font-bold tracking-tight">{item?.name}</h1>
+                        <div className="flex items-center justify-between">
+                            <p className="text-2xl font-semibold">${item?.price.toFixed(2)}</p>
+                        </div>
+                        <p className="text-gray-500 leading-relaxed">{item?.description}</p>
+                    </div>
+
+                    <Separator className="my-4" />
+
+                    <Form {...form}>
+                        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+                            <div className="space-y-4">
+                                {modifiers.map((modifier, index) => (
+                                    <FormField
+                                        key={modifier.id}
+                                        control={form.control}
+                                        name={`modifiers.${index}.selectedOptions`}
+                                        defaultValue={[]}
+                                        render={({ field }) => (
+                                            <FormItem className="space-y-3">
+                                                <FormLabel className="text-base font-semibold">
+                                                    {modifier.name} 
+                                                    <span className={`ml-2 text-sm ${modifier.is_required ? 'text-red-500' : 'text-gray-500'}`}>
+                                                        {modifier.is_required ? '(Required)' : '(Optional)'} 
+                                                        {modifier.max_selections > 1 && ` • Select ${modifier.min_selections}-${modifier.max_selections}`}
+                                                    </span>
+                                                </FormLabel>
+                                                <FormControl>
+                                                    {modifier.max_selections === 1 ? (
+                                                        <div className="space-y-2">
+                                                            {modifier.modifier_options.map((option) => {
+                                                                const isSelected = field.value?.[0] === option.id.toString();
+                                                                return (
+                                                                    <Button
+                                                                        key={option.id}
+                                                                        type="button"
+                                                                        variant="outline"
+                                                                        onClick={() => field.onChange([option.id.toString()])}
+                                                                        className={`w-full justify-start space-x-3 ${
+                                                                            isSelected ? 'border-primary bg-primary/5 ring-1 ring-primary' : ''
+                                                                        }`}
+                                                                    >
+                                                                        <div className={`flex h-4 w-4 shrink-0 items-center justify-center rounded-full border ${
+                                                                            isSelected ? 'border-primary bg-primary' : 'border-gray-300'
+                                                                        }`}>
+                                                                            {isSelected && (
+                                                                                <div className="h-1.5 w-1.5 rounded-full bg-white" />
+                                                                            )}
+                                                                        </div>
+                                                                        <div className="flex flex-1 items-center justify-between">
+                                                                            <span>{option.name}</span>
+                                                                            <span className="text-sm text-gray-500">
+                                                                                {`+$${option.price.toFixed(2)}`}
+                                                                            </span>
+                                                                        </div>
+                                                                    </Button>
+                                                                );
+                                                            })}
+                                                        </div>
+                                                    ) : (
+                                                        <div className="space-y-2">
+                                                            {modifier.modifier_options.map((option) => {
+                                                                console.log('Checkbox option price:', option.price);
+                                                                const selectedOptions = Array.isArray(field.value) ? field.value : [];
+                                                                const isChecked = selectedOptions.includes(option.id.toString());
+                                                                const atMaxSelections = selectedOptions.length >= (modifier.max_selections || 0);
+                                                                
+                                                                return (
+                                                                    <Button
+                                                                        key={option.id}
+                                                                        type="button"
+                                                                        variant="outline"
+                                                                        disabled={!isChecked && atMaxSelections}
+                                                                        onClick={() => {
+                                                                            const value = option.id.toString();
+                                                                            if (isChecked) {
+                                                                                field.onChange(selectedOptions.filter(v => v !== value));
+                                                                            } else if (!atMaxSelections) {
+                                                                                const newSelection = [...selectedOptions, value];
+                                                                                if (newSelection.length <= (modifier.max_selections || 0)) {
+                                                                                    field.onChange(newSelection);
+                                                                                }
+                                                                            }
+                                                                        }}
+                                                                        className={`w-full justify-start space-x-3 ${
+                                                                            isChecked ? 'border-primary bg-primary/5 ring-1 ring-primary' : ''
+                                                                        } ${atMaxSelections && !isChecked ? 'opacity-50' : ''}`}
+                                                                    >
+                                                                        <div className={`flex h-4 w-4 shrink-0 items-center justify-center rounded-sm border ${
+                                                                            isChecked ? 'border-primary bg-primary' : 'border-gray-300'
+                                                                        }`}>
+                                                                            {isChecked && (
+                                                                                <svg
+                                                                                    xmlns="http://www.w3.org/2000/svg"
+                                                                                    viewBox="0 0 24 24"
+                                                                                    fill="none"
+                                                                                    stroke="currentColor"
+                                                                                    strokeWidth="2"
+                                                                                    strokeLinecap="round"
+                                                                                    strokeLinejoin="round"
+                                                                                    className="h-3 w-3 text-white"
+                                                                                >
+                                                                                    <polyline points="20 6 9 17 4 12" />
+                                                                                </svg>
+                                                                            )}
+                                                                        </div>
+                                                                        <div className="flex flex-1 items-center justify-between">
+                                                                            <span>{option.name}</span>
+                                                                            <span className="text-sm text-gray-500">
+                                                                                {`+$${option.price.toFixed(2)}`}
+                                                                            </span>
+                                                                        </div>
+                                                                    </Button>
+                                                                );
+                                                            })}
+                                                        </div>
+                                                    )}
+                                                </FormControl>
+                                                <FormMessage />
+                                            </FormItem>
+                                        )}
+                                    />
+                                ))}
+                            </div>
+
+                            <div className="space-y-2">
+                                <FormField
+                                    control={form.control}
+                                    name="quantity"
+                                    render={({ field }) => (
+                                        <FormItem>
+                                            <FormLabel className="text-base font-semibold">Quantity</FormLabel>
+                                            <FormControl>
+                                                <div className="mt-4 flex items-center justify-between">
+                                                    <div className="flex items-center space-x-4">
+                                                        <Label htmlFor="quantity">Quantity</Label>
+                                                        <div className="flex items-center">
+                                                            <Button
+                                                                type="button"
+                                                                variant="outline"
+                                                                size="icon"
+                                                                className="h-8 w-8 rounded-r-none"
+                                                                onClick={() => {
+                                                                    const currentQty = parseInt(form.getValues('quantity'));
+                                                                    if (currentQty > 1) {
+                                                                        form.setValue('quantity', (currentQty - 1).toString());
+                                                                    }
+                                                                }}
+                                                            >
+                                                                <MinusIcon className="h-4 w-4" />
+                                                            </Button>
+                                                            <Input
+                                                                type="number"
+                                                                id="quantity"
+                                                                min="1"
+                                                                className="h-8 w-16 rounded-none text-center [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
+                                                                {...form.register('quantity')}
+                                                            />
+                                                            <Button
+                                                                type="button"
+                                                                variant="outline"
+                                                                size="icon"
+                                                                className="h-8 w-8 rounded-l-none"
+                                                                onClick={() => {
+                                                                    const currentQty = parseInt(form.getValues('quantity'));
+                                                                    form.setValue('quantity', (currentQty + 1).toString());
+                                                                }}
+                                                            >
+                                                                <PlusIcon className="h-4 w-4" />
+                                                            </Button>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </FormControl>
+                                            <FormMessage />
+                                        </FormItem>
+                                    )}
+                                />
+                            </div>
+
+                            <Button
+                                type="submit"
+                                size="lg"
+                                className="w-full bg-primary hover:bg-primary/90 text-white font-semibold py-6"
+                            >
+                                Add to Cart
+                            </Button>
+                        </form>
+                    </Form>
                 </div>
             </div>
         </div>
-    </section>
-    )
+    );
 }
 
-export default ProductDetailsPage
+export default ItemDetailsPage
