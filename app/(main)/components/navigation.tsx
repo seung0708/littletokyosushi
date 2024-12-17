@@ -13,15 +13,15 @@ interface NavbarProps {
 
 const Navbar: React.FC<NavbarProps> = ({className, isOpen, toggleMenu}) => {
 
-
     return(
         <nav className={className}>
             <div className="">
                 <div className="flex h-16 items-center">
                     <div className="relative lg:hidden">
-                        <HamburgerMenu toggleMenu={toggleMenu} />
-                        {isOpen && (
-                        <CloseMenu toggleMenu={toggleMenu} />
+                        {isOpen ? (
+                            <CloseMenu toggleMenu={toggleMenu} />
+                        ) : (
+                            <HamburgerMenu toggleMenu={toggleMenu} />
                         )}
                     </div>
                     <div className="flex justify-center ml-auto lg:ml-0">

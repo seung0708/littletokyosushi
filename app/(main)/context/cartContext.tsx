@@ -1,6 +1,7 @@
+'use client'
 import React, { createContext, useContext, useState } from "react";
 
-type CartItem = {
+export interface CartItem  {
     id: string;
     cart_id: string;
     menu_item_id: number;
@@ -10,13 +11,13 @@ type CartItem = {
     modifiers: CartItemModifier[];
 };
 
-type CartItemModifier = {
+export interface CartItemModifier  {
     id: string;
     cart_item_id: string;
     options: CartItemModifierOption[];
 };
 
-type CartItemModifierOption = {
+export interface CartItemModifierOption {
     id: string;
     name: string;
     price: number;
