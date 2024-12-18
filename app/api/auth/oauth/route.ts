@@ -3,21 +3,19 @@ import { NextResponse } from 'next/server';
 
 export async function POST(request: Request) {
     const supabase = await createClient();
-
     try {
-        const { provider } = await request.json();
 
         const { data, error } = await supabase.auth.signInWithOAuth({
-            provider,
+            provider: 'google',
             options: {
-                redirectTo: `${request.headers.get('origin')}/auth/callback`,
+                redirectTo: `${request.headers.get('origin')}/api/auth/callback`,
                 queryParams: {
                     access_type: 'offline',
                     prompt: 'consent',
                 },
             },
         });
-
+        console.log(data, error);
         if (error) throw error;
 
         return NextResponse.json(data);

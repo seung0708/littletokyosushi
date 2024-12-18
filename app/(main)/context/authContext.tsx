@@ -13,16 +13,27 @@ interface AuthContextType {
     logout: () => Promise<void>;
     googleLogin: () => Promise<void>;
     signup: (email: string, password: string) => Promise<void>;
+
     resetPassword: (password: string, token: string) => Promise<void>;
 };
 
 const AuthContext = createContext<AuthContextType | null>(null)
+
+export const useAuth = () => {
+    const context = useContext(AuthContext);
+    if (!context) {
+        throw new Error('useAuth must be used within a AuthProvider');
+    }
+    return context;
+}
 
 export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     const [user, setUser] = useState<User | null>(null);
     const [isLoading, setIsLoading] = useState(true);
     const supabase = createClient();
     const {cartId} = useCart();
+
+    
 
 
     useEffect(() => {
@@ -103,13 +114,13 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
                     'Content-Type': 'application/json',
                 },
             });
-            const {data: {user}, error} = await response.json();
+            const result = await response.json();
             if (!response.ok) {
-                throw new Error(error || 'Failed to sign in');
-            }
-            if(user) {
-                await handleCartMerge(user.id);
-            }
+                throw new Error(result.error || 'Failed to sign in with Google');
+            } 
+            
+            window.location.href = result.url;
+            console.log(result);
         } catch (error) {
             console.error('Error signing in with Google:', error);
         }
@@ -159,12 +170,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
             {children}
         </AuthContext.Provider>
     )
+
+    
 }
 
-export const useAuth = () => {
-    const context = useContext(AuthContext);
-    if (!context) {
-        throw new Error('useAuth must be used within a AuthProvider');
-    }
-    return context;
-}
