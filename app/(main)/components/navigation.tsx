@@ -1,4 +1,4 @@
-import NavLinks from "@/app/(main)/components/nav/nav-links";
+import NavLinks from "@/app/(main)/components/nav/links";
 import HamburgerMenu from "@/app/(main)/components/nav/hamburger-menu";
 import CloseMenu from "@/app/(main)/components/nav/close-menu";
 import Logo from "@/app/(main)/components/nav/logo";

@@ -20,7 +20,7 @@ const CartPage: React.FC = () => {
                         {cartItems.map((item: CartItem) => (
                             <li className="flex py-6 sm:py-10">
                                 <div className="flex-shrink-0">
-                                    <img src={process.env.NEXT_PUBLIC_SUPABASE_URL + '/storage/v1/object/public/menu-items/' + itemalt="Front of men&#039;s Basic Tee in sienna." className="h-24 w-24 rounded-md object-cover object-center sm:h-48 sm:w-48" />
+                                    <img src="https://tailwindui.com/plus/img/ecommerce-images/shopping-cart-page-01-product-01.jpg" alt="Front of men&#039;s Basic Tee in sienna." className="h-24 w-24 rounded-md object-cover object-center sm:h-48 sm:w-48" />
                                 </div>
                                 <div className="ml-4 flex flex-1 flex-col justify-between sm:ml-6">
                                     <div className="relative pr-9 sm:grid sm:grid-cols-2 sm:gap-x-6 sm:pr-0">
