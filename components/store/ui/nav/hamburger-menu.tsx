@@ -1,4 +1,4 @@
-import { Button } from '@/app/(main)/components/ui/buttons';
+import { Button } from '@/components/ui/button';
 import Svg from '../svg';
 
 interface HamburgerMenuProps {

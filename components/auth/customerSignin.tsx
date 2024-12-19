@@ -93,11 +93,11 @@ export default function CustomerSignin() {
                 </Button>
             </form>
             <div className="mt-4">
-                <Link href='/signup' className="text-blue-500 hover:underline">
+                <Link href='/signup' className="text-xs text-blue-500 hover:underline">
                     Don't have an account?
                 </Link>
                 
-                <Link href='/forgot-password' className="text-blue-500 hover:underline ml-2">
+                <Link href='/forgot-password' className="text-xs text-blue-500 hover:underline ml-2">
                     Forgot Password?
                 </Link>
             </div>
@@ -105,7 +105,7 @@ export default function CustomerSignin() {
         <hr className="my-4" />  
         <div className="flex items-center justify-center mt-4">
         <Button variant={"outline"} type="button" onClick={handleGoogleSignin}>
-            <Image src="/google.svg" alt="Google Logo" width={20} height={20} /> Login with Google
+            <Image src="/google.svg" alt="Google Logo" width={20} height={20} /> Sign in with Google
         </Button>
         </div>
     </>
