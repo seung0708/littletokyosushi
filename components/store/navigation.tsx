@@ -1,8 +1,8 @@
-import NavLinks from "@/app/(main)/components/nav/links";
-import HamburgerMenu from "@/app/(main)/components/nav/hamburger-menu";
-import CloseMenu from "@/app/(main)/components/nav/close-menu";
-import Logo from "@/app/(main)/components/nav/logo";
-import CartIcon from "@/app/(main)/components/nav/cart-icon";
+import NavLinks from "@/components/store/ui/nav/links";
+import HamburgerMenu from "@/components/store/ui/nav/hamburger-menu";
+import CloseMenu from "@/components/store/ui/nav/close-menu";
+import Logo from "@/components/store/ui/nav/logo";
+import CartIcon from "@/components/store/ui/nav/cart-icon";
 
 interface NavbarProps {
     className?: string,

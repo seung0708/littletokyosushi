@@ -1,5 +1,5 @@
 import {ReactNode} from 'react';
-import Header from './components/header';
+import Header from '../../components/store/header';
 import { CartProvider } from '../context/cartContext';
 import { AuthProvider } from '../context/authContext';
 

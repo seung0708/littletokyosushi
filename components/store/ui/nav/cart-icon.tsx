@@ -1,5 +1,5 @@
 import Link from "next/link";
-import Svg from "../ui/svg";
+import Svg from "../svg";
 import { useCart } from "@/app/context/cartContext";
 
 export default function CartIcon() {

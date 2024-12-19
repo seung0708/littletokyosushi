@@ -1,6 +1,6 @@
 'use client';
 
-import { useAuth } from "../../../context/authContext"
+import { useAuth } from "../../../../app/context/authContext"
 import NavLink from "./navLink"
 
 export default function Links({ className = "", showSpan = false }) {

@@ -13,7 +13,7 @@ export async function POST(req: NextRequest) {
       email,
       password
     });
-
+    console.log(user, authError);
     if (authError) {
       console.error('Auth error:', authError);
       return NextResponse.json({ error: authError.message }, { status: 400 });
@@ -28,7 +28,7 @@ export async function POST(req: NextRequest) {
       .from('customers')
       .insert([
         { 
-          user_id: user.id,
+          id: user.id,
           email: user.email,
           created_at: new Date().toISOString(),
           updated_at: new Date().toISOString()

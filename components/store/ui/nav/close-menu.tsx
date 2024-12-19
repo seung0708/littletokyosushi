@@ -1,11 +1,11 @@
 import { Button } from '@/app/(main)/components/ui/buttons';
-import Svg from '../ui/svg';
+import Svg from '../svg';
 
-interface HamburgerMenuProps {
+interface CloseMenuProps {
     toggleMenu: () => void;   
 }
 
- const HamburgerMenu: React.FC<HamburgerMenuProps> = ({toggleMenu}) => {
+ const CloseMenu: React.FC<CloseMenuProps> = ({toggleMenu}) => {
     return (
         <Button 
             type="button"
@@ -13,12 +13,12 @@ interface HamburgerMenuProps {
             onClick={toggleMenu}
         >
             <span className="absolute -inset-0.5"></span>
-            <span className="sr-only">Open menu</span>
+            <span className="sr-only">Close menu</span>
             <Svg className="h-6 w-6">
-                <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" />
+                <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
             </Svg>
         </Button>
     )
 }
 
-export default HamburgerMenu
+export default CloseMenu;

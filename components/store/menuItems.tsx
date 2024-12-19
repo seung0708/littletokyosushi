@@ -1,4 +1,4 @@
-import { Items } from '../menu/page';
+import { Items } from '../../app/(store)/menu/page';
 import { useRouter } from "next/navigation";
 import Image from 'next/image';
 

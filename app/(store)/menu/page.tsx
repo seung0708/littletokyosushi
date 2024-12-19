@@ -1,6 +1,6 @@
 'use client';
 import {useState, useEffect} from 'react';
-import MenuItems from "../components/menuItems"
+import MenuItems from "../../../components/store/menuItems"
 import { createClient } from "@/lib/supabase/client";
 
 interface Category {
