@@ -1,11 +1,11 @@
-import { loginFormSchema } from '@/schema-validations/adminLogin';
+import { signinFormSchema } from '@/schema-validations/auth';
 import { createClient } from '@/lib/supabase/server'
 import { NextResponse } from 'next/server';
 
 export async function POST(req: Request) { 
   const body = await req.json(); 
   
-  const result = loginFormSchema.safeParse(body)
+  const result = signinFormSchema.safeParse(body)
   if(!result.success) {
     console.error('Validation error:', result.error.errors);
     return NextResponse.json({error: result.error.errors}, {status: 400})
@@ -19,6 +19,19 @@ export async function POST(req: Request) {
       email, 
       password
     })
+
+    if (user) {
+      const {error} = await supabase.from('customers').insert({
+        user_id: user.id,
+        email: user.email,
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString()
+      })
+      if (error) {
+        console.error('Error inserting customer record:', error);
+        return NextResponse.json({error: error.message}, {status: 500})
+      }
+    }
   
     if (error) {
       console.error('Login error:', error);

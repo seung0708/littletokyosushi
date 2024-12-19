@@ -1,6 +1,6 @@
 import Link from "next/link";
 import Svg from "../ui/svg";
-import { useCart } from "@/app/(main)/context/cartContext";
+import { useCart } from "@/app/context/cartContext";
 
 export default function CartIcon() {
     const { cartItems } = useCart();

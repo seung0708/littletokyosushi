@@ -1,7 +1,7 @@
 'use client';
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { useAuth } from "@/app/(main)/context/authContext";
+import { useAuth } from "@/app/context/authContext";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
@@ -9,6 +9,7 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import Image from "next/image";
+import Link from "next/link";
 
 const formSchema = z.object({
     email: z.string().email("Invalid email format"),
@@ -17,9 +18,9 @@ const formSchema = z.object({
 
 type FormData = z.infer<typeof formSchema>;
 
-export default function CustomerLogin() {
+export default function CustomerSignin() {
     const [error, setError] = useState<string | null>(null);
-    const { login, isLoading, googleLogin } = useAuth();
+    const { signin, isLoading, googleSignin } = useAuth();
     const router = useRouter();
 
     const form = useForm<FormData>({
@@ -32,7 +33,7 @@ export default function CustomerLogin() {
 
     async function onSubmit(data: FormData) {
         try {
-            await login(data.email, data.password); 
+            await signin(data.email, data.password); 
             // Redirect to admin dashboard on successful login    
             router.push("/");
             router.refresh();
@@ -42,9 +43,9 @@ export default function CustomerLogin() {
         }   
     }
 
-    async function handleGoogleLogin() {
+    async function handleGoogleSignin() {
         try {
-            await googleLogin();
+            await googleSignin();
             // Redirect to admin dashboard on successful login    
         } catch (error: any) {
             console.error("Login error:", error);   
@@ -87,14 +88,23 @@ export default function CustomerLogin() {
                     )}
                 />
                 {error && <p className="text-red-500">{error}</p>}
-                <Button type="submit" disabled={isLoading}>
+                <Button className="w-full" type="submit" disabled={isLoading}>
                     {isLoading ? "Loading..." : "Login"}
                 </Button>
             </form>
+            <div className="mt-4">
+                <Link href='/signup' className="text-blue-500 hover:underline">
+                    Don't have an account?
+                </Link>
+                
+                <Link href='/forgot-password' className="text-blue-500 hover:underline ml-2">
+                    Forgot Password?
+                </Link>
+            </div>
         </Form>
         <hr className="my-4" />  
         <div className="flex items-center justify-center mt-4">
-        <Button variant={"outline"} type="button" onClick={handleGoogleLogin}>
+        <Button variant={"outline"} type="button" onClick={handleGoogleSignin}>
             <Image src="/google.svg" alt="Google Logo" width={20} height={20} /> Login with Google
         </Button>
         </div>

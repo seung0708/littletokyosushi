@@ -1,5 +1,5 @@
 'use client'
-import { useCart, CartItem } from "../context/cartContext";
+import { useCart, CartItem } from "../../context/cartContext";
 import { useRouter } from "next/navigation"
 
 const CartPage: React.FC = () => {

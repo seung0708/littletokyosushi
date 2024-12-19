@@ -1,7 +1,7 @@
 import {ReactNode} from 'react';
 import Header from './components/header';
-import { CartProvider } from './context/cartContext';
-import { AuthProvider } from './context/authContext';
+import { CartProvider } from '../context/cartContext';
+import { AuthProvider } from '../context/authContext';
 
 export default function MainLayout({children}: {children: ReactNode}) {
     return (

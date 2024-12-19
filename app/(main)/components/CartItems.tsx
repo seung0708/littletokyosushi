@@ -1,4 +1,4 @@
-import { useCart, CartItem } from "../context/cartContext"
+import { useCart, CartItem } from "../../context/cartContext"
 
 const CartItems = ({ cartItems }: { cartItems: CartItem[] }) => {
     const { removeItemFromCart} = useCart();

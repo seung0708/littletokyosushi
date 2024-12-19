@@ -9,11 +9,10 @@ import { redirect } from 'next/navigation';
 interface AuthContextType {
     user: User | null; 
     isLoading: boolean;
-    login: (email: string, password: string) => Promise<void>;
-    logout: () => Promise<void>;
-    googleLogin: () => Promise<void>;
+    signin: (email: string, password: string) => Promise<void>;
+    signout: () => Promise<void>;
+    googleSignin: () => Promise<void>;
     signup: (email: string, password: string) => Promise<void>;
-
     resetPassword: (password: string, token: string) => Promise<void>;
 };
 
@@ -85,9 +84,9 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         }
     };
     
-    const login = async (email: string, password: string) => {
+    const signin = async (email: string, password: string) => {
         try {
-            const response = await fetch('/api/auth/login', {
+            const response = await fetch('/api/auth/signin', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -106,7 +105,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         }
     };
 
-    const googleLogin = async () => {
+    const googleSignin = async () => {
         try {
             const response = await fetch('/api/auth/oauth', {
                 method: 'POST',
@@ -126,7 +125,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         }
     };
 
-    const logout = async () => {
+    const signout = async () => {
         try {
             const response = await fetch('/api/auth/logout', {
                 method: 'POST',
@@ -166,7 +165,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     };
 
     return (    
-        <AuthContext.Provider value={{user, isLoading, login, logout, googleLogin, resetPassword, signup}}>
+        <AuthContext.Provider value={{user, isLoading, signin, signout, googleSignin, resetPassword, signup}}>
             {children}
         </AuthContext.Provider>
     )

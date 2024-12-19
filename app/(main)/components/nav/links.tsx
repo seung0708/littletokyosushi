@@ -1,6 +1,6 @@
 'use client';
 
-import { useAuth } from "../../context/authContext"
+import { useAuth } from "../../../context/authContext"
 import NavLink from "./navLink"
 
 export default function Links({ className = "", showSpan = false }) {
@@ -14,9 +14,9 @@ export default function Links({ className = "", showSpan = false }) {
     
     const authLinks = user ? [
         {name: 'Account', href: '/account'},
-        {name: 'Logout', href: '/logout'},
+        {name: 'Sign Out', href: '/signout'},
     ] : [
-        {name: 'Login', href: '/login'},
+        {name: 'Sign In', href: '/signin'},
     ];
     
     const links = [...publicLinks, ...authLinks];

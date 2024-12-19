@@ -1,5 +1,5 @@
-import { AuthProvider } from "../(main)/context/authContext"
-import { CartProvider } from "../(main)/context/cartContext"
+import { AuthProvider } from "../context/authContext"
+import { CartProvider } from "../context/cartContext"
 
 // Add this to break layout inheritance
 export const metadata = {
