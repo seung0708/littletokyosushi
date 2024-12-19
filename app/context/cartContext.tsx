@@ -61,19 +61,18 @@ export const CartProvider = ({ children }: CartProviderProps) => {
             try {
                 if (!storedCartId) {
                     // Create new cart if none exists
-                    const response = await fetch('/api/main/cart', {
-                        method: 'POST',
+                    const response = await fetch('/api/store/cart', {
+                        method: 'GET',
                         headers: {
                             'Content-Type': 'application/json',
                         },
-                        body: JSON.stringify({}),
                     });
                     const data = await response.json();
                     localStorage.setItem('cartId', data.id);
                     setCartId(data.id);
                 } else {
                     // Fetch existing cart items
-                    const response = await fetch(`/api/main/cart/${storedCartId}`);
+                    const response = await fetch(`/api/store/cart/${storedCartId}`);
                     const data = await response.json();
                     setCartItems(data);
                 }

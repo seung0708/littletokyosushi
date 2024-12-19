@@ -42,7 +42,7 @@
     "jest-environment-jsdom": "^29.7.0",
     "lucide-react": "^0.451.0",
     "mini-css-extract-plugin": "^2.9.2",
-    "next": "14.2.14",
+    "next": "^14.2.21",
     "notenv": "^2.0.3",
     "prettier": "^3.3.3",
     "react": "^18",
