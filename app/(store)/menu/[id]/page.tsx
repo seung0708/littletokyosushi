@@ -148,12 +148,12 @@ export default function ItemDetailsPage({ params }: { params: { id: string } }) 
                 modifiers: cartModifiers
             };
 
-            console.log('Submitting cart item:', cartItem);
+            //console.log('Submitting cart item:', cartItem);
             await addItemToCart(cartItem);
             
             // Reset form
             form.reset();
-            console.log('Item added to cart successfully');
+            //console.log('Item added to cart successfully');
         } catch (error) {
             console.error('Error adding item to cart:', error);
         }

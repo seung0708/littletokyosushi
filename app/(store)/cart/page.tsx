@@ -3,9 +3,9 @@ import { useCart, CartItem } from "../../context/cartContext";
 import { useRouter } from "next/navigation"
 
 const CartPage: React.FC = () => {
-    const { cartItems, removeItemFromCart, updateItemQuantity } = useCart();
+    const { cartItems} = useCart();
     const router = useRouter();
-
+    console.log(cartItems)
     const handleClick = () => {
         router.push('/checkout')
     }
