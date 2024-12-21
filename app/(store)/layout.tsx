@@ -1,15 +1,15 @@
 import {ReactNode} from 'react';
 import Header from '../../components/store/header';
-import { CartProvider } from '../context/cartContext';
-import { AuthProvider } from '../context/authContext';
+import { CartProvider } from '@/app/context/cartContext';
+import { AuthProvider } from '@/app/context/authContext';
 
 export default function MainLayout({children}: {children: ReactNode}) {
     return (
-        <CartProvider>
-            <AuthProvider>
+        <AuthProvider>
+            <CartProvider>
                 <Header />
                 <main>{children}</main>
-            </AuthProvider>
-        </CartProvider>
+            </CartProvider>
+        </AuthProvider>
     )
 }

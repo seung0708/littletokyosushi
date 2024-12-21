@@ -1,9 +1,7 @@
 'use client';
 import { createContext, useContext, useEffect, useState } from 'react';
 import { User } from '@supabase/supabase-js';
-import { useCart } from './cartContext';
 import { createClient } from '@/lib/supabase/client';
-import { error } from 'console';
 import { redirect } from 'next/navigation';
 
 interface AuthContextType {
@@ -30,11 +28,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     const [user, setUser] = useState<User | null>(null);
     const [isLoading, setIsLoading] = useState(true);
     const supabase = createClient();
-    const {cartId} = useCart();
-
     
-
-
     useEffect(() => {
         const fetchUser = async () => {
             const {data: {user}, error}  = await supabase.auth.getUser();
@@ -42,7 +36,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
             setIsLoading(false);
 
             const {data: {subscription}} = await supabase.auth.onAuthStateChange(async (_event, session) => {
-                setUser(user ?? null);
+                setUser(session?.user ?? null); 
                 setIsLoading(false);
             })
 
@@ -50,18 +44,6 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         }
         fetchUser();
     }, []);
-
-    const handleCartMerge = async (userId: string) => {
-        if(cartId) {
-            await fetch(`/api/main/cart/merge`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({ guestCartId: cartId, userId }),
-            });
-        }
-    }
 
     const signup = async (email: string, password: string) => {
         try {
@@ -75,9 +57,6 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
             const {data: {user}, error} = await response.json();
             if (!response.ok) {
                 throw new Error(error || 'Failed to sign up');
-            }
-            if(user) {
-                await handleCartMerge(user.id);
             }
         } catch (error) {
             console.error('Eror signing up:', error);
@@ -96,9 +75,6 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
             const {data: {user}, error} = await response.json();
             if (!response.ok) {
                 throw new Error(error || 'Failed to sign in');
-            }
-            if(user) {
-                await handleCartMerge(user.id);
             }
         } catch (error) {
             console.error('Eror signing in:', error);
@@ -136,9 +112,6 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
             const {data: {user}, error} = await response.json();
             if (!response.ok) {
                 throw new Error(error || 'Failed to sign out');
-            }
-            if(user) {
-                await handleCartMerge(user.id);
             }
         } catch (error) {
             console.error('Error signing out:', error);

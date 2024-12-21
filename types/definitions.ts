@@ -18,6 +18,31 @@ export default interface Inventory {
     low_stock_threshold: number;
     sync_status: boolean
 }
+export interface Modifier {
+    id: number;
+    name: string;
+    min_selections: number;
+    max_selections: number;
+    is_required: boolean;
+    modifier_options: {
+        id: number;
+        name: string;
+        price: number;
+    }[];
+};
+
+export interface CartItem {
+    menu_item_id: number;
+    quantity: number;
+    base_price: number;
+    total_price: number;
+    modifiers: {
+        id: number;
+        selectedOptions: number[];
+    }[];
+}
+
+
 export interface Item {
     id: number; 
     name: string; 
@@ -31,6 +56,7 @@ export interface Item {
     quantity_in_stock: number ;
     low_stock_threshold: number;
     sync_status: boolean
+    modifiers: Modifier[]
 }
 
 export type ItemFormData = {

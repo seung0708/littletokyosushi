@@ -98,8 +98,6 @@ export default function EditItemPage({ params }: { params: { id: string } }) {
         const errorData = await response.json();
         throw new Error(errorData.error || 'Failed to update item');
       }
-
-      toast.success('Item updated successfully');
       router.push('/items');
       router.refresh();
     } catch (error) {
