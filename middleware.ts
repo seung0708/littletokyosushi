@@ -13,11 +13,10 @@ export async function middleware(request: NextRequest) {
     //console.log('Checking admin auth for path:', path);
     
     // Skip auth check for these paths
-    const publicPaths = ['/login', '/api/auth/login']
+    const publicPaths = ['/login', '/api/auth/signin']
     if (publicPaths.includes(path)) {
       return response
     }
-
     // Check authentication for protected routes
     const { data: { user } } = await supabase.auth.getUser()
     

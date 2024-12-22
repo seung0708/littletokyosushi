@@ -32,17 +32,26 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     useEffect(() => {
         const fetchUser = async () => {
             const {data: {user}, error}  = await supabase.auth.getUser();
-            setUser(user ?? null);
+            if (user) {
+                setUser(user);
+            } else {
+                setUser(null);
+            }
             setIsLoading(false);
-
-            const {data: {subscription}} = await supabase.auth.onAuthStateChange(async (_event, session) => {
-                setUser(session?.user ?? null); 
-                setIsLoading(false);
-            })
-
-            return () => subscription.unsubscribe();
         }
         fetchUser();
+
+        const {data: {subscription}} = supabase.auth.onAuthStateChange(async (_event, session) => {
+            setUser(session?.user ?? null); 
+            if (session?.user) {
+                localStorage.setItem('user', JSON.stringify(session.user));
+            } else {
+                localStorage.removeItem('user');
+            }
+            setIsLoading(false);
+        })
+
+        return () => subscription.unsubscribe();
     }, []);
 
     const signup = async (email: string, password: string) => {
@@ -54,10 +63,14 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
                 },
                 body: JSON.stringify({ email, password }),
             });
-            const {data: {user}, error} = await response.json();
+            const user = await response.json();
+            setUser(user);
+            localStorage.setItem('user', JSON.stringify(user));
+            console.log(user)
             if (!response.ok) {
-                throw new Error(error || 'Failed to sign up');
+                throw new Error(user.error || 'Failed to sign up');
             }
+            
         } catch (error) {
             console.error('Eror signing up:', error);
         }
@@ -72,9 +85,11 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
                 },
                 body: JSON.stringify({ email, password }),
             });
-            const {data: {user}, error} = await response.json();
+            const data = await response.json();
+            console.log(data);
+            
             if (!response.ok) {
-                throw new Error(error || 'Failed to sign in');
+                throw new Error('Failed to sign in');
             }
         } catch (error) {
             console.error('Eror signing in:', error);
@@ -103,16 +118,18 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
     const signout = async () => {
         try {
-            const response = await fetch('/api/auth/logout', {
+            const response = await fetch('/api/auth/signout', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                 },
             });
-            const {data: {user}, error} = await response.json();
+            const data = await response.json();
             if (!response.ok) {
-                throw new Error(error || 'Failed to sign out');
+                throw new Error(data.error || 'Failed to sign out');
             }
+            localStorage.removeItem('user');
+            setUser(null);  
         } catch (error) {
             console.error('Error signing out:', error);
         }

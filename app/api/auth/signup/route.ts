@@ -26,14 +26,14 @@ export async function POST(req: NextRequest) {
     // Then create the customer record
     const { error: customerError } = await supabase
       .from('customers')
-      .insert([
+      .insert( 
         { 
           id: user.id,
           email: user.email,
           created_at: new Date().toISOString(),
           updated_at: new Date().toISOString()
         }
-      ]);
+      );
 
     if (customerError) {
       // If customer creation fails, we should ideally delete the auth user

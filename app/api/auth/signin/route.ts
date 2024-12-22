@@ -15,30 +15,17 @@ export async function POST(req: Request) {
   const supabase = await createClient()
 
   try {
-    const { data: { user }, error } = await supabase.auth.signInWithPassword({
+    const { data, error } = await supabase.auth.signInWithPassword({
       email, 
       password
     })
-
-    if (user) {
-      const {error} = await supabase.from('customers').insert({
-        user_id: user.id,
-        email: user.email,
-        created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString()
-      })
-      if (error) {
-        console.error('Error inserting customer record:', error);
-        return NextResponse.json({error: error.message}, {status: 500})
-      }
-    }
   
     if (error) {
       console.error('Login error:', error);
       return NextResponse.json({error: error.message}, {status: 400})
     }
-  
-    return NextResponse.json(user);
+    
+    return NextResponse.json(data);
   } catch (error) {
     console.error('Unexpected error during login:', error);
     return NextResponse.json({error: 'An unexpected error occurred'}, {status: 500})
