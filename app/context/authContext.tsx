@@ -49,7 +49,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
             return () => subscription.unsubscribe();
         }
         fetchUser();
-    }, []);
+    }, []); 
 
     const handleCartMerge = async (userId: string) => {
         if(cartId) {
