@@ -12,12 +12,12 @@ export default function AuthLayout({
     children: React.ReactNode
 }) {
     return (
-        <CartProvider>
-            <AuthProvider>
+        <AuthProvider>
+            <CartProvider>
                 <div className="flex items-center justify-center bg-gray-50">
                     {children}
                 </div>
-            </AuthProvider>
-        </CartProvider>
+            </CartProvider>
+        </AuthProvider>
     )
 }
