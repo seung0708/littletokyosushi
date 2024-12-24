@@ -59,7 +59,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
             if (!response.ok) {
                 throw new Error(error || 'Failed to sign up');
             }
-            redirect('/login');
+            redirect('/confirm');
         } catch (error) {
             console.error('Eror signing up:', error);
         }
