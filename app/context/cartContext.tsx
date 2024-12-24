@@ -1,5 +1,6 @@
 'use client'
 import React, { createContext, useContext, useEffect, useState } from "react";
+import { useAuth } from "./authContext";
 
 export interface CartItem  {
     cart_id?: string;
@@ -48,11 +49,13 @@ interface CartProviderProps {
 }
 
 export const CartProvider = ({ children }: CartProviderProps) => {
+    const { user } = useAuth();
+    let customerId = user?.id;
     const [cartItems, setCartItems] = useState<CartItem[]>([]);
     const [cartId, setCartId] = useState<string | null>(null);
     const [isCartLoading, setIsCartLoading] = useState(false);
     const [cartError, setCartError] = useState<string | null>(null);
-    
+
     const fetchCart = async () => {
         try {
             setIsCartLoading(true);
@@ -81,40 +84,83 @@ export const CartProvider = ({ children }: CartProviderProps) => {
         try {
             setIsCartLoading(true);
             setCartError(null);
-            if(!cartId) {
-                const response = await fetch('/api/store/cart', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({
-                        cart_items: [item],
-                    }),
-                });
-                if (!response.ok) {
-                    const error = await response.json();
-                    throw new Error(error.error || 'Failed to add item to cart');
+            if(!customerId) { 
+                if(!cartId) {
+                    const response = await fetch('/api/store/cart', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({
+                            cart_items: [item],
+                            customer_id: customerId,
+                        }),
+                    });
+                    if (!response.ok) {
+                        const error = await response.json();
+                        throw new Error(error.error || 'Failed to add item to cart');
+                    }
+                    const data = await response.json();
+                    setCartId(data.cart_id);
+                    setCartItems(data.cart_items || []);
+                   
+                } 
+                else {
+                    // const response = await fetch(`/api/store/cart/${cartId}`, {
+                    //     method: 'PATCH',
+                    //     headers: {
+                    //         'Content-Type': 'application/json',
+                    //     },
+                    //     body: JSON.stringify({
+                    //         cart_items: [...cartItems, item]
+                    //     }),
+                    // });
+                    // if (!response.ok) {
+                    //     const error = await response.json();
+                    //     throw new Error(error.error || 'Failed to add item to cart');
+                    // }
+                    // const data = await response.json();
+                    // setCartItems(data.cart_items || []);
                 }
-                const data = await response.json();
-                setCartId(data.cart_id);
-                setCartItems(data.cart_items || []);
-            } else {
-                const response = await fetch(`/api/store/cart/${cartId}`, {
-                    method: 'PATCH',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({
-                        cart_items: [...cartItems, item]
-                    }),
-                });
-                if (!response.ok) {
-                    const error = await response.json();
-                    throw new Error(error.error || 'Failed to add item to cart');
-                }
-                const data = await response.json();
-                setCartItems(data.cart_items || []);
-            }
+            } 
+            // else { 
+            //     if(!cartId) {
+            //         const response = await fetch('/api/store/cart', {
+            //             method: 'POST',
+            //             headers: {
+            //                 'Content-Type': 'application/json',
+            //             },
+            //             body: JSON.stringify({
+            //                 cart_items: [...cartItems, item], 
+            //                 customer_id: customerId
+            //             }),
+            //         });
+            //         if (!response.ok) {
+            //             const error = await response.json();
+            //             throw new Error(error.error || 'Failed to add item to cart');
+            //         }
+            //         const data = await response.json();
+            //         setCartId(data.cart_id);
+            //         setCartItems(data.cart_items || []);
+            //     } else {
+            //         const response = await fetch(`/api/store/cart/${cartId}`, {
+            //             method: 'PATCH',
+            //             headers: {
+            //                 'Content-Type': 'application/json',
+            //             }, 
+            //             body: JSON.stringify({
+            //                 cart_items: [...cartItems, item],
+            //                 customer_id: customerId
+            //             }),
+            //         });
+            //         if (!response.ok) {
+            //             const error = await response.json();
+            //             throw new Error(error.error || 'Failed to add item to cart');
+            //         }
+            //         const data = await response.json();
+            //         setCartItems(data.cart_items || []);
+            //     }
+            // }
         } catch (error) {
             console.error('Error adding item to cart:', error);
             setCartError(error instanceof Error ? error.message : 'Failed to add item to cart');
@@ -122,7 +168,7 @@ export const CartProvider = ({ children }: CartProviderProps) => {
         } finally {
             setIsCartLoading(false);
         }
-    };
+};
 
     useEffect(() => {   
         fetchCart();

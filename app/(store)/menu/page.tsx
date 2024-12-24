@@ -50,12 +50,12 @@ const MenuPage: React.FC = () => {
         const fetchData = async () => {
             try {
                 setIsLoading(true);
-                const itemsResponse = await fetch('/api/main/items');
+                const itemsResponse = await fetch('/api/store/items');
                 const items = await itemsResponse.json();
                 console.log(items)
                 setItems(items.items)
 
-                const categoriesResponse = await fetch('/api/main/categories');
+                const categoriesResponse = await fetch('/api/store/categories');
                 const categories = await categoriesResponse.json();
                 console.log(categories)
                 setCategories(categories)

@@ -8,7 +8,6 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
-import { cp } from 'fs';
 
 const formSchema = z.object({
   email: z.string().email('Invalid email format'),

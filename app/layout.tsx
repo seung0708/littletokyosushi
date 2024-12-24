@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import "./globals.css";
+import { poppins } from "./fonts/fonts";
 
 // Metadata for the page
 export const metadata: Metadata = {
@@ -15,7 +16,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <title>{metadata.title as string}</title>
         <meta name="description" content={metadata.description as string} />
       </head>
-      <body className={`h-screen`}>
+      <body className={`h-screen ${poppins.className}`}>
         {children}
       </body>
     </html>
