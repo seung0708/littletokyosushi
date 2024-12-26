@@ -5,13 +5,18 @@ export async function POST(req: NextRequest) {
   console.log('Signout post handler called')
   const supabase = await createClient()
 
-  // Check if a user's logged in
-  const {
-    data: { user },
-  } = await supabase.auth.getUser()
- 
-  if (user) {
-    await supabase.auth.signOut()
+  try {
+    const {error } = await supabase.auth.signOut()
+
+    if (error) {
+      console.error('Error signing out:', error);
+      return NextResponse.json({ error: error.message }, { status: 400 });
+    }
+
+    return NextResponse.json({ message: 'Signed out successfully' });
+  } catch (error) {
+    console.error('Unexpected error during signout:', error);
+    return NextResponse.json({ error: 'An unexpected error occurred' }, { status: 500 });
   }
-  return NextResponse.json(user);
+
 }

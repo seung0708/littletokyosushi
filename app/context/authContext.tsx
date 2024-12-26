@@ -2,7 +2,6 @@
 import { createContext, useContext, useEffect, useState } from 'react';
 import { User } from '@supabase/supabase-js';
 import { createClient } from '@/lib/supabase/client';
-import { error } from 'console';
 import { redirect } from 'next/navigation';
 
 interface AuthContextType {
@@ -33,8 +32,13 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     useEffect(() => {
         const fetchUser = async () => {
             const {data: {user}, error}  = await supabase.auth.getUser();
-            setUser(user ?? null);
+            if (user) {
+                setUser(user);
+            } else {
+                setUser(null);
+            }
             setIsLoading(false);
+            console.log(localStorage.getItem('user'));
             console.log(user);
             const {data: {subscription}} = await supabase.auth.onAuthStateChange(async (_event, session) => {
                 setUser(user ?? null);
@@ -55,9 +59,12 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
                 },
                 body: JSON.stringify({ email, password }),
             });
-            const {data: {user}, error} = await response.json();
+            const user = await response.json();
+            localStorage.setItem('user', JSON.stringify(user));
+            setUser(user);
+            
             if (!response.ok) {
-                throw new Error(error || 'Failed to sign up');
+                throw new Error(user.error || 'Failed to sign up');
             }
             redirect('/confirm');
         } catch (error) {
@@ -74,9 +81,11 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
                 },
                 body: JSON.stringify({ email, password }),
             });
-            const {data: {user}, error} = await response.json();
+            const data = await response.json();
+            console.log(data);
+            
             if (!response.ok) {
-                throw new Error(error || 'Failed to sign in');
+                throw new Error('Failed to sign in');
             }
         } catch (error) {
             console.error('Eror signing in:', error);
@@ -95,9 +104,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
             if (!response.ok) {
                 throw new Error(result.error || 'Failed to sign in with Google');
             } 
-            
-            window.location.href = result.url;
-            console.log(result);
+            redirect('/');
         } catch (error) {
             console.error('Error signing in with Google:', error);
         }
@@ -105,16 +112,19 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
     const signout = async () => {
         try {
-            const response = await fetch('/api/auth/logout', {
+            const response = await fetch('/api/auth/signout', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                 },
+                credentials: 'include',
             });
-            const {data: {user}, error} = await response.json();
+            const data = await response.json();
             if (!response.ok) {
-                throw new Error(error || 'Failed to sign out');
+                throw new Error(data.error || 'Failed to sign out');
             }
+            setUser(null);
+            redirect('/');
         } catch (error) {
             console.error('Error signing out:', error);
         }
