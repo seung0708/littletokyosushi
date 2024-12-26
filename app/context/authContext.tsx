@@ -28,7 +28,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     const [user, setUser] = useState<User | null>(null);
     const [isLoading, setIsLoading] = useState(true);
     const supabase = createClient();
-    
+
     useEffect(() => {
         const fetchUser = async () => {
             const {data: {user}, error}  = await supabase.auth.getUser();
@@ -38,21 +38,17 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
                 setUser(null);
             }
             setIsLoading(false);
+            console.log(localStorage.getItem('user'));
+            console.log(user);
+            const {data: {subscription}} = await supabase.auth.onAuthStateChange(async (_event, session) => {
+                setUser(user ?? null);
+                setIsLoading(false);
+            })
+
+            return () => subscription.unsubscribe();
         }
         fetchUser();
-
-        const {data: {subscription}} = supabase.auth.onAuthStateChange(async (_event, session) => {
-            setUser(session?.user ?? null); 
-            if (session?.user) {
-                localStorage.setItem('user', JSON.stringify(session.user));
-            } else {
-                localStorage.removeItem('user');
-            }
-            setIsLoading(false);
-        })
-
-        return () => subscription.unsubscribe();
-    }, []);
+    }, []); 
 
     const signup = async (email: string, password: string) => {
         try {
@@ -64,13 +60,13 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
                 body: JSON.stringify({ email, password }),
             });
             const user = await response.json();
-            setUser(user);
             localStorage.setItem('user', JSON.stringify(user));
-            console.log(user)
+            setUser(user);
+            
             if (!response.ok) {
                 throw new Error(user.error || 'Failed to sign up');
             }
-            
+            redirect('/confirm');
         } catch (error) {
             console.error('Eror signing up:', error);
         }
@@ -108,9 +104,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
             if (!response.ok) {
                 throw new Error(result.error || 'Failed to sign in with Google');
             } 
-            
-            window.location.href = result.url;
-            console.log(result);
+            redirect('/');
         } catch (error) {
             console.error('Error signing in with Google:', error);
         }
@@ -123,13 +117,14 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
                 headers: {
                     'Content-Type': 'application/json',
                 },
+                credentials: 'include',
             });
             const data = await response.json();
             if (!response.ok) {
                 throw new Error(data.error || 'Failed to sign out');
             }
-            localStorage.removeItem('user');
-            setUser(null);  
+            setUser(null);
+            redirect('/');
         } catch (error) {
             console.error('Error signing out:', error);
         }
@@ -162,4 +157,3 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
     
 }
-

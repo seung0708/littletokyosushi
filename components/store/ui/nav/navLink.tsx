@@ -1,9 +1,10 @@
 import Link from "next/link";
 
 type NavLinkProps = {
-    link: { name: string, href: string, onClick?: () => void }, 
+    link: {name: string, href: string},
     className: string,
     showSpan?: boolean,
+
 };
 
 export default function NavLinks({link, className, showSpan = false}: NavLinkProps) {

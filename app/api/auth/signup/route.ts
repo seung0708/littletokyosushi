@@ -11,7 +11,12 @@ export async function POST(req: NextRequest) {
     // First create the auth user
     const { data: { user }, error: authError } = await supabase.auth.signUp({
       email,
-      password
+      password,
+      options: { 
+        data: {
+          role: 'customer'
+        }
+      }
     });
     console.log(user, authError);
     if (authError) {
@@ -22,26 +27,6 @@ export async function POST(req: NextRequest) {
     if (!user) {
       return NextResponse.json({ error: 'Failed to create user' }, { status: 400 });
     }
-
-    // Then create the customer record
-    const { error: customerError } = await supabase
-      .from('customers')
-      .insert( 
-        { 
-          id: user.id,
-          email: user.email,
-          created_at: new Date().toISOString(),
-          updated_at: new Date().toISOString()
-        }
-      );
-
-    if (customerError) {
-      // If customer creation fails, we should ideally delete the auth user
-      // but Supabase doesn't provide a way to delete auth users via API
-      console.error('Customer creation error:', customerError);
-      return NextResponse.json({ error: customerError.message }, { status: 400 });
-    }
-
     return NextResponse.json(user);
   } catch (error) {
     console.error('Unexpected error during signup:', error);

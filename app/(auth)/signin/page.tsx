@@ -1,11 +1,11 @@
 'use client';
 import AdminSignin from "@/components/auth/adminSignin";
 import CustomerSignin from "@/components/auth/customerSignin";
-
 import { useEffect, useState } from "react";
 
 export default function LoginPage() {
     const [isAdmin, setIsAdmin] = useState(false);
+
 
     useEffect(() => {
         setIsAdmin(window.location.host.startsWith('admin.'))
