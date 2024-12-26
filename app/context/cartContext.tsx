@@ -4,7 +4,6 @@ import { useAuth } from "./authContext";
 
 export interface CartItem  {
     cart_id?: string;
-    cart_id?: string;
     menu_item_id: number
     quantity: number;
     base_price: number;
@@ -19,16 +18,9 @@ export interface CartItemModifier  {
     max_selections: number;
     is_required: boolean;
     modifier_options: CartItemModifierOption[];
-    id: number;
-    name: string;
-    min_selections: number;
-    max_selections: number;
-    is_required: boolean;
-    modifier_options: CartItemModifierOption[];
 };
 
 export interface CartItemModifierOption {
-    id: number;
     id: number;
     name: string;
     price: number;
@@ -41,10 +33,6 @@ interface CartContextType {
     isCartLoading: boolean;
     cartError: string | null;
 }
-    addItemToCart: (item: CartItem) => Promise<void>;
-    isCartLoading: boolean;
-    cartError: string | null;
-}
 
 const CartContext = createContext<CartContextType | null>(null);
 
@@ -52,11 +40,10 @@ export const useCart = () => {
     const context = useContext(CartContext);
     if (!context) {
         throw new Error('useCart must be used within a CartProvider');
-        throw new Error('useCart must be used within a CartProvider');
     }
     return context;
 };
-};
+
 
 interface CartProviderProps {
     children: React.ReactNode;
@@ -196,15 +183,7 @@ export const CartProvider = ({ children }: CartProviderProps) => {
             isCartLoading,
             cartError,
         }}>
-        <CartContext.Provider value={{
-            cartItems,
-            cartId,
-            addItemToCart,
-            isCartLoading,
-            cartError,
-        }}>
             {children}
         </CartContext.Provider>
     );
-};
 };

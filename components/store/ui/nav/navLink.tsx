@@ -1,7 +1,7 @@
 import Link from "next/link";
 
 type NavLinkProps = {
-    link: {name: string, href: string},
+    link: {name: string, href: string, onClick?: () => void},
     className: string,
     showSpan?: boolean,
 
