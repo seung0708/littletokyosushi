@@ -52,12 +52,10 @@ const MenuPage: React.FC = () => {
                 setIsLoading(true);
                 const itemsResponse = await fetch('/api/store/items');
                 const items = await itemsResponse.json();
-                console.log(items)
                 setItems(items.items)
 
                 const categoriesResponse = await fetch('/api/store/categories');
                 const categories = await categoriesResponse.json();
-                console.log(categories)
                 setCategories(categories)
             } catch (error) {
                 console.error('Error fetching data:', error);

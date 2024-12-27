@@ -1,14 +1,39 @@
 'use client'
+import { useEffect, useState } from "react";
 import { useCart, CartItem } from "../../context/cartContext";
 import { useRouter } from "next/navigation"
 
+
 const CartPage: React.FC = () => {
+    const [items, setItems] = useState([])
     const { cartItems} = useCart();
+    //console.log(cartItems, items);
     const router = useRouter();
-    console.log(cartItems)
     const handleClick = () => {
         router.push('/checkout')
     }
+
+    useEffect(() => {
+        const fetchMenuItem = async () => {
+            try {
+                const itemPromises = cartItems.map(async (item) => {
+                    const response = await fetch(`/api/store/items/${item.menu_item_id}`);
+                    if (!response.ok) throw new Error('Failed to fetch item');
+                    return response.json();
+                });
+                
+                const itemsData = await Promise.all(itemPromises);
+                //console.log('Fetched items:', itemsData);
+                setItems(itemsData);
+            } catch (error) {
+                console.error('Error fetching menu items:', error);
+            }
+        };
+    
+        if (cartItems.length > 0) {
+            fetchMenuItem();
+        }
+    }, [cartItems]);
 
     return (
         <div className="mx-auto max-w-7xl px-4 pb-24 sm:px-6 lg:max-w-7xl lg:px-8">
@@ -17,24 +42,26 @@ const CartPage: React.FC = () => {
                 <section aria-labelledby="cart-heading" className="lg:col-span-7">
                     <h2 id="cart-heading" className="sr-only">Items in your shopping cart</h2>
                     <ul role="list" className="divide-y divide-gray-200 border-b border-t border-gray-200">
-                        {cartItems.map((item: CartItem) => (
-                            <li className="flex py-6 sm:py-10">
+                        {items.map(({item}) => {
+                            console.log(item)
+                            return(
+                            <li key={item.id} className="flex py-6 sm:py-10">
                                 <div className="flex-shrink-0">
-                                    <img src={`${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/menu-items/${item.image_urls[0]}`} alt="Front of men&#039;s Basic Tee in sienna." className="h-24 w-24 rounded-md object-cover object-center sm:h-48 sm:w-48" />
+                                    <img src={`${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/menu-items/${item.image_urls[0]}`} alt="" className="h-24 w-24 rounded-md object-cover object-center sm:h-48 sm:w-48" />
                                 </div>
                                 <div className="ml-4 flex flex-1 flex-col justify-between sm:ml-6">
                                     <div className="relative pr-9 sm:grid sm:grid-cols-2 sm:gap-x-6 sm:pr-0">
                                         <div>
                                             <div className="flex justify-between">
                                                 <h3 className="text-sm">
-                                                    <a href="#" className="font-medium hover:text-red-500">Basic Tee</a>
+                                                    <a href="#" className="font-medium hover:text-red-500">{item.name}</a>
                                                 </h3>
                                             </div>
                                             <div className="mt-1 flex text-sm">
                                                 <p className="">Sienna</p>
                                                 <p className="ml-4 border-l border-gray-200 pl-4 ">Large</p>
                                             </div>
-                                            <p className="mt-1 text-sm font-medium text-white">$32.00</p>
+                                            <p className="mt-1 text-sm font-medium">${item.price}.00</p>
                                         </div>
                                         <div className="mt-4 sm:mt-0 sm:pr-9">
                                             <label htmlFor="quantity-0" className="sr-only">Quantity, Basic Tee</label>
@@ -60,7 +87,7 @@ const CartPage: React.FC = () => {
                                     </div>
                                 </div>
                             </li>
-                        ))} 
+                        )})} 
                     </ul>
                 </section>
                 <section aria-labelledby="summary-heading" className="mt-16 rounded-lg bg-gray-50 px-4 py-6 sm:p-6 lg:col-span-5 lg:mt-0 lg:p-8">
@@ -77,7 +104,7 @@ const CartPage: React.FC = () => {
                                     <span className="sr-only">Learn more about how shipping is calculated</span>
                                     <svg className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true" data-slot="icon">
                                         <path 
-                                            fill-rule="evenodd" 
+                                            fillRule="evenodd" 
                                             d="M18 10a8 8 0 1 1-16 0 8 8 0 0 1 16 0ZM8.94 6.94a.75.75 0 1 1-1.061-1.061 3 3 0 1 1 2.871 5.026v.345a.75.75 0 0 1-1.5 0v-.5c0-.72.57-1.172 1.081-1.287A1.5 1.5 0 1 0 8.94 6.94ZM10 15a1 1 0 1 0 0-2 1 1 0 0 0 0 2Z" 
                                             clipRule="evenodd" 
                                         />
@@ -93,7 +120,7 @@ const CartPage: React.FC = () => {
                                     <span className="sr-only">Learn more about how tax is calculated</span>
                                     <svg className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true" data-slot="icon">
                                         <path 
-                                            fill-rule="evenodd" 
+                                            fillRule="evenodd" 
                                             d="M18 10a8 8 0 1 1-16 0 8 8 0 0 1 16 0ZM8.94 6.94a.75.75 0 1 1-1.061-1.061 3 3 0 1 1 2.871 5.026v.345a.75.75 0 0 1-1.5 0v-.5c0-.72.57-1.172 1.081-1.287A1.5 1.5 0 1 0 8.94 6.94ZM10 15a1 1 0 1 0 0-2 1 1 0 0 0 0 2Z" 
                                             clipRule="evenodd" />
                                     </svg>

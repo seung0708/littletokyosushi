@@ -38,7 +38,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
                 setUser(null);
             }
             setIsLoading(false);
-            console.log(localStorage.getItem('user'));
+            //console.log(localStorage.getItem('user'));
             console.log(user);
             const {data: {subscription}} = await supabase.auth.onAuthStateChange(async (_event, session) => {
                 setUser(user ?? null);
