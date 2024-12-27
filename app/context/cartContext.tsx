@@ -56,11 +56,12 @@ export const CartProvider = ({ children }: CartProviderProps) => {
     const [cartId, setCartId] = useState<string>("");
     const [isCartLoading, setIsCartLoading] = useState(false);
     const [cartError, setCartError] = useState<string | null>(null);
+
     useEffect(() => {   
         // First load stored data
         const storedCartId = localStorage.getItem('cartId');
         const storedCartItems = localStorage.getItem('cartItems');
-        console.log(JSON.parse(storedCartItems));
+        console.log(storedCartId, storedCartItems);
         // Update states if data exists
         if (storedCartItems && storedCartItems !== 'undefined' && storedCartItems !== 'null') {
             setCartItems(JSON.parse(storedCartItems));
@@ -124,11 +125,11 @@ export const CartProvider = ({ children }: CartProviderProps) => {
                     }
                     const data = await response.json();
                     console.log(data);
-                    // setCartId(data.cart_id);
-                    // localStorage.setItem('cartId', data.cart_id);
-                    // setCartItems(data.cart_items || []);
-                    // localStorage.setItem('cartItems', JSON.stringify(data.cart_items));
-                    // console.log(localStorage.getItem('cartItems'));
+                    setCartId(data.id);
+                    localStorage.setItem('cartId', data.id);
+                    setCartItems(data.cart_items || []);
+                    localStorage.setItem('cartItems', JSON.stringify(data.cart_items));
+                    console.log(localStorage.getItem('cartItems'));
                 } 
                 else {
                     console.log('Entering else block - should update existing cart');

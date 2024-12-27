@@ -2,8 +2,8 @@ import { createClient } from "@/lib/supabase/server";
 import { NextResponse } from "next/server"; 
 
 interface Cart {
-    id: number;
-    customer_id: number | null;
+    id: string;
+    customer_id: string | null;
     cart_items: {
         menu_item_id: number;
         base_price: number;
@@ -26,10 +26,11 @@ interface Cart {
 }
 
 export async function POST(request: Request) {
-    
+    const supabase = createClient();
+    const { customer_id, cart_items } = await request.json();
     try {
-        const supabase = createClient();
-        const { customer_id, cart_items } = await request.json();
+        let cartItemModifiers = [];
+        let cartItemModifierOptions = [];
         const { data: cart, error: createCartError } = await supabase
             .from('carts')
             .insert({
@@ -66,10 +67,9 @@ export async function POST(request: Request) {
                 { status: 500 }
             );
         }
-        let modifiers = [];
-        let modifierOptions = [];
+        
         if (cart_items[0].modifiers && cart_items[0].modifiers.length > 0) {
-            const { data: cartItemModifiers, error: createCartItemModifiersError } = await supabase
+            const { data: createItemModifiers, error: createCartItemModifiersError } = await supabase
                 .from('cart_item_modifiers')
                 .insert(
                     cart_items[0].modifiers.map((modifier: any) => ({
@@ -86,13 +86,14 @@ export async function POST(request: Request) {
                     { status: 500 }
                 );
             }
-            const {data: cartItemModifierOptions, error: createCartItemModifierOptionsError} = await supabase
+            const {data: createItemModifierOptions, error: createCartItemModifierOptionsError} = await supabase
                 .from('cart_item_modifier_options')
                 .insert(
-                    cart_items[0].modifiers.flatMap((modifier: any) => 
+                    cart_items[0].modifiers.flatMap((modifier: any, index: number) => 
                         modifier.modifier_options.map((option: any) => ({
-                            cart_item_modifiers_id: cartItemModifiers?.[0]?.id,  // Use the first modifier ID (or adjust as needed)
+                            cart_item_modifiers_id: createItemModifiers?.[index]?.id,  // Use the first modifier ID (or adjust as needed)
                             modifier_option_id: option.id,
+                            modifier_id: modifier.id,
                         }))
                     )
                 )
@@ -105,20 +106,20 @@ export async function POST(request: Request) {
                     { status: 500 }
                 );
             }
-            modifiers = cartItemModifiers;
-            modifierOptions = cartItemModifierOptions;
+            cartItemModifiers = createItemModifiers;
+            cartItemModifierOptions = createItemModifierOptions;
         }
          // Enhance cart items with modifiers and modifier options
          const cartItemsWithModifiers = cartItems?.map((cartItem: any) => {
             // Find the corresponding modifiers for this cart item
-            const cartItemModifiersForItem = modifiers.filter((modifier: any) => 
+            const cartItemModifiersForItem = cartItemModifiers.filter((modifier: any) => 
                 modifier.cart_items_id === cartItem.id
             );
             
             // Add the modifier options to the corresponding cart item
             const modifiersWithOptions = cartItemModifiersForItem.map((modifier: any) => ({
                 ...modifier,
-                modifier_options: modifierOptions.filter((option: any) =>
+                modifier_options: cartItemModifierOptions.filter((option: any) =>
                     option.cart_item_modifiers_id === modifier.id
                 ),
             }));
@@ -134,6 +135,8 @@ export async function POST(request: Request) {
             customer_id: cart.customer_id,
             cart_items: cartItemsWithModifiers || [],
         };
+
+        
         
         return NextResponse.json(cartData);
     } catch (error) {
