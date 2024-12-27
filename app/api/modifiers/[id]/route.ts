@@ -16,6 +16,7 @@ export async function GET(req: Request,{ params }: { params: { id: string } }) {
                 is_required,
                 modifier_options (
                     id,
+                    modifier_id,
                     name,
                     price
                 )

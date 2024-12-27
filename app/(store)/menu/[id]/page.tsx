@@ -12,23 +12,43 @@ import { Separator } from '@/components/ui/separator';
 import { MinusIcon, PlusIcon } from "lucide-react";
 import { useCart } from '@/app/context/cartContext';
 import { useAuth } from '@/app/context/authContext';
-import { v4 as uuidv4 } from 'uuid';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
+import { Label } from '@/components/ui/label';
 
 interface FormModifier {
     id: number;
     name: string;
-    selectedOptions: number[];
+    min_selections: number;
+    max_selections: number;
+    is_required: boolean;
+    modifier_options: {
+        id: number;
+        modifier_id: number;
+        name: string;
+        price: number;
+    }[];
 }
 
 const formSchema = z.object({
     quantity: z.number().min(1),
-    modifiers: z.array(z.object({
-        id: z.number(),
-        name: z.string(),
-        selectedOptions: z.array(z.number()).default([])
-    }))
+    modifiers: z.array(
+        z.object({
+            id: z.number(),
+            name: z.string(),
+            min_selections: z.number(),
+            max_selections: z.number(),
+            is_required: z.boolean(),
+            modifier_options: z.array(
+                z.object({
+                    id: z.number(),
+                    modifier_id: z.number(),
+                    name: z.string(),
+                    price: z.number()
+                })
+            )
+        })
+    )
 });
 
 type FormData = z.infer<typeof formSchema>;
@@ -42,13 +62,59 @@ export default function ItemDetailsPage({ params }: { params: { id: string } }) 
     const { addItemToCart } = useCart();
     const { user } = useAuth();
 
-    const form = useForm<FormData>({
+    const form = useForm<z.infer<typeof formSchema>>({
         resolver: zodResolver(formSchema),
         defaultValues: {
             quantity: 1,
             modifiers: []
-        }
+        },
+        mode: "onChange"
     });
+
+    const handleModifierChange = (modifierId: number, option: any, isSelected: boolean) => {
+        const currentModifiers = form.getValues('modifiers');
+        const modifierIndex = currentModifiers.findIndex(m => m.id === modifierId);
+        
+        if (modifierIndex === -1) return;
+        
+        const modifier = modifiers[modifierIndex];
+        const currentOptions = currentModifiers[modifierIndex].modifier_options || [];
+        
+        let newOptions;
+        if (modifier.max_selections === 1) {
+            // Radio button behavior
+            newOptions = isSelected ? [option] : [];
+        } else {
+            // Checkbox behavior
+            if (isSelected) {
+                if (currentOptions.length < modifier.max_selections) {
+                    newOptions = [...currentOptions, option];
+                } else {
+                    return; // Max selections reached
+                }
+            } else {
+                newOptions = currentOptions.filter(opt => opt.id !== option.id);
+            }
+        }
+        
+        const updatedModifiers = [...currentModifiers];
+        updatedModifiers[modifierIndex] = {
+            ...currentModifiers[modifierIndex],
+            modifier_options: newOptions
+        };
+        
+        form.setValue('modifiers', updatedModifiers, { shouldValidate: true });
+    };
+
+    const isFormValid = () => {
+        const formValues = form.getValues();
+        return formValues.modifiers.every(mod => {
+            if (mod.is_required) {
+                return mod.modifier_options.length === mod.max_selections;
+            }
+            return true;
+        });
+    };
 
     useEffect(() => {
         const fetchItem = async () => {
@@ -73,130 +139,93 @@ export default function ItemDetailsPage({ params }: { params: { id: string } }) 
             try {
                 setLoading(true);
                 const response = await fetch(`/api/modifiers/${params.id}`);
-                if (!response.ok) throw new Error('Failed to fetch modifiers');
                 const data = await response.json();
                 setModifiers(data);
                 
-                // Initialize form with modifiers
-                const defaultModifiers = data.map((mod: Modifier) => ({
+                // Initialize form with empty modifier_options arrays
+                const initialModifiers = data.map((mod: Modifier) => ({
                     id: mod.id,
                     name: mod.name,
-                    selectedOptions: []
+                    min_selections: mod.min_selections,
+                    max_selections: mod.max_selections,
+                    is_required: mod.is_required,
+                    modifier_options: []
                 }));
-                form.setValue('modifiers', defaultModifiers);
+                
+                form.reset({
+                    quantity: 1,
+                    modifiers: initialModifiers
+                });
             } catch (error) {
                 console.error('Error fetching modifiers:', error);
-            } finally {
-                setLoading(false);
             }
         };
 
         fetchItem();
-        fetchModifiers();
+        if (params.id) {
+            fetchModifiers();
+        }
     }, [params.id, form]);
 
-    const calculateTotalPrice = (basePrice: number, quantity: number, formModifiers: FormModifier[]) => {
-        const modifierPrice = formModifiers.reduce((total, formMod) => {
-            // Find the actual modifier with options from the state
-            const modifier = modifiers.find(m => m.id === formMod.id);
-            if (!modifier) return total;
-
-            return total + formMod.selectedOptions.reduce((sum, optId) => {
-                const modifierOption = modifier.modifier_options.find(opt => opt.id === optId);
-                return sum + (modifierOption?.price || 0);
-            }, 0);
+    const calculateTotalPrice = (basePrice: number, quantity: number, modifiers: FormModifier[]) => {
+        const modifierPrice = modifiers.reduce((total, mod) => {
+            return total + mod.modifier_options.reduce((optTotal, opt) => optTotal + opt.price, 0);
         }, 0);
-
         return (basePrice + modifierPrice) * quantity;
     };
 
     const onSubmit = async (data: FormData) => {
-        try {
-            if (!item) {
-                throw new Error('Menu item not found');
-            }
+        console.log('onSubmit executing with data:', data);
+        
+        // Validate required selections
+        const invalidModifier = data.modifiers.find(mod => 
+            mod.is_required && mod.modifier_options.length !== mod.max_selections
+        );
 
-            const cartModifiers: CartItemModifier[] = data.modifiers.map(formMod => {
-                const modifier = modifiers.find(m => m.id === formMod.id);
-                if (!modifier) {
-                    throw new Error(`Modifier ${formMod.id} not found`);
-                }
-                
-                const selectedModifierOptions: CartItemModifierOption[] = modifier.modifier_options
-                    .filter(opt => formMod.selectedOptions.includes(opt.id))
-                    .map(opt => ({
-                        id: opt.id,
-                        name: opt.name,
-                        price: opt.price
-                    }));
+        if (invalidModifier) {
+            console.error(`Please select exactly ${invalidModifier.max_selections} options for ${invalidModifier.name}`);
+            return;
+        }
 
-                return {
-                    id: modifier.id,
-                    name: modifier.name,
-                    min_selections: modifier.min_selections,
-                    max_selections: modifier.max_selections,
-                    is_required: modifier.is_required,
-                    modifier_options: selectedModifierOptions
-                };
-            });
+        if (!item) {
+            console.error('Menu item not found');
+            return;
+        }
 
-            const cartItem: CartItem = {
-                menu_item_id: item.id,
-                quantity: data.quantity,
-                base_price: item.price,
-                total_price: calculateTotalPrice(item.price, data.quantity, data.modifiers),
-                modifiers: cartModifiers
+        const cartModifiers: CartItemModifier[] = data.modifiers.map(formMod => {
+            const modifier = modifiers.find(m => m.id === formMod.id);
+            if (!modifier) return null;
+            return {
+                id: modifier.id,
+                name: modifier.name,
+                min_selections: modifier.min_selections,
+                max_selections: modifier.max_selections,
+                is_required: modifier.is_required,
+                modifier_options: formMod.modifier_options.map(opt => ({
+                    id: opt.id,
+                    modifier_id: opt.modifier_id,
+                    name: opt.name,
+                    price: opt.price
+                }))
             };
+        }).filter(Boolean) as CartItemModifier[];
 
-            //console.log('Submitting cart item:', cartItem);
+        const cartItem: CartItem = {
+            menu_item_id: item.id,
+            quantity: data.quantity,
+            base_price: item.price,
+            total_price: calculateTotalPrice(item.price, data.quantity, data.modifiers),
+            modifiers: cartModifiers
+        };
+
+        try {
+            console.log('Adding item to cart:', cartItem);
             await addItemToCart(cartItem);
-            
-            // Reset form
             form.reset();
-            //console.log('Item added to cart successfully');
+            console.log('Item added to cart successfully');
         } catch (error) {
             console.error('Error adding item to cart:', error);
         }
-    };
-
-    const handleModifierChange = (modifierId: number, optionId: number, isSelected: boolean) => {
-        const currentModifiers = form.getValues('modifiers');
-        const modifierIndex = currentModifiers.findIndex(m => m.id === modifierId);
-        
-        if (modifierIndex === -1) return;
-        
-        const currentModifier = modifiers.find(m => m.id === modifierId);
-        if (!currentModifier) return;
-
-        let currentSelections = currentModifiers[modifierIndex].selectedOptions || [];
-        let newSelections: number[];
-
-        if (isSelected) {
-            // Add the new selection if we're below max_selections
-            if (currentSelections.length < currentModifier.max_selections) {
-                newSelections = [...currentSelections, optionId];
-            } else {
-                return; // Don't update if we're at max selections
-            }
-        } else {
-            // Remove the selection if we're above min_selections
-            if (currentSelections.length > currentModifier.min_selections) {
-                newSelections = currentSelections.filter(id => id !== optionId);
-            } else {
-                return; // Don't update if we're at min selections
-            }
-        }
-
-        // Update the form with new selections
-        const updatedModifiers = [...currentModifiers];
-        updatedModifiers[modifierIndex] = {
-            ...currentModifiers[modifierIndex],
-            selectedOptions: newSelections
-        };
-        form.setValue('modifiers', updatedModifiers);
-        
-        // Force a re-render to update UI
-        form.trigger('modifiers');
     };
 
     const handleImageLoad = () => {
@@ -245,85 +274,68 @@ export default function ItemDetailsPage({ params }: { params: { id: string } }) 
                     <p className="text-2xl font-bold mb-6">${item.price.toFixed(2)}</p>
 
                     <Form {...form}>
-                        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+                        <form 
+                            onSubmit={(e) => {
+                                e.preventDefault();
+                                const data = form.getValues();
+                                console.log('Form submitted with data:', data);
+                                onSubmit(data);
+                            }} 
+                            className="space-y-6"
+                        >
+                        {modifiers.map((modifier, index) => (
+                        <div key={modifier.id} className="space-y-4">
+                            <Separator />
+                            <div className="flex justify-between items-center">
+                                <FormLabel>{modifier.name}</FormLabel>
+                                    <p className="text-sm text-gray-500">
+                                        {modifier.is_required ? (
+                                    <span>
+                                        Required
+                                    </span>
+                                    ) : (
+                                        <span>Optional</span>
+                                    )}
+                                    </p>
+                            </div>
                             <FormField
                                 control={form.control}
-                                name="quantity"
+                                name={`modifiers.${index}.modifier_options`}
                                 render={({ field }) => (
                                     <FormItem>
-                                        <FormLabel>Quantity</FormLabel>
-                                        <div className="flex items-center space-x-4">
-                                            <Button
-                                                type="button"
-                                                variant="outline"
-                                                size="icon"
-                                                onClick={() => {
-                                                    const newQuantity = Math.max(1, field.value - 1);
-                                                    form.setValue('quantity', newQuantity);
+                                        <FormControl>
+                                        {modifier.max_selections === 1 ? (
+                                            <RadioGroup
+                                                value={field.value[0]?.id?.toString() || ''}
+                                                onValueChange={(value) => {
+                                                    const option = modifier.modifier_options.find(
+                                                        opt => opt.id.toString() === value
+                                                    );
+                                                    if (option) {
+                                                        handleModifierChange(modifier.id, option, true);
+                                                    }
                                                 }}
                                             >
-                                                <MinusIcon className="h-4 w-4" />
-                                            </Button>
-                                            <span className="text-xl font-semibold">{field.value}</span>
-                                            <Button
-                                                type="button"
-                                                variant="outline"
-                                                size="icon"
-                                                onClick={() => {
-                                                    const newQuantity = field.value + 1;
-                                                    form.setValue('quantity', newQuantity);
-                                                }}
-                                            >
-                                                <PlusIcon className="h-4 w-4" />
-                                            </Button>
-                                        </div>
-                                    </FormItem>
-                                )}
-                            />
-
-                            {modifiers.map((modifier, index) => (
-                                <div key={modifier.id} className="space-y-4">
-                                    <Separator />
-                                    <div className="flex justify-between items-center">
-                                        <FormLabel>{modifier.name}</FormLabel>
-                                        <span className="text-sm text-gray-500">
-                                            {modifier.is_required ? 'Required' : 'Optional'} •{' '}
-                                            {modifier.min_selections === modifier.max_selections
-                                                ? `Select ${modifier.min_selections}`
-                                                : `Select ${modifier.min_selections}-${modifier.max_selections}`}
-                                        </span>
-                                    </div>
-                                    {modifier.max_selections === 1 ? (
-                                        <RadioGroup
-                                            onValueChange={(value) => {
-                                                const optionId = parseInt(value);
-                                                const currentModifiers = form.getValues('modifiers');
-                                                const updatedModifiers = [...currentModifiers];
-                                                updatedModifiers[index] = {
-                                                    ...currentModifiers[index],
-                                                    selectedOptions: [optionId]
-                                                };
-                                                form.setValue('modifiers', updatedModifiers);
-                                            }}
-                                        >
                                             {modifier.modifier_options.map((option) => (
                                                 <div key={option.id} className="flex items-center space-x-2">
-                                                    <RadioGroupItem value={option.id.toString()} id={`option-${option.id}`} />
-                                                    <label htmlFor={`option-${option.id}`} className="flex justify-between w-full">
+                                                    <RadioGroupItem value={option.id.toString()} id={`${modifier.id}-${option.id}`} />
+                                                    <Label htmlFor={`${modifier.id}-${option.id}`} className="flex justify-between w-full">
                                                         <span>{option.name}</span>
                                                         {option.price > 0 && <span>+${option.price.toFixed(2)}</span>}
-                                                    </label>
+                                                    </Label>
                                                 </div>
                                             ))}
-                                        </RadioGroup>
-                                    ) : (
-                                        <div className="space-y-2">
+                                            </RadioGroup>
+                                        ) : (
+                                            <div className="space-y-2">
                                             {modifier.modifier_options.map((option) => {
-                                                const currentSelections = form.getValues(`modifiers.${index}.selectedOptions`) || [];
-                                                const isSelected = currentSelections.includes(option.id);
-                                                const atMaxSelections = currentSelections.length >= modifier.max_selections;
+                                                const formValues = form.getValues();
+                                                const currentModifier = formValues.modifiers[index];
+                                                const currentOptions = currentModifier?.modifier_options || [];
+                                                const isSelected = currentOptions.some(opt => opt.id === option.id);
+                                                const atMaxSelections = currentOptions.length >= modifier.max_selections;
                                                 const isDisabled = !isSelected && atMaxSelections;
-                                                
+
                                                 return (
                                                     <div key={option.id} className="flex items-center space-x-2">
                                                         <Checkbox
@@ -331,27 +343,42 @@ export default function ItemDetailsPage({ params }: { params: { id: string } }) 
                                                             checked={isSelected}
                                                             disabled={isDisabled}
                                                             onCheckedChange={(checked) => {
-                                                                handleModifierChange(modifier.id, option.id, checked as boolean);
+                                                                handleModifierChange(modifier.id, option, checked);
                                                             }}
                                                         />
-                                                        <label 
-                                                            htmlFor={`option-${option.id}`} 
+                                                        <Label
+                                                            htmlFor={`option-${option.id}`}
                                                             className={`flex justify-between w-full ${isDisabled ? 'text-gray-400 cursor-not-allowed' : ''}`}
                                                         >
                                                             <span>{option.name}</span>
                                                             {option.price > 0 && <span>+${option.price.toFixed(2)}</span>}
-                                                        </label>
+                                                        </Label>
                                                     </div>
                                                 );
                                             })}
+                                            </div>
+                                        )}
+                                        </FormControl>
+                                        <div className="text-sm text-red-500 mt-1">
+                                            {modifier.is_required && field.value.length < modifier.min_selections && (
+                                                <span>Please select at least {modifier.min_selections} option{modifier.min_selections > 1 ? 's' : ''}</span>
+                                            )}
+                                            {field.value.length > modifier.max_selections && (
+                                                <span>Cannot select more than {modifier.max_selections} option{modifier.max_selections > 1 ? 's' : ''}</span>
+                                            )}
                                         </div>
-                                    )}
-                                </div>
-                            ))}
-
-                            <Button type="submit" className="w-full">
-                                Add to Cart
-                            </Button>
+                                    </FormItem>
+                                )}
+                            />
+                        </div>
+                        ))}
+                        <Button 
+                            type="submit" 
+                            className="w-full"
+                            disabled={!isFormValid()}
+                        >
+                            Add to Cart
+                        </Button>
                         </form>
                     </Form>
                 </div>

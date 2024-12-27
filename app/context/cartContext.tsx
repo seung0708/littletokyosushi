@@ -56,26 +56,19 @@ export const CartProvider = ({ children }: CartProviderProps) => {
     const [cartId, setCartId] = useState<string>("");
     const [isCartLoading, setIsCartLoading] = useState(false);
     const [cartError, setCartError] = useState<string | null>(null);
-
     useEffect(() => {   
         // First load stored data
         const storedCartId = localStorage.getItem('cartId');
         const storedCartItems = localStorage.getItem('cartItems');
-        
-        console.log('useEffect running');
-        console.log('storedCartId:', storedCartId);
-        console.log('storedCartItems:', storedCartItems);
-        
+        console.log(JSON.parse(storedCartItems));
         // Update states if data exists
         if (storedCartItems && storedCartItems !== 'undefined' && storedCartItems !== 'null') {
-            console.log('Attempting to parse storedCartItems:', storedCartItems);
             setCartItems(JSON.parse(storedCartItems));
         }
         
         if (storedCartId) {
             setCartId(storedCartId);
             if (!storedCartItems || storedCartItems === 'undefined' || storedCartItems === 'null') {
-                console.log('No stored items, fetching cart');
                 fetchCart();
             }
         }
@@ -85,7 +78,7 @@ export const CartProvider = ({ children }: CartProviderProps) => {
         try {
             setIsCartLoading(true);
             setCartError(null);
-            console.log(cartId)
+            
             if(cartId) {
                 const response = await fetch(`/api/store/cart/${cartId}`);
                 if (!response.ok) {
@@ -107,9 +100,6 @@ export const CartProvider = ({ children }: CartProviderProps) => {
 
 
     const addItemToCart = async (item: CartItem) => {
-        console.log('Current cartId state:', cartId);
-        console.log('localStorage cartId:', localStorage.getItem('cartId'));
-        console.log('Type of cartId:', typeof cartId);
         try {
             setIsCartLoading(true);
             setCartError(null);
@@ -134,7 +124,7 @@ export const CartProvider = ({ children }: CartProviderProps) => {
                     }
                     const data = await response.json();
                     console.log(data);
-                    setCartId(data.cart_id);
+                    // setCartId(data.cart_id);
                     // localStorage.setItem('cartId', data.cart_id);
                     // setCartItems(data.cart_items || []);
                     // localStorage.setItem('cartItems', JSON.stringify(data.cart_items));
