@@ -211,6 +211,7 @@ export default function ItemDetailsPage({ params }: { params: { id: string } }) 
         }).filter(Boolean) as CartItemModifier[];
 
         const cartItem: CartItem = {
+            
             menu_item_id: item.id,
             quantity: data.quantity,
             base_price: item.price,
@@ -283,6 +284,40 @@ export default function ItemDetailsPage({ params }: { params: { id: string } }) 
                             }} 
                             className="space-y-6"
                         >
+                        <FormField
+                            control={form.control}
+                            name="quantity"
+                            render={({ field }) => (
+                                <FormItem>
+                                    <FormLabel>Quantity</FormLabel>
+                                    <div className="flex items-center space-x-4">
+                                        <Button
+                                            type="button"
+                                            variant="outline"
+                                            size="icon"
+                                            onClick={() => {
+                                                const newQuantity = Math.max(1, field.value - 1);
+                                                form.setValue('quantity', newQuantity);
+                                            }}
+                                        >
+                                            <MinusIcon className="h-4 w-4" />
+                                        </Button>
+                                        <span className="text-xl font-semibold">{field.value}</span>
+                                        <Button
+                                            type="button"
+                                            variant="outline"
+                                            size="icon"
+                                            onClick={() => {
+                                                const newQuantity = field.value + 1;
+                                                form.setValue('quantity', newQuantity);
+                                            }}
+                                        >
+                                            <PlusIcon className="h-4 w-4" />
+                                        </Button>
+                                    </div>
+                                </FormItem>
+                            )}
+                        />    
                         {modifiers.map((modifier, index) => (
                         <div key={modifier.id} className="space-y-4">
                             <Separator />
@@ -298,6 +333,7 @@ export default function ItemDetailsPage({ params }: { params: { id: string } }) 
                                     )}
                                     </p>
                             </div>
+                            
                             <FormField
                                 control={form.control}
                                 name={`modifiers.${index}.modifier_options`}

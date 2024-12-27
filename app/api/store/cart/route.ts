@@ -1,29 +1,6 @@
 import { createClient } from "@/lib/supabase/server";
 import { NextResponse } from "next/server"; 
-
-interface Cart {
-    id: string;
-    customer_id: string | null;
-    cart_items: {
-        menu_item_id: number;
-        base_price: number;
-        total_price: number;
-        quantity: number;
-        modifiers: {
-            id: number;
-            name: string;
-            min_selections: number;
-            max_selections: number;
-            is_required: boolean;
-            modifier_options: {
-                id: number;
-                modifier_id: number;
-                name: string;
-                price: number;
-            }[];
-        }[];
-    }[];
-}
+import { Cart } from "@/types/definitions";
 
 export async function POST(request: Request) {
     const supabase = createClient();

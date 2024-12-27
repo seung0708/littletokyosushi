@@ -13,6 +13,31 @@ export interface Category {
     category_name: string;
 }
 
+export interface Cart {
+    id: string;
+    customer_id: string | null;
+    cart_items: {
+        menu_item_id: number;
+        base_price: number;
+        total_price: number;
+        quantity: number;
+        modifiers: {
+            id: number;
+            name: string;
+            min_selections: number;
+            max_selections: number;
+            is_required: boolean;
+            modifier_options: {
+                id: number;
+                modifier_id: number;
+                name: string;
+                price: number;
+            }[];
+        }[];
+    }[];
+}
+
+
 export default interface Inventory {
     quantity_in_stock: number ;
     low_stock_threshold: number;
