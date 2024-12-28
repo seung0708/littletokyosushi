@@ -12,29 +12,18 @@ export async function GET(
     const isAdminRequest = pathname.startsWith('/api/items/');
 
     try {
-        if (isAdminRequest) {
-            const authResult = await checkAdminAuth();
-            if ('error' in authResult) {
-                return NextResponse.json({ error: authResult.error }, { status: authResult.status });
-            }
-        }
+        // if (isAdminRequest) {
+        //     const authResult = await checkAdminAuth();
+        //     if ('error' in authResult) {
+        //         return NextResponse.json({ error: authResult.error }, { status: authResult.status });
+        //     }
+        // }
 
         // Fetch the menu item
         const id = parseInt(params.id);
-        const { data: item, error: itemError } = await supabase
+        const { data: itemWithModifiers, error: itemError } = await supabase
             .from('menu_items')
-            .select(`
-                *,
-                categories (
-                    id,
-                    name
-                )${isAdminRequest ? `,
-                inventories (
-                    quantity_in_stock,
-                    low_stock_threshold,
-                    sync_status
-                )` : ''}
-            `)
+            .select('*, modifiers(*, modifier_options(*))')
             .eq('id', id)
             .single();
 
@@ -46,15 +35,33 @@ export async function GET(
             );
         }
 
-        if (!item) {
+        if (!itemWithModifiers) {
             console.log('Item not found:', { itemId: id });
             return NextResponse.json(
                 { error: 'Item not found' },
                 { status: 404 }
             );
         }
-
-        return NextResponse.json({ item });
+        return NextResponse.json({
+            id: itemWithModifiers.id,
+            name: itemWithModifiers.name,
+            description: itemWithModifiers.description,
+            price: itemWithModifiers.price,
+            image_urls: itemWithModifiers.image_urls,
+            modifiers: itemWithModifiers.modifiers.map((mod: any) => ({
+                id: mod.id,
+                name: mod.name,
+                min_selections: mod.min_selections,
+                max_selections: mod.max_selections,
+                is_required: mod.is_required,
+                modifier_options: mod.modifier_options.map((opt: any) => ({
+                    id: opt.id,
+                    modifier_id: opt.modifier_id,
+                    name: opt.name,
+                    price: opt.price
+                }))
+            }))
+        });
     } catch (error) {
         console.error('Unexpected error in GET /api/items/[id]:', error);
         return NextResponse.json(

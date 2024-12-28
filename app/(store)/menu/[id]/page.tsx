@@ -1,7 +1,7 @@
 'use client'
 import {useEffect, useState} from 'react';
 import { Item, Modifier } from '@/types/definitions';
-import { CartItem, CartItemModifier, CartItemModifierOption } from '@/app/context/cartContext';
+import { CartItem, CartItemModifier, CartItemModifierOption } from '@/types/cart';
 import Image from 'next/image';
 import { useForm } from 'react-hook-form';
 import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
@@ -15,6 +15,9 @@ import { useAuth } from '@/app/context/authContext';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
+
+import { createClient } from '@/lib/supabase/client';
 
 interface FormModifier {
     id: number;
@@ -32,6 +35,7 @@ interface FormModifier {
 
 const formSchema = z.object({
     quantity: z.number().min(1),
+    special_instructions: z.string(),
     modifiers: z.array(
         z.object({
             id: z.number(),
@@ -55,12 +59,10 @@ type FormData = z.infer<typeof formSchema>;
 
 export default function ItemDetailsPage({ params }: { params: { id: string } }) {
     const [item, setItem] = useState<Item | null>(null);
-    const [modifiers, setModifiers] = useState<Modifier[]>([]);
     const [loading, setLoading] = useState(true);
     const [loadingImage, setLoadingImage] = useState(true);
     const [selectedImage, setSelectedImage] = useState(0);
     const { addItemToCart } = useCart();
-    const { user } = useAuth();
 
     const form = useForm<z.infer<typeof formSchema>>({
         resolver: zodResolver(formSchema),
@@ -72,6 +74,7 @@ export default function ItemDetailsPage({ params }: { params: { id: string } }) 
     });
 
     const handleModifierChange = (modifierId: number, option: any, isSelected: boolean) => {
+        const {modifiers} = item!;
         const currentModifiers = form.getValues('modifiers');
         const modifierIndex = currentModifiers.findIndex(m => m.id === modifierId);
         
@@ -117,54 +120,26 @@ export default function ItemDetailsPage({ params }: { params: { id: string } }) 
     };
 
     useEffect(() => {
+     
         const fetchItem = async () => {
+            console.log('Fetching item with ID:', params.id);
             try {
                 setLoading(true);
                 const response = await fetch(`/api/store/items/${params.id}`);
                 if (!response.ok) throw new Error('Failed to fetch item');
                 const data = await response.json();
+                console.log('Fetched item data:', data.item);
                 const fetchedItem = data.item;
                 if (!fetchedItem) {
                     throw new Error('No item data in response');
                 }
-                setItem(fetchedItem);
             } catch (error) {
                 console.error('Error fetching item:', error);
             } finally {
                 setLoading(false);
             }
         };
-
-        const fetchModifiers = async () => {
-            try {
-                setLoading(true);
-                const response = await fetch(`/api/modifiers/${params.id}`);
-                const data = await response.json();
-                setModifiers(data);
-                
-                // Initialize form with empty modifier_options arrays
-                const initialModifiers = data.map((mod: Modifier) => ({
-                    id: mod.id,
-                    name: mod.name,
-                    min_selections: mod.min_selections,
-                    max_selections: mod.max_selections,
-                    is_required: mod.is_required,
-                    modifier_options: []
-                }));
-                
-                form.reset({
-                    quantity: 1,
-                    modifiers: initialModifiers
-                });
-            } catch (error) {
-                console.error('Error fetching modifiers:', error);
-            }
-        };
-
         fetchItem();
-        if (params.id) {
-            fetchModifiers();
-        }
     }, [params.id, form]);
 
     const calculateTotalPrice = (basePrice: number, quantity: number, modifiers: FormModifier[]) => {
@@ -187,37 +162,32 @@ export default function ItemDetailsPage({ params }: { params: { id: string } }) 
             return;
         }
 
-        if (!item) {
-            console.error('Menu item not found');
-            return;
-        }
-
         const cartModifiers: CartItemModifier[] = data.modifiers.map(formMod => {
-            const modifier = modifiers.find(m => m.id === formMod.id);
-            if (!modifier) return null;
+            const modifier = item?.modifiers.find(m => m.id === formMod.id);
+            if (!modifier) return [];
             return {
                 id: modifier.id,
-                name: modifier.name,
-                min_selections: modifier.min_selections,
-                max_selections: modifier.max_selections,
-                is_required: modifier.is_required,
+                modifier_id: modifier.id,
+                modifier_name: modifier.name,
                 modifier_options: formMod.modifier_options.map(opt => ({
-                    id: opt.id,
-                    modifier_id: opt.modifier_id,
                     name: opt.name,
                     price: opt.price
                 }))
-            };
+            }
         }).filter(Boolean) as CartItemModifier[];
 
         const cartItem: CartItem = {
-            
-            menu_item_id: item.id,
+            menu_item_id: item?.id || 0,
+            menu_item_name: item?.name || '',
+            menu_item_image: item?.image_urls[0] || '',
             quantity: data.quantity,
-            base_price: item.price,
-            total_price: calculateTotalPrice(item.price, data.quantity, data.modifiers),
-            modifiers: cartModifiers
+            base_price: item?.price || 0,
+            special_instructions: data.special_instructions,
+            total_price: calculateTotalPrice(item?.price || 0, data.quantity, data.modifiers),
+            cart_item_modifiers: cartModifiers
         };
+
+        console.log('cartItem:', cartItem);
 
         try {
             console.log('Adding item to cart:', cartItem);
@@ -272,8 +242,7 @@ export default function ItemDetailsPage({ params }: { params: { id: string } }) 
                 <div>
                     <h1 className="text-3xl font-bold mb-4">{item.name}</h1>
                     <p className="text-gray-600 mb-4">{item.description}</p>
-                    <p className="text-2xl font-bold mb-6">${item.price.toFixed(2)}</p>
-
+                    <p className="text-2xl float-right font-bold mb-6">${item.price.toFixed(2)}</p>
                     <Form {...form}>
                         <form 
                             onSubmit={(e) => {
@@ -289,7 +258,6 @@ export default function ItemDetailsPage({ params }: { params: { id: string } }) 
                             name="quantity"
                             render={({ field }) => (
                                 <FormItem>
-                                    <FormLabel>Quantity</FormLabel>
                                     <div className="flex items-center space-x-4">
                                         <Button
                                             type="button"
@@ -318,96 +286,108 @@ export default function ItemDetailsPage({ params }: { params: { id: string } }) 
                                 </FormItem>
                             )}
                         />    
-                        {modifiers.map((modifier, index) => (
-                        <div key={modifier.id} className="space-y-4">
-                            <Separator />
-                            <div className="flex justify-between items-center">
-                                <FormLabel>{modifier.name}</FormLabel>
-                                    <p className="text-sm text-gray-500">
-                                        {modifier.is_required ? (
-                                    <span>
-                                        Required
-                                    </span>
-                                    ) : (
-                                        <span>Optional</span>
-                                    )}
-                                    </p>
-                            </div>
-                            
-                            <FormField
-                                control={form.control}
-                                name={`modifiers.${index}.modifier_options`}
-                                render={({ field }) => (
-                                    <FormItem>
-                                        <FormControl>
-                                        {modifier.max_selections === 1 ? (
-                                            <RadioGroup
-                                                value={field.value[0]?.id?.toString() || ''}
-                                                onValueChange={(value) => {
-                                                    const option = modifier.modifier_options.find(
-                                                        opt => opt.id.toString() === value
-                                                    );
-                                                    if (option) {
-                                                        handleModifierChange(modifier.id, option, true);
-                                                    }
-                                                }}
-                                            >
-                                            {modifier.modifier_options.map((option) => (
-                                                <div key={option.id} className="flex items-center space-x-2">
-                                                    <RadioGroupItem value={option.id.toString()} id={`${modifier.id}-${option.id}`} />
-                                                    <Label htmlFor={`${modifier.id}-${option.id}`} className="flex justify-between w-full">
-                                                        <span>{option.name}</span>
-                                                        {option.price > 0 && <span>+${option.price.toFixed(2)}</span>}
-                                                    </Label>
+                        {item.modifiers?.map((modifier, index) => (
+                            <div key={modifier.id} className="space-y-4">
+                                <Separator />
+                                <div className="flex justify-between items-center">
+                                    <FormLabel>{modifier.name}</FormLabel>
+                                        <p className="text-sm text-gray-500">
+                                            {modifier.is_required ? (
+                                                <span>Required</span>
+                                                ) : (
+                                                    <span>Optional</span>
+                                                )}
+                                        </p>
+                                </div>                            
+                                <FormField
+                                    control={form.control}
+                                    name={`modifiers.${index}.modifier_options`}
+                                    render={({ field }) => (
+                                        <FormItem>
+                                            <FormControl>
+                                            {modifier.max_selections === 1 ? (
+                                                <RadioGroup
+                                                    value={field.value[0]?.id?.toString() || ''}
+                                                    onValueChange={(value) => {
+                                                        const option = modifier.modifier_options.find(
+                                                            opt => opt.id.toString() === value
+                                                        );
+                                                        if (option) {
+                                                            handleModifierChange(modifier.id, option, true);
+                                                        }
+                                                    }}
+                                                >
+                                                    {modifier.modifier_options.map((option) => (
+                                                        <div key={option.id} className="flex items-center space-x-2">
+                                                            <RadioGroupItem value={option.id.toString()} id={`${modifier.id}-${option.id}`} />
+                                                            <Label htmlFor={`${modifier.id}-${option.id}`} className="flex justify-between w-full">
+                                                                <span>{option.name}</span>
+                                                                {option.price > 0 && <span>+${option.price.toFixed(2)}</span>}
+                                                            </Label>
+                                                        </div>
+                                                    ))}
+                                                </RadioGroup>
+                                                ) : (
+                                                <div className="space-y-2">
+                                                    {modifier.modifier_options.map((option) => {
+                                                        const formValues = form.getValues();
+                                                        const currentModifier = formValues.modifiers[index];
+                                                        const currentOptions = currentModifier?.modifier_options || [];
+                                                        const isSelected = currentOptions.some(opt => opt.id === option.id);
+                                                        const atMaxSelections = currentOptions.length >= modifier.max_selections;
+                                                        const isDisabled = !isSelected && atMaxSelections;
+                                                        return (
+                                                            <div key={option.id} className="flex items-center space-x-2">
+                                                                <Checkbox
+                                                                    id={`option-${option.id}`}
+                                                                    checked={isSelected}
+                                                                    disabled={isDisabled}
+                                                                    onCheckedChange={(checked) => {
+                                                                        handleModifierChange(modifier.id, option, checked);
+                                                                    }}
+                                                                />
+                                                                <Label
+                                                                    htmlFor={`option-${option.id}`}
+                                                                    className={`flex justify-between w-full ${isDisabled ? 'text-gray-400 cursor-not-allowed' : ''}`}
+                                                                >
+                                                                    <span>{option.name}</span>
+                                                                    {option.price > 0 && <span>+${option.price.toFixed(2)}</span>}
+                                                                </Label>
+                                                            </div>
+                                                        );
+                                                    })}
                                                 </div>
-                                            ))}
-                                            </RadioGroup>
-                                        ) : (
-                                            <div className="space-y-2">
-                                            {modifier.modifier_options.map((option) => {
-                                                const formValues = form.getValues();
-                                                const currentModifier = formValues.modifiers[index];
-                                                const currentOptions = currentModifier?.modifier_options || [];
-                                                const isSelected = currentOptions.some(opt => opt.id === option.id);
-                                                const atMaxSelections = currentOptions.length >= modifier.max_selections;
-                                                const isDisabled = !isSelected && atMaxSelections;
-
-                                                return (
-                                                    <div key={option.id} className="flex items-center space-x-2">
-                                                        <Checkbox
-                                                            id={`option-${option.id}`}
-                                                            checked={isSelected}
-                                                            disabled={isDisabled}
-                                                            onCheckedChange={(checked) => {
-                                                                handleModifierChange(modifier.id, option, checked);
-                                                            }}
-                                                        />
-                                                        <Label
-                                                            htmlFor={`option-${option.id}`}
-                                                            className={`flex justify-between w-full ${isDisabled ? 'text-gray-400 cursor-not-allowed' : ''}`}
-                                                        >
-                                                            <span>{option.name}</span>
-                                                            {option.price > 0 && <span>+${option.price.toFixed(2)}</span>}
-                                                        </Label>
-                                                    </div>
-                                                );
-                                            })}
+                                            )}
+                                            </FormControl>
+                                            <div className="text-sm text-red-500 mt-1">
+                                                {modifier.is_required && field.value.length < modifier.min_selections && (
+                                                    <span>Please select at least {modifier.min_selections} option{modifier.min_selections > 1 ? 's' : ''}</span>
+                                                )}
+                                                {field.value.length > modifier.max_selections && (
+                                                    <span>Cannot select more than {modifier.max_selections} option{modifier.max_selections > 1 ? 's' : ''}</span>
+                                                )}
                                             </div>
-                                        )}
-                                        </FormControl>
-                                        <div className="text-sm text-red-500 mt-1">
-                                            {modifier.is_required && field.value.length < modifier.min_selections && (
-                                                <span>Please select at least {modifier.min_selections} option{modifier.min_selections > 1 ? 's' : ''}</span>
-                                            )}
-                                            {field.value.length > modifier.max_selections && (
-                                                <span>Cannot select more than {modifier.max_selections} option{modifier.max_selections > 1 ? 's' : ''}</span>
-                                            )}
-                                        </div>
-                                    </FormItem>
-                                )}
-                            />
-                        </div>
+                                        </FormItem>
+                                    )}
+                                />
+                            </div>
                         ))}
+                        <Separator />
+                        <FormField
+                            control={form.control}
+                            name="special_instructions"
+                            render={({ field }) => (
+                                <FormItem>
+                                    <FormControl>
+                                        <Textarea
+                                            {...field} 
+                                            placeholder="Special Instructions (optional)"
+                                        />
+                                    </FormControl>
+                                    <FormMessage />
+                                </FormItem>
+                                    )}
+                                />
                         <Button 
                             type="submit" 
                             className="w-full"

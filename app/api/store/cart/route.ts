@@ -1,13 +1,11 @@
 import { createClient } from "@/lib/supabase/server";
 import { NextResponse } from "next/server"; 
-import { Cart } from "@/types/definitions";
+import { Cart} from "@/types/cart";
 
 export async function POST(request: Request) {
     const supabase = createClient();
     const { customer_id, cart_items } = await request.json();
     try {
-        let cartItemModifiers = [];
-        let cartItemModifierOptions = [];
         const { data: cart, error: createCartError } = await supabase
             .from('carts')
             .insert({
@@ -35,7 +33,6 @@ export async function POST(request: Request) {
                     total_price: item.total_price
                 }))
             )
-            .select();
         
         if (createCartItemsError) {
             console.error('Error creating cart items:', createCartItemsError);
@@ -54,7 +51,6 @@ export async function POST(request: Request) {
                         modifier_id: modifier.id,
                     }))
                 )
-                .select();
 
             if (createCartItemModifiersError) {
                 console.error('Error creating cart item modifiers:', createCartItemModifiersError);
@@ -63,7 +59,7 @@ export async function POST(request: Request) {
                     { status: 500 }
                 );
             }
-            const {data: createItemModifierOptions, error: createCartItemModifierOptionsError} = await supabase
+            const {error: createCartItemModifierOptionsError} = await supabase
                 .from('cart_item_modifier_options')
                 .insert(
                     cart_items[0].modifiers.flatMap((modifier: any, index: number) => 
@@ -83,35 +79,12 @@ export async function POST(request: Request) {
                     { status: 500 }
                 );
             }
-            cartItemModifiers = createItemModifiers;
-            cartItemModifierOptions = createItemModifierOptions;
         }
-         const cartItemsWithModifiers = cartItems?.map((cartItem: any) => {
-            const cartItemModifiersForItem = cartItemModifiers.filter((modifier: any) => 
-                modifier.cart_items_id === cartItem.id
-            );
-            const modifiersWithOptions = cartItemModifiersForItem.map((modifier: any) => ({
-                ...modifier,
-                modifier_options: cartItemModifierOptions.filter((option: any) =>
-                    option.cart_item_modifiers_id === modifier.id
-                ),
-            }));
-
-            return {
-                ...cartItem,
-                modifiers: modifiersWithOptions,
-            };
-        });
-
-        const cartData: Cart = {
-            id: cart.id,
-            customer_id: cart.customer_id,
-            cart_items: cartItemsWithModifiers || [],
-        };
-
-        
-        
-        return NextResponse.json(cartData);
+         
+        return NextResponse.json(
+            { cart_id: cart.id },
+            { message: 'Cart created successfully' },
+            { status: 200 });
     } catch (error) {
         console.error('Error in cart items API:', error);
         return NextResponse.json(    

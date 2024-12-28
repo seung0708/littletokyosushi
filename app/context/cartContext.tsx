@@ -1,35 +1,15 @@
 'use client'
 import React, { createContext, useContext, useEffect, useState } from "react";
 import { useAuth } from "./authContext";
-
-export interface CartItem  {
-    cart_id?: string;
-    menu_item_id: number
-    quantity: number;
-    base_price: number;
-    total_price: number;
-    modifiers: CartItemModifier[];
-};
-
-export interface CartItemModifier  {
-    id: number;
-    name: string;
-    min_selections: number;
-    max_selections: number;
-    is_required: boolean;
-    modifier_options: CartItemModifierOption[];
-};
-
-export interface CartItemModifierOption {
-    id: number;
-    name: string;
-    price: number;
-};
+import { CartItem, Cart, CartItemModifier, CartItemModifierOption } from "@/types/cart";
+import { createClient } from "@/lib/supabase/client";
+import { useSearchParams } from "next/navigation";
 
 interface CartContextType {
     cartItems: CartItem[];
     cartId: string;
     addItemToCart: (item: CartItem) => Promise<void>;
+    updateCart: (item: CartItem) => Promise<void>;
     isCartLoading: boolean;
     cartError: string | null;
 }
@@ -56,67 +36,45 @@ export const CartProvider = ({ children }: CartProviderProps) => {
     const [cartId, setCartId] = useState<string>("");
     const [isCartLoading, setIsCartLoading] = useState(false);
     const [cartError, setCartError] = useState<string | null>(null);
-    
-    useEffect(() => {   
-        console.log('CartProvider: Loading stored data');
-        // First load stored data
-        const storedCartId = localStorage.getItem('cartId');
-        const storedCartItems = localStorage.getItem('cartItems');
-        
-        console.log('Stored data:', {
-            storedCartId,
-            storedCartItems
-        });
+    const [cartSuccess, setCartSuccess] = useState<string | null>(null);
 
-        // Update states if data exists
-        if (storedCartItems && storedCartItems !== 'undefined' && storedCartItems !== 'null') {
-            const parsedItems = JSON.parse(storedCartItems);
-            setCartItems(parsedItems);
-        }
-        
-        if (storedCartId) {
-            setCartId(storedCartId);
-            if (!storedCartItems || storedCartItems === 'undefined' || storedCartItems === 'null') {
-                console.log('No stored items, fetching cart');
-                fetchCart();
-            }
-        }
-    }, []);
-
-    const fetchCart = async () => {
-        try {
-            setIsCartLoading(true);
-            setCartError(null);
-            
-            if(cartId) {
-                console.log('Fetching cart:', cartId);
-                const response = await fetch(`/api/store/cart/${cartId}`);
-                if (!response.ok) {
-                    const error = await response.json();
-                    throw new Error(error.error || 'Failed to fetch cart');
+    useEffect(() => {
+        const fetchCart = async () => {
+            try {
+                setIsCartLoading(true);
+                setCartError(null);
+                console.log('Fetching cart...');
+                const cartId = localStorage.getItem('cartId');
+                if(cartId) {
+                    console.log('Fetching cart:', cartId);
+                    const response = await fetch(`/api/store/cart/${cartId}`);
+                    if (!response.ok) {
+                        const error = await response.json();
+                        throw new Error(error.error || 'Failed to fetch cart');
+                    }
+                    const data = await response.json();
+                    console.log(data)
+                    setCartItems(data.cart_items || []);
+                    localStorage.setItem('cartItems', JSON.stringify(data.cart_items));
                 }
-                const data = await response.json();
-                console.log('Fetched cart data:', data);
-                setCartItems(data.cart_items || []);
-                localStorage.setItem('cartItems', JSON.stringify(data.cart_items));
+            } catch (error) {
+                console.error('Error fetching cart:', error);
+                setCartError(error instanceof Error ? error.message : 'Failed to fetch cart');
+            } finally {
+                setIsCartLoading(false);
             }
-        } catch (error) {
-            console.error('Error fetching cart:', error);
-            setCartError(error instanceof Error ? error.message : 'Failed to fetch cart');
-        } finally {
-            setIsCartLoading(false);
-        }
-    };
+        };
+        fetchCart();
+    },[cartId]);
 
+   
+    
     const addItemToCart = async (item: CartItem) => {
         try {
             setIsCartLoading(true);
             setCartError(null);
             if(!customerId) {
-                console.log('Entering !customerId block');
-                console.log('!cartId evaluation:', !cartId); 
                 if(!cartId || cartId === '') {
-                    console.log('Entering !cartId block - should create new cart');
                     const response = await fetch('/api/store/cart', {
                         method: 'POST',
                         headers: {
@@ -132,10 +90,9 @@ export const CartProvider = ({ children }: CartProviderProps) => {
                         throw new Error(error.error || 'Failed to add item to cart');
                     }
                     const data = await response.json();
-                    setCartId(data.id);
-                    localStorage.setItem('cartId', data.id);
-                    setCartItems(data.cart_items || []);
-                    localStorage.setItem('cartItems', JSON.stringify(data.cart_items));
+                    setCartId(data.cart_id)
+                    localStorage.setItem('cartId', data.cart_id);
+                    setCartSuccess(data.message);
                 } 
                 else {
                     const response = await fetch(`/api/store/cart/${cartId}`, {
@@ -152,12 +109,12 @@ export const CartProvider = ({ children }: CartProviderProps) => {
                         throw new Error(error.error || 'Failed to add item to cart');
                     }
                     const data = await response.json();
-                    console.log(data);
-                    setCartItems(prevItems => {
-                        const updatedItems = [...prevItems, data];
-                        localStorage.setItem('cartItems', JSON.stringify(updatedItems));
-                        return updatedItems;
-                    });
+                   
+                    // setCartItems(prevItems => {
+                    //     const updatedItems = [...prevItems, data];
+                    //     localStorage.setItem('cartItems', JSON.stringify(updatedItems));
+                    //     return updatedItems;
+                    // });
                 }
             } 
             else { 
@@ -214,11 +171,63 @@ export const CartProvider = ({ children }: CartProviderProps) => {
         }
     };
 
+    const updateCart = async (updatedItem: CartItem) => {
+        try {
+            setIsCartLoading(true);
+            setCartError(null);
+
+            // Get previous state before update
+            const previousCartItems = cartItems;
+
+            // Update local state immediately
+            setCartItems(prevItems => {
+                const updatedItems = prevItems.map(item => 
+                    item.cart_id === updatedItem.cart_id ? {
+                        ...item,
+                        quantity: updatedItem.quantity,
+                        total_price: updatedItem.total_price
+                    } : item
+                );
+                localStorage.setItem('cartItems', JSON.stringify(updatedItems));
+                return updatedItems;
+            });
+
+            // Update the database
+            const response = await fetch(`/api/store/cart/${cartId}`, {
+                method: 'PATCH',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    cart_items: [updatedItem]
+                }),
+            });
+
+            if (!response.ok) {
+                const error = await response.json();
+                // Revert to previous state if update fails
+                setCartItems(previousCartItems);
+                localStorage.setItem('cartItems', JSON.stringify(previousCartItems));
+                throw new Error(error.error || 'Failed to update cart');
+            }
+
+            const updatedCartItem = await response.json();
+            console.log('Updated cart item from server:', updatedCartItem);
+
+        } catch (error) {
+            console.error('Error updating cart:', error);
+            setCartError(error instanceof Error ? error.message : 'Failed to update cart');
+        } finally {
+            setIsCartLoading(false);
+        }
+    };
+
     return (
         <CartContext.Provider value={{
             cartItems,
             cartId,
             addItemToCart,
+            updateCart,
             isCartLoading,
             cartError,
         }}>
@@ -226,5 +235,3 @@ export const CartProvider = ({ children }: CartProviderProps) => {
         </CartContext.Provider>
     );
 };
-
-
