@@ -86,14 +86,10 @@ export async function POST(request: Request) {
             cartItemModifiers = createItemModifiers;
             cartItemModifierOptions = createItemModifierOptions;
         }
-         // Enhance cart items with modifiers and modifier options
          const cartItemsWithModifiers = cartItems?.map((cartItem: any) => {
-            // Find the corresponding modifiers for this cart item
             const cartItemModifiersForItem = cartItemModifiers.filter((modifier: any) => 
                 modifier.cart_items_id === cartItem.id
             );
-            
-            // Add the modifier options to the corresponding cart item
             const modifiersWithOptions = cartItemModifiersForItem.map((modifier: any) => ({
                 ...modifier,
                 modifier_options: cartItemModifierOptions.filter((option: any) =>

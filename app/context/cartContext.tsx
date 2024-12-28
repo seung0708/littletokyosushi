@@ -61,7 +61,7 @@ export const CartProvider = ({ children }: CartProviderProps) => {
         // First load stored data
         const storedCartId = localStorage.getItem('cartId');
         const storedCartItems = localStorage.getItem('cartItems');
-        console.log(storedCartId, storedCartItems);
+        
         // Update states if data exists
         if (storedCartItems && storedCartItems !== 'undefined' && storedCartItems !== 'null') {
             setCartItems(JSON.parse(storedCartItems));
@@ -124,15 +124,12 @@ export const CartProvider = ({ children }: CartProviderProps) => {
                         throw new Error(error.error || 'Failed to add item to cart');
                     }
                     const data = await response.json();
-                    console.log(data);
                     setCartId(data.id);
                     localStorage.setItem('cartId', data.id);
                     setCartItems(data.cart_items || []);
                     localStorage.setItem('cartItems', JSON.stringify(data.cart_items));
-                    console.log(localStorage.getItem('cartItems'));
                 } 
                 else {
-                    console.log('Entering else block - should update existing cart');
                     const response = await fetch(`/api/store/cart/${cartId}`, {
                         method: 'PATCH',
                         headers: {
@@ -149,56 +146,57 @@ export const CartProvider = ({ children }: CartProviderProps) => {
                     const data = await response.json();
                     console.log(data);
                     setCartItems(prevItems => {
-                        // Update state
                         const updatedItems = [...prevItems, data];
-                    
-                        // Update localStorage with the new cartItems
                         localStorage.setItem('cartItems', JSON.stringify(updatedItems));
-                    
-                        // Return updated items to update the state
                         return updatedItems;
                     });
-                    
                 }
             } 
-            // else { 
-            //     if(!cartId) {
-            //         const response = await fetch('/api/store/cart', {
-            //             method: 'POST',
-            //             headers: {
-            //                 'Content-Type': 'application/json',
-            //             },
-            //             body: JSON.stringify({
-            //                 cart_items: [...cartItems, item], 
-            //                 customer_id: customerId
-            //             }),
-            //         });
-            //         if (!response.ok) {
-            //             const error = await response.json();
-            //             throw new Error(error.error || 'Failed to add item to cart');
-            //         }
-            //         const data = await response.json();
-            //         setCartId(data.cart_id);
-            //         setCartItems(data.cart_items || []);
-            //     } else {
-            //         const response = await fetch(`/api/store/cart/${cartId}`, {
-            //             method: 'PATCH',
-            //             headers: {
-            //                 'Content-Type': 'application/json',
-            //             }, 
-            //             body: JSON.stringify({
-            //                 cart_items: [...cartItems, item],
-            //                 customer_id: customerId
-            //             }),
-            //         });
-            //         if (!response.ok) {
-            //             const error = await response.json();
-            //             throw new Error(error.error || 'Failed to add item to cart');
-            //         }
-            //         const data = await response.json();
-            //         setCartItems(data.cart_items || []);
-            //     }
-            // }
+            else { 
+                if(!cartId) {
+                    const response = await fetch('/api/store/cart', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({
+                            cart_items: [...cartItems, item], 
+                            customer_id: customerId
+                        }),
+                    });
+                    if (!response.ok) {
+                        const error = await response.json();
+                        throw new Error(error.error || 'Failed to add item to cart');
+                    }
+                    const data = await response.json();
+                    setCartId(data.id);
+                    localStorage.setItem('cartId', data.id);
+                    setCartItems(data.cart_items || []);
+                    localStorage.setItem('cartItems', JSON.stringify(data.cart_items));
+                } else {
+                    const response = await fetch(`/api/store/cart/${cartId}`, {
+                        method: 'PATCH',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        }, 
+                        body: JSON.stringify({
+                            cart_items: [...cartItems, item],
+                            customer_id: customerId
+                        }),
+                    });
+                    if (!response.ok) {
+                        const error = await response.json();
+                        throw new Error(error.error || 'Failed to add item to cart');
+                    }
+                    const data = await response.json();
+                    console.log(data);
+                    setCartItems(prevItems => {
+                        const updatedItems = [...prevItems, data];
+                        localStorage.setItem('cartItems', JSON.stringify(updatedItems));
+                        return updatedItems;
+                    });
+                }
+            }
         } catch (error) {
             console.error('Error adding item to cart:', error);
             setCartError(error instanceof Error ? error.message : 'Failed to add item to cart');

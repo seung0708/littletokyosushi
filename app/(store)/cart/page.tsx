@@ -2,38 +2,102 @@
 import { useEffect, useState } from "react";
 import { useCart, CartItem } from "../../context/cartContext";
 import { useRouter } from "next/navigation"
-
+import { Modifier } from "@/types/definitions";
 
 const CartPage: React.FC = () => {
     const [items, setItems] = useState([])
-    const { cartItems} = useCart();
-    //console.log(cartItems, items);
+    const [allModifiers, setAllModifiers] = useState<Modifier[][]>([])
+    //console.log('allModifiers', allModifiers);
+    const { cartItems} = useCart(); 
+    console.log('cartItems', cartItems);
     const router = useRouter();
     const handleClick = () => {
         router.push('/checkout')
     }
 
     useEffect(() => {
-        const fetchMenuItem = async () => {
-            try {
-                const itemPromises = cartItems.map(async (item) => {
-                    const response = await fetch(`/api/store/items/${item.menu_item_id}`);
-                    if (!response.ok) throw new Error('Failed to fetch item');
-                    return response.json();
-                });
-                
-                const itemsData = await Promise.all(itemPromises);
-                //console.log('Fetched items:', itemsData);
-                setItems(itemsData);
-            } catch (error) {
-                console.error('Error fetching menu items:', error);
-            }
-        };
-    
         if (cartItems.length > 0) {
             fetchMenuItem();
+            fetchModifiers();
         }
     }, [cartItems]);
+
+
+    const fetchMenuItem = async () => {
+        try {
+            const itemPromises = cartItems.map(async (item) => {
+                const response = await fetch(`/api/store/items/${item.menu_item_id}`);
+                if (!response.ok) throw new Error('Failed to fetch item');
+                return response.json();
+            });
+            
+            const itemsData = await Promise.all(itemPromises);
+            //console.log('Fetched items:', itemsData);
+            setItems(itemsData);
+        } catch (error) {
+            console.error('Error fetching menu items:', error);
+        }
+    };
+
+    const fetchModifiers = async () => {
+        try {
+            const allModifiersMap = new Map<number, Modifier>(); // Use a Map to deduplicate modifiers by ID
+            
+            for (const item of cartItems) {
+                const cartModifiers = item.modifiers;
+    
+                if (!cartModifiers || cartModifiers.length === 0) {
+                    console.warn('No modifiers found for item:', item);
+                    continue;
+                }
+    
+                const response = await fetch(`/api/modifiers/${item.menu_item_id}`);
+                if (!response.ok) throw new Error('Failed to fetch modifiers');
+                const modifiers = await response.json();
+    
+                if (!modifiers || modifiers.length === 0) {
+                    console.warn('No modifiers data returned for item:', item.menu_item_id);
+                    continue;
+                }
+    
+                // Flatten the modifier options for this cart item
+                const allModifierOptions = cartModifiers.flatMap((modifier) => modifier.modifier_options || []);
+    
+                //console.log('allModifierOptions', allModifierOptions);
+                const mergedModifiers = modifiers.map((modifier: Modifier) => {
+                    console.log('modifier', modifier);
+                    console.log('allModifierOptions', allModifierOptions)
+                    const modifierOptions = allModifierOptions.filter(
+                        (option) => option.modifier_id === modifier.id
+                    );
+                    console.log('modifierOptions', modifierOptions);
+                    return {
+                        ...modifier,
+                        modifier_options: modifierOptions.map((option) => ({
+                            id: option.id,
+                            name: modifier.modifier_options.find((modOpt) => modOpt.id === option.modifier_option_id)?.name, // Ensure the 'name' field exists
+                            modifier_option_id: option.modifier_option_id,
+                            modifier_id: option.modifier_id,
+                            created_at: option.created_at,
+                        })),
+                    };
+                });
+    
+                console.log('mergedModifiers', mergedModifiers); // Debug merged modifiers
+    
+                // Add each merged modifier to the Map, overwriting duplicates
+                for (const modifier of mergedModifiers) {
+                    allModifiersMap.set(modifier.id, modifier);
+                }
+            }
+    
+            // Convert the Map back to an array and update state
+            const allModifierData = Array.from(allModifiersMap.values());
+            setAllModifiers(allModifierData); // Update state with the deduplicated array
+        } catch (error) {
+            console.error('Error fetching modifiers:', error);
+        }
+    };
 
     return (
         <div className="mx-auto max-w-7xl px-4 pb-24 sm:px-6 lg:max-w-7xl lg:px-8">
@@ -43,7 +107,6 @@ const CartPage: React.FC = () => {
                     <h2 id="cart-heading" className="sr-only">Items in your shopping cart</h2>
                     <ul role="list" className="divide-y divide-gray-200 border-b border-t border-gray-200">
                         {items.map(({item}) => {
-                            console.log(item)
                             return(
                             <li key={item.id} className="flex py-6 sm:py-10">
                                 <div className="flex-shrink-0">
@@ -57,13 +120,31 @@ const CartPage: React.FC = () => {
                                                     <a href="#" className="font-medium hover:text-red-500">{item.name}</a>
                                                 </h3>
                                             </div>
-                                            <div className="mt-1 flex text-sm">
-                                                <p className="">Sienna</p>
-                                                <p className="ml-4 border-l border-gray-200 pl-4 ">Large</p>
+                                            <div className="mt-1 text-sm">
+                                            {allModifiers.map((modifier) => (
+                                                <div key={modifier.id} className="modifier">
+                                                    <h2>{modifier.name}</h2>
+                                                    {cartItems.find((cartItem) => cartItem.id === item.id)?.modifier_options.length > 0 ? (
+                                                        <ul>
+                                                            {modifier.modifier_options.map((option) => {
+                                                                //console.log('option', option);
+                                                                return (
+                                                                <li key={option.id}>
+                                                                    {option.name}
+                                                                </li>
+                                                            )})}
+                                                        </ul>
+                                                    ) : (
+                                                        <p>No options available for this modifier.</p>
+                                                    )}
+                                                </div>
+                                            ))}
                                             </div>
-                                            <p className="mt-1 text-sm font-medium">${item.price}.00</p>
                                         </div>
+
                                         <div className="mt-4 sm:mt-0 sm:pr-9">
+                                        <p className="mt-1 text-sm font-medium">${item.price.toFixed(2)}</p>
+
                                             <label htmlFor="quantity-0" className="sr-only">Quantity, Basic Tee</label>
                                             <select id="quantity-0" name="quantity-0" className="max-w-full rounded-md border border-gray-300 py-1.5 text-left text-base font-medium leading-5 text-gray-700 shadow-sm focus:border-red-500 focus:outline-none focus:ring-1 focus:ring-red-500 sm:text-sm">
                                                 <option value="1">1</option>
