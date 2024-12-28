@@ -3,17 +3,37 @@ import { useEffect, useState } from "react";
 import { useCart, CartItem } from "../../context/cartContext";
 import { useRouter } from "next/navigation"
 import { Modifier } from "@/types/definitions";
+import { Form, FormField, FormItem, FormLabel } from "@/components/ui/form";
+import { z } from 'zod';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { useForm } from "react-hook-form";
+import { Button } from "@/components/ui/button";
+import { MinusIcon, PlusIcon } from "lucide-react";
+
+
 
 const CartPage: React.FC = () => {
     const [items, setItems] = useState([])
     const [allModifiers, setAllModifiers] = useState<Modifier[][]>([])
-    //console.log('allModifiers', allModifiers);
+    console.log('allModifiers', allModifiers)
     const { cartItems} = useCart(); 
-    console.log('cartItems', cartItems);
+    //console.log('cartItems', cartItems)
     const router = useRouter();
-    const handleClick = () => {
-        router.push('/checkout')
-    }
+
+    const minQuantity = cartItems.length > 0 ? cartItems[0].quantity : 1;
+
+    const formSchema = z.object({
+        quantity: z.number().min(minQuantity),
+    })
+
+    type FormData = z.infer<typeof formSchema>;
+
+    const form = useForm<FormData>({
+        resolver: zodResolver(formSchema),
+        defaultValues: {
+            quantity: minQuantity
+        }
+    })
 
     useEffect(() => {
         if (cartItems.length > 0) {
@@ -41,67 +61,79 @@ const CartPage: React.FC = () => {
 
     const fetchModifiers = async () => {
         try {
-            const allModifiersMap = new Map<number, Modifier>(); // Use a Map to deduplicate modifiers by ID
-            
-            for (const item of cartItems) {
-                const cartModifiers = item.modifiers;
-    
-                if (!cartModifiers || cartModifiers.length === 0) {
-                    console.warn('No modifiers found for item:', item);
-                    continue;
-                }
-    
+            // Fetch modifiers for each cart item
+            const modifierPromises = cartItems.map(async (item) => {
                 const response = await fetch(`/api/modifiers/${item.menu_item_id}`);
-                if (!response.ok) throw new Error('Failed to fetch modifiers');
-                const modifiers = await response.json();
-    
-                if (!modifiers || modifiers.length === 0) {
-                    console.warn('No modifiers data returned for item:', item.menu_item_id);
-                    continue;
-                }
-    
-                // Flatten the modifier options for this cart item
-                const allModifierOptions = cartModifiers.flatMap((modifier) => modifier.modifier_options || []);
-    
-                //console.log('allModifierOptions', allModifierOptions);
-                const mergedModifiers = modifiers.map((modifier: Modifier) => {
-                    console.log('modifier', modifier);
-                    console.log('allModifierOptions', allModifierOptions)
-                    const modifierOptions = allModifierOptions.filter(
-                        (option) => option.modifier_id === modifier.id
-                    );
-                    console.log('modifierOptions', modifierOptions);
+                if (!response.ok) throw new Error(`Failed to fetch modifiers for item ${item.menu_item_id}`);
+                const fetchedModifierData = await response.json();
+                
+                if (!item.modifiers) {
                     return {
-                        ...modifier,
-                        modifier_options: modifierOptions.map((option) => ({
-                            id: option.id,
-                            name: modifier.modifier_options.find((modOpt) => modOpt.id === option.modifier_option_id)?.name, // Ensure the 'name' field exists
-                            modifier_option_id: option.modifier_option_id,
-                            modifier_id: option.modifier_id,
-                            created_at: option.created_at,
-                        })),
+                        ...item,
+                        modifiers: []
+                    };
+                }
+
+                // Map through the item's selected modifiers
+                const updatedModifiers = item.modifiers.map(selectedMod => {
+                    // Find the full modifier data using modifier_id
+                    const fullModifier = fetchedModifierData.find(mod => mod.id === selectedMod.modifier_id);
+                    if (!fullModifier) return selectedMod;
+
+                    // Map the selected modifier options
+                    const updatedOptions = selectedMod.modifier_options.map(option => {
+                        // Find the full option data from the fetched modifier
+                        const fullOption = fullModifier.modifier_options.find(
+                            opt => opt.id === option.modifier_option_id
+                        );
+                        
+                        return {
+                            ...option,
+                            name: fullOption?.name || 'Unknown Option',
+                            price: fullOption?.price || 0
+                        };
+                    });
+
+                    // Return the modifier with the full data
+                    return {
+                        ...selectedMod,
+                        name: fullModifier.name,
+                        min_selections: fullModifier.min_selections,
+                        max_selections: fullModifier.max_selections,
+                        is_required: fullModifier.is_required,
+                        modifier_options: updatedOptions
                     };
                 });
-    
-                console.log('mergedModifiers', mergedModifiers); // Debug merged modifiers
-    
-                // Add each merged modifier to the Map, overwriting duplicates
-                for (const modifier of mergedModifiers) {
-                    allModifiersMap.set(modifier.id, modifier);
-                }
-            }
-    
-            // Convert the Map back to an array and update state
-            const allModifierData = Array.from(allModifiersMap.values());
-            setAllModifiers(allModifierData); // Update state with the deduplicated array
+
+                return {
+                    ...item,
+                    modifiers: updatedModifiers
+                };
+            });
+
+            const fetchedModifiers = await Promise.all(modifierPromises);
+            console.log('Fetched modifiers:', fetchedModifiers);
+            setAllModifiers(fetchedModifiers);
         } catch (error) {
             console.error('Error fetching modifiers:', error);
         }
     };
-
+    
+    
+    const onSubmit = async (data: FormData) => {
+        const updatedCartItems = cartItems.map(item => ({
+            ...item,
+            quantity: data.quantity
+        }));
+        //console.log('updatedCartItems', updatedCartItems);
+        await updateCart(updatedCartItems);
+        router.push('/checkout');
+    }
+    
     return (
         <div className="mx-auto max-w-7xl px-4 pb-24 sm:px-6 lg:max-w-7xl lg:px-8">
-            <h1 className="text-3xl font-bold tracking-tight text-white sm:text-4xl">Shopping Cart</h1>
+        <h1 className="text-3xl font-bold tracking-tight sm:text-4xl">Shopping Cart</h1>
+        <Form {...form}>
             <form className="mt-12 lg:grid lg:grid-cols-12 lg:items-start lg:gap-x-12 xl:gap-x-16">
                 <section aria-labelledby="cart-heading" className="lg:col-span-7">
                     <h2 id="cart-heading" className="sr-only">Items in your shopping cart</h2>
@@ -120,19 +152,18 @@ const CartPage: React.FC = () => {
                                                     <a href="#" className="font-medium hover:text-red-500">{item.name}</a>
                                                 </h3>
                                             </div>
+        
                                             <div className="mt-1 text-sm">
-                                            {allModifiers.map((modifier) => (
+                                            {allModifiers.find(cartItem => cartItem.menu_item_id === item.id && cartItem.modifiers.length > 0)?.modifiers.map(modifier => (
                                                 <div key={modifier.id} className="modifier">
                                                     <h2>{modifier.name}</h2>
-                                                    {cartItems.find((cartItem) => cartItem.id === item.id)?.modifier_options.length > 0 ? (
+                                                    {modifier.modifier_options && modifier.modifier_options.length > 0 ? (
                                                         <ul>
-                                                            {modifier.modifier_options.map((option) => {
-                                                                //console.log('option', option);
-                                                                return (
+                                                            {modifier.modifier_options.map((option) => (
                                                                 <li key={option.id}>
                                                                     {option.name}
                                                                 </li>
-                                                            )})}
+                                                            ))}
                                                         </ul>
                                                     ) : (
                                                         <p>No options available for this modifier.</p>
@@ -141,28 +172,57 @@ const CartPage: React.FC = () => {
                                             ))}
                                             </div>
                                         </div>
-
                                         <div className="mt-4 sm:mt-0 sm:pr-9">
-                                        <p className="mt-1 text-sm font-medium">${item.price.toFixed(2)}</p>
-
-                                            <label htmlFor="quantity-0" className="sr-only">Quantity, Basic Tee</label>
-                                            <select id="quantity-0" name="quantity-0" className="max-w-full rounded-md border border-gray-300 py-1.5 text-left text-base font-medium leading-5 text-gray-700 shadow-sm focus:border-red-500 focus:outline-none focus:ring-1 focus:ring-red-500 sm:text-sm">
-                                                <option value="1">1</option>
-                                                <option value="2">2</option>
-                                                <option value="3">3</option>
-                                                <option value="4">4</option>
-                                                <option value="5">5</option>
-                                                <option value="6">6</option>
-                                                <option value="7">7</option>
-                                                <option value="8">8</option>
-                                            </select>
-                                            <div className="absolute right-0 top-0">
-                                                <button type="button" className="-m-2 inline-flex p-2 text-white hover:text-red-500">
-                                                    <span className="sr-only">Remove</span>
-                                                    <svg className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true" data-slot="icon">
-                                                        <path d="M6.28 5.22a.75.75 0 0 0-1.06 1.06L8.94 10l-3.72 3.72a.75.75 0 1 0 1.06 1.06L10 11.06l3.72 3.72a.75.75 0 1 0 1.06-1.06L11.06 10l3.72-3.72a.75.75 0 0 0-1.06-1.06L10 8.94 6.28 5.22Z" />
-                                                    </svg>
-                                                </button>
+                                            <div className="flex flex-col items-end">
+                                            {cartItems && cartItems.some(cartItem => cartItem.menu_item_id === item.id) && (
+                                                    <>
+                                                        {cartItems
+                                                            .filter(cartItem => cartItem.menu_item_id === item.id)
+                                                            .slice(0, 1) // Ensure only one match is rendered
+                                                            .map(cartItem => (
+                                                                <div key={cartItem.menu_item_id}>
+                                                                    <p className="mb-2 text-sm font-medium">
+                                                                        ${cartItem.base_price.toFixed(2)}
+                                                                    </p>
+                                                                    <FormField
+                                                                        control={form.control}
+                                                                        name="quantity"
+                                                                        render={({ field }) => (
+                                                                            <FormItem>
+                                                                                <div className="flex items-center space-x-4">
+                                                                                    <Button
+                                                                                        type="button"
+                                                                                        variant="outline"
+                                                                                        size="sm"
+                                                                                        className="h-6 w-6"
+                                                                                        onClick={() => {
+                                                                                            const newQuantity = Math.max(1, cartItem.quantity - 1);
+                                                                                            form.setValue('quantity', newQuantity);
+                                                                                        }}
+                                                                                    >
+                                                                                        <MinusIcon className="h-3 w-3" />
+                                                                                    </Button>
+                                                                                    <span className="text-sm font-medium">{cartItem.quantity}</span>
+                                                                                    <Button
+                                                                                        type="button"
+                                                                                        variant="outline"
+                                                                                        size="sm"
+                                                                                        className="h-6 w-6"
+                                                                                        onClick={() => {
+                                                                                            const newQuantity = cartItem.quantity + 1;
+                                                                                            form.setValue('quantity', newQuantity);
+                                                                                        }}
+                                                                                    >
+                                                                                        <PlusIcon className="h-3 w-3" />
+                                                                                    </Button>
+                                                                                </div>
+                                                                            </FormItem>
+                                                                        )}
+                                                                    />
+                                                                </div>
+                                                            ))}
+                                                    </>
+                                                )}
                                             </div>
                                         </div>
                                     </div>
@@ -172,13 +232,27 @@ const CartPage: React.FC = () => {
                     </ul>
                 </section>
                 <section aria-labelledby="summary-heading" className="mt-16 rounded-lg bg-gray-50 px-4 py-6 sm:p-6 lg:col-span-5 lg:mt-0 lg:p-8">
-                    <h2 id="summary-heading" className="text-lg font-medium text-gray-900">Order summary</h2>
                     <dl className="mt-6 space-y-4">
-                        <div className="flex items-center justify-between">
-                            <dt className="text-sm text-gray-600">Subtotal</dt>
-                            <dd className="text-sm font-medium text-gray-900">$99.00</dd>
-                        </div>
                         <div className="flex items-center justify-between border-t border-gray-200 pt-4">
+                            <dt className="text-base font-medium text-gray-900">Sub Total</dt>
+                            <dd className="text-base font-medium text-gray-900">{cartItems.reduce((total, item) => total + item.base_price * item.quantity, 0).toFixed(2)}</dd>
+                        </div>
+                    </dl>
+                    <div className="mt-6">
+                        <Button type="button" className="w-full rounded-md border border-transparent bg-red-500 px-4 py-3 text-base font-medium text-white shadow-sm hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 focus:ring-offset-gray-50">Checkout</Button>
+                    </div>
+                </section>
+            </form>
+        </Form>
+    </div>
+    
+    )
+
+}
+
+export default CartPage
+
+{/* <div className="flex items-center justify-between border-t border-gray-200 pt-4">
                             <dt className="flex items-center text-sm text-gray-600">
                                 <span>Delivery estimate</span>
                                 <a href="#" className="ml-2 flex-shrink-0 text-gray-400 hover:text-red-500">
@@ -208,20 +282,4 @@ const CartPage: React.FC = () => {
                                 </a>
                             </dt>
                             <dd className="text-sm font-medium text-gray-900">$8.32</dd>
-                        </div>    
-                        <div className="flex items-center justify-between border-t border-gray-200 pt-4">
-                            <dt className="text-base font-medium text-gray-900">Order total</dt>
-                            <dd className="text-base font-medium text-gray-900">$112.32</dd>
-                        </div>
-                    </dl>
-                    <div className="mt-6">
-                        <button onClick={handleClick} type="button" className="w-full rounded-md border border-transparent bg-red-500 px-4 py-3 text-base font-medium text-white shadow-sm hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 focus:ring-offset-gray-50">Checkout</button>
-                    </div>
-                </section>
-            </form>
-        </div>
-    )
-
-}
-
-export default CartPage
+                        </div>     */}

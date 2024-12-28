@@ -56,20 +56,28 @@ export const CartProvider = ({ children }: CartProviderProps) => {
     const [cartId, setCartId] = useState<string>("");
     const [isCartLoading, setIsCartLoading] = useState(false);
     const [cartError, setCartError] = useState<string | null>(null);
-
+    
     useEffect(() => {   
+        console.log('CartProvider: Loading stored data');
         // First load stored data
         const storedCartId = localStorage.getItem('cartId');
         const storedCartItems = localStorage.getItem('cartItems');
         
+        console.log('Stored data:', {
+            storedCartId,
+            storedCartItems
+        });
+
         // Update states if data exists
         if (storedCartItems && storedCartItems !== 'undefined' && storedCartItems !== 'null') {
-            setCartItems(JSON.parse(storedCartItems));
+            const parsedItems = JSON.parse(storedCartItems);
+            setCartItems(parsedItems);
         }
         
         if (storedCartId) {
             setCartId(storedCartId);
             if (!storedCartItems || storedCartItems === 'undefined' || storedCartItems === 'null') {
+                console.log('No stored items, fetching cart');
                 fetchCart();
             }
         }
@@ -81,13 +89,14 @@ export const CartProvider = ({ children }: CartProviderProps) => {
             setCartError(null);
             
             if(cartId) {
+                console.log('Fetching cart:', cartId);
                 const response = await fetch(`/api/store/cart/${cartId}`);
                 if (!response.ok) {
                     const error = await response.json();
                     throw new Error(error.error || 'Failed to fetch cart');
                 }
                 const data = await response.json();
-                console.log(data);
+                console.log('Fetched cart data:', data);
                 setCartItems(data.cart_items || []);
                 localStorage.setItem('cartItems', JSON.stringify(data.cart_items));
             }
@@ -98,7 +107,6 @@ export const CartProvider = ({ children }: CartProviderProps) => {
             setIsCartLoading(false);
         }
     };
-
 
     const addItemToCart = async (item: CartItem) => {
         try {
@@ -204,9 +212,7 @@ export const CartProvider = ({ children }: CartProviderProps) => {
         } finally {
             setIsCartLoading(false);
         }
-};
-
-
+    };
 
     return (
         <CartContext.Provider value={{
@@ -220,3 +226,5 @@ export const CartProvider = ({ children }: CartProviderProps) => {
         </CartContext.Provider>
     );
 };
+
+
