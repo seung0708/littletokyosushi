@@ -39,36 +39,40 @@ export const CartProvider = ({ children }: CartProviderProps) => {
     const [cartSuccess, setCartSuccess] = useState<string | null>(null);
 
     useEffect(() => {
-        const fetchCart = async () => {
-            try {
-                setIsCartLoading(true);
-                setCartError(null);
-                console.log('Fetching cart...');
-                const cartId = localStorage.getItem('cartId');
-                if(cartId) {
-                    console.log('Fetching cart:', cartId);
-                    const response = await fetch(`/api/store/cart/${cartId}`);
-                    if (!response.ok) {
-                        const error = await response.json();
-                        throw new Error(error.error || 'Failed to fetch cart');
-                    }
-                    const data = await response.json();
-                    console.log(data)
-                    setCartItems(data.cart_items || []);
-                    localStorage.setItem('cartItems', JSON.stringify(data.cart_items));
-                }
-            } catch (error) {
-                console.error('Error fetching cart:', error);
-                setCartError(error instanceof Error ? error.message : 'Failed to fetch cart');
-            } finally {
-                setIsCartLoading(false);
-            }
-        };
-        fetchCart();
+        const storedCartItems = localStorage.getItem('cartItems');
+        const storedCartId = localStorage.getItem('cartId');
+        if (storedCartItems) {
+            setCartItems(JSON.parse(storedCartItems));
+        }
+        if (storedCartId) {
+            setCartId(storedCartId);
+        }
     },[cartId]);
 
-   
-    
+    const fetchCart = async () => {
+        try {
+            setIsCartLoading(true);
+            setCartError(null);
+            console.log('Fetching cart...');
+            const cartId = localStorage.getItem('cartId');
+            if(cartId) {
+                console.log('Fetching cart:', cartId);
+                const response = await fetch(`/api/store/cart/${cartId}`);
+                if (!response.ok) {
+                    const error = await response.json();
+                    throw new Error(error.error || 'Failed to fetch cart');
+                }
+                const data = await response.json();
+                return data;
+            }
+        } catch (error) {
+            console.error('Error fetching cart:', error);
+            setCartError(error instanceof Error ? error.message : 'Failed to fetch cart');
+        } finally {
+            setIsCartLoading(false);
+        }
+    };
+
     const addItemToCart = async (item: CartItem) => {
         try {
             setIsCartLoading(true);
@@ -89,10 +93,17 @@ export const CartProvider = ({ children }: CartProviderProps) => {
                         const error = await response.json();
                         throw new Error(error.error || 'Failed to add item to cart');
                     }
-                    const data = await response.json();
-                    setCartId(data.cart_id)
-                    localStorage.setItem('cartId', data.cart_id);
-                    setCartSuccess(data.message);
+                    const data = await response.json(); 
+                    console.log(data);
+                    setCartId(data.cartId);
+                    localStorage.setItem('cartId', data.cartId);
+                    if (data.status = 200) {
+                        const cart = await fetchCart();
+                        console.log(cart);
+                        setCartItems(cart.cart_items);
+                        localStorage.setItem('cartItems', JSON.stringify(cart.cart_items));
+                    }
+
                 } 
                 else {
                     const response = await fetch(`/api/store/cart/${cartId}`, {

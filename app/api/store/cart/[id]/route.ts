@@ -11,14 +11,15 @@ export async function GET(request: Request, { params}: { params: { id: string } 
         cart_items(id, base_price, total_price, quantity, special_instructions, menu_items(name, price, image_urls), 
         cart_item_modifiers(id, modifiers(id, name), 
             cart_item_modifier_options(id, modifier_id, modifier_options(id, name, price))))`)
-    .eq('id', params.id);
+    .eq('id', params.id)
+    .single();
     console.log('dbCart:', dbCart);
 
-    const cart: Cart[] = dbCart?.map((cart: any) => ({
-        id: cart.id,
-        customer_id: cart.customer_id,
-        completed_at: cart.completed_at,
-        cart_items: cart.cart_items.map((cartItem: any) => ({
+    const cart: Cart = {
+        id: dbCart?.id,
+        customer_id: dbCart?.customer_id,
+        completed_at: dbCart?.completed_at,
+        cart_items:  dbCart?.cart_items.map((cartItem: any) => ({
             id: cartItem.id,
             base_price: cartItem.base_price,
             special_instructions: cartItem.special_instructions,
@@ -33,12 +34,13 @@ export async function GET(request: Request, { params}: { params: { id: string } 
                 cart_item_modifier_options: cartItemModifier.cart_item_modifier_options.map((cartItemModifierOption: any) => ({
                     id: cartItemModifierOption.id,
                     modifier_id: cartItemModifierOption.modifier_id,
+                    modifier_option_id: cartItemModifierOption.modifier_options.id,
                     name: cartItemModifierOption.modifier_options.name,
                     price: cartItemModifierOption.modifier_options.price,
                 })),
             })),
-        })),
-    })) || [];
+        })) || [],
+    };
     console.log('cart:', cart, error);
     
     if (error) {

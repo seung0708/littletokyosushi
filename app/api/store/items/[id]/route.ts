@@ -10,15 +10,9 @@ export async function GET(
     try {
         // Fetch the menu item
         const id = parseInt(params.id);
-        const { data: item, error: itemError } = await supabase
+        const { data: itemWithModifiers, error: itemError } = await supabase
             .from('menu_items')
-            .select(`
-                *,
-                categories (
-                    id,
-                    name
-                )
-            `)
+            .select('*, modifiers(*, modifier_options(*))')
             .eq('id', id)
             .single();
 
@@ -30,7 +24,7 @@ export async function GET(
             );
         }
 
-        if (!item) {
+        if (!itemWithModifiers) {
             console.log('Item not found:', { itemId: id });
             return NextResponse.json(
                 { error: 'Item not found' },
@@ -38,20 +32,29 @@ export async function GET(
             );
         }
 
-        // Transform the item to match the frontend expectations
-        const transformedItem = {
-            id: item.id,
-            name: item.name,
-            description: item.description,
-            price: item.price,
-            category_id: item.category_id,
-            is_available: item.is_available,
-            special_instructions: item.special_instructions || '',
-            image_urls: item.image_urls || [],
-            category_name: item.categories?.name || ''
-        };
-
-        return NextResponse.json({ item: transformedItem });
+        const item = {
+            id: itemWithModifiers.id,
+            name: itemWithModifiers.name,
+            description: itemWithModifiers.description,
+            price: itemWithModifiers.price,
+            image_urls: itemWithModifiers.image_urls,
+            modifiers: itemWithModifiers.modifiers.map((mod: any) => ({
+                id: mod.id,
+                name: mod.name,
+                min_selections: mod.min_selections,
+                max_selections: mod.max_selections,
+                is_required: mod.is_required,
+                modifier_options: mod.modifier_options.map((opt: any) => ({
+                    id: opt.id,
+                    modifier_id: opt.modifier_id,
+                    modifier_option_id: opt.id,
+                    name: opt.name,
+                    price: opt.price
+                }))
+            }))
+        }
+        console.log('Fetched item:', item);
+        return NextResponse.json(item);
     } catch (error) {
         console.error('Unexpected error in GET /api/main/items/[id]:', error);
         return NextResponse.json(

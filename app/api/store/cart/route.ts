@@ -33,7 +33,8 @@ export async function POST(request: Request) {
                     total_price: item.total_price
                 }))
             )
-        
+            .select();
+
         if (createCartItemsError) {
             console.error('Error creating cart items:', createCartItemsError);
             return NextResponse.json(
@@ -42,15 +43,15 @@ export async function POST(request: Request) {
             );
         }
         
-        if (cart_items[0].modifiers && cart_items[0].modifiers.length > 0) {
+        if (cart_items[0].cart_item_modifiers && cart_items[0].cart_item_modifiers.length > 0) {
             const { data: createItemModifiers, error: createCartItemModifiersError } = await supabase
                 .from('cart_item_modifiers')
                 .insert(
-                    cart_items[0].modifiers.map((modifier: any) => ({
+                    cart_items[0].cart_item_modifiers.map((modifier: any) => ({
                         cart_items_id: cartItems?.[0].id,
                         modifier_id: modifier.id,
                     }))
-                )
+                ).select();
 
             if (createCartItemModifiersError) {
                 console.error('Error creating cart item modifiers:', createCartItemModifiersError);
@@ -59,13 +60,13 @@ export async function POST(request: Request) {
                     { status: 500 }
                 );
             }
-            const {error: createCartItemModifierOptionsError} = await supabase
+            const {data: createItemModifierOptions, error: createCartItemModifierOptionsError} = await supabase
                 .from('cart_item_modifier_options')
                 .insert(
-                    cart_items[0].modifiers.flatMap((modifier: any, index: number) => 
+                    cart_items[0].cart_item_modifiers.flatMap((modifier: any, index: number) => 
                         modifier.modifier_options.map((option: any) => ({
                             cart_item_modifiers_id: createItemModifiers?.[index]?.id,  // Use the first modifier ID (or adjust as needed)
-                            modifier_option_id: option.id,
+                            modifier_option_id: option.modifier_option_id,
                             modifier_id: modifier.id,
                         }))
                     )
@@ -79,11 +80,11 @@ export async function POST(request: Request) {
                     { status: 500 }
                 );
             }
+
         }
-         
+
         return NextResponse.json(
-            { cart_id: cart.id },
-            { message: 'Cart created successfully' },
+            { cartId: cart.id },
             { status: 200 });
     } catch (error) {
         console.error('Error in cart items API:', error);
