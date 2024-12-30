@@ -67,6 +67,7 @@ export async function POST(request: Request) {
                         modifier.modifier_options.map((option: any) => ({
                             cart_item_modifiers_id: createItemModifiers?.[index]?.id,  // Use the first modifier ID (or adjust as needed)
                             modifier_option_id: option.modifier_option_id,
+                            modifier_option_price: option.price,
                             modifier_id: modifier.id,
                         }))
                     )

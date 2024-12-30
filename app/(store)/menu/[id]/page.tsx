@@ -333,7 +333,7 @@ export default function ItemDetailsPage({ params }: { params: { id: string } }) 
                                                             <RadioGroupItem value={option.id.toString()} id={`${modifier.id}-${option.id}`} />
                                                             <Label htmlFor={`${modifier.id}-${option.id}`} className="flex justify-between w-full">
                                                                 <span>{option.name}</span>
-                                                                {option.price > 0 && <span>+${option.price.toFixed(2)}</span>}
+                                                                <span>+${option.price.toFixed(2)}</span>
                                                             </Label>
                                                         </div>
                                                     ))}
@@ -361,7 +361,7 @@ export default function ItemDetailsPage({ params }: { params: { id: string } }) 
                                                                 />
                                                                 <Label htmlFor={`${modifier.id}-${option.id}`} className="flex justify-between w-full">
                                                                     <span>{option.name}</span>
-                                                                    {option.price > 0 && <span>+${option.price.toFixed(2)}</span>}
+                                                                    <span>+${option.price.toFixed(2)}</span>
                                                                 </Label>
                                                             </div>
                                                         );

@@ -53,7 +53,6 @@ export async function GET(
                 }))
             }))
         }
-        console.log('Fetched item:', item);
         return NextResponse.json(item);
     } catch (error) {
         console.error('Unexpected error in GET /api/main/items/[id]:', error);

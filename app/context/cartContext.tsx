@@ -106,6 +106,7 @@ export const CartProvider = ({ children }: CartProviderProps) => {
 
                 } 
                 else {
+                    console.log('Updating cart...');
                     const response = await fetch(`/api/store/cart/${cartId}`, {
                         method: 'PATCH',
                         headers: {
@@ -120,12 +121,14 @@ export const CartProvider = ({ children }: CartProviderProps) => {
                         throw new Error(error.error || 'Failed to add item to cart');
                     }
                     const data = await response.json();
-                   
-                    // setCartItems(prevItems => {
-                    //     const updatedItems = [...prevItems, data];
-                    //     localStorage.setItem('cartItems', JSON.stringify(updatedItems));
-                    //     return updatedItems;
-                    // });
+                    console.log(data);
+                    setCartSuccess(data.message);
+                    if(data.status === 200) {
+                        const cart = await fetchCart();
+                        console.log(cart);
+                        setCartItems(cart.cart_items);
+                        localStorage.setItem('cartItems', JSON.stringify(cart.cart_items));
+                    }
                 }
             } 
             else { 
@@ -165,12 +168,6 @@ export const CartProvider = ({ children }: CartProviderProps) => {
                         throw new Error(error.error || 'Failed to add item to cart');
                     }
                     const data = await response.json();
-                    console.log(data);
-                    setCartItems(prevItems => {
-                        const updatedItems = [...prevItems, data];
-                        localStorage.setItem('cartItems', JSON.stringify(updatedItems));
-                        return updatedItems;
-                    });
                 }
             }
         } catch (error) {
