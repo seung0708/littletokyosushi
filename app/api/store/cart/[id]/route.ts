@@ -60,11 +60,21 @@ function getModifiersArray(newItems: any) {
 }
 
 async function updateExistingCartItem(supabase: any, existingCartItem: any, newItems: any) {
+    let updatedQuantity = 0;
+    if ('cart_item_id' in newItems) { 
+        updatedQuantity += newItems.quantity;
+    } 
+    if ('menu_item_id' in newItems) { 
+        console.log('existingCartItem.quantity', existingCartItem.quantity);
+        console.log('newItems.quantity', newItems.quantity);
+        updatedQuantity += existingCartItem.quantity + newItems.quantity;
+    }
+
     const { data, error } = await supabase
         .from('cart_items')
         .update({
-            quantity: newItems.quantity,
-            total_price: existingCartItem.total_price + newItems.total_price,
+            quantity: updatedQuantity,
+            total_price: newItems.total_price,
             special_instructions: newItems.special_instructions || existingCartItem.special_instructions
         })
         .eq('id', existingCartItem.id)
@@ -165,11 +175,18 @@ export async function PATCH(request: Request, { params }: { params: { id: string
             .eq('id', id)
             .single();
 
-        console.log('dbCart:', dbCart);
-        const existingCartItem = dbCart?.cart_items.find((cartItem: any) => cartItem.id === newItems.id);
+        //console.log('dbCart:', dbCart);
+        const existingCartItem = dbCart?.cart_items.find((cartItem: any) => {
+            if ( 'menu_item_id' in newItems) {
+                return cartItem.menu_item_id === newItems.menu_item_id;
+            } else if ('cart_item_id' in newItems) {
+                return cartItem.id === newItems.cart_item_id;
+            }
+
+        });
         console.log('existingCartItem:', existingCartItem);
         
-        if (existingCartItem && existingCartItem.menu_item_id === newItems.menu_item_id) {
+        if (existingCartItem) {
             if (existingCartItem.cart_item_modifiers.length > 0 && newItems.modifiers) {
                 console.log('Adding items from menu to cart...');
                 isSameModifierOptions = await compareModifierOptions(existingCartItem, newItems);
@@ -183,17 +200,6 @@ export async function PATCH(request: Request, { params }: { params: { id: string
             if (existingCartItem.cart_item_modifiers.length > 0 && newItems.cart_item_modifiers) {
                 await updateExistingCartItem(supabase, existingCartItem, newItems);
             } 
-
-            // const { data: updatedCartItem, error } = await supabase
-            //         .from('cart_items')
-            //         .update({s
-            //             quantity: newItems.quantity,
-            //             total_price: newItems.total_price,
-            //         })
-            //         .eq('id', existingCartItem.id)
-            //         .select()
-
-            //     console.log('updated cart item:', updatedCartItem);
 
         } 
         //console.log('existingCartItem.menu_item_id !== newItems.menu_item_id:', existingCartItem.menu_item_id !== newItems.menu_item_id);
@@ -225,7 +231,7 @@ export async function PATCH(request: Request, { params }: { params: { id: string
 
                 //console.log('new cart item modifier:', cartItemModifier);
 
-                const { data: cartItemModifierOption, error: cartItemModifierOptionError } = await supabase
+                const {error: cartItemModifierOptionError } = await supabase
                     .from('cart_item_modifier_options')
                     .insert(
                         getModifiersArray(newItems).flatMap((newItemModifier: any, index: number) => 
@@ -237,7 +243,6 @@ export async function PATCH(request: Request, { params }: { params: { id: string
                             }))
                         )
                     )
-                    .select()
             }
         } else {
             await updateExistingCartItem(supabase, existingCartItem, newItems);
@@ -246,8 +251,7 @@ export async function PATCH(request: Request, { params }: { params: { id: string
             { 
                 message: 'Cart updated successfully',
                 status: 200
-              
-             }
+            }
         )
 
     } catch (error) {

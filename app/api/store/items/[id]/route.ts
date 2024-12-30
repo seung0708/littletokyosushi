@@ -16,6 +16,7 @@ export async function GET(
             .eq('id', id)
             .single();
 
+        console.log('itemWithModifiers:', itemWithModifiers);
         if (itemError) {
             console.error('Failed to fetch item:', { error: itemError, itemId: id });
             return NextResponse.json(
