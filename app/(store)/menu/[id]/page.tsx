@@ -202,6 +202,10 @@ export default function ItemDetailsPage({ params }: { params: { id: string } }) 
         try {
             await addItemToCart(cartItem);
             form.reset();
+            form.setValue('modifiers', item?.modifiers.map(mod => ({
+                ...mod,
+                modifier_options: []
+            })));
         } catch (error) {
             console.error('Error adding item to cart:', error);
         }
