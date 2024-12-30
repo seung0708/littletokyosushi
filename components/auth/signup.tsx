@@ -119,7 +119,7 @@ export default function Signup() {
                 />
                 {error && <p className="text-red-500">{error}</p>}
                 <Button className="w-full" type="submit" disabled={isLoading}>
-                    {isLoading ? "Loading..." : "Login"}
+                    {isLoading ? "Loading..." : "Sign Up"}
                 </Button>
             </form>
             <div className="mt-4">
