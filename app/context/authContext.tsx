@@ -34,6 +34,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
             const {data: {user}, error}  = await supabase.auth.getUser();
             if (user) {
                 setUser(user);
+                
             } else {
                 setUser(null);
             }
