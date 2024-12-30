@@ -74,6 +74,8 @@ export const CartProvider = ({ children }: CartProviderProps) => {
         }
     };
 
+    
+
     const addItemToCart = async (item: CartItem) => {
         try {
             setIsCartLoading(true);

@@ -27,7 +27,19 @@ export async function POST(req: NextRequest) {
     if (!user) {
       return NextResponse.json({ error: 'Failed to create user' }, { status: 400 });
     }
-    return NextResponse.json(user);
+
+    const { data: customerData, error: customerError } = await supabase
+      .from('customers')
+      .insert({
+        id: user.id,
+        email: user.email,
+      })
+      .select()
+      .single();
+
+    console.log(customerData.id.substring(0, 8), customerError);
+
+    return NextResponse.json('test');
   } catch (error) {
     console.error('Unexpected error during signup:', error);
     return NextResponse.json({error: 'An unexpected error occurred'}, {status: 500})
