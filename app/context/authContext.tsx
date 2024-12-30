@@ -38,6 +38,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
                 setUser(null);
             }
             setIsLoading(false);
+            //console.log(localStorage.getItem('user'));
             console.log(user);
             const {data: {subscription}} = await supabase.auth.onAuthStateChange(async (_event, session) => {
                 setUser(user ?? null);
@@ -59,9 +60,9 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
                 body: JSON.stringify({ email, password }),
             });
             const user = await response.json();
-            setUser(user);
             localStorage.setItem('user', JSON.stringify(user));
-            console.log(user)
+            setUser(user);
+            
             if (!response.ok) {
                 throw new Error(user.error || 'Failed to sign up');
             }
@@ -84,7 +85,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
             console.log(data);
             
             if (!response.ok) {
-                throw new Error(error || 'Failed to sign in');
+                throw new Error('Failed to sign in');
             }
         } catch (error) {
             console.error('Eror signing in:', error);
@@ -103,9 +104,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
             if (!response.ok) {
                 throw new Error(result.error || 'Failed to sign in with Google');
             } 
-            
-            window.location.href = result.url;
-            console.log(result);
+            redirect('/');
         } catch (error) {
             console.error('Error signing in with Google:', error);
         }
@@ -118,11 +117,14 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
                 headers: {
                     'Content-Type': 'application/json',
                 },
+                credentials: 'include',
             });
             const data = await response.json();
             if (!response.ok) {
                 throw new Error(data.error || 'Failed to sign out');
             }
+            setUser(null);
+            redirect('/');
         } catch (error) {
             console.error('Error signing out:', error);
         }

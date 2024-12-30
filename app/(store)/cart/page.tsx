@@ -1,119 +1,185 @@
 'use client'
-import { useCart, CartItem } from "../../context/cartContext";
+import { useEffect, useState } from "react";
+import { useCart } from "../../context/cartContext";
 import { useRouter } from "next/navigation"
+import { Modifier } from "@/types/definitions";
+import { Form, FormField, FormItem, FormLabel } from "@/components/ui/form";
+import { z } from 'zod';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { useForm } from "react-hook-form";
+import { Button } from "@/components/ui/button";
+import { MinusIcon, PlusIcon, TrashIcon } from "lucide-react";
+import { CartItem } from "@/types/cart";
+
 
 const CartPage: React.FC = () => {
-    const { cartItems} = useCart();
+    const { cartItems, updateCart, removeItemFromCart} = useCart(); 
+    console.log('cartItems', cartItems)
     const router = useRouter();
-    console.log(cartItems)
-    const handleClick = () => {
-        router.push('/checkout')
+
+
+    const formSchema = z.object({
+        quantity: z.number().min(1),
+    })
+
+    type FormData = z.infer<typeof formSchema>;
+
+    const form = useForm<FormData>({
+        resolver: zodResolver(formSchema),
+        defaultValues: {
+            quantity: 1
+        }
+    })
+
+    const onSubmit = async (data: FormData) => {
+    
     }
+
+    const calculateTotalPrice = (basePrice: number, quantity: number, modifiers) => {
+        console.log('modifiers', modifiers)
+        const modifierPrice = modifiers.reduce((total: number, mod: any) => {
+            return total + mod.cart_item_modifier_options.reduce((optTotal: number, opt: any) => optTotal + opt.price, 0);
+        }, 0);
+
+        
+        return (basePrice + modifierPrice) * quantity;
+    };
+    
+    const handleQuantityChange = async (cartItem: CartItem, increment: boolean) => {
+        console.log('cartItem', cartItem)
+        console.log('cartItem.quantity', cartItem.quantity)
+        const newQuantity = increment ? cartItem.quantity + 1 : Math.max(cartItem.quantity - 1, 1);
+        const updatedItem = {
+            ...cartItem,
+            quantity: newQuantity,
+            base_price: cartItem.base_price,
+            total_price: calculateTotalPrice(cartItem.base_price, newQuantity, cartItem.cart_item_modifiers)
+        };
+
+        console.log('updatedItem', updatedItem)
+        await updateCart(updatedItem);
+
+    };
 
     return (
         <div className="mx-auto max-w-7xl px-4 pb-24 sm:px-6 lg:max-w-7xl lg:px-8">
-            <h1 className="text-3xl font-bold tracking-tight text-white sm:text-4xl">Shopping Cart</h1>
-            <form className="mt-12 lg:grid lg:grid-cols-12 lg:items-start lg:gap-x-12 xl:gap-x-16">
-                <section aria-labelledby="cart-heading" className="lg:col-span-7">
-                    <h2 id="cart-heading" className="sr-only">Items in your shopping cart</h2>
-                    <ul role="list" className="divide-y divide-gray-200 border-b border-t border-gray-200">
-                        {cartItems.map((item: CartItem) => (
-                            <li className="flex py-6 sm:py-10">
-                                <div className="flex-shrink-0">
-                                    <img src={`${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/menu-items/${item.image_urls[0]}`} alt="Front of men&#039;s Basic Tee in sienna." className="h-24 w-24 rounded-md object-cover object-center sm:h-48 sm:w-48" />
-                                </div>
-                                <div className="ml-4 flex flex-1 flex-col justify-between sm:ml-6">
-                                    <div className="relative pr-9 sm:grid sm:grid-cols-2 sm:gap-x-6 sm:pr-0">
-                                        <div>
-                                            <div className="flex justify-between">
-                                                <h3 className="text-sm">
-                                                    <a href="#" className="font-medium hover:text-red-500">Basic Tee</a>
-                                                </h3>
+            <h1 className="text-3xl font-bold tracking-tight sm:text-4xl">Shopping Cart</h1>
+            <Form {...form}>
+                <form className="mt-12 lg:grid lg:grid-cols-12 lg:items-start lg:gap-x-12 xl:gap-x-16">
+                    <section aria-labelledby="cart-heading" className="lg:col-span-7">
+                        <h2 id="cart-heading" className="sr-only">Items in your shopping cart</h2>
+                        <ul role="list" className="divide-y divide-gray-200 border-b border-t border-gray-200">
+                            {cartItems.map((cartItem) => (
+                                <li key={cartItem.id} className="flex py-6 sm:py-10">
+                                    <div className="flex-shrink-0">
+                                        <img 
+                                            src={`${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/menu-items/${cartItem.menu_item_image}`} 
+                                            alt={cartItem.menu_item_name} 
+                                            className="h-24 w-24 rounded-md object-cover object-center sm:h-48 sm:w-48" 
+                                        />
+                                    </div>
+                                    <div className="ml-4 flex flex-1 flex-col justify-between sm:ml-6">
+                                        <div className="relative pr-9 sm:grid sm:grid-cols-2 sm:gap-x-6 sm:pr-0">
+                                            <div>
+                                                <div className="flex justify-between">
+                                                    <h3 className="text-sm">
+                                                        <p className="font-medium text-gray-700 hover:text-gray-800">
+                                                            {cartItem.menu_item_name}
+                                                        </p>
+                                                    </h3>
+                                                </div>
+                                                <div className="mt-1 text-sm">
+                                                    {cartItem.cart_item_modifiers?.map(modifier => (
+                                                        <div key={modifier.id} className="modifier">
+                                                            <h2>{modifier.name}</h2>
+                                                            {modifier.cart_item_modifier_options && modifier.cart_item_modifier_options.length > 0 ? (
+                                                                <ul>
+                                                                    {modifier.cart_item_modifier_options.map((option: any) => (
+                                                                        <li key={option.id}>{option.name}</li>
+                                                                    ))}
+                                                                </ul>
+                                                            ) : null}
+                                                        </div>
+                                                    ))}
+                                                </div>
                                             </div>
-                                            <div className="mt-1 flex text-sm">
-                                                <p className="">Sienna</p>
-                                                <p className="ml-4 border-l border-gray-200 pl-4 ">Large</p>
-                                            </div>
-                                            <p className="mt-1 text-sm font-medium text-white">$32.00</p>
-                                        </div>
-                                        <div className="mt-4 sm:mt-0 sm:pr-9">
-                                            <label htmlFor="quantity-0" className="sr-only">Quantity, Basic Tee</label>
-                                            <select id="quantity-0" name="quantity-0" className="max-w-full rounded-md border border-gray-300 py-1.5 text-left text-base font-medium leading-5 text-gray-700 shadow-sm focus:border-red-500 focus:outline-none focus:ring-1 focus:ring-red-500 sm:text-sm">
-                                                <option value="1">1</option>
-                                                <option value="2">2</option>
-                                                <option value="3">3</option>
-                                                <option value="4">4</option>
-                                                <option value="5">5</option>
-                                                <option value="6">6</option>
-                                                <option value="7">7</option>
-                                                <option value="8">8</option>
-                                            </select>
-                                            <div className="absolute right-0 top-0">
-                                                <button type="button" className="-m-2 inline-flex p-2 text-white hover:text-red-500">
-                                                    <span className="sr-only">Remove</span>
-                                                    <svg className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true" data-slot="icon">
-                                                        <path d="M6.28 5.22a.75.75 0 0 0-1.06 1.06L8.94 10l-3.72 3.72a.75.75 0 1 0 1.06 1.06L10 11.06l3.72 3.72a.75.75 0 1 0 1.06-1.06L11.06 10l3.72-3.72a.75.75 0 0 0-1.06-1.06L10 8.94 6.28 5.22Z" />
-                                                    </svg>
-                                                </button>
+                                            <div className="mt-4 sm:mt-0">
+                                                <div className="flex flex-col items-end">
+                                                    <p className="mb-2 text-sm font-medium text-gray-900">
+                                                    ${
+                                                        (
+                                                            cartItem.base_price * cartItem.quantity + 
+                                                            (cartItem.cart_item_modifiers?.reduce((total: number, modifier: any) => {
+                                                                const modifierTotal = modifier.cart_item_modifier_options?.reduce(
+                                                                    (subTotal: number, option: any) => subTotal + (option.price || 0), 0) || 0; 
+                                                                    return total + modifierTotal;
+                                                                }, 0) || 0
+                                                        ) 
+                                                        ).toFixed(2)
+                                                    }
+                                                    </p>
+                                                    <div className="flex items-center space-x-2">
+                                                        <Button
+                                                            type="button"
+                                                            variant="outline"
+                                                            size="sm"
+                                                            className="h-6 w-6"
+                                                            disabled={cartItem.quantity <= 1}
+                                                            onClick={() => handleQuantityChange(cartItem, false)}
+                                                        >
+                                                            <MinusIcon className="h-3 w-3" />
+                                                        </Button>
+                                                        <span>{cartItem.quantity}</span>
+                                                        <Button
+                                                            type="button"
+                                                            variant="outline"
+                                                            size="sm"
+                                                            className="h-6 w-6"
+                                                            onClick={() => handleQuantityChange(cartItem, true)}
+                                                        >
+                                                            <PlusIcon className="h-3 w-3" />
+                                                        </Button>
+                                                    </div>
+                                                    <Button
+                                                        type="button"
+                                                        variant="ghost"
+                                                        size="sm"
+                                                        className="inline-flex p-2 text-gray-400 hover:text-gray-500"
+                                                        onClick={() => removeItemFromCart(cartItem)}
+                                                    >
+                                                        <span className="sr-only">Remove</span>
+                                                        <TrashIcon className="h-5 w-5" aria-hidden="true" />
+                                                    </Button>
+                                                </div>
                                             </div>
                                         </div>
                                     </div>
-                                </div>
-                            </li>
-                        ))} 
-                    </ul>
-                </section>
-                <section aria-labelledby="summary-heading" className="mt-16 rounded-lg bg-gray-50 px-4 py-6 sm:p-6 lg:col-span-5 lg:mt-0 lg:p-8">
-                    <h2 id="summary-heading" className="text-lg font-medium text-gray-900">Order summary</h2>
-                    <dl className="mt-6 space-y-4">
-                        <div className="flex items-center justify-between">
-                            <dt className="text-sm text-gray-600">Subtotal</dt>
-                            <dd className="text-sm font-medium text-gray-900">$99.00</dd>
+                                </li>
+                            ))}
+                        </ul>
+                    </section>
+                    <section aria-labelledby="summary-heading" className="mt-16 rounded-lg bg-gray-50 px-4 py-6 sm:p-6 lg:col-span-5 lg:mt-0 lg:p-8">
+                        <dl className="mt-6 space-y-4">
+                            <div className="flex items-center justify-between border-t border-gray-200 pt-4">
+                                <dt className="text-base font-medium text-gray-900">Sub Total</dt>
+                                <dd className="text-base font-medium text-gray-900">
+                                    ${cartItems.reduce((total, item) => total + item.base_price * item.quantity, 0).toFixed(2)}
+                                </dd>
+                            </div>
+                        </dl>
+                        <div className="mt-6">
+                            <Button 
+                                type="button" 
+                                className="w-full rounded-md border border-transparent bg-red-500 px-4 py-3 text-base font-medium text-white shadow-sm hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 focus:ring-offset-gray-50" 
+                                onClick={form.handleSubmit(onSubmit)}
+                            >
+                                Checkout
+                            </Button>
                         </div>
-                        <div className="flex items-center justify-between border-t border-gray-200 pt-4">
-                            <dt className="flex items-center text-sm text-gray-600">
-                                <span>Delivery estimate</span>
-                                <a href="#" className="ml-2 flex-shrink-0 text-gray-400 hover:text-red-500">
-                                    <span className="sr-only">Learn more about how shipping is calculated</span>
-                                    <svg className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true" data-slot="icon">
-                                        <path 
-                                            fill-rule="evenodd" 
-                                            d="M18 10a8 8 0 1 1-16 0 8 8 0 0 1 16 0ZM8.94 6.94a.75.75 0 1 1-1.061-1.061 3 3 0 1 1 2.871 5.026v.345a.75.75 0 0 1-1.5 0v-.5c0-.72.57-1.172 1.081-1.287A1.5 1.5 0 1 0 8.94 6.94ZM10 15a1 1 0 1 0 0-2 1 1 0 0 0 0 2Z" 
-                                            clipRule="evenodd" 
-                                        />
-                                    </svg>
-                                </a>
-                            </dt>
-                            <dd className="text-sm font-medium text-gray-900">$5.00</dd>
-                        </div>
-                        <div className="flex items-center justify-between border-t border-gray-200 pt-4">
-                            <dt className="flex text-sm text-gray-600">
-                                <span>Tax estimate</span>
-                                <a href="#" className="ml-2 flex-shrink-0 text-gray-400 hover:text-red-500">
-                                    <span className="sr-only">Learn more about how tax is calculated</span>
-                                    <svg className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true" data-slot="icon">
-                                        <path 
-                                            fill-rule="evenodd" 
-                                            d="M18 10a8 8 0 1 1-16 0 8 8 0 0 1 16 0ZM8.94 6.94a.75.75 0 1 1-1.061-1.061 3 3 0 1 1 2.871 5.026v.345a.75.75 0 0 1-1.5 0v-.5c0-.72.57-1.172 1.081-1.287A1.5 1.5 0 1 0 8.94 6.94ZM10 15a1 1 0 1 0 0-2 1 1 0 0 0 0 2Z" 
-                                            clipRule="evenodd" />
-                                    </svg>
-                                </a>
-                            </dt>
-                            <dd className="text-sm font-medium text-gray-900">$8.32</dd>
-                        </div>    
-                        <div className="flex items-center justify-between border-t border-gray-200 pt-4">
-                            <dt className="text-base font-medium text-gray-900">Order total</dt>
-                            <dd className="text-base font-medium text-gray-900">$112.32</dd>
-                        </div>
-                    </dl>
-                    <div className="mt-6">
-                        <button onClick={handleClick} type="button" className="w-full rounded-md border border-transparent bg-red-500 px-4 py-3 text-base font-medium text-white shadow-sm hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 focus:ring-offset-gray-50">Checkout</button>
-                    </div>
-                </section>
-            </form>
+                    </section>
+                </form>
+            </Form>
         </div>
-    )
-
+    );
 }
-
 export default CartPage

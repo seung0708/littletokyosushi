@@ -13,6 +13,10 @@ export interface Category {
     category_name: string;
 }
 
+
+
+
+
 export default interface Inventory {
     quantity_in_stock: number ;
     low_stock_threshold: number;
@@ -26,6 +30,7 @@ export interface Modifier {
     is_required: boolean;
     modifier_options: {
         id: number;
+        modifier_id: number;
         name: string;
         price: number;
     }[];
@@ -36,10 +41,7 @@ export interface CartItem {
     quantity: number;
     base_price: number;
     total_price: number;
-    modifiers: {
-        id: number;
-        selectedOptions: number[];
-    }[];
+    modifiers: Modifier[];
 }
 
 
