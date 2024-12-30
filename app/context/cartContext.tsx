@@ -10,6 +10,7 @@ interface CartContextType {
     cartId: string;
     addItemToCart: (item: CartItem) => Promise<void>;
     updateCart: (item: CartItem) => Promise<void>;
+    removeItemFromCart: (item: CartItem) => Promise<void>;
     isCartLoading: boolean;
     cartError: string | null;
 }
@@ -85,7 +86,7 @@ export const CartProvider = ({ children }: CartProviderProps) => {
                             'Content-Type': 'application/json',
                         },
                         body: JSON.stringify({
-                            cart_items: [item],
+                            items: [item],
                             customer_id: customerId,
                         }),
                     });
@@ -187,19 +188,6 @@ export const CartProvider = ({ children }: CartProviderProps) => {
             // Get previous state before update
             const previousCartItems = cartItems;
 
-            // Update local state immediately
-            setCartItems(prevItems => {
-                const updatedItems = prevItems.map(item => 
-                    item.cart_id === updatedItem.cart_id ? {
-                        ...item,
-                        quantity: updatedItem.quantity,
-                        total_price: updatedItem.total_price
-                    } : item
-                );
-                localStorage.setItem('cartItems', JSON.stringify(updatedItems));
-                return updatedItems;
-            });
-
             // Update the database
             const response = await fetch(`/api/store/cart/${cartId}`, {
                 method: 'PATCH',
@@ -219,8 +207,15 @@ export const CartProvider = ({ children }: CartProviderProps) => {
                 throw new Error(error.error || 'Failed to update cart');
             }
 
-            const updatedCartItem = await response.json();
-            console.log('Updated cart item from server:', updatedCartItem);
+            const data = await response.json();
+            console.log(data);
+            setCartSuccess(data.message);
+            if(data.status === 200) {
+                const cart = await fetchCart();
+                console.log(cart);
+                setCartItems(cart.cart_items);
+                localStorage.setItem('cartItems', JSON.stringify(cart.cart_items));
+            }
 
         } catch (error) {
             console.error('Error updating cart:', error);
@@ -230,12 +225,38 @@ export const CartProvider = ({ children }: CartProviderProps) => {
         }
     };
 
+    const removeItemFromCart = async (cartItem: CartItem) => {
+        const response = await fetch(`/api/store/cart/${cartId}`, {
+            method: 'DELETE',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(
+                cartItem
+            ),
+        });
+        if (!response.ok) {
+            const error = await response.json();
+            throw new Error(error.error || 'Failed to remove item from cart');
+        }
+        const data = await response.json();
+        console.log(data);
+        setCartSuccess(data.message);
+        if(data.status === 200) {
+            const cart = await fetchCart();
+            console.log(cart);
+            setCartItems(cart.cart_items);
+            localStorage.setItem('cartItems', JSON.stringify(cart.cart_items));
+        }
+    };
+
     return (
         <CartContext.Provider value={{
             cartItems,
             cartId,
             addItemToCart,
             updateCart,
+            removeItemFromCart,
             isCartLoading,
             cartError,
         }}>

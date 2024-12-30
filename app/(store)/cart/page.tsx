@@ -8,15 +8,12 @@ import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from "react-hook-form";
 import { Button } from "@/components/ui/button";
-import { MinusIcon, PlusIcon } from "lucide-react";
-
-
+import { MinusIcon, PlusIcon, TrashIcon } from "lucide-react";
+import { CartItem } from "@/types/cart";
 
 
 const CartPage: React.FC = () => {
-    const [allModifiers, setAllModifiers] = useState<Modifier[][]>([])
-    console.log('allModifiers', allModifiers)
-    const { cartItems, updateCart} = useCart(); 
+    const { cartItems, updateCart, removeItemFromCart} = useCart(); 
     console.log('cartItems', cartItems)
     const router = useRouter();
 
@@ -35,23 +32,33 @@ const CartPage: React.FC = () => {
     })
 
     const onSubmit = async (data: FormData) => {
-        const updatedCartItems = cartItems.map(item => ({
-            ...item,
-            quantity: data.quantity,
-            total_price: item.base_price * data.quantity
-        }));
-
-        for (const item of updatedCartItems) {
-            await updateCart(item);
-        }
-        router.push('/checkout');
-    }
     
-    const handleQuantityChange = async (newQuantity: number) => {
-        try {
-        } catch (error) {
-            console.error('Error updating quantity:', error);
-        }
+    }
+
+    const calculateTotalPrice = (basePrice: number, quantity: number, modifiers) => {
+        console.log('modifiers', modifiers)
+        const modifierPrice = modifiers.reduce((total: number, mod: any) => {
+            return total + mod.cart_item_modifier_options.reduce((optTotal: number, opt: any) => optTotal + opt.price, 0);
+        }, 0);
+
+        
+        return (basePrice + modifierPrice) * quantity;
+    };
+    
+    const handleQuantityChange = async (cartItem: CartItem, increment: boolean) => {
+        console.log('cartItem', cartItem)
+        console.log('cartItem.quantity', cartItem.quantity)
+        const newQuantity = increment ? cartItem.quantity + 1 : Math.max(cartItem.quantity - 1, 1);
+        const updatedItem = {
+            ...cartItem,
+            quantity: newQuantity,
+            base_price: cartItem.base_price,
+            total_price: calculateTotalPrice(cartItem.base_price, newQuantity, cartItem.cart_item_modifiers)
+        };
+
+        console.log('updatedItem', updatedItem)
+        await updateCart(updatedItem);
+
     };
 
     return (
@@ -97,16 +104,6 @@ const CartPage: React.FC = () => {
                                                 </div>
                                             </div>
                                             <div className="mt-4 sm:mt-0">
-                                                <div className="absolute right-0 top-0">
-                                                    <Button
-                                                        variant="ghost"
-                                                        size="sm"
-                                                        className="inline-flex p-2 text-gray-400 hover:text-gray-500"
-                                                        onClick={() => {}}
-                                                    >
-                                                        <span className="sr-only">Remove</span>
-                                                    </Button>
-                                                </div>
                                                 <div className="flex flex-col items-end">
                                                     <p className="mb-2 text-sm font-medium text-gray-900">
                                                     ${
@@ -121,33 +118,38 @@ const CartPage: React.FC = () => {
                                                         ).toFixed(2)
                                                     }
                                                     </p>
-                                                    <FormField
-                                                        control={form.control}
-                                                        name="quantity"
-                                                        render={({ field }) => (
-                                                            <div className="flex items-center space-x-2">
-                                                                <Button
-                                                                    variant="outline"
-                                                                    size="sm"
-                                                                    className="h-6 w-6"
-                                                                    disabled={cartItem.quantity <= 1}
-                                                                    onClick={() => {}}
-                                                                >
-                                                                    <MinusIcon className="h-3 w-3" />
-                                                                </Button>
-                                                                <span>{cartItem.quantity}</span>
-                                                                <Button
-                                                                    variant="outline"
-                                                                    size="sm"
-                                                                    className="h-6 w-6"
-                                                                    disabled={cartItem.quantity >= 10}
-                                                                    onClick={() => {}}
-                                                                >
-                                                                    <PlusIcon className="h-3 w-3" />
-                                                                </Button>
-                                                            </div>
-                                                        )}
-                                                    />
+                                                    <div className="flex items-center space-x-2">
+                                                        <Button
+                                                            type="button"
+                                                            variant="outline"
+                                                            size="sm"
+                                                            className="h-6 w-6"
+                                                            disabled={cartItem.quantity <= 1}
+                                                            onClick={() => handleQuantityChange(cartItem, false)}
+                                                        >
+                                                            <MinusIcon className="h-3 w-3" />
+                                                        </Button>
+                                                        <span>{cartItem.quantity}</span>
+                                                        <Button
+                                                            type="button"
+                                                            variant="outline"
+                                                            size="sm"
+                                                            className="h-6 w-6"
+                                                            onClick={() => handleQuantityChange(cartItem, true)}
+                                                        >
+                                                            <PlusIcon className="h-3 w-3" />
+                                                        </Button>
+                                                    </div>
+                                                    <Button
+                                                        type="button"
+                                                        variant="ghost"
+                                                        size="sm"
+                                                        className="inline-flex p-2 text-gray-400 hover:text-gray-500"
+                                                        onClick={() => removeItemFromCart(cartItem)}
+                                                    >
+                                                        <span className="sr-only">Remove</span>
+                                                        <TrashIcon className="h-5 w-5" aria-hidden="true" />
+                                                    </Button>
                                                 </div>
                                             </div>
                                         </div>

@@ -8,14 +8,12 @@ export async function GET(request: Request, { params}: { params: { id: string } 
     const {data: dbCart, error} = await supabase
     .from('carts')
     .select(`id, customer_id, completed_at, 
-        cart_items(id, base_price, total_price, quantity, special_instructions, menu_items(name, price, image_urls), 
+        cart_items(id, base_price, total_price, quantity, special_instructions, menu_items(id, name, price, image_urls), 
         cart_item_modifiers(id, modifiers(id, name), 
             cart_item_modifier_options(id, modifier_id, modifier_options(id, name, price))))`)
     .eq('id', params.id)
+    .order('created_at', { referencedTable: 'cart_items' })
     .single();
-    console.log('dbCart:', dbCart);
-    console.log('dbCart cart_items:', dbCart?.cart_items);
-    console.log('dbCart cart_item_modifiers:', dbCart?.cart_items.map((cartItem: any) => cartItem.cart_item_modifiers));
 
     const cart: Cart = {
         id: dbCart?.id,
@@ -27,6 +25,7 @@ export async function GET(request: Request, { params}: { params: { id: string } 
             special_instructions: cartItem.special_instructions,
             total_price: cartItem.total_price,
             quantity: cartItem.quantity,
+            menu_item_id: cartItem.menu_items.id,
             menu_item_name: cartItem.menu_items.name,
             menu_item_price: cartItem.menu_items.price,
             menu_item_image: cartItem.menu_items.image_urls[0],
@@ -56,13 +55,105 @@ export async function GET(request: Request, { params}: { params: { id: string } 
     return NextResponse.json(cart);
 }
 
+function getModifiersArray(newItems: any) {
+    return newItems.modifiers || newItems.cart_item_modifiers || [];
+}
+
+async function updateExistingCartItem(supabase: any, existingCartItem: any, newItems: any) {
+    const { data, error } = await supabase
+        .from('cart_items')
+        .update({
+            quantity: newItems.quantity,
+            total_price: existingCartItem.total_price + newItems.total_price,
+            special_instructions: newItems.special_instructions || existingCartItem.special_instructions
+        })
+        .eq('id', existingCartItem.id)
+        .select('id, quantity, total_price, special_instructions');
+
+    console.log('updated existing cart item:', data);
+    return { data, error };
+}
+
+async function compareModifierOptions(existingCartItem: any, newItems: any) {
+    const existingModifierOptions = existingCartItem.cart_item_modifiers.map((existingModifier: any) => 
+        existingModifier.cart_item_modifier_options.map((option: any) => option)
+    );
+    
+    const newModifierOptions = getModifiersArray(newItems).map((newModifier: any) => 
+        newModifier.modifier_options.map((option: any) => option)
+    );
+
+    console.log('existingModifierOptions:', existingModifierOptions);
+    console.log('newModifierOptions:', newModifierOptions);
+
+    return existingModifierOptions.every((existingOptions: any, i: number) =>
+        existingOptions.every((existingOption: any, j: number) =>
+            existingOption.modifier_option_id === newModifierOptions[i]?.[j]?.modifier_option_id
+        )
+    );
+}
+
+async function createNewCartItemWithModifiers(supabase: any, existingCartItem: any, newItems: any) {
+    // Create cart item
+    const { data: cartItem, error } = await supabase
+        .from('cart_items')
+        .insert({
+            cart_id: existingCartItem.cart_id,
+            base_price: newItems.base_price,
+            total_price: newItems.total_price,
+            quantity: newItems.quantity,
+            menu_item_id: newItems.menu_item_id,
+            special_instructions: newItems.special_instructions || '',
+        })
+        .select();
+
+    if (error || !cartItem) {
+        console.error('Error creating cart item:', error);
+        return { error };
+    }
+
+    // Create modifiers
+    const { data: cartItemModifier, error: modifierError } = await supabase
+        .from('cart_item_modifiers')
+        .insert(
+            getModifiersArray(newItems).map((modifier: any) => ({
+                cart_items_id: cartItem[0].id,
+                modifier_id: modifier.modifier_id,
+            }))
+        )
+        .select();
+
+    if (modifierError) {
+        console.error('Error creating modifiers:', modifierError);
+        return { error: modifierError };
+    }
+
+    // Create modifier options
+    const { data: cartItemModifierOptions, error: optionError } = await supabase
+        .from('cart_item_modifier_options')
+        .insert(
+            getModifiersArray(newItems).flatMap((modifier: any, index: number) => 
+                modifier.modifier_options.map((option: any) => ({
+                    cart_item_modifiers_id: cartItemModifier[index].id,
+                    modifier_option_id: option.modifier_option_id,
+                    modifier_option_price: option.price,
+                    modifier_id: modifier.modifier_id
+                }))
+            )
+        )
+        .select();
+    
+    console.log('created new cart item with modifiers:', cartItem);
+    return { data: cartItem, error: optionError };
+}
+
 export async function PATCH(request: Request, { params }: { params: { id: string } }) {
     try {
         const { cart_items } = await request.json()
         const newItems = cart_items[cart_items.length - 1]
-        //console.log('newItems:', newItems)
+        console.log('newItems:', newItems)
         const { id } = params
-
+        let isSameModifierOptions: boolean;
         const supabase = createClient();
 
         const { data: dbCart, error } = await supabase
@@ -74,104 +165,83 @@ export async function PATCH(request: Request, { params }: { params: { id: string
             .eq('id', id)
             .single();
 
-        //console.log('dbCart:', dbCart);
-        const existingCartItem = dbCart?.cart_items.find((cartItem: any) => cartItem)
-        //console.log('existingCartItem:', existingCartItem);
-        if (existingCartItem) {
-            if ((existingCartItem.menu_item_id === newItems.menu_item_id) && existingCartItem.cart_item_modifiers.length > 0 && newItems.cart_item_modifiers.length > 0) {
-                const existingModifierOptions = existingCartItem.cart_item_modifiers.map((existingModifier: any) => existingModifier.cart_item_modifier_options.map((existingModifierOption: any) => existingModifierOption))
-                const newModifierOptions = newItems.cart_item_modifiers.map((newModifier: any) => newModifier.modifier_options.map((newModifierOption: any) => newModifierOption))
-                let isSameModifierOption = false;
-                for (let i = 0; i < existingModifierOptions.length; i++) {
-                    isSameModifierOption = newModifierOptions[i]?.every((newOption: any, j: number) => {
-                        return existingModifierOptions[i][j]?.modifier_option_id === newOption?.modifier_option_id;
-                    });
-                
-                }
-                console.log('isSameModifierOption:', isSameModifierOption);
-
-                if (isSameModifierOption) {
-                    const { data, error } = await supabase
-                        .from('cart_items')
-                        .update({
-                            quantity: existingCartItem.quantity + newItems.quantity,
-                            total_price: existingCartItem.total_price + newItems.total_price,
-                            special_instructions: newItems.special_instructions || existingCartItem.special_instructions
-                        })
-                        .eq('id', existingCartItem.id)
-                        .select('id, quantity, total_price, special_instructions')
-
-                    console.log('same modifier options:', data);
+        console.log('dbCart:', dbCart);
+        const existingCartItem = dbCart?.cart_items.find((cartItem: any) => cartItem.id === newItems.id);
+        console.log('existingCartItem:', existingCartItem);
+        
+        if (existingCartItem && existingCartItem.menu_item_id === newItems.menu_item_id) {
+            if (existingCartItem.cart_item_modifiers.length > 0 && newItems.modifiers) {
+                console.log('Adding items from menu to cart...');
+                isSameModifierOptions = await compareModifierOptions(existingCartItem, newItems);
+                console.log('isSameModifierOptions:', isSameModifierOptions);
+                if(isSameModifierOptions) {
+                    await updateExistingCartItem(supabase, existingCartItem, newItems);
                 } else {
-                    const {data: cartItem, error} = await supabase
-                        .from('cart_items')
-                        .insert({
-                            cart_id: existingCartItem.cart_id,
-                            base_price: newItems.base_price,
-                            total_price: newItems.total_price,
-                            quantity: newItems.quantity,
-                            menu_item_id: newItems.menu_item_id,
-                            special_instructions: newItems.special_instructions || '',
-                        })
-                        .select()
+                    await createNewCartItemWithModifiers(supabase, existingCartItem, newItems);
+                }
+            } 
+            if (existingCartItem.cart_item_modifiers.length > 0 && newItems.cart_item_modifiers) {
+                await updateExistingCartItem(supabase, existingCartItem, newItems);
+            } 
 
-                        console.log('new cart item:', cartItem);
+            // const { data: updatedCartItem, error } = await supabase
+            //         .from('cart_items')
+            //         .update({s
+            //             quantity: newItems.quantity,
+            //             total_price: newItems.total_price,
+            //         })
+            //         .eq('id', existingCartItem.id)
+            //         .select()
 
-                    const { data: cartItemModifier, error: cartItemModifierError } = await supabase
-                        .from('cart_item_modifiers')
-                        .insert(
-                            newItems.cart_item_modifiers.map((cartItemModifier: any) => ({
-                                cart_items_id: cartItem?.[0].id,
-                                modifier_id: cartItemModifier.modifier_id,
+            //     console.log('updated cart item:', updatedCartItem);
+
+        } 
+        //console.log('existingCartItem.menu_item_id !== newItems.menu_item_id:', existingCartItem.menu_item_id !== newItems.menu_item_id);
+        if (!existingCartItem) {
+            const {data: cartItem, error} = await supabase
+                .from('cart_items')
+                .insert({
+                    cart_id: dbCart?.id,
+                    base_price: newItems.base_price,
+                    total_price: newItems.total_price,
+                    quantity: newItems.quantity,
+                    menu_item_id: newItems.menu_item_id,
+                    special_instructions: newItems.special_instructions || '',
+                })
+                .select()
+
+            //console.log('new cart item:', cartItem);
+
+            if (getModifiersArray(newItems) && getModifiersArray(newItems).length > 0) {
+                const { data: cartItemModifier, error: cartItemModifierError } = await supabase
+                    .from('cart_item_modifiers')
+                    .insert(
+                        getModifiersArray(newItems).map((cartItemModifier: any) => ({
+                            cart_items_id: cartItem?.[0].id,
+                            modifier_id: cartItemModifier.modifier_id,
+                        }))
+                    )
+                    .select()
+
+                //console.log('new cart item modifier:', cartItemModifier);
+
+                const { data: cartItemModifierOption, error: cartItemModifierOptionError } = await supabase
+                    .from('cart_item_modifier_options')
+                    .insert(
+                        getModifiersArray(newItems).flatMap((newItemModifier: any, index: number) => 
+                            newItemModifier.modifier_options.map((newItemModifierOption: any) => ({
+                                cart_item_modifiers_id: cartItemModifier?.[index]?.id,
+                                modifier_option_id: newItemModifierOption.modifier_option_id,
+                                modifier_option_price: newItemModifierOption.price,
+                                modifier_id: newItemModifier.modifier_id
                             }))
                         )
-                        .select()
-
-                    console.log('new cart item modifier:', cartItemModifier);
-
-                    const { data: cartItemModifierOption, error: cartItemModifierOptionError } = await supabase
-                        .from('cart_item_modifier_options')
-                        .insert(
-                            newItems.cart_item_modifiers.flatMap((newItemModifier: any, index: number) => 
-                                newItemModifier.modifier_options.map((newItemModifierOption: any) => ({
-                                    cart_item_modifiers_id: cartItemModifier?.[index]?.id,
-                                    modifier_option_id: newItemModifierOption.modifier_option_id,
-                                    modifier_option_price: newItemModifierOption.price,
-                                    modifier_id: newItemModifier.modifier_id
-                                }))
-                            )
-                        )
-                        .select()
-
-                    //console.log('new cart item modifier option:', cartItemModifierOption);
-                }
-            } else {
-                const { data, error } = await supabase
-                    .from('cart_items')
-                    .insert({
-                        cart_id: dbCart?.id,
-                        base_price: newItems.base_price,
-                        total_price: newItems.total_price,
-                        quantity: newItems.quantity,
-                        menu_item_id: newItems.menu_item_id,
-                        special_instructions: newItems.special_instructions || '',
-                        cart_item_modifiers: newItems.cart_item_modifiers.map((cartItemModifier: any) => ({
-                            cart_items_id: existingCartItem.id,
-                            modifier_id: cartItemModifier.modifier_id,
-                            cart_item_modifier_options: cartItemModifier.modifier_options.map((cartItemModifierOption: any) => ({
-                                cart_item_modifiers_id: cartItemModifier.id,
-                                modifier_option_id: cartItemModifierOption.id,
-                                modifier_option_price: cartItemModifierOption.price,
-                                modifier_id: cartItemModifierOption.modifier_id,
-                            })),
-                        })),
-                    })    
-
-                //console.log('new cart item:', data);
+                    )
+                    .select()
             }
-                
+        } else {
+            await updateExistingCartItem(supabase, existingCartItem, newItems);
         }
-
         return NextResponse.json(
             { 
                 message: 'Cart updated successfully',
@@ -187,4 +257,38 @@ export async function PATCH(request: Request, { params }: { params: { id: string
             { status: 500 }
         )
     }
+}
+
+export async function DELETE(request: Request, { params }: { params: { id: string } }) {
+    const supabase = createClient();
+    const { id } = params;
+    const cartItem = await request.json();
+    console.log('cartItem:', cartItem);
+
+    try {
+        const { error } = await supabase
+            .from('cart_items')
+            .delete()
+            .eq('id', cartItem.id);
+        if (error) {
+            console.error('Error deleting cart item:', error);
+            return NextResponse.json(
+                { error: 'Error deleting cart item' },
+                { status: 500 }
+            );
+        }
+    } catch (error) {
+        console.error('Error deleting cart item:', error);
+        return NextResponse.json(
+            { error: 'Error deleting cart item' },
+            { status: 500 }
+        );
+    }
+
+    return NextResponse.json(
+        { 
+            message: 'Cart item deleted successfully',
+            status: 200
+         }
+    )
 }

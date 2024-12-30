@@ -4,7 +4,8 @@ import { Cart} from "@/types/cart";
 
 export async function POST(request: Request) {
     const supabase = createClient();
-    const { customer_id, cart_items } = await request.json();
+    const { customer_id, items } = await request.json();
+    console.log('items', items);
     try {
         const { data: cart, error: createCartError } = await supabase
             .from('carts')
@@ -21,16 +22,16 @@ export async function POST(request: Request) {
                 { status: 500 }
             );
         }
-
         const { data: cartItems, error: createCartItemsError } = await supabase
             .from('cart_items')
             .insert(
-                cart_items.map((item: any) => ({
+                items.map((item: any) => ({
                     cart_id: cart.id,
                     menu_item_id: item.menu_item_id,
                     quantity: item.quantity,
                     base_price: item.base_price,
-                    total_price: item.total_price
+                    total_price: item.total_price,
+                    special_instructions: item.special_instructions
                 }))
             )
             .select();
@@ -43,11 +44,11 @@ export async function POST(request: Request) {
             );
         }
         
-        if (cart_items[0].cart_item_modifiers && cart_items[0].cart_item_modifiers.length > 0) {
+        if (items[0].modifiers && items[0].modifiers.length > 0) {
             const { data: createItemModifiers, error: createCartItemModifiersError } = await supabase
                 .from('cart_item_modifiers')
                 .insert(
-                    cart_items[0].cart_item_modifiers.map((modifier: any) => ({
+                    items[0].modifiers.map((modifier: any) => ({
                         cart_items_id: cartItems?.[0].id,
                         modifier_id: modifier.id,
                     }))
@@ -63,7 +64,7 @@ export async function POST(request: Request) {
             const {data: createItemModifierOptions, error: createCartItemModifierOptionsError} = await supabase
                 .from('cart_item_modifier_options')
                 .insert(
-                    cart_items[0].cart_item_modifiers.flatMap((modifier: any, index: number) => 
+                    items[0].modifiers.flatMap((modifier: any, index: number) => 
                         modifier.modifier_options.map((option: any) => ({
                             cart_item_modifiers_id: createItemModifiers?.[index]?.id,  // Use the first modifier ID (or adjust as needed)
                             modifier_option_id: option.modifier_option_id,

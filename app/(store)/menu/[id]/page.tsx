@@ -158,6 +158,7 @@ export default function ItemDetailsPage({ params }: { params: { id: string } }) 
         return (basePrice + modifierPrice) * quantity;
     };
 
+   
     const onSubmit = async (data: FormData) => {
         console.log('onSubmit executing with data:', data);
         
@@ -193,9 +194,9 @@ export default function ItemDetailsPage({ params }: { params: { id: string } }) 
             menu_item_image: item?.image_urls[0] || '',
             quantity: data.quantity,
             base_price: item?.price || 0,
-            special_instructions: data.special_instructions,
+            special_instructions: data.special_instructions || '',
             total_price: calculateTotalPrice(item?.price || 0, data.quantity, data.modifiers),
-            cart_item_modifiers: cartModifiers
+            modifiers: cartModifiers
         };
 
         try {
