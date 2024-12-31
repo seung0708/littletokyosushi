@@ -36,39 +36,28 @@ export const CartProvider = ({ children }: CartProviderProps) => {
     const [cartSuccess, setCartSuccess] = useState<string | null>(null);
 
     useEffect(() => {
-        const storedCartItems = localStorage.getItem('cartItems');
-        if (storedCartItems) {
-            setCartItems(JSON.parse(storedCartItems));
-        }
         const storedCartId = localStorage.getItem('cartId');
         if (storedCartId) {
             setCartId(storedCartId);
+            fetchCart(storedCartId);
         }
     }, []);
 
-    const fetchCart = async () => {
+    const fetchCart = async (displayId: string) => {
         setIsCartLoading(true);
         setCartError(null);
-        const storedCartId = localStorage.getItem('cartId');
-        console.log('Stored Cart ID:', storedCartId);
-        if(!storedCartId) return;
-
         try {
-            const response = await fetch(`/api/store/cart/${storedCartId}`);
+            const response = await fetch(`/api/store/cart/${displayId}`, {
+                method: 'GET',
+                credentials: 'include',
+            });
             if (!response.ok) {
-                const errorText = await response.text();
-                console.log('Error response:', errorText);
-                try {
-                    const error = JSON.parse(errorText);
-                    throw new Error(error.error || 'Failed to fetch cart');
-                } catch {
-                    throw new Error('Failed to fetch cart');
-                }
+               throw new Error('Failed to fetch cart');
             }
             const cart = await response.json();
-            console.log('Cart data:', cart);
             setCartItems(cart.cart_items);
-            setCartId(storedCartId);
+            setCartId(cart.id);
+            localStorage.setItem('cartId', cart.id);
             localStorage.setItem('cartItems', JSON.stringify(cart.cart_items));
         } catch (error) {
             console.error('Error fetching cart:', error);
@@ -108,18 +97,20 @@ export const CartProvider = ({ children }: CartProviderProps) => {
                 },
                 body: JSON.stringify({
                     items: [item],
-                    customer_id: userId
+                    customerId: userId
                 }),
+                credentials: 'include',
             });
             if (!response.ok) {
                 const error = await response.json();
                 throw new Error(error.error || 'Failed to create new cart');
             }
             const data = await response.json();
-            console.log(data);
-            setCartId(data.cartId);
-            localStorage.setItem('cartId', data.cartId);
-            if(data.status === 200) fetchCart();
+            setCartSuccess(data.message);
+            if(data.status === 200) {
+                const displayId = data.cartId.substring(0, 8);
+                fetchCart(displayId);
+            };
         }
         catch (error) {
             console.error('Error creating new cart:', error);
@@ -134,9 +125,10 @@ export const CartProvider = ({ children }: CartProviderProps) => {
                     'Content-Type': 'application/json',
                 },
                 body: JSON.stringify({
-                    items: [...cartItems, item],
-                    customer_id: userId
+                    cartItems: [item],
+                    customerId: userId
                 }),
+                credentials: 'include',
             });
             if (!response.ok) {
                 const error = await response.json();
@@ -144,7 +136,9 @@ export const CartProvider = ({ children }: CartProviderProps) => {
             }
             const data = await response.json();
             setCartSuccess(data.message);
-            if(data.status === 200) fetchCart();
+            if(data.status === 200) {
+                fetchCart(cartId);
+            };
         }
         catch (error) {
             console.error('Error updating existing cart:', error);
@@ -157,9 +151,10 @@ export const CartProvider = ({ children }: CartProviderProps) => {
             headers: {
                 'Content-Type': 'application/json',
             },
-            body: JSON.stringify(
+            body: JSON.stringify({
                 itemId
-            ),
+            }),
+            credentials: 'include',
         });
         if (!response.ok) {
             const error = await response.json();
@@ -168,7 +163,9 @@ export const CartProvider = ({ children }: CartProviderProps) => {
         const data = await response.json();
         console.log(data);
         setCartSuccess(data.message);
-        if(data.status === 200) fetchCart();
+        if(data.status === 200) {
+            fetchCart(cartId);
+        }
     };
 
     return (

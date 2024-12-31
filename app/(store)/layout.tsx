@@ -1,3 +1,5 @@
+'use client';
+
 import {ReactNode} from 'react';
 import Header from '../../components/store/header';
 import { CartProvider } from '@/app/context/cartContext';

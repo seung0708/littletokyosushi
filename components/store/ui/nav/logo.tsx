@@ -6,11 +6,12 @@ export default function Logo() {
         <Link href="/" >
             <span className="sr-only">Little Tokyo Sushi</span>
             <Image
-                className="h-11 w-auto"
-                    src={'/assets/images/logo.png'}
-                    alt="logo"
-                    height={44}
-                    width={44}
+                className="w-auto"
+                src={'/assets/images/logo.png'}
+                alt="logo"
+                height={44}
+                width={44}
+                priority
             />
             </Link>
     )
