@@ -1,4 +1,6 @@
-import NavLinks from "@/components/store/ui/nav/links";
+'use client';
+import { useAuth } from "@/app/context/authContext";
+import NavLink from "@/components/store/ui/nav/navLink";
 import HamburgerMenu from "@/components/store/ui/nav/hamburger-menu";
 import CloseMenu from "@/components/store/ui/nav/close-menu";
 import Logo from "@/components/store/ui/nav/logo";
@@ -12,27 +14,45 @@ interface NavbarProps {
 }
 
 const Navbar: React.FC<NavbarProps> = ({className, isOpen, toggleMenu}) => {
-
+    const { user } = useAuth();
     return(
         <nav className={className}>
             <div className="">
                 <div className="flex h-16 items-center">
-                    <div className="relative lg:hidden">
+                    <div className="relative md:hidden">
                         {isOpen ? (
                             <CloseMenu toggleMenu={toggleMenu} />
                         ) : (
                             <HamburgerMenu toggleMenu={toggleMenu} />
                         )}
                     </div>
-                    <div className="flex justify-center ml-auto lg:ml-0">
+                    <div className="flex justify-center ml-auto md:ml-0">
                        <Logo />
                     </div>
                     <div className="ml-auto flex items-center">
-                        <div className="hidden lg:flex lg:items-center lg:justify-center lg:space-x-14 text-white text-lg">
-                            <NavLinks className="relative inline-block group" showSpan={true} />
-                            <span className="h-6 w-px bg-gray-200" aria-hidden="true"></span>
+                        <div className="text-sm md:text-md space-x-4 flex justify-between items-center text-white md:text-lg">
+                            <div className="hidden md:flex md:items-center md:justify-between md:space-x-8 lg:space-x-14">
+                                <NavLink href="/#about" className="relative inline-block group" showSpan={true}>About</NavLink>       
+                                <NavLink href="/#contact" className="relative inline-block group" showSpan={true}>Contact</NavLink>
+                                <NavLink href="/menu" className="relative inline-block group" showSpan={true}>Menu</NavLink>
+                                <span className="h-6 w-px bg-gray-200" aria-hidden="true"></span>
+                            </div>
+                           
+                            {!user ? (
+                            <div>
+                                <NavLink href="/signin" className="relative inline-block group" showSpan={true}>Sign In</NavLink>
+                                <span>/</span>
+                                <NavLink href="/signup" className="relative inline-block group" showSpan={true}>Sign Up</NavLink>
+                            </div>
+                            ) : (
+                                <div>
+                                    <NavLink href="/account" className="relative inline-block group" showSpan={true}>Account</NavLink>
+                                    <span>/</span>
+                                    <NavLink href="/logout" className="relative inline-block group" showSpan={true}>Logout</NavLink>
+                                </div>
+                            )}
                         </div>
-                        <CartIcon />
+                        <CartIcon />                        
                     </div>
                 </div>
             </div>
