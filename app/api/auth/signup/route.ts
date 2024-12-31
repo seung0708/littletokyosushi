@@ -37,9 +37,9 @@ export async function POST(req: NextRequest) {
       .select()
       .single();
 
-    console.log(customerData.id.substring(0, 8), customerError);
+    console.log(customerData, customerError);
 
-    return NextResponse.json('test');
+    return NextResponse.json(customerData);
   } catch (error) {
     console.error('Unexpected error during signup:', error);
     return NextResponse.json({error: 'An unexpected error occurred'}, {status: 500})

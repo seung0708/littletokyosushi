@@ -31,10 +31,10 @@ const Navbar: React.FC<NavbarProps> = ({isOpen, toggleMenu}) => {
             <Logo />
             <div className="text-sm flex md:text-md space-x-4 text-white md:text-lg">
                 {!user ? (
-                    <div>
+                    <div className="flex space-x-4">
                         <NavLink href="/signin" className="" showSpan={true}>Sign In</NavLink>
                             
-                        <NavLink href="/signup" className="hidden" showSpan={true}>Sign Up</NavLink>
+                        <NavLink href="/signup" className="hidden md:block" showSpan={true}>Sign Up</NavLink>
                     </div>
                 ) : (
                     <div>

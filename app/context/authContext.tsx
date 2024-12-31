@@ -61,7 +61,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
                 body: JSON.stringify({ email, password }),
             });
             const user = await response.json();
-            localStorage.setItem('user', JSON.stringify(user));
+            localStorage.setItem('userId', JSON.stringify(user.id));
             setUser(user);
             
             if (!response.ok) {
