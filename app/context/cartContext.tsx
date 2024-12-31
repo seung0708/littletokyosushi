@@ -2,8 +2,7 @@
 import React, { createContext, useContext, useEffect, useState } from "react";
 import { useAuth } from "./authContext";
 import { CartItem, Cart, CartItemModifier, CartItemModifierOption } from "@/types/cart";
-import { createClient } from "@/lib/supabase/client";
-import { useSearchParams } from "next/navigation";
+
 
 interface CartContextType {
     cartItems: CartItem[];
@@ -32,7 +31,8 @@ interface CartProviderProps {
 
 export const CartProvider = ({ children }: CartProviderProps) => {
     const { user } = useAuth();
-    let customerId = user?.id;
+    let userId = user?.id;
+    console.log(user, userId);
     const [cartItems, setCartItems] = useState<CartItem[]>([]);
     const [cartId, setCartId] = useState<string>("");
     const [isCartLoading, setIsCartLoading] = useState(false);
@@ -48,16 +48,16 @@ export const CartProvider = ({ children }: CartProviderProps) => {
         if (storedCartId) {
             setCartId(storedCartId);
         }
-    },[cartId]);
+    },[]);
 
     const fetchCart = async () => {
         try {
             setIsCartLoading(true);
             setCartError(null);
-            console.log('Fetching cart...');
+            //console.log('Fetching cart...');
             const cartId = localStorage.getItem('cartId');
             if(cartId) {
-                console.log('Fetching cart:', cartId);
+                //console.log('Fetching cart:', cartId);
                 const response = await fetch(`/api/store/cart/${cartId}`);
                 if (!response.ok) {
                     const error = await response.json();
@@ -77,10 +77,11 @@ export const CartProvider = ({ children }: CartProviderProps) => {
     
 
     const addItemToCart = async (item: CartItem) => {
+        console.log(userId)
         try {
             setIsCartLoading(true);
             setCartError(null);
-            if(!customerId) {
+            if(!userId) {
                 if(!cartId || cartId === '') {
                     const response = await fetch('/api/store/cart', {
                         method: 'POST',
@@ -89,7 +90,7 @@ export const CartProvider = ({ children }: CartProviderProps) => {
                         },
                         body: JSON.stringify({
                             items: [item],
-                            customer_id: customerId,
+                            customer_id: userId,
                         }),
                     });
                     if (!response.ok) {
@@ -97,26 +98,27 @@ export const CartProvider = ({ children }: CartProviderProps) => {
                         throw new Error(error.error || 'Failed to add item to cart');
                     }
                     const data = await response.json(); 
-                    console.log(data);
+                    //console.log(data);
                     setCartId(data.cartId);
                     localStorage.setItem('cartId', data.cartId);
                     if (data.status = 200) {
                         const cart = await fetchCart();
-                        console.log(cart);
+                        //console.log(cart);
                         setCartItems(cart.cart_items);
                         localStorage.setItem('cartItems', JSON.stringify(cart.cart_items));
                     }
 
                 } 
                 else {
-                    console.log('Updating cart...');
+                    //console.log('Updating cart...');
                     const response = await fetch(`/api/store/cart/${cartId}`, {
                         method: 'PATCH',
                         headers: {
                             'Content-Type': 'application/json',
                         },
                         body: JSON.stringify({
-                            cart_items: [...cartItems, item]
+                            cart_items: [...cartItems, item],
+                            customer_id: userId
                         }),
                     });
                     if (!response.ok) {
@@ -124,7 +126,7 @@ export const CartProvider = ({ children }: CartProviderProps) => {
                         throw new Error(error.error || 'Failed to add item to cart');
                     }
                     const data = await response.json();
-                    console.log(data);
+                    //console.log(data);
                     setCartSuccess(data.message);
                     if(data.status === 200) {
                         const cart = await fetchCart();
@@ -142,19 +144,24 @@ export const CartProvider = ({ children }: CartProviderProps) => {
                             'Content-Type': 'application/json',
                         },
                         body: JSON.stringify({
-                            cart_items: [...cartItems, item], 
-                            customer_id: customerId
+                            items: [...cartItems, item], 
+                            customer_id: userId
                         }),
                     });
                     if (!response.ok) {
                         const error = await response.json();
                         throw new Error(error.error || 'Failed to add item to cart');
                     }
-                    const data = await response.json();
-                    setCartId(data.id);
-                    localStorage.setItem('cartId', data.id);
-                    setCartItems(data.cart_items || []);
-                    localStorage.setItem('cartItems', JSON.stringify(data.cart_items));
+                    const data = await response.json(); 
+                    //console.log(data);
+                    setCartId(data.cartId);
+                    localStorage.setItem('cartId', data.cartId);
+                    if (data.status = 200) {
+                        const cart = await fetchCart();
+                        //console.log(cart);
+                        setCartItems(cart.cart_items);
+                        localStorage.setItem('cartItems', JSON.stringify(cart.cart_items));
+                    }
                 } else {
                     const response = await fetch(`/api/store/cart/${cartId}`, {
                         method: 'PATCH',
@@ -163,7 +170,7 @@ export const CartProvider = ({ children }: CartProviderProps) => {
                         }, 
                         body: JSON.stringify({
                             cart_items: [...cartItems, item],
-                            customer_id: customerId
+                            customer_id: userId
                         }),
                     });
                     if (!response.ok) {
@@ -171,6 +178,14 @@ export const CartProvider = ({ children }: CartProviderProps) => {
                         throw new Error(error.error || 'Failed to add item to cart');
                     }
                     const data = await response.json();
+                    //console.log(data);
+                    setCartSuccess(data.message);
+                    if(data.status === 200) {
+                        const cart = await fetchCart();
+                        console.log(cart);
+                        setCartItems(cart.cart_items);
+                        localStorage.setItem('cartItems', JSON.stringify(cart.cart_items));
+                    }
                 }
             }
         } catch (error) {
@@ -197,7 +212,8 @@ export const CartProvider = ({ children }: CartProviderProps) => {
                     'Content-Type': 'application/json',
                 },
                 body: JSON.stringify({
-                    cart_items: [updatedItem]
+                    cart_items: [updatedItem],
+                    customer_id: userId
                 }),
             });
 
@@ -214,7 +230,7 @@ export const CartProvider = ({ children }: CartProviderProps) => {
             setCartSuccess(data.message);
             if(data.status === 200) {
                 const cart = await fetchCart();
-                console.log(cart);
+                //console.log(cart);
                 setCartItems(cart.cart_items);
                 localStorage.setItem('cartItems', JSON.stringify(cart.cart_items));
             }

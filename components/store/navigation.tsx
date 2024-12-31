@@ -1,41 +1,50 @@
-import NavLinks from "@/components/store/ui/nav/links";
+'use client';
+import { useAuth } from "@/app/context/authContext";
+import NavLink from "@/components/store/ui/nav/navLink";
 import HamburgerMenu from "@/components/store/ui/nav/hamburger-menu";
 import CloseMenu from "@/components/store/ui/nav/close-menu";
 import Logo from "@/components/store/ui/nav/logo";
 import CartIcon from "@/components/store/ui/nav/cart-icon";
 
 interface NavbarProps {
-    className?: string,
     isOpen: boolean
     toggleMenu: () => void
 
 }
 
-const Navbar: React.FC<NavbarProps> = ({className, isOpen, toggleMenu}) => {
-
+const Navbar: React.FC<NavbarProps> = ({isOpen, toggleMenu}) => {
+    const { user, signout } = useAuth();
     return(
-        <nav className={className}>
-            <div className="">
-                <div className="flex h-16 items-center">
-                    <div className="relative lg:hidden">
-                        {isOpen ? (
-                            <CloseMenu toggleMenu={toggleMenu} />
-                        ) : (
-                            <HamburgerMenu toggleMenu={toggleMenu} />
-                        )}
-                    </div>
-                    <div className="flex justify-center ml-auto lg:ml-0">
-                       <Logo />
-                    </div>
-                    <div className="ml-auto flex items-center">
-                        <div className="hidden lg:flex lg:items-center lg:justify-center lg:space-x-14 text-white text-lg">
-                            <NavLinks className="relative inline-block group" showSpan={true} />
-                            <span className="h-6 w-px bg-gray-200" aria-hidden="true"></span>
-                        </div>
-                        <CartIcon />
-                    </div>
-                </div>
+        <nav className="flex items-center justify-between py-2 px-8">
+            <div className=" md:hidden">
+                {isOpen ? (
+                    <CloseMenu toggleMenu={toggleMenu} />
+                ) : (
+                    <HamburgerMenu toggleMenu={toggleMenu} />
+                )}
             </div>
+            <div className="hidden md:flex space-x-4">
+                    <NavLink href="/#about" className="" showSpan={true}>About</NavLink>       
+                    <NavLink href="/#contact" showSpan={true}>Contact</NavLink>
+                    <NavLink href="/menu" className="" showSpan={true}>Menu</NavLink>
+            </div>
+            <Logo />
+            <div className="text-sm flex md:text-md space-x-4 text-white md:text-lg">
+                {!user ? (
+                    <div className="flex space-x-4">
+                        <NavLink href="/signin" className="" showSpan={true}>Sign In</NavLink>
+                            
+                        <NavLink href="/signup" className="hidden md:block" showSpan={true}>Sign Up</NavLink>
+                    </div>
+                ) : (
+                    <div>
+                        <NavLink href="/account" className="" showSpan={true}>Account</NavLink>
+                            <span>/</span>
+                        <NavLink href="/" className="" showSpan={true} onClick={() => signout()}>Logout</NavLink>
+                    </div>
+                )}
+                 <CartIcon />  
+            </div>                          
         </nav>
     )
 }
