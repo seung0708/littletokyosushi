@@ -3,7 +3,6 @@ import { createClient } from '@/lib/supabase/server';
 import { Cart, CartItem, CartItemModifier, CartItemModifierOption } from '@/types/cart';
 
 export async function GET(request: Request, { params}: { params: { id: string } }) {
-    console.log('Getting cart items...');
     const supabase = createClient();
     const {data: dbCart, error} = await supabase
     .from('carts')
@@ -159,9 +158,9 @@ async function createNewCartItemWithModifiers(supabase: any, existingCartItem: a
 
 export async function PATCH(request: Request, { params }: { params: { id: string } }) {
     try {
-        const { customer_id, cart_items } = await request.json()
-        console.log('customer_id:', customer_id)
-        const newItems = cart_items[cart_items.length - 1]
+        const { customer_id, items } = await request.json()
+        console.log('items:', items)
+        const newItems = items[items.length - 1]
         //console.log('newItems:', newItems)
         const { id } = params
         let isSameModifierOptions: boolean;
@@ -278,14 +277,14 @@ export async function PATCH(request: Request, { params }: { params: { id: string
 export async function DELETE(request: Request, { params }: { params: { id: string } }) {
     const supabase = createClient();
     const { id } = params;
-    const cartItem = await request.json();
-    console.log('cartItem:', cartItem);
+    const itemId = await request.json();
+    console.log('itemId:', itemId);
 
     try {
         const { error } = await supabase
             .from('cart_items')
             .delete()
-            .eq('id', cartItem.id);
+            .eq('id', itemId);
         if (error) {
             console.error('Error deleting cart item:', error);
             return NextResponse.json(

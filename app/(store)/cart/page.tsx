@@ -6,7 +6,7 @@ import { CartItem } from "@/types/cart";
 
 
 const CartPage: React.FC = () => {
-    const { cartItems, updateCart, removeItemFromCart} = useCart(); 
+    const { cartItems, handleCartUpdate, removeItemFromCart} = useCart(); 
     const onSubmit = async () => {
         console.log('cartItems', cartItems)
         
@@ -35,7 +35,7 @@ const CartPage: React.FC = () => {
             menu_item_image: cartItem.menu_item_image, 
             cart_item_modifiers: cartItem.cart_item_modifiers
         };
-        await updateCart(updatedItem);
+        await handleCartUpdate(updatedItem);
 
     };
 
@@ -101,7 +101,7 @@ const CartPage: React.FC = () => {
                                                             variant="ghost"
                                                             size="sm"
                                                             className="inline-flex p-2 hover:bg-white"
-                                                            onClick={() => removeItemFromCart(cartItem)}
+                                                            onClick={() => removeItemFromCart(cartItem.id)}
                                                             
                                                         >
                                                             <span className="sr-only">Remove</span>

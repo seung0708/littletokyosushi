@@ -87,8 +87,7 @@ export async function POST(request: Request) {
         }
 
         return NextResponse.json(
-            { cartId: cart.id },
-            { status: 200 });
+            { cartId: cart.id, status: 200 });
     } catch (error) {
         console.error('Error in cart items API:', error);
         return NextResponse.json(    

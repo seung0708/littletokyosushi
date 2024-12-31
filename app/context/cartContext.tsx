@@ -3,13 +3,11 @@ import React, { createContext, useContext, useEffect, useState } from "react";
 import { useAuth } from "./authContext";
 import { CartItem, Cart, CartItemModifier, CartItemModifierOption } from "@/types/cart";
 
-
 interface CartContextType {
     cartItems: CartItem[];
     cartId: string;
-    addItemToCart: (item: CartItem) => Promise<void>;
-    updateCart: (item: CartItem) => Promise<void>;
-    removeItemFromCart: (item: CartItem) => Promise<void>;
+    handleCartUpdate: (item: CartItem) => Promise<void>;
+    removeItemFromCart: (itemId: string) => Promise<void>;
     isCartLoading: boolean;
     cartError: string | null;
 }
@@ -24,7 +22,6 @@ export const useCart = () => {
     return context;
 };
 
-
 interface CartProviderProps {
     children: React.ReactNode;
 }
@@ -32,40 +29,47 @@ interface CartProviderProps {
 export const CartProvider = ({ children }: CartProviderProps) => {
     const { user } = useAuth();
     let userId = user?.id;
-    console.log(user, userId);
     const [cartItems, setCartItems] = useState<CartItem[]>([]);
-    const [cartId, setCartId] = useState<string>("");
+    const [cartId, setCartId] = useState<string>(""); // eslint-disable-line
     const [isCartLoading, setIsCartLoading] = useState(false);
     const [cartError, setCartError] = useState<string | null>(null);
     const [cartSuccess, setCartSuccess] = useState<string | null>(null);
 
     useEffect(() => {
         const storedCartItems = localStorage.getItem('cartItems');
-        const storedCartId = localStorage.getItem('cartId');
         if (storedCartItems) {
             setCartItems(JSON.parse(storedCartItems));
         }
+        const storedCartId = localStorage.getItem('cartId');
         if (storedCartId) {
             setCartId(storedCartId);
         }
-    },[]);
+    }, []);
 
     const fetchCart = async () => {
+        setIsCartLoading(true);
+        setCartError(null);
+        const storedCartId = localStorage.getItem('cartId');
+        console.log('Stored Cart ID:', storedCartId);
+        if(!storedCartId) return;
+
         try {
-            setIsCartLoading(true);
-            setCartError(null);
-            //console.log('Fetching cart...');
-            const cartId = localStorage.getItem('cartId');
-            if(cartId) {
-                //console.log('Fetching cart:', cartId);
-                const response = await fetch(`/api/store/cart/${cartId}`);
-                if (!response.ok) {
-                    const error = await response.json();
+            const response = await fetch(`/api/store/cart/${storedCartId}`);
+            if (!response.ok) {
+                const errorText = await response.text();
+                console.log('Error response:', errorText);
+                try {
+                    const error = JSON.parse(errorText);
                     throw new Error(error.error || 'Failed to fetch cart');
+                } catch {
+                    throw new Error('Failed to fetch cart');
                 }
-                const data = await response.json();
-                return data;
             }
+            const cart = await response.json();
+            console.log('Cart data:', cart);
+            setCartItems(cart.cart_items);
+            setCartId(storedCartId);
+            localStorage.setItem('cartItems', JSON.stringify(cart.cart_items));
         } catch (error) {
             console.error('Error fetching cart:', error);
             setCartError(error instanceof Error ? error.message : 'Failed to fetch cart');
@@ -74,183 +78,87 @@ export const CartProvider = ({ children }: CartProviderProps) => {
         }
     };
 
-    
-
-    const addItemToCart = async (item: CartItem) => {
-        console.log(userId)
+    const handleCartUpdate = async (item: CartItem) => {
+        console.log('handleCartUpdate item', item);
         try {
-            setIsCartLoading(true);
-            setCartError(null);
-            if(!userId) {
-                if(!cartId || cartId === '') {
-                    const response = await fetch('/api/store/cart', {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                        },
-                        body: JSON.stringify({
-                            items: [item],
-                            customer_id: userId,
-                        }),
-                    });
-                    if (!response.ok) {
-                        const error = await response.json();
-                        throw new Error(error.error || 'Failed to add item to cart');
-                    }
-                    const data = await response.json(); 
-                    //console.log(data);
-                    setCartId(data.cartId);
-                    localStorage.setItem('cartId', data.cartId);
-                    if (data.status = 200) {
-                        const cart = await fetchCart();
-                        //console.log(cart);
-                        setCartItems(cart.cart_items);
-                        localStorage.setItem('cartItems', JSON.stringify(cart.cart_items));
-                    }
-
-                } 
-                else {
-                    //console.log('Updating cart...');
-                    const response = await fetch(`/api/store/cart/${cartId}`, {
-                        method: 'PATCH',
-                        headers: {
-                            'Content-Type': 'application/json',
-                        },
-                        body: JSON.stringify({
-                            cart_items: [...cartItems, item],
-                            customer_id: userId
-                        }),
-                    });
-                    if (!response.ok) {
-                        const error = await response.json();
-                        throw new Error(error.error || 'Failed to add item to cart');
-                    }
-                    const data = await response.json();
-                    //console.log(data);
-                    setCartSuccess(data.message);
-                    if(data.status === 200) {
-                        const cart = await fetchCart();
-                        console.log(cart);
-                        setCartItems(cart.cart_items);
-                        localStorage.setItem('cartItems', JSON.stringify(cart.cart_items));
-                    }
-                }
-            } 
-            else { 
-                if(!cartId) {
-                    const response = await fetch('/api/store/cart', {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                        },
-                        body: JSON.stringify({
-                            items: [...cartItems, item], 
-                            customer_id: userId
-                        }),
-                    });
-                    if (!response.ok) {
-                        const error = await response.json();
-                        throw new Error(error.error || 'Failed to add item to cart');
-                    }
-                    const data = await response.json(); 
-                    //console.log(data);
-                    setCartId(data.cartId);
-                    localStorage.setItem('cartId', data.cartId);
-                    if (data.status = 200) {
-                        const cart = await fetchCart();
-                        //console.log(cart);
-                        setCartItems(cart.cart_items);
-                        localStorage.setItem('cartItems', JSON.stringify(cart.cart_items));
-                    }
-                } else {
-                    const response = await fetch(`/api/store/cart/${cartId}`, {
-                        method: 'PATCH',
-                        headers: {
-                            'Content-Type': 'application/json',
-                        }, 
-                        body: JSON.stringify({
-                            cart_items: [...cartItems, item],
-                            customer_id: userId
-                        }),
-                    });
-                    if (!response.ok) {
-                        const error = await response.json();
-                        throw new Error(error.error || 'Failed to add item to cart');
-                    }
-                    const data = await response.json();
-                    //console.log(data);
-                    setCartSuccess(data.message);
-                    if(data.status === 200) {
-                        const cart = await fetchCart();
-                        console.log(cart);
-                        setCartItems(cart.cart_items);
-                        localStorage.setItem('cartItems', JSON.stringify(cart.cart_items));
-                    }
-                }
+          if (!userId) {
+            if (!cartId || cartId === '') {
+              await createNewCart(item); 
+            } else {
+              await updateExistingCart(item);
             }
+          } else {
+            if (!cartId || cartId === '') {
+              await createNewCart(item);  
+            } else {
+              await updateExistingCart(item);
+            }
+          }
         } catch (error) {
-            console.error('Error adding item to cart:', error);
-            setCartError(error instanceof Error ? error.message : 'Failed to add item to cart');
-            throw error;
-        } finally {
-            setIsCartLoading(false);
+          console.error('Error updating cart:', error);
         }
-    };
+      };
 
-    const updateCart = async (updatedItem: CartItem) => {
+    const createNewCart = async (item: CartItem) => {
         try {
-            setIsCartLoading(true);
-            setCartError(null);
+            const response = await fetch('/api/store/cart', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    items: [item],
+                    customer_id: userId
+                }),
+            });
+            if (!response.ok) {
+                const error = await response.json();
+                throw new Error(error.error || 'Failed to create new cart');
+            }
+            const data = await response.json();
+            console.log(data);
+            setCartId(data.cartId);
+            localStorage.setItem('cartId', data.cartId);
+            if(data.status === 200) fetchCart();
+        }
+        catch (error) {
+            console.error('Error creating new cart:', error);
+        }
+    }
 
-            // Get previous state before update
-            const previousCartItems = cartItems;
-
-            // Update the database
+    const updateExistingCart = async (item: CartItem) => {
+        try {
             const response = await fetch(`/api/store/cart/${cartId}`, {
                 method: 'PATCH',
                 headers: {
                     'Content-Type': 'application/json',
                 },
                 body: JSON.stringify({
-                    cart_items: [updatedItem],
+                    items: [...cartItems, item],
                     customer_id: userId
                 }),
             });
-
             if (!response.ok) {
                 const error = await response.json();
-                // Revert to previous state if update fails
-                setCartItems(previousCartItems);
-                localStorage.setItem('cartItems', JSON.stringify(previousCartItems));
-                throw new Error(error.error || 'Failed to update cart');
+                throw new Error(error.error || 'Failed to update existing cart');
             }
-
             const data = await response.json();
-            console.log(data);
             setCartSuccess(data.message);
-            if(data.status === 200) {
-                const cart = await fetchCart();
-                //console.log(cart);
-                setCartItems(cart.cart_items);
-                localStorage.setItem('cartItems', JSON.stringify(cart.cart_items));
-            }
-
-        } catch (error) {
-            console.error('Error updating cart:', error);
-            setCartError(error instanceof Error ? error.message : 'Failed to update cart');
-        } finally {
-            setIsCartLoading(false);
+            if(data.status === 200) fetchCart();
         }
-    };
+        catch (error) {
+            console.error('Error updating existing cart:', error);
+        }
+    }
 
-    const removeItemFromCart = async (cartItem: CartItem) => {
+    const removeItemFromCart = async (itemId: string) => {
         const response = await fetch(`/api/store/cart/${cartId}`, {
             method: 'DELETE',
             headers: {
                 'Content-Type': 'application/json',
             },
             body: JSON.stringify(
-                cartItem
+                itemId
             ),
         });
         if (!response.ok) {
@@ -260,20 +168,14 @@ export const CartProvider = ({ children }: CartProviderProps) => {
         const data = await response.json();
         console.log(data);
         setCartSuccess(data.message);
-        if(data.status === 200) {
-            const cart = await fetchCart();
-            console.log(cart);
-            setCartItems(cart.cart_items);
-            localStorage.setItem('cartItems', JSON.stringify(cart.cart_items));
-        }
+        if(data.status === 200) fetchCart();
     };
 
     return (
         <CartContext.Provider value={{
             cartItems,
             cartId,
-            addItemToCart,
-            updateCart,
+            handleCartUpdate,
             removeItemFromCart,
             isCartLoading,
             cartError,

@@ -62,7 +62,7 @@ export default function ItemDetailsPage({ params }: { params: { id: string } }) 
     const [loading, setLoading] = useState(true);
     const [loadingImage, setLoadingImage] = useState(true);
     const [selectedImage, setSelectedImage] = useState(0);
-    const { addItemToCart } = useCart();
+    const { handleCartUpdate } = useCart();
 
     const form = useForm<z.infer<typeof formSchema>>({
         resolver: zodResolver(formSchema),
@@ -200,7 +200,7 @@ export default function ItemDetailsPage({ params }: { params: { id: string } }) 
         };
 
         try {
-            await addItemToCart(cartItem);
+            await handleCartUpdate(cartItem);
             form.reset();
             form.setValue('modifiers', item?.modifiers.map(mod => ({
                 ...mod,
