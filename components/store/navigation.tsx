@@ -7,55 +7,44 @@ import Logo from "@/components/store/ui/nav/logo";
 import CartIcon from "@/components/store/ui/nav/cart-icon";
 
 interface NavbarProps {
-    className?: string,
     isOpen: boolean
     toggleMenu: () => void
 
 }
 
-const Navbar: React.FC<NavbarProps> = ({className, isOpen, toggleMenu}) => {
+const Navbar: React.FC<NavbarProps> = ({isOpen, toggleMenu}) => {
     const { user } = useAuth();
     return(
-        <nav className={className}>
-            <div className="">
-                <div className="flex h-16 items-center">
-                    <div className="relative md:hidden">
-                        {isOpen ? (
-                            <CloseMenu toggleMenu={toggleMenu} />
-                        ) : (
-                            <HamburgerMenu toggleMenu={toggleMenu} />
-                        )}
-                    </div>
-                    <div className="flex justify-center ml-auto md:ml-0">
-                       <Logo />
-                    </div>
-                    <div className="ml-auto flex items-center">
-                        <div className="text-sm md:text-md space-x-4 flex justify-between items-center text-white md:text-lg">
-                            <div className="hidden md:flex md:items-center md:justify-between md:space-x-8 lg:space-x-14">
-                                <NavLink href="/#about" className="relative inline-block group" showSpan={true}>About</NavLink>       
-                                <NavLink href="/#contact" className="relative inline-block group" showSpan={true}>Contact</NavLink>
-                                <NavLink href="/menu" className="relative inline-block group" showSpan={true}>Menu</NavLink>
-                                <span className="h-6 w-px bg-gray-200" aria-hidden="true"></span>
-                            </div>
-                           
-                            {!user ? (
-                            <div>
-                                <NavLink href="/signin" className="relative inline-block group" showSpan={true}>Sign In</NavLink>
-                                <span>/</span>
-                                <NavLink href="/signup" className="relative inline-block group" showSpan={true}>Sign Up</NavLink>
-                            </div>
-                            ) : (
-                                <div>
-                                    <NavLink href="/account" className="relative inline-block group" showSpan={true}>Account</NavLink>
-                                    <span>/</span>
-                                    <NavLink href="/logout" className="relative inline-block group" showSpan={true}>Logout</NavLink>
-                                </div>
-                            )}
-                        </div>
-                        <CartIcon />                        
-                    </div>
-                </div>
+        <nav className="flex items-center justify-between py-2 px-8">
+            <div className=" md:hidden">
+                {isOpen ? (
+                    <CloseMenu toggleMenu={toggleMenu} />
+                ) : (
+                    <HamburgerMenu toggleMenu={toggleMenu} />
+                )}
             </div>
+            <div className="hidden md:flex space-x-4">
+                    <NavLink href="/#about" className="" showSpan={true}>About</NavLink>       
+                    <NavLink href="/#contact" showSpan={true}>Contact</NavLink>
+                    <NavLink href="/menu" className="" showSpan={true}>Menu</NavLink>
+            </div>
+            <Logo />
+            <div className="text-sm flex md:text-md space-x-4 text-white md:text-lg">
+                {!user ? (
+                    <div>
+                        <NavLink href="/signin" className="" showSpan={true}>Sign In</NavLink>
+                            
+                        <NavLink href="/signup" className="hidden" showSpan={true}>Sign Up</NavLink>
+                    </div>
+                ) : (
+                    <div>
+                        <NavLink href="/account" className="" showSpan={true}>Account</NavLink>
+                            <span>/</span>
+                        <NavLink href="/logout" className="" showSpan={true}>Logout</NavLink>
+                    </div>
+                )}
+                 <CartIcon />  
+            </div>                          
         </nav>
     )
 }

@@ -9,7 +9,7 @@ const MobileNav: React.FC<MobileNavProps> = ({toggleMenu, isOpen}) => {
     return (
         <>
         {isOpen && (
-        <div className="fixed inset-x-0 top-16 z-40 bg-gray-900 text-white px-12" role="dialog" aria-modal="true">
+        <div className="fixed inset-x-0 top-14 z-40 bg-gray-900 text-white px-4" role="dialog" aria-modal="true">
             <div className="flex flex-col p-4">
                 <ul role="list" aria-labelledby="heading-mobile" className="flex flex-col space-y-4">
                     <Link href="/#about" onClick={toggleMenu}>About</Link>
