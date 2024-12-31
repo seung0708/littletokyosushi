@@ -7,6 +7,7 @@ export async function POST(request: Request) {
     const { customer_id, items } = await request.json();
     console.log('items', items);
     try {
+    
         const { data: cart, error: createCartError } = await supabase
             .from('carts')
             .insert({
@@ -14,7 +15,7 @@ export async function POST(request: Request) {
             })
             .select()
             .single();
-
+        
         if (createCartError) {
             console.error('Error creating cart:', createCartError);
             return NextResponse.json(
@@ -97,3 +98,25 @@ export async function POST(request: Request) {
     }    
 }
 
+export const DELETE = async (request: Request) => {
+    const supabase = createClient();
+    const { cartId } = await request.json();
+    if(!cartId) return;
+    try {
+        const { error } = await supabase.from('carts').delete().eq('id', cartId);
+        if (error) {
+            console.error('Error deleting cart:', error);
+            return NextResponse.json(
+                { error: 'Error deleting cart' },
+                { status: 500 }
+            );
+        }
+        return NextResponse.json({ message: 'Cart deleted successfully' }, { status: 200 });
+    } catch (error) {
+        console.error('Error deleting cart:', error);
+        return NextResponse.json(
+            { error: 'Error deleting cart' },
+            { status: 500 }
+        );
+    }
+}

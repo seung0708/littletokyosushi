@@ -7,8 +7,6 @@ import { CartItem } from "@/types/cart";
 
 const CartPage: React.FC = () => {
     const { cartItems, updateCart, removeItemFromCart} = useCart(); 
-    console.log('cartItems', cartItems)
-
     const onSubmit = async () => {
         console.log('cartItems', cartItems)
         
@@ -25,11 +23,8 @@ const CartPage: React.FC = () => {
     };
     
     const handleQuantityChange = async (cartItem: CartItem, increment: boolean) => {
-        console.log('cartItem', cartItem)
-        console.log('cartItem.quantity', cartItem.quantity)
         const newQuantity = increment ? cartItem.quantity + 1 : cartItem.quantity - 1;
-        console.log('newQuantity', newQuantity) 
-        console.log('cartItem.quantity', cartItem.quantity + 1)
+
         const updatedItem = {
             cart_item_id: cartItem.id,
             quantity: newQuantity,
@@ -40,8 +35,6 @@ const CartPage: React.FC = () => {
             menu_item_image: cartItem.menu_item_image, 
             cart_item_modifiers: cartItem.cart_item_modifiers
         };
-
-        console.log('updatedItem', updatedItem)
         await updateCart(updatedItem);
 
     };

@@ -159,12 +159,14 @@ async function createNewCartItemWithModifiers(supabase: any, existingCartItem: a
 
 export async function PATCH(request: Request, { params }: { params: { id: string } }) {
     try {
-        const { cart_items } = await request.json()
+        const { customer_id, cart_items } = await request.json()
+        console.log('customer_id:', customer_id)
         const newItems = cart_items[cart_items.length - 1]
-        console.log('newItems:', newItems)
+        //console.log('newItems:', newItems)
         const { id } = params
         let isSameModifierOptions: boolean;
         const supabase = createClient();
+
 
         const { data: dbCart, error } = await supabase
             .from('carts')
@@ -175,7 +177,17 @@ export async function PATCH(request: Request, { params }: { params: { id: string
             .eq('id', id)
             .single();
 
-        //console.log('dbCart:', dbCart);
+        
+
+        if (!dbCart?.customer_id && customer_id) {
+            const { error } = await supabase
+                .from('carts')
+                .update({
+                    customer_id
+                })
+                .eq('id', id)
+        }
+        console.log('dbCart:', dbCart);
         const existingCartItem = dbCart?.cart_items.find((cartItem: any) => {
             if ( 'menu_item_id' in newItems) {
                 return cartItem.menu_item_id === newItems.menu_item_id;
@@ -184,7 +196,7 @@ export async function PATCH(request: Request, { params }: { params: { id: string
             }
 
         });
-        console.log('existingCartItem:', existingCartItem);
+        //console.log('existingCartItem:', existingCartItem);
         
         if (existingCartItem) {
             if (existingCartItem.cart_item_modifiers.length > 0 && newItems.modifiers) {
