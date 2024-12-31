@@ -12,5 +12,6 @@ export async function POST(req: NextRequest) {
   if (user) {
     await supabase.auth.signOut()
   }
-  return NextResponse.json(user);
+
+  return NextResponse.json({ status: 200 })
 }

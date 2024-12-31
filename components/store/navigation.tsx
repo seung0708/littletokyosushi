@@ -13,7 +13,7 @@ interface NavbarProps {
 }
 
 const Navbar: React.FC<NavbarProps> = ({isOpen, toggleMenu}) => {
-    const { user } = useAuth();
+    const { user, signout } = useAuth();
     return(
         <nav className="flex items-center justify-between py-2 px-8">
             <div className=" md:hidden">
@@ -40,7 +40,7 @@ const Navbar: React.FC<NavbarProps> = ({isOpen, toggleMenu}) => {
                     <div>
                         <NavLink href="/account" className="" showSpan={true}>Account</NavLink>
                             <span>/</span>
-                        <NavLink href="/logout" className="" showSpan={true}>Logout</NavLink>
+                        <NavLink href="/" className="" showSpan={true} onClick={() => signout()}>Logout</NavLink>
                     </div>
                 )}
                  <CartIcon />  
