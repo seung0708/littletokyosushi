@@ -28,7 +28,7 @@ interface CartProviderProps {
 
 export const CartProvider = ({ children }: CartProviderProps) => {
     const { user } = useAuth();
-    let userId = user?.id;
+    const userId = user?.id;
     const [cartItems, setCartItems] = useState<CartItem[]>([]);
     const [cartId, setCartId] = useState<string>(""); // eslint-disable-line
     const [isCartLoading, setIsCartLoading] = useState(false);
@@ -36,22 +36,24 @@ export const CartProvider = ({ children }: CartProviderProps) => {
     const [cartSuccess, setCartSuccess] = useState<string | null>(null);
 
     useEffect(() => {
-        const storedCartId = localStorage.getItem('cartId');
-        if (storedCartId) {
-            setCartId(storedCartId);
-            fetchCart(storedCartId);
+        fetchCart(localStorage.getItem('cartId') || '');
+        if(userId) {
+            handleCartMerge();
         }
-    }, []);
+        
+    }, [userId, cartId]);
 
-    const fetchCart = async (displayId: string) => {
+    const fetchCart = async (cartId: string) => {
         setIsCartLoading(true);
         setCartError(null);
         try {
-            const response = await fetch(`/api/store/cart/${displayId}`, {
+            const response = await fetch(`/api/store/cart/${cartId}`, {
                 method: 'GET',
                 credentials: 'include',
             });
             if (!response.ok) {
+               localStorage.removeItem('cartId');
+               localStorage.removeItem('cartItems');
                throw new Error('Failed to fetch cart');
             }
             const cart = await response.json();
@@ -66,6 +68,21 @@ export const CartProvider = ({ children }: CartProviderProps) => {
             setIsCartLoading(false);
         }
     };
+
+    const handleCartMerge = async () => {
+        const response = await fetch(`/api/store/cart/merge/${cartId}`, {
+            method: 'PATCH',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                customerId: user?.id
+            }),
+            credentials: 'include',
+        });
+        const data = await response.json();
+        console.log('handleCartMerge data', data);
+    }
 
     const handleCartUpdate = async (item: CartItem) => {
         console.log('handleCartUpdate item', item);
