@@ -53,7 +53,7 @@ export async function GET() {
                 modifier_id: cartItemModifier?.modifiers?.id,
                 name: cartItemModifier?.modifiers?.name,
                 cart_item_modifier_options: cartItemModifier?.cart_item_modifier_options?.map((cartItemModifierOption: any) => ({
-                    id: cartItemModifierOption?.id.substring(0, 8),
+                    id: cartItemModifierOption?.id,
                     modifier_id: cartItemModifierOption?.modifier_id,
                     modifier_option_id: cartItemModifierOption?.modifier_options?.id,
                     name: cartItemModifierOption?.modifier_options?.name,
@@ -80,8 +80,8 @@ export async function PATCH(request: Request) {
         const { data: dbCart, error: cartError } = await supabase
             .from('carts')
             .select(`id, customer_id, completed_at, 
-                cart_items(id, cart_id, menu_item_id, base_price, total_price, quantity, special_instructions,
-                cart_item_modifiers(id, cart_items_id, modifier_id,
+                cart_items(id, cart_id, menu_item_id, quantity, base_price, total_price, special_instructions,
+                    cart_item_modifiers(id, cart_items_id, modifier_id,
                 cart_item_modifier_options(id, cart_item_modifiers_id, modifier_option_id, modifier_id, modifier_option_price))))`)
             .eq('id', cartId)
             .single();
@@ -95,7 +95,7 @@ export async function PATCH(request: Request) {
             );
         }
         
-        const existingCartItem = dbCart?.cart_items.find((cartItem: any) => {
+        const existingCartItem = dbCart.cart_items.find((cartItem: any) => {
             if ( 'menu_item_id' in newItems) {
                 return cartItem.menu_item_id === newItems.menu_item_id;
             } else if ('cart_item_id' in newItems) {
@@ -104,67 +104,68 @@ export async function PATCH(request: Request) {
 
         });
         console.log('existingCartItem:', existingCartItem);
-        // if (existingCartItem) {
-        //     if (existingCartItem.cart_item_modifiers.length > 0 && newItems.modifiers) {
-        //         console.log('Adding items from menu to cart...');
-        //         isSameModifierOptions = await compareModifierOptions(existingCartItem, newItems);
-        //         console.log('isSameModifierOptions:', isSameModifierOptions);
-        //         if(isSameModifierOptions) {
-        //             await updateExistingCartItem(supabase, existingCartItem, newItems);
-        //         } else {
-        //             await createNewCartItemWithModifiers(supabase, existingCartItem, newItems);
-        //         }
-        //     } 
-        //     if (existingCartItem.cart_item_modifiers.length > 0 && newItems.cart_item_modifiers) {
-        //         await updateExistingCartItem(supabase, existingCartItem, newItems);
-        //     } 
+        if (existingCartItem) {
+            if (existingCartItem.cart_item_modifiers.length > 0 && newItems.modifiers) {
+                console.log('Adding items from menu to cart...');
+                isSameModifierOptions = await compareModifierOptions(existingCartItem, newItems);
+                console.log('isSameModifierOptions:', isSameModifierOptions);
+                if(isSameModifierOptions) {
+                    await updateExistingCartItem(supabase, existingCartItem, newItems);
+                } else {
+                    await createNewCartItemWithModifiers(supabase, existingCartItem, newItems);
+                }
+            } 
+            if (existingCartItem.cart_item_modifiers.length > 0 && newItems.cart_item_modifiers) {
+                await updateExistingCartItem(supabase, existingCartItem, newItems);
+            } 
 
-        // } 
-        // //console.log('existingCartItem.menu_item_id !== newItems.menu_item_id:', existingCartItem.menu_item_id !== newItems.menu_item_id);
-        // if (!existingCartItem) {
-        //     const {data: cartItem, error} = await supabase
-        //         .from('cart_items')
-        //         .insert({
-        //             cart_id: dbCart.id,
-        //             base_price: newItems.base_price,
-        //             total_price: newItems.total_price,
-        //             quantity: newItems.quantity,
-        //             menu_item_id: newItems.menu_item_id,
-        //             special_instructions: newItems.special_instructions || '',
-        //         })
-        //         .select()
+        } 
+        //console.log('existingCartItem.menu_item_id !== newItems.menu_item_id:', existingCartItem.menu_item_id !== newItems.menu_item_id);
+        if (!existingCartItem) {
+            const {data: cartItem, error} = await supabase
+                .from('cart_items')
+                .insert({
+                    cart_id: dbCart.id,
+                    base_price: newItems.base_price,
+                    total_price: newItems.total_price,
+                    quantity: newItems.quantity,
+                    menu_item_id: newItems.menu_item_id,
+                    special_instructions: newItems.special_instructions || '',
+                })
+                .select()
 
-        //     //console.log('new cart item:', cartItem);
+            //console.log('new cart item:', cartItem);
 
-        //     if (getModifiersArray(newItems) && getModifiersArray(newItems).length > 0) {
-        //         const { data: cartItemModifier, error: cartItemModifierError } = await supabase
-        //             .from('cart_item_modifiers')
-        //             .insert(
-        //                 getModifiersArray(newItems).map((cartItemModifier: any) => ({
-        //                     cart_items_id: cartItem?.[0].id,
-        //                     modifier_id: cartItemModifier.modifier_id,
-        //                 }))
-        //             )
-        //             .select()
+            if (getModifiersArray(newItems) && getModifiersArray(newItems).length > 0) {
+                const { data: cartItemModifier, error: cartItemModifierError } = await supabase
+                    .from('cart_item_modifiers')
+                    .insert(
+                        getModifiersArray(newItems).map((cartItemModifier: any) => ({
+                            cart_items_id: cartItem?.[0].id,
+                            modifier_id: cartItemModifier.modifier_id,
+                        }))
+                    )
+                    .select()
 
-        //         //console.log('new cart item modifier:', cartItemModifier);
+                //console.log('new cart item modifier:', cartItemModifier);
 
-        //         const {error: cartItemModifierOptionError } = await supabase
-        //             .from('cart_item_modifier_options')
-        //             .insert(
-        //                 getModifiersArray(newItems).flatMap((newItemModifier: any, index: number) => 
-        //                     newItemModifier.modifier_options.map((newItemModifierOption: any) => ({
-        //                         cart_item_modifiers_id: cartItemModifier?.[index]?.id,
-        //                         modifier_option_id: newItemModifierOption.modifier_option_id,
-        //                         modifier_option_price: newItemModifierOption.price,
-        //                         modifier_id: newItemModifier.modifier_id
-        //                     }))
-        //                 )
-        //             )
-        //     }
-        // } else {
-        //     await updateExistingCartItem(supabase, existingCartItem, newItems);
-        // }
+                const {error: cartItemModifierOptionError } = await supabase
+                    .from('cart_item_modifier_options')
+                    .insert(
+                        getModifiersArray(newItems).flatMap((newItemModifier: any, index: number) => 
+                            newItemModifier.modifier_options.map((newItemModifierOption: any) => ({
+                                cart_item_modifiers_id: cartItemModifier?.[index]?.id,
+                                modifier_option_id: newItemModifierOption.modifier_option_id,
+                                modifier_option_price: newItemModifierOption.price,
+                                modifier_id: newItemModifier.modifier_id
+                            }))
+                        )
+                    )
+            }
+        } else {
+            await updateExistingCartItem(supabase, existingCartItem, newItems);
+        }
+
         return NextResponse.json(
             { 
                 message: 'Cart updated successfully',

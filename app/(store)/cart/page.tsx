@@ -7,7 +7,8 @@ import { CartItem } from "@/types/cart";
 
 const CartPage: React.FC = () => {
     const { cartItems, handleCartUpdate, removeItemFromCart} = useCart(); 
-    const onSubmit = async () => {
+    const onSubmit = async (e) => {
+        e.preventDefault();
         console.log('cartItems', cartItems)
         
     }
