@@ -124,6 +124,8 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
                 throw new Error(data.error || 'Failed to sign out');
             }
             setUser(null);
+            localStorage.removeItem('cartId');
+            localStorage.removeItem('cartItems');
             redirect('/');
         } catch (error) {
             console.error('Error signing out:', error);

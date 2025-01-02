@@ -37,11 +37,16 @@ export const CartProvider = ({ children }: CartProviderProps) => {
 
     useEffect(() => {
         fetchCart(localStorage.getItem('cartId') || '');
+        const currentCartItems = cartItems;
+        const storedCartItems = JSON.parse(localStorage.getItem('cartItems') || '[]');
+        if (currentCartItems !== storedCartItems) {
+            localStorage.setItem('cartItems', JSON.stringify(currentCartItems));
+        }
         if(userId) {
             handleCartMerge();
         }
         
-    }, [userId, cartId]);
+    }, [userId]);
 
     const fetchCart = async (cartId: string) => {
         setIsCartLoading(true);
@@ -81,6 +86,11 @@ export const CartProvider = ({ children }: CartProviderProps) => {
             credentials: 'include',
         });
         const data = await response.json();
+        if (data.cart.id.substring(0, 8) !== cartId) {
+            setCartId(data.cart.id.substring(0, 8));
+            localStorage.setItem('cartId', data.cart.id.substring(0, 8));
+            localStorage.setItem('cartItems', JSON.stringify(data.cart.cart_items));
+        }
         console.log('handleCartMerge data', data);
     }
 
