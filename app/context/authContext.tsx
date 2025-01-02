@@ -34,9 +34,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
             const {data: {user}, error}  = await supabase.auth.getUser();
             if (user) {
                 console.log(user);
-                localStorage.setItem('userId', JSON.stringify(user.id));
-                const storedUserId = localStorage.getItem('userId');
-                setUser(JSON.parse(storedUserId));
+                setUser(user);
             } else {
                 setUser(null);
             }
@@ -62,7 +60,6 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
                 body: JSON.stringify({ email, password }),
             });
             const user = await response.json();
-            localStorage.setItem('userId', JSON.stringify(user.id));
             setUser(user);
             
             if (!response.ok) {
@@ -127,7 +124,6 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
                 throw new Error(data.error || 'Failed to sign out');
             }
             setUser(null);
-            localStorage.removeItem('userId');
             redirect('/');
         } catch (error) {
             console.error('Error signing out:', error);
