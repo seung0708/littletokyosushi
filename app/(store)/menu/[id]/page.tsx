@@ -62,7 +62,7 @@ export default function ItemDetailsPage({ params }: { params: { id: string } }) 
     const [loading, setLoading] = useState(true);
     const [loadingImage, setLoadingImage] = useState(true);
     const [selectedImage, setSelectedImage] = useState(0);
-    const { addItemToCart } = useCart();
+    const { handleCartUpdate } = useCart();
 
     const form = useForm<z.infer<typeof formSchema>>({
         resolver: zodResolver(formSchema),
@@ -131,13 +131,13 @@ export default function ItemDetailsPage({ params }: { params: { id: string } }) 
     useEffect(() => {
      
         const fetchItem = async () => {
-            console.log('Fetching item with ID:', params.id);
+            
             try {
                 setLoading(true);
                 const response = await fetch(`/api/store/items/${params.id}`);
                 if (!response.ok) throw new Error('Failed to fetch item');
                 const data = await response.json();
-                console.log('Fetched item data:', data, data.modifiers.map((mod: Modifier) => mod.modifier_options));
+                
                 setItem(data);
                 if (!data) {
                     throw new Error('No item data in response');
@@ -200,7 +200,7 @@ export default function ItemDetailsPage({ params }: { params: { id: string } }) 
         };
 
         try {
-            await addItemToCart(cartItem);
+            await handleCartUpdate(cartItem);
             form.reset();
             form.setValue('modifiers', item?.modifiers.map(mod => ({
                 ...mod,
@@ -235,6 +235,7 @@ export default function ItemDetailsPage({ params }: { params: { id: string } }) 
                         height={500}
                         className="w-full h-auto rounded-lg shadow-lg"
                         onLoad={handleImageLoad}
+                        priority
                     />
                     {item.image_urls.length > 1 && (
                         <div className="flex mt-4 space-x-2">

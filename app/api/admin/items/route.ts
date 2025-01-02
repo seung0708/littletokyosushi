@@ -1,7 +1,7 @@
 import { createClient } from '@/lib/supabase/server';
 import { revalidatePath } from 'next/cache';
 import { NextResponse } from 'next/server';
-import { checkAdminAuth, transformItem } from '../../utils/auth';
+import { checkAdminAuth, transformItem } from '../../../../utils/auth';
 
 const ITEMS_PER_PAGE = 8;
 

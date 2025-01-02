@@ -1,12 +1,13 @@
+import { cookies } from "next/headers";
 import { createClient } from "@/lib/supabase/server";
 import { NextResponse } from "next/server"; 
-import { Cart} from "@/types/cart";
 
 export async function POST(request: Request) {
     const supabase = createClient();
     const { customer_id, items } = await request.json();
     console.log('items', items);
     try {
+    
         const { data: cart, error: createCartError } = await supabase
             .from('carts')
             .insert({
@@ -14,7 +15,7 @@ export async function POST(request: Request) {
             })
             .select()
             .single();
-
+        
         if (createCartError) {
             console.error('Error creating cart:', createCartError);
             return NextResponse.json(
@@ -61,20 +62,18 @@ export async function POST(request: Request) {
                     { status: 500 }
                 );
             }
-            const {data: createItemModifierOptions, error: createCartItemModifierOptionsError} = await supabase
+            const {error: createCartItemModifierOptionsError} = await supabase
                 .from('cart_item_modifier_options')
                 .insert(
                     items[0].modifiers.flatMap((modifier: any, index: number) => 
                         modifier.modifier_options.map((option: any) => ({
-                            cart_item_modifiers_id: createItemModifiers?.[index]?.id,  // Use the first modifier ID (or adjust as needed)
+                            cart_item_modifiers_id: createItemModifiers?.[index]?.id, 
                             modifier_option_id: option.modifier_option_id,
                             modifier_option_price: option.price,
                             modifier_id: modifier.id,
                         }))
                     )
                 )
-                .select();
-
             if (createCartItemModifierOptionsError) {
                 console.error('Error creating cart item modifier options:', createCartItemModifierOptionsError);
                 return NextResponse.json(
@@ -85,9 +84,20 @@ export async function POST(request: Request) {
 
         }
 
-        return NextResponse.json(
-            { cartId: cart.id },
-            { status: 200 });
+        const response = NextResponse.json(
+            { message: 'Cart created successfully', cartId: cart.id , status: 200 }
+        );
+
+        cookies().set('fullCartId', cart.id, {
+            httpOnly: true,     // Makes cookie inaccessible to JavaScript
+            secure: true,       // Only sent over HTTPS
+            sameSite: 'strict', // Prevents CSRF attacks
+            maxAge: 60 * 60 * 24 * 7, // Cookie expires in 7 days
+            path: '/',          // Cookie available across all routes
+        });
+
+        return response;
+
     } catch (error) {
         console.error('Error in cart items API:', error);
         return NextResponse.json(    
@@ -97,3 +107,25 @@ export async function POST(request: Request) {
     }    
 }
 
+export const DELETE = async (request: Request) => {
+    const supabase = createClient();
+    const { cartId } = await request.json();
+    if(!cartId) return;
+    try {
+        const { error } = await supabase.from('carts').delete().eq('id', cartId);
+        if (error) {
+            console.error('Error deleting cart:', error);
+            return NextResponse.json(
+                { error: 'Error deleting cart' },
+                { status: 500 }
+            );
+        }
+        return NextResponse.json({ message: 'Cart deleted successfully' }, { status: 200 });
+    } catch (error) {
+        console.error('Error deleting cart:', error);
+        return NextResponse.json(
+            { error: 'Error deleting cart' },
+            { status: 500 }
+        );
+    }
+}
