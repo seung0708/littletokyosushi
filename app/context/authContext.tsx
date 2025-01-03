@@ -2,7 +2,7 @@
 import { createContext, useContext, useEffect, useState } from 'react';
 import { User } from '@supabase/supabase-js';
 import { createClient } from '@/lib/supabase/client';
-import { redirect } from 'next/navigation';
+import { useRouter, redirect } from 'next/navigation';
 
 interface AuthContextType {
     user: User | null; 
@@ -28,6 +28,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     const [user, setUser] = useState<User | null>(null);
     const [isLoading, setIsLoading] = useState(true);
     const supabase = createClient();
+    const router = useRouter();
 
     useEffect(() => {
         const fetchUser = async () => {
@@ -80,13 +81,14 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
                 },
                 body: JSON.stringify({ email, password }),
             });
-            const {data: {user}} = await response.json();
-            console.log(user, user.id);
-            setUser(user);
-            
+           
             if (!response.ok) {
                 throw new Error('Failed to sign in');
             }
+            const {data: {user}} = await response.json();
+            console.log(user, user.id);
+            setUser(user);
+            redirect('/');
         } catch (error) {
             console.error('Eror signing in:', error);
         }
@@ -120,11 +122,10 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
                 credentials: 'include',
             });
             const data = await response.json();
+
             if (!response.ok) {
                 throw new Error(data.error || 'Failed to sign out');
             }
-            setUser(null);
-            redirect('/');
         } catch (error) {
             console.error('Error signing out:', error);
         }

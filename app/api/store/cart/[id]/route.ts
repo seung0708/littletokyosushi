@@ -2,16 +2,12 @@ import { NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import { Cart, CartItem, CartItemModifier, CartItemModifierOption } from '@/types/cart';
 import { compareModifierOptions, createNewCartItemWithModifiers, getModifiersArray, updateExistingCartItem } from '@/utils/cart';
-import { cookies } from 'next/headers';
 
-export async function GET() {
-    const cartId = cookies().get('fullCartId')?.value;
-
-    if (!cartId) {
-        return NextResponse.json({ error: 'No cart ID found' }, { status: 404 });
-    }
-
+export async function GET(request: Request, { params }: { params: { id: string } }) {
+    const { id: cartId } = params;
     const supabase = createClient();
+    console.log('GET /api/store/cart/[id] -cartId', cartId, params);
+
     const {data: dbCart, error} = await supabase
     .from('carts')
     .select(`id, customer_id, completed_at, 
@@ -21,6 +17,7 @@ export async function GET() {
     .eq('id', cartId)
     .order('created_at', { referencedTable: 'cart_items' })
     .single();
+
 
     if (error) {
         console.error('Error fetching cart items:', error);
@@ -35,11 +32,11 @@ export async function GET() {
     }
 
     const cart: Cart = {
-        id: dbCart?.id.substring(0, 8),
-        customer_id: dbCart?.customer_id?.substring(0, 8),
+        id: dbCart?.id,
+        customer_id: dbCart?.customer_id,
         completed_at: dbCart?.completed_at,
         cart_items: dbCart?.cart_items.map((cartItem: any) => ({
-            id: cartItem?.id.substring(0, 8),
+            id: cartItem?.id,
             base_price: cartItem?.base_price,
             special_instructions: cartItem?.special_instructions,
             total_price: cartItem?.total_price,
@@ -49,7 +46,7 @@ export async function GET() {
             menu_item_price: cartItem?.menu_items?.price,
             menu_item_image: cartItem?.menu_items?.image_urls[0],
             cart_item_modifiers: cartItem?.cart_item_modifiers?.map((cartItemModifier: any) => ({
-                id: cartItemModifier?.id.substring(0, 8),
+                id: cartItemModifier?.id,
                 modifier_id: cartItemModifier?.modifiers?.id,
                 name: cartItemModifier?.modifiers?.name,
                 cart_item_modifier_options: cartItemModifier?.cart_item_modifier_options?.map((cartItemModifierOption: any) => ({
@@ -66,11 +63,11 @@ export async function GET() {
     return NextResponse.json(cart);
 }
 
-export async function PATCH(request: Request) {
-    const cartId = cookies().get('fullCartId')?.value;
+export async function PATCH(request: Request,  { params }: { params: { id: string } }) {
     try {
         const { customerId, cartItems } = await request.json()
-        //console.log('customer_id:', customerId)
+        if(!cartItems) return NextResponse.json({ message: 'Cart items not found' });
+        console.log('cartItems', cartItems)
         const newItems = cartItems[cartItems.length - 1]
         console.log('newItems:', newItems)
         let isSameModifierOptions: boolean;
@@ -83,7 +80,7 @@ export async function PATCH(request: Request) {
                 cart_items(id, cart_id, menu_item_id, quantity, base_price, total_price, special_instructions,
                     cart_item_modifiers(id, cart_items_id, modifier_id,
                 cart_item_modifier_options(id, cart_item_modifiers_id, modifier_option_id, modifier_id, modifier_option_price))))`)
-            .eq('id', cartId)
+            .eq('id', params.id)
             .single();
         console.log('dbCart:', dbCart);
         
@@ -183,8 +180,8 @@ export async function PATCH(request: Request) {
 }
 
 
-export async function DELETE(request: Request) {
-    const cartId = cookies().get('fullCartId')?.value;
+export async function DELETE(request: Request, params: { id: string } ) {
+    
     const { itemId } = await request.json();
     const supabase = createClient();
     try {
@@ -194,7 +191,7 @@ export async function DELETE(request: Request) {
                 cart_items(id, base_price, total_price, quantity, special_instructions, menu_items(id, name, price, image_urls), 
                 cart_item_modifiers(id, modifiers(id, name), 
                     cart_item_modifier_options(id, modifier_id, modifier_options(id, name, price))))`)
-            .eq('id', cartId)
+            .eq('id', params.id)
             .single();
 
         if (cartError) {

@@ -1,4 +1,3 @@
-import { cookies } from "next/headers";
 import { createClient } from "@/lib/supabase/server";
 import { NextResponse } from "next/server"; 
 
@@ -84,19 +83,10 @@ export async function POST(request: Request) {
 
         }
 
-        const response = NextResponse.json(
+        return NextResponse.json(
             { message: 'Cart created successfully', cartId: cart.id , status: 200 }
         );
 
-        cookies().set('fullCartId', cart.id, {
-            httpOnly: true,     // Makes cookie inaccessible to JavaScript
-            secure: true,       // Only sent over HTTPS
-            sameSite: 'strict', // Prevents CSRF attacks
-            maxAge: 60 * 60 * 24 * 7, // Cookie expires in 7 days
-            path: '/',          // Cookie available across all routes
-        });
-
-        return response;
 
     } catch (error) {
         console.error('Error in cart items API:', error);
