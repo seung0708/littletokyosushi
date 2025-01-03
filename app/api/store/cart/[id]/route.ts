@@ -3,9 +3,10 @@ import { createClient } from '@/lib/supabase/server';
 import { Cart, CartItem, CartItemModifier, CartItemModifierOption } from '@/types/cart';
 import { compareModifierOptions, createNewCartItemWithModifiers, getModifiersArray, updateExistingCartItem } from '@/utils/cart';
 
-export async function GET(params: { id: string }) {
-    const cartId = params.id;
+export async function GET(request: Request, { params }: { params: { id: string } }) {
+    const { id: cartId } = params;
     const supabase = createClient();
+    console.log('GET /api/store/cart/[id] -cartId', cartId, params);
 
     const {data: dbCart, error} = await supabase
     .from('carts')
@@ -16,6 +17,7 @@ export async function GET(params: { id: string }) {
     .eq('id', cartId)
     .order('created_at', { referencedTable: 'cart_items' })
     .single();
+
 
     if (error) {
         console.error('Error fetching cart items:', error);
@@ -30,11 +32,11 @@ export async function GET(params: { id: string }) {
     }
 
     const cart: Cart = {
-        id: dbCart?.id.substring(0, 8),
-        customer_id: dbCart?.customer_id?.substring(0, 8),
+        id: dbCart?.id,
+        customer_id: dbCart?.customer_id,
         completed_at: dbCart?.completed_at,
         cart_items: dbCart?.cart_items.map((cartItem: any) => ({
-            id: cartItem?.id.substring(0, 8),
+            id: cartItem?.id,
             base_price: cartItem?.base_price,
             special_instructions: cartItem?.special_instructions,
             total_price: cartItem?.total_price,
@@ -44,7 +46,7 @@ export async function GET(params: { id: string }) {
             menu_item_price: cartItem?.menu_items?.price,
             menu_item_image: cartItem?.menu_items?.image_urls[0],
             cart_item_modifiers: cartItem?.cart_item_modifiers?.map((cartItemModifier: any) => ({
-                id: cartItemModifier?.id.substring(0, 8),
+                id: cartItemModifier?.id,
                 modifier_id: cartItemModifier?.modifiers?.id,
                 name: cartItemModifier?.modifiers?.name,
                 cart_item_modifier_options: cartItemModifier?.cart_item_modifier_options?.map((cartItemModifierOption: any) => ({
@@ -61,10 +63,11 @@ export async function GET(params: { id: string }) {
     return NextResponse.json(cart);
 }
 
-export async function PATCH(request: Request,  params: { id: string }) {
+export async function PATCH(request: Request,  { params }: { params: { id: string } }) {
     try {
         const { customerId, cartItems } = await request.json()
-        //console.log('customer_id:', customerId)
+        if(!cartItems) return NextResponse.json({ message: 'Cart items not found' });
+        console.log('cartItems', cartItems)
         const newItems = cartItems[cartItems.length - 1]
         console.log('newItems:', newItems)
         let isSameModifierOptions: boolean;

@@ -1,12 +1,12 @@
 import {createClient} from "@/lib/supabase/server";
-import {cookies} from "next/headers";
 import { NextResponse } from "next/server";
 
-export async function PATCH(request: Request) {
-    let fullCartId = cookies().get('fullCartId')?.value;
+export async function PATCH(request: Request, { params }: { params: { id: string } }) {
 
     const supabase = await createClient(); 
     const { customerId } = await request.json();
+
+    
 
     const { data: existingCart, error: existingCartError } = await supabase
         .from('carts')
@@ -14,6 +14,7 @@ export async function PATCH(request: Request) {
         .eq('customer_id', customerId)
         .single();
     
+    console.log('existingCart:', existingCart, 'existingCartError:', existingCartError);
     if (existingCartError) {
         console.error('Error fetching existing cart:', existingCartError);
         return NextResponse.json(
@@ -21,11 +22,11 @@ export async function PATCH(request: Request) {
             { status: 500 }
         );
     }
-    
+   
     const { data: dbCart, error: cartError } = await supabase
         .from('carts')
         .select('*')
-        .eq('id', fullCartId)
+        .eq('id', params.id)
         .single();
     
         console.log('dbCart:', dbCart);
@@ -61,7 +62,7 @@ export async function PATCH(request: Request) {
             );
         }     
         
-        const response = await fetch(`/api/store/cart/${fullCartId}`, {
+        const response = await fetch(`/api/store/cart/${params.id}`, {
             method: 'DELETE',
             credentials: 'include',
         });
@@ -69,9 +70,6 @@ export async function PATCH(request: Request) {
             const error = await response.json();
             throw new Error(error.error || 'Failed to delete cart');
         }
-
-        cookies().set('fullCartId', existingCart.id);
-
 
     }
 
@@ -81,7 +79,7 @@ export async function PATCH(request: Request) {
         const {error: updateCartError } = await supabase
             .from('carts')
             .update({ customer_id: customerId })
-            .eq('id', fullCartId)
+            .eq('id', params.id);
 
         if (updateCartError) {
             console.error('Error updating cart:', updateCartError);
@@ -95,7 +93,6 @@ export async function PATCH(request: Request) {
 
 
     return NextResponse.json({
-        cart: existingCart, 
         message: 'Cart merged successfully',
         status: 200
     });

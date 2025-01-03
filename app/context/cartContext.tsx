@@ -36,19 +36,17 @@ export const CartProvider = ({ children }: CartProviderProps) => {
     const [cartSuccess, setCartSuccess] = useState<string | null>(null);
 
     useEffect(() => {
-        fetchCart();
-        const currentCartItems = cartItems;
-        const storedCartItems = JSON.parse(localStorage.getItem('partialCartId') || '[]');
-        if (currentCartItems !== storedCartItems) {
-            localStorage.setItem('cartItems', JSON.stringify(currentCartItems));
-        }
         if(userId) {
+            console.log('userId', userId);
             handleCartMerge();
         }
-        
-    }, [userId]);
+        if (cartId) {
+            fetchCart();
+        }
+    }, [userId, cartId]);
 
     const fetchCart = async () => {
+        console.log('fetchCart cartId', cartId);
         setIsCartLoading(true);
         setCartError(null);
         try {
@@ -59,16 +57,16 @@ export const CartProvider = ({ children }: CartProviderProps) => {
                 },
                 credentials: 'include',
             });
+           
             if (!response.ok) {
-               localStorage.removeItem('cartId');
-               localStorage.removeItem('cartItems');
                throw new Error('Failed to fetch cart');
             }
 
             const cart = await response.json();
+            console.log('fetchCart cart', cart);
             setCartItems(cart.cart_items);
             setCartId(cart.id);
-            localStorage.setItem('partialCartId', cart.id.substring(0, 8));
+            localStorage.setItem('cartId', cart.id.substring(0, 8));
             localStorage.setItem('cartItems', JSON.stringify(cart.cart_items));
         } catch (error) {
             console.error('Error fetching cart:', error);
@@ -79,24 +77,58 @@ export const CartProvider = ({ children }: CartProviderProps) => {
     };
 
     const handleCartMerge = async () => {
-        const response = await fetch(`/api/store/cart/merge/${cartId}`, {
-            method: 'PATCH',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-                customerId: user?.id
-            }),
-            credentials: 'include',
-        });
-        const data = await response.json();
-        if (data.cart.id.substring(0, 8) !== cartId) {
-            setCartId(data.cart.id);
-            localStorage.setItem('cartId', data.cart.id.substring(0, 8));
-            localStorage.setItem('partialCartId', data.cart.id.substring(0, 8));
-            localStorage.setItem('cartItems', JSON.stringify(data.cart.cart_items));
+        if(!user) return;
+
+        const localCartId = localStorage.getItem('cartId');
+        const localCartItems = localStorage.getItem('cartItems');
+        if(!localCartId || !localCartItems) {
+            try {
+                if(userId) {
+                    const response = await fetch('/api/store/cart/user', {
+                        headers: {
+                            'user-id': userId
+                        },
+                        credentials: 'include'
+                    });
+                    const data = await response.json();
+                    console.log('handleCartMerge data', data);
+                    if(data.status === 200) {
+                       setCartId(data.cartId); 
+                       localStorage.setItem('cartId', data.cartId.substring(0, 8));
+                    }
+                
+                }
+            } catch (error) {
+                
+            }
+        } else {
+            try {
+
+                const response = await fetch(`/api/store/cart/merge/${cartId}`, {
+                    method: 'PATCH',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        customerId: user?.id
+                    }),
+                    credentials: 'include',
+                });
+                const data = await response.json();
+                console.log('handleCartMerge data', data);
+                // if (data.cart.id.substring(0, 8) !== cartId) {
+                //     setCartId(data.cart.id);
+                //     localStorage.setItem('cartId', data.cart.id.substring(0, 8));
+                //     localStorage.setItem('partialCartId', data.cart.id.substring(0, 8));
+                //     localStorage.setItem('cartItems', JSON.stringify(data.cart.cart_items));
+                // }
+                
+            } catch (error) {
+                console.error('Error merging cart:', error);
+            }
         }
-        console.log('handleCartMerge data', data);
+
+        
     }
 
     const handleCartUpdate = async (item: CartItem) => {
