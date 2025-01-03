@@ -3,6 +3,7 @@ import { createContext, useContext, useEffect, useState } from 'react';
 import { User } from '@supabase/supabase-js';
 import { createClient } from '@/lib/supabase/client';
 import { useRouter, redirect } from 'next/navigation';
+import { revalidatePath } from 'next/cache';
 
 interface AuthContextType {
     user: User | null; 
@@ -106,7 +107,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
             if (!response.ok) {
                 throw new Error(result.error || 'Failed to sign in with Google');
             } 
-            redirect('/');
+            
         } catch (error) {
             console.error('Error signing in with Google:', error);
         }
@@ -122,10 +123,10 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
                 credentials: 'include',
             });
             const data = await response.json();
-
             if (!response.ok) {
                 throw new Error(data.error || 'Failed to sign out');
             }
+            setUser(null);
         } catch (error) {
             console.error('Error signing out:', error);
         }
