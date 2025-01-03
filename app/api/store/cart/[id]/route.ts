@@ -2,16 +2,11 @@ import { NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import { Cart, CartItem, CartItemModifier, CartItemModifierOption } from '@/types/cart';
 import { compareModifierOptions, createNewCartItemWithModifiers, getModifiersArray, updateExistingCartItem } from '@/utils/cart';
-import { cookies } from 'next/headers';
 
-export async function GET() {
-    const cartId = cookies().get('fullCartId')?.value;
-
-    if (!cartId) {
-        return NextResponse.json({ error: 'No cart ID found' }, { status: 404 });
-    }
-
+export async function GET(params: { id: string }) {
+    const cartId = params.id;
     const supabase = createClient();
+
     const {data: dbCart, error} = await supabase
     .from('carts')
     .select(`id, customer_id, completed_at, 
@@ -66,8 +61,7 @@ export async function GET() {
     return NextResponse.json(cart);
 }
 
-export async function PATCH(request: Request) {
-    const cartId = cookies().get('fullCartId')?.value;
+export async function PATCH(request: Request,  params: { id: string }) {
     try {
         const { customerId, cartItems } = await request.json()
         //console.log('customer_id:', customerId)
@@ -83,7 +77,7 @@ export async function PATCH(request: Request) {
                 cart_items(id, cart_id, menu_item_id, quantity, base_price, total_price, special_instructions,
                     cart_item_modifiers(id, cart_items_id, modifier_id,
                 cart_item_modifier_options(id, cart_item_modifiers_id, modifier_option_id, modifier_id, modifier_option_price))))`)
-            .eq('id', cartId)
+            .eq('id', params.id)
             .single();
         console.log('dbCart:', dbCart);
         
@@ -183,8 +177,8 @@ export async function PATCH(request: Request) {
 }
 
 
-export async function DELETE(request: Request) {
-    const cartId = cookies().get('fullCartId')?.value;
+export async function DELETE(request: Request, params: { id: string } ) {
+    
     const { itemId } = await request.json();
     const supabase = createClient();
     try {
@@ -194,7 +188,7 @@ export async function DELETE(request: Request) {
                 cart_items(id, base_price, total_price, quantity, special_instructions, menu_items(id, name, price, image_urls), 
                 cart_item_modifiers(id, modifiers(id, name), 
                     cart_item_modifier_options(id, modifier_id, modifier_options(id, name, price))))`)
-            .eq('id', cartId)
+            .eq('id', params.id)
             .single();
 
         if (cartError) {

@@ -30,15 +30,15 @@ export const CartProvider = ({ children }: CartProviderProps) => {
     const { user } = useAuth();
     const userId = user?.id;
     const [cartItems, setCartItems] = useState<CartItem[]>([]);
-    const [cartId, setCartId] = useState<string>(""); // eslint-disable-line
+    const [cartId, setCartId] = useState<string>(""); 
     const [isCartLoading, setIsCartLoading] = useState(false);
     const [cartError, setCartError] = useState<string | null>(null);
     const [cartSuccess, setCartSuccess] = useState<string | null>(null);
 
     useEffect(() => {
-        fetchCart(localStorage.getItem('cartId') || '');
+        fetchCart();
         const currentCartItems = cartItems;
-        const storedCartItems = JSON.parse(localStorage.getItem('cartItems') || '[]');
+        const storedCartItems = JSON.parse(localStorage.getItem('partialCartId') || '[]');
         if (currentCartItems !== storedCartItems) {
             localStorage.setItem('cartItems', JSON.stringify(currentCartItems));
         }
@@ -48,12 +48,15 @@ export const CartProvider = ({ children }: CartProviderProps) => {
         
     }, [userId]);
 
-    const fetchCart = async (cartId: string) => {
+    const fetchCart = async () => {
         setIsCartLoading(true);
         setCartError(null);
         try {
             const response = await fetch(`/api/store/cart/${cartId}`, {
                 method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
                 credentials: 'include',
             });
             if (!response.ok) {
@@ -61,10 +64,11 @@ export const CartProvider = ({ children }: CartProviderProps) => {
                localStorage.removeItem('cartItems');
                throw new Error('Failed to fetch cart');
             }
+
             const cart = await response.json();
             setCartItems(cart.cart_items);
             setCartId(cart.id);
-            localStorage.setItem('cartId', cart.id);
+            localStorage.setItem('partialCartId', cart.id.substring(0, 8));
             localStorage.setItem('cartItems', JSON.stringify(cart.cart_items));
         } catch (error) {
             console.error('Error fetching cart:', error);
@@ -87,8 +91,9 @@ export const CartProvider = ({ children }: CartProviderProps) => {
         });
         const data = await response.json();
         if (data.cart.id.substring(0, 8) !== cartId) {
-            setCartId(data.cart.id.substring(0, 8));
+            setCartId(data.cart.id);
             localStorage.setItem('cartId', data.cart.id.substring(0, 8));
+            localStorage.setItem('partialCartId', data.cart.id.substring(0, 8));
             localStorage.setItem('cartItems', JSON.stringify(data.cart.cart_items));
         }
         console.log('handleCartMerge data', data);
@@ -136,7 +141,7 @@ export const CartProvider = ({ children }: CartProviderProps) => {
             setCartSuccess(data.message);
             if(data.status === 200) {
                 const displayId = data.cartId.substring(0, 8);
-                fetchCart(displayId);
+                fetchCart();
             };
         }
         catch (error) {
@@ -164,7 +169,7 @@ export const CartProvider = ({ children }: CartProviderProps) => {
             const data = await response.json();
             setCartSuccess(data.message);
             if(data.status === 200) {
-                fetchCart(cartId);
+                fetchCart();
             };
         }
         catch (error) {
@@ -191,7 +196,7 @@ export const CartProvider = ({ children }: CartProviderProps) => {
         console.log(data);
         setCartSuccess(data.message);
         if(data.status === 200) {
-            fetchCart(cartId);
+            fetchCart();
         }
     };
 
