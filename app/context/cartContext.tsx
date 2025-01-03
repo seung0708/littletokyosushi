@@ -36,14 +36,18 @@ export const CartProvider = ({ children }: CartProviderProps) => {
     const [cartSuccess, setCartSuccess] = useState<string | null>(null);
 
     useEffect(() => {
-        if(userId) {
-            console.log('userId', userId);
+        if(!user) {
+            setCartId('');
+            setCartItems([]);
+            localStorage.removeItem('cartId');
+            localStorage.removeItem('cartItems');
+        } else if(userId) {
             handleCartMerge();
         }
         if (cartId) {
             fetchCart();
         }
-    }, [userId, cartId]);
+    }, [userId, user, cartId]);
 
     const fetchCart = async () => {
         console.log('fetchCart cartId', cartId);
