@@ -160,8 +160,6 @@ export default function ItemDetailsPage({ params }: { params: { id: string } }) 
 
    
     const onSubmit = async (data: FormData) => {
-        console.log('onSubmit executing with data:', data);
-        
         // Validate required selections
         const invalidModifier = data.modifiers.find(mod => 
             mod.is_required && mod.modifier_options.length !== mod.max_selections

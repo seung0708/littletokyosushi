@@ -84,7 +84,7 @@ export async function POST(request: Request) {
         }
 
         return NextResponse.json(
-            { message: 'Cart created successfully', cartId: cart.id , status: 200 }
+            { message: 'Cart created successfully', cartId: cart.id, cartItems , status: 200 }
         );
 
 
@@ -97,25 +97,25 @@ export async function POST(request: Request) {
     }    
 }
 
-export const DELETE = async (request: Request) => {
-    const supabase = createClient();
-    const { cartId } = await request.json();
-    if(!cartId) return;
-    try {
-        const { error } = await supabase.from('carts').delete().eq('id', cartId);
-        if (error) {
-            console.error('Error deleting cart:', error);
-            return NextResponse.json(
-                { error: 'Error deleting cart' },
-                { status: 500 }
-            );
-        }
-        return NextResponse.json({ message: 'Cart deleted successfully' }, { status: 200 });
-    } catch (error) {
-        console.error('Error deleting cart:', error);
-        return NextResponse.json(
-            { error: 'Error deleting cart' },
-            { status: 500 }
-        );
-    }
-}
+// export const DELETE = async (request: Request) => {
+//     const supabase = createClient();
+//     const { cartId } = await request.json();
+//     if(!cartId) return;
+//     try {
+//         const { error } = await supabase.from('carts').delete().eq('id', cartId);
+//         if (error) {
+//             console.error('Error deleting cart:', error);
+//             return NextResponse.json(
+//                 { error: 'Error deleting cart' },
+//                 { status: 500 }
+//             );
+//         }
+//         return NextResponse.json({ message: 'Cart deleted successfully' }, { status: 200 });
+//     } catch (error) {
+//         console.error('Error deleting cart:', error);
+//         return NextResponse.json(
+//             { error: 'Error deleting cart' },
+//             { status: 500 }
+//         );
+//     }
+// }

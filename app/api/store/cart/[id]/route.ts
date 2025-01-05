@@ -67,9 +67,8 @@ export async function PATCH(request: Request,  { params }: { params: { id: strin
     try {
         const { customerId, cartItems } = await request.json()
         if(!cartItems) return NextResponse.json({ message: 'Cart items not found' });
-        console.log('cartItems', cartItems)
         const newItems = cartItems[cartItems.length - 1]
-        console.log('newItems:', newItems)
+        console.log('newItems:', newItems);
         let isSameModifierOptions: boolean;
         const supabase = createClient();
 
@@ -96,7 +95,7 @@ export async function PATCH(request: Request,  { params }: { params: { id: strin
             if ( 'menu_item_id' in newItems) {
                 return cartItem.menu_item_id === newItems.menu_item_id;
             } else if ('cart_item_id' in newItems) {
-                return cartItem.id.substring(0, 8) === newItems.cart_item_id;
+                return cartItem.id === newItems.cart_item_id;
             }
 
         });
@@ -166,7 +165,8 @@ export async function PATCH(request: Request,  { params }: { params: { id: strin
         return NextResponse.json(
             { 
                 message: 'Cart updated successfully',
-                status: 200
+                status: 200,
+                cartId: dbCart.id
             }
         )
 
@@ -180,9 +180,10 @@ export async function PATCH(request: Request,  { params }: { params: { id: strin
 }
 
 
-export async function DELETE(request: Request, params: { id: string } ) {
-    
+export async function DELETE(request: Request, { params }: { params: { id: string } }) {
+    console.log('DELETE /api/store/cart/[id]', params.id);
     const { itemId } = await request.json();
+    console.log('itemId:', itemId);
     const supabase = createClient();
     try {
         const { data: dbCart, error: cartError } = await supabase
@@ -193,6 +194,7 @@ export async function DELETE(request: Request, params: { id: string } ) {
                     cart_item_modifier_options(id, modifier_id, modifier_options(id, name, price))))`)
             .eq('id', params.id)
             .single();
+        
 
         if (cartError) {
             console.error('Error fetching cart items:', cartError);
@@ -202,7 +204,7 @@ export async function DELETE(request: Request, params: { id: string } ) {
             );
         }
         console.log('dbCart:', dbCart);
-        const cartItem = dbCart?.cart_items.find((cartItem: any) => cartItem.id.substring(0, 8) === itemId);
+        const cartItem = dbCart?.cart_items.find((cartItem: any) => cartItem.id === itemId);
         console.log('cartItem:', cartItem);
 
         if (!cartItem) {
