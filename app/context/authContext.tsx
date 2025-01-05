@@ -43,7 +43,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
             setIsLoading(false);
       
             const {data: {subscription}} = await supabase.auth.onAuthStateChange(async (_event, session) => {
-                setUser(user ?? null);
+                setUser(session?.user ?? null);
                 setIsLoading(false);
             })
 
@@ -86,10 +86,9 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
             if (!response.ok) {
                 throw new Error('Failed to sign in');
             }
-            const {data: {user}} = await response.json();
-            console.log(user, user.id);
-            setUser(user);
-            redirect('/');
+            const data = await response.json();
+            console.log(data, data.user);
+            setUser(data.user);
         } catch (error) {
             console.error('Eror signing in:', error);
         }

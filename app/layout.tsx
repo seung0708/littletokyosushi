@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import "./globals.css";
 import { poppins } from "./fonts/fonts";
+import { AuthProvider } from "./context/authContext";
+import { CartProvider } from "./context/cartContext";
 
 export const metadata: Metadata = {
   title: "Little Tokyo Sushi",
@@ -15,7 +17,11 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body suppressHydrationWarning={true} className={poppins.className}>
-        {children}
+        <AuthProvider>
+          <CartProvider>
+            {children}
+          </CartProvider>
+        </AuthProvider>
       </body>
     </html>
   );

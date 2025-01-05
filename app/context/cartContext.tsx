@@ -37,20 +37,19 @@ export const CartProvider = ({ children }: CartProviderProps) => {
 
     useEffect(() => {
         if(!user) {
-            setCartId('');
-            setCartItems([]);
-            localStorage.removeItem('cartId');
-            localStorage.removeItem('cartItems');
+            return;
         } else if(userId) {
-            handleCartMerge();
+            console.log('useEffect userId', userId);
+            handleCartUpdate();
         }
-        if (cartId) {
-            fetchCart();
-        }
-    }, [userId, user, cartId]);
+    }, [userId, user]);
+
+    useEffect(() => {
+        fetchCart();
+    }, [cartId]);
+
 
     const fetchCart = async () => {
-        console.log('fetchCart cartId', cartId);
         setIsCartLoading(true);
         setCartError(null);
         try {
@@ -67,9 +66,8 @@ export const CartProvider = ({ children }: CartProviderProps) => {
             }
 
             const cart = await response.json();
-            console.log('fetchCart cart', cart);
-            setCartItems(cart.cart_items);
             setCartId(cart.id);
+            setCartItems(cart.cart_items);
             localStorage.setItem('cartId', cart.id.substring(0, 8));
             localStorage.setItem('cartItems', JSON.stringify(cart.cart_items));
         } catch (error) {
@@ -80,81 +78,86 @@ export const CartProvider = ({ children }: CartProviderProps) => {
         }
     };
 
-    const handleCartMerge = async () => {
-        if(!user) return;
-
-        const localCartId = localStorage.getItem('cartId');
-        const localCartItems = localStorage.getItem('cartItems');
-        if(!localCartId || !localCartItems) {
-            try {
-                if(userId) {
-                    const response = await fetch('/api/store/cart/user', {
-                        headers: {
-                            'user-id': userId
-                        },
-                        credentials: 'include'
-                    });
-                    const data = await response.json();
-                    console.log('handleCartMerge data', data);
-                    if(data.status === 200) {
-                       setCartId(data.cartId); 
-                       localStorage.setItem('cartId', data.cartId.substring(0, 8));
-                    }
-                
+    const handleCartUpdate = async (item?: CartItem) => {
+        console.log('handleCartUpdate', { userId, cartId, item });
+        
+        try {
+            // Case 1: Anonymous user adding item
+            if (!userId && item) {
+                if (!cartId || cartId === '') {
+                    console.log('Anonymous user - create new cart');
+                    await createNewCart(item);
+                } else {
+                    console.log('Anonymous user - update existing cart');
+                    await updateExistingCart(item);
                 }
-            } catch (error) {
-                
             }
-        } else {
-            try {
-
-                const response = await fetch(`/api/store/cart/merge/${cartId}`, {
-                    method: 'PATCH',
+            // Case 2: User just signed in
+            else if (userId) {
+                // Check if user has an existing cart
+                const response = await fetch('/api/store/cart/user', {
                     headers: {
-                        'Content-Type': 'application/json',
+                        'user-id': userId
                     },
-                    body: JSON.stringify({
-                        customerId: user?.id
-                    }),
-                    credentials: 'include',
+                    credentials: 'include'
                 });
                 const data = await response.json();
-                console.log('handleCartMerge data', data);
-                // if (data.cart.id.substring(0, 8) !== cartId) {
-                //     setCartId(data.cart.id);
-                //     localStorage.setItem('cartId', data.cart.id.substring(0, 8));
-                //     localStorage.setItem('partialCartId', data.cart.id.substring(0, 8));
-                //     localStorage.setItem('cartItems', JSON.stringify(data.cart.cart_items));
-                // }
                 
-            } catch (error) {
-                console.error('Error merging cart:', error);
+                if (data.status === 200) {
+                    // User has existing cart - merge if anonymous cart exists
+                    if (cartId) {
+                        console.log('Merging anonymous cart with user cart');
+                        const mergeResponse = await fetch(`/api/store/cart/merge/${cartId}`, {
+                            method: 'PATCH',
+                            headers: {
+                                'Content-Type': 'application/json',
+                            },
+                            body: JSON.stringify({
+                                customerId: userId
+                            }),
+                            credentials: 'include',
+                        });
+                        const mergeData = await mergeResponse.json();
+                        if (mergeData.status === 200) {
+                            setCartId(mergeData.cartId);
+                            localStorage.setItem('cartId', mergeData.cartId.substring(0, 8));
+                            await fetchCart();
+                        }
+                    } else {
+                        // No anonymous cart - use existing user cart
+                        setCartId(data.cartId);
+                        localStorage.setItem('cartId', data.cartId.substring(0, 8));
+                        await fetchCart();
+                    }
+                } else if (cartId) {
+                    // No existing user cart - associate anonymous cart
+                    console.log('Associate anonymous cart with user');
+                    const response = await fetch(`/api/store/cart/merge/${cartId}`, {
+                        method: 'PATCH',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({
+                            customerId: userId
+                        }),
+                        credentials: 'include',
+                    });
+                    const data = await response.json();
+                    if (data.status === 200) {
+                        setCartId(data.cartId);
+                        localStorage.setItem('cartId', data.cartId.substring(0, 8));
+                        await fetchCart();
+                    }
+                } else if (item) {
+                    // No carts at all - create new one
+                    console.log('Create new cart for user');
+                    await createNewCart(item);
+                }
             }
-        }
-
-        
-    }
-
-    const handleCartUpdate = async (item: CartItem) => {
-        console.log('handleCartUpdate item', item);
-        try {
-          if (!userId) {
-            if (!cartId || cartId === '') {
-              await createNewCart(item); 
-            } else {
-              await updateExistingCart(item);
-            }
-          } else {
-            if (!cartId || cartId === '') {
-              await createNewCart(item);  
-            } else {
-              await updateExistingCart(item);
-            }
-          }
         } catch (error) {
-          console.error('Error updating cart:', error);
+            console.error('Error updating cart:', error);
         }
-      };
+    };
 
     const createNewCart = async (item: CartItem) => {
         try {
@@ -174,10 +177,12 @@ export const CartProvider = ({ children }: CartProviderProps) => {
                 throw new Error(error.error || 'Failed to create new cart');
             }
             const data = await response.json();
+            console.log('createNewCart data', data);
             setCartSuccess(data.message);
             if(data.status === 200) {
-                const displayId = data.cartId.substring(0, 8);
-                fetchCart();
+                setCartId(data.cartId); 
+                localStorage.setItem('cartId', data.cartId.substring(0, 8));
+                await fetchCart();
             };
         }
         catch (error) {
@@ -205,7 +210,9 @@ export const CartProvider = ({ children }: CartProviderProps) => {
             const data = await response.json();
             setCartSuccess(data.message);
             if(data.status === 200) {
-                fetchCart();
+                setCartId(data.cartId);
+                localStorage.setItem('cartId', data.cartId.substring(0, 8));
+                await fetchCart();
             };
         }
         catch (error) {
@@ -214,6 +221,7 @@ export const CartProvider = ({ children }: CartProviderProps) => {
     }
 
     const removeItemFromCart = async (itemId: string) => {
+        console.log('removeItemFromCart', { cartId, itemId });
         const response = await fetch(`/api/store/cart/${cartId}`, {
             method: 'DELETE',
             headers: {
@@ -232,7 +240,7 @@ export const CartProvider = ({ children }: CartProviderProps) => {
         console.log(data);
         setCartSuccess(data.message);
         if(data.status === 200) {
-            fetchCart();
+            await fetchCart();
         }
     };
 

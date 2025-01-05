@@ -67,9 +67,8 @@ export async function PATCH(request: Request,  { params }: { params: { id: strin
     try {
         const { customerId, cartItems } = await request.json()
         if(!cartItems) return NextResponse.json({ message: 'Cart items not found' });
-        console.log('cartItems', cartItems)
         const newItems = cartItems[cartItems.length - 1]
-        console.log('newItems:', newItems)
+        console.log('newItems:', newItems);
         let isSameModifierOptions: boolean;
         const supabase = createClient();
 
@@ -96,7 +95,7 @@ export async function PATCH(request: Request,  { params }: { params: { id: strin
             if ( 'menu_item_id' in newItems) {
                 return cartItem.menu_item_id === newItems.menu_item_id;
             } else if ('cart_item_id' in newItems) {
-                return cartItem.id.substring(0, 8) === newItems.cart_item_id;
+                return cartItem.id === newItems.cart_item_id;
             }
 
         });
@@ -166,7 +165,8 @@ export async function PATCH(request: Request,  { params }: { params: { id: strin
         return NextResponse.json(
             { 
                 message: 'Cart updated successfully',
-                status: 200
+                status: 200,
+                cartId: dbCart.id
             }
         )
 
@@ -180,56 +180,57 @@ export async function PATCH(request: Request,  { params }: { params: { id: strin
 }
 
 
-export async function DELETE(request: Request, params: { id: string } ) {
-    
+export async function DELETE(request: Request, { params }: { params: { id: string } }) {
+    console.log('DELETE /api/store/cart/[id]', params.id);
     const { itemId } = await request.json();
+    console.log('itemId:', itemId);
     const supabase = createClient();
-    try {
-        const { data: dbCart, error: cartError } = await supabase
-            .from('carts')
-            .select(`id, customer_id, completed_at, 
-                cart_items(id, base_price, total_price, quantity, special_instructions, menu_items(id, name, price, image_urls), 
-                cart_item_modifiers(id, modifiers(id, name), 
-                    cart_item_modifier_options(id, modifier_id, modifier_options(id, name, price))))`)
-            .eq('id', params.id)
-            .single();
+    // try {
+    //     const { data: dbCart, error: cartError } = await supabase
+    //         .from('carts')
+    //         .select(`id, customer_id, completed_at, 
+    //             cart_items(id, base_price, total_price, quantity, special_instructions, menu_items(id, name, price, image_urls), 
+    //             cart_item_modifiers(id, modifiers(id, name), 
+    //                 cart_item_modifier_options(id, modifier_id, modifier_options(id, name, price))))`)
+    //         .eq('id', params.id)
+    //         .single();
 
-        if (cartError) {
-            console.error('Error fetching cart items:', cartError);
-            return NextResponse.json(
-                { error: 'Failed to fetch cart items' },
-                { status: 500 }
-            );
-        }
-        console.log('dbCart:', dbCart);
-        const cartItem = dbCart?.cart_items.find((cartItem: any) => cartItem.id.substring(0, 8) === itemId);
-        console.log('cartItem:', cartItem);
+    //     if (cartError) {
+    //         console.error('Error fetching cart items:', cartError);
+    //         return NextResponse.json(
+    //             { error: 'Failed to fetch cart items' },
+    //             { status: 500 }
+    //         );
+    //     }
+    //     console.log('dbCart:', dbCart);
+    //     const cartItem = dbCart?.cart_items.find((cartItem: any) => cartItem.id.substring(0, 8) === itemId);
+    //     console.log('cartItem:', cartItem);
 
-        if (!cartItem) {
-            return NextResponse.json(
-                { error: 'Cart item not found' },
-                { status: 404 }
-            );
-        }
+    //     if (!cartItem) {
+    //         return NextResponse.json(
+    //             { error: 'Cart item not found' },
+    //             { status: 404 }
+    //         );
+    //     }
 
-        const { error } = await supabase
-            .from('cart_items')
-            .delete()
-            .eq('id', cartItem.id);
-        if (error) {
-            console.error('Error deleting cart item:', error);
-            return NextResponse.json(
-                { error: 'Error deleting cart item' },
-                { status: 500 }
-            );
-        }
-    } catch (error) {
-        console.error('Error deleting cart item:', error);
-        return NextResponse.json(
-            { error: 'Error deleting cart item' },
-            { status: 500 }
-        );
-    }
+    //     const { error } = await supabase
+    //         .from('cart_items')
+    //         .delete()
+    //         .eq('id', cartItem.id);
+    //     if (error) {
+    //         console.error('Error deleting cart item:', error);
+    //         return NextResponse.json(
+    //             { error: 'Error deleting cart item' },
+    //             { status: 500 }
+    //         );
+    //     }
+    // } catch (error) {
+    //     console.error('Error deleting cart item:', error);
+    //     return NextResponse.json(
+    //         { error: 'Error deleting cart item' },
+    //         { status: 500 }
+    //     );
+    // }
 
     return NextResponse.json(
         { 
