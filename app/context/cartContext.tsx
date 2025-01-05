@@ -34,6 +34,7 @@ export const CartProvider = ({ children }: CartProviderProps) => {
     const [isCartLoading, setIsCartLoading] = useState(false);
     const [cartError, setCartError] = useState<string | null>(null);
     const [cartSuccess, setCartSuccess] = useState<string | null>(null);
+    
 
     useEffect(() => {
         if(!user) {
@@ -45,6 +46,10 @@ export const CartProvider = ({ children }: CartProviderProps) => {
     }, [userId, user]);
 
     useEffect(() => {
+        const savedCartId = localStorage.getItem('cartId');
+        if (!savedCartId) {
+            setCartId('');
+        }
         fetchCart();
     }, [cartId]);
 
@@ -82,13 +87,13 @@ export const CartProvider = ({ children }: CartProviderProps) => {
         console.log('handleCartUpdate', { userId, cartId, item });
         
         try {
-            // Case 1: Anonymous user adding item
+            // Case 1: Guest adding item
             if (!userId && item) {
                 if (!cartId || cartId === '') {
-                    console.log('Anonymous user - create new cart');
+                    console.log('Guest user - create new cart');
                     await createNewCart(item);
                 } else {
-                    console.log('Anonymous user - update existing cart');
+                    console.log('Guest user - update existing cart');
                     await updateExistingCart(item);
                 }
             }
@@ -123,12 +128,16 @@ export const CartProvider = ({ children }: CartProviderProps) => {
                             localStorage.setItem('cartId', mergeData.cartId.substring(0, 8));
                             await fetchCart();
                         }
-                    } else {
-                        // No anonymous cart - use existing user cart
-                        setCartId(data.cartId);
-                        localStorage.setItem('cartId', data.cartId.substring(0, 8));
-                        await fetchCart();
+                    } 
+                    // No anonymous cart - update existing user cart
+                    if(item) {
+                        console.log('Update existing user cart');
+                        await updateExistingCart(item);
                     }
+                    console.log('Using existing user cart');
+                    setCartId(data.cartId);
+                    localStorage.setItem('cartId', data.cartId.substring(0, 8));
+                    await fetchCart();
                 } else if (cartId) {
                     // No existing user cart - associate anonymous cart
                     console.log('Associate anonymous cart with user');

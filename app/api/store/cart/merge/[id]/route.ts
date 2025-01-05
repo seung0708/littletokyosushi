@@ -13,32 +13,44 @@ export async function PATCH(request: Request, { params }: { params: { id: string
     
     console.log('existingCart:', existingCart, 'existingCartError:', existingCartError);
    
-    const { data: dbCart, error: cartError } = await supabase
+    const { data: guestCart, error: guestCartError } = await supabase
         .from('carts')
         .select('*')
         .eq('id', params.id)
         .single();
     
-    if (cartError) {
-        console.error('Error fetching cart items:', cartError);
+    if (guestCartError) {
+        console.error('Error fetching cart items:', guestCartError);
         return NextResponse.json(
             { error: 'Failed to fetch cart items' },
             { status: 500 }
         );
     }
-
+    console.log('guestCart:', guestCart);
     // If user has an existing cart, merge the carts
-    if (existingCart && !dbCart.customer_id) {
+    if (existingCart && !guestCart.customer_id) {
         console.log('merging cart');
+
+        const {data: cartItems, error: cartItemsError } = await supabase
+            .from('cart_items')
+            .select('*')
+            .eq('cart_id', guestCart.id)
         
-        const { error: updateCartItemsError } = await supabase
+        console.log('cartItems:', cartItems);
+        
+        const { data: updateCartItems, error: updateCartItemsError } = await supabase
             .from('cart_items')
             .update(
-                dbCart?.cart_items.map((item: any) => ({
+                cartItems?.map((item: any) => ({
                     cart_id: existingCart.id
                 }))
             )
-            .eq('cart_id', dbCart.id);
+            .eq('cart_id', guestCart.id)
+            .select();
+
+        console.log('updateCartItems1:', updateCartItems);
+
+        
 
         if (updateCartItemsError) {
             console.error('Error updating cart items:', updateCartItemsError);
@@ -49,14 +61,10 @@ export async function PATCH(request: Request, { params }: { params: { id: string
         }     
         
         // Delete the anonymous cart after merging
-        const response = await fetch(`/api/store/cart/${params.id}`, {
-            method: 'DELETE',
-            credentials: 'include',
-        });
-        if (!response.ok) {
-            const error = await response.json();
-            throw new Error(error.error || 'Failed to delete cart');
-        }
+        await supabase
+            .from('carts')
+            .delete()
+            .eq('id', guestCart.id);
 
         // Fetch the updated cart with all its items
         const { data: updatedCart, error: fetchError } = await supabase
