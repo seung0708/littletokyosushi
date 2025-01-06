@@ -1,10 +1,11 @@
+'use client';
 import Link from "next/link";
 import Svg from "../svg";
 import { useCart } from "@/app/context/cartContext";
 
+
 export default function CartIcon() {
     const { cartItems } = useCart();
-
     return (
         <div className="ml-4 flow-root lg:ml-10">
             <Link href="/cart" className="group -m-2 flex items-center p-2">
