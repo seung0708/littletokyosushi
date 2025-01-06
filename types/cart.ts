@@ -1,6 +1,8 @@
 export interface CartItem  {
+    id?: string;
     cart_id?: string;
     menu_item_name: string;
+    menu_item_price: number;
     menu_item_image: string;
     base_price: number;
     special_instructions?: string;
@@ -13,7 +15,7 @@ export interface CartItemModifier  {
     id: number;
     cart_items_id?: number;
     modifier_id: number;
-    modifier_name: string;
+    name: string;
     cart_item_modifier_options?: CartItemModifierOption[];
 };
 
