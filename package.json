@@ -46,6 +46,7 @@
     "notenv": "^2.0.3",
     "prettier": "^3.3.3",
     "react": "^18",
+    "react-datepicker": "^7.6.0",
     "react-dom": "^18",
     "react-hook-form": "^7.53.2",
     "sonner": "^1.7.1",

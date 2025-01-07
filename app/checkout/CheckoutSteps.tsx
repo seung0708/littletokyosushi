@@ -2,7 +2,8 @@
 import { useState } from 'react'
 import { useAuth } from '@/app/context/authContext'
 import CheckoutCustomerSignIn from '@/components/auth/checkoutCustomerSignIn'
-
+import DeliveryPickupSelector from '@/components/checkout/deliverypickupselector';  
+import OrderSummary from '@/components/checkout/orderSummary';
 
 type CheckoutStepsProps =  'signin' | 'delivery-pickup' | 'summary';
 
@@ -43,45 +44,38 @@ const CheckoutSteps = () => {
     }
 
     return (
-        <div className="space-y-4">
-             <div className="space-y-8">
-      {/* Progress Steps */}
-      <nav aria-label="Progress">
-        <ol role="list" className="flex items-center">
-          {steps.map((step, stepIdx) => (
-            <li key={step.id} className={`relative ${stepIdx !== steps.length - 1 ? 'pr-8 sm:pr-20' : ''}`}>
-              <div className="flex items-center">
-                <div className={`
-                  h-8 w-8 rounded-full flex items-center justify-center
-                  ${step.status === 'complete' ? 'bg-red-600' : 
-                    step.status === 'current' ? 'border-2 border-red-600' : 
-                    'border-2 border-gray-300'}
-                `}>
-                  {step.status === 'complete' ? '✓' : stepIdx + 1}
-                </div>
-                {stepIdx !== steps.length - 1 && (
-                  <div className={`
-                    h-0.5 w-full sm:w-20
-                    ${step.status === 'complete' ? 'bg-red-600' : 'bg-gray-300'}
-                  `} />
+        <div className="mx-auto max-w-2xl px-4 py-16 sm:px-6 sm:py-24 lg:max-w-none lg:px-0">
+            <nav aria-label="Progress">
+                <ol role="list" className="flex items-center">
+                    {steps.map((step, stepIdx) => (
+                        <li key={step.id} className={`relative ${stepIdx !== steps.length - 1 ? 'pr-8 sm:pr-20' : ''}`}>
+                            <div className="flex items-center">
+                                <div className={`
+                                  h-8 w-8 rounded-full flex items-center justify-center
+                                ${step.status === 'complete' ? 'bg-red-600' : 
+                                step.status === 'current' ? 'border-2 border-red-600' : 
+                                'border-2 border-gray-300'}
+                                `}>
+                                  {step.status === 'complete' ? '✓' : stepIdx + 1}
+                                </div>
+                                {stepIdx !== steps.length - 1 && (
+                                <div className={`h-0.5 w-full sm:w-20 ${step.status === 'complete' ? 'bg-red-600' : 'bg-gray-300'}`} />
+                                )}
+                            </div>
+                            <span className="mt-2 block text-sm font-medium">{step.name}</span>
+                        </li>
+                    ))}
+                </ol>
+            </nav>
+            <div className="mt-8">
+                {currentStep === 'signin' && (
+                    <CheckoutCustomerSignIn 
+                        onComplete={() => handleNextStep()} 
+                    />
                 )}
-              </div>
-              <span className="mt-2 block text-sm font-medium">{step.name}</span>
-            </li>
-          ))}
-        </ol>
-      </nav>
 
-      {/* Content based on current step */}
-      <div className="mt-8">
-        {currentStep === 'signin' && (
-          <CheckoutCustomerSignIn 
-            onComplete={() => handleNextStep()} 
-          />
-        )}
-
-        {currentStep === 'delivery-pickup' && (
-          <DeliveryPickupSelector
+                {currentStep === 'delivery-pickup' && (
+                    <DeliveryPickupSelector
             selectedMethod={deliveryMethod}
             onMethodSelect={setDeliveryMethod}
             onComplete={() => handleNextStep()}
@@ -114,8 +108,6 @@ const CheckoutSteps = () => {
         )}
       </div>
     </div>
-
-        </div>
     )
 
 }

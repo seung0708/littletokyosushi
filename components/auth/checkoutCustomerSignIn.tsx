@@ -5,7 +5,7 @@ interface CustomerSignInProps {
     onComplete: () => void
 }
 
-const CustomerSignIn: React.FC<CustomerSignInProps> = ({ onComplete }) => { 
+const CheckoutCustomerSignIn: React.FC<CustomerSignInProps> = ({ onComplete }) => { 
     const { signin } = useAuth()
 
     const handleSignIn = async () => {
@@ -78,4 +78,4 @@ const CustomerSignIn: React.FC<CustomerSignInProps> = ({ onComplete }) => {
     )
 }
 
-export default CustomerSignIn
+export default CheckoutCustomerSignIn
