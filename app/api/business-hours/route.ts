@@ -14,17 +14,40 @@ export async function GET() {
         console.log(regularHours, regularHoursError);
         if (regularHoursError) throw regularHoursError;
 
+        const transformedRegularHours = regularHours.map(hour => ({
+            id: hour.id,
+            day: hour.day,
+            isOpen: hour.is_open,
+            orderingStart: hour.ordering_start,
+            orderingEnd: hour.ordering_end,
+            pickupStart: hour.pickup_start,
+            pickupEnd: hour.pickup_end
+        }));
+
         const now = new Date();
         const { data: specialSchedules, error: specialSchedulesError } = await supabase
             .from('special_schedules')
             .select('*')
-            .gte('start_date', format(now, 'MM-dd-yyyy'))
-            .lte('end_date', format(addDays(now, 30), 'MM-dd-yyyy'));
+            .gte('date', format(now, 'MM-dd-yyyy'))
+            .lte('date', format(addDays(now, 30), 'MM-dd-yyyy'));
 
         if (specialSchedulesError) throw specialSchedulesError;
 
+        const transformedSpecialSchedules = specialSchedules?.map(schedule => ({
+            id: schedule.id,
+            date: schedule.date,
+            scheduleType: schedule.schedule_type,
+            isOpen: schedule.is_open,
+            orderingStart: schedule.ordering_start,
+            orderingEnd: schedule.ordering_end,
+            pickupStart: schedule.pickup_start,
+            pickupEnd: schedule.pickup_end,
+            note: schedule.note
+        })) || [];
+
         return NextResponse.json({
-            regularHours
+            regularHours: transformedRegularHours,
+            specialSchedules: transformedSpecialSchedules
         });
 
     } catch (error) {

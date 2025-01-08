@@ -31,19 +31,14 @@ export const useBusinessHours = () => {
 
         const dayOfWeek = format(date, 'eeee').toLowerCase();
         const dateStr = format(date, 'MM-dd-yyyy');
-        const now = new Date();
         const times: string[] = [];
-        
         const specialSchedule = businessHours.specialSchedules.find(schedule => schedule.date === dateStr);
+        //console.log(specialSchedule);
         if (specialSchedule) {
-            if (specialSchedule.isOpen) return []
-            const startTime = parse(specialSchedule.pickupStart!, 'HH:mm', date);
-            const endTime = parse(specialSchedule.pickupEnd!, 'HH:mm', date);
+            if (!specialSchedule.isOpen) return []
+            const startTime = parse(specialSchedule.pickupStart!.slice(0, 5), 'HH:mm', date);
+            const endTime = parse(specialSchedule.pickupEnd!.slice(0, 5), 'HH:mm', date);
             let currentTime = startTime;
-                
-            if(format(date, 'yyyy-MM-dd') === format(now, 'yyyy-MM-dd')) {
-                currentTime = new Date(Math.max(currentTime.getTime(), addMinutes(now, 30).getTime()));
-            }
 
             while (currentTime <= endTime) {
                 times.push(format(currentTime, 'HH:mm'));
@@ -57,18 +52,13 @@ export const useBusinessHours = () => {
 
         if (!regularHours?.isOpen) return [];
 
-        let currentTime = parse(regularHours.pickupStart!, 'HH:mm', date);
-        let endTime = parse(regularHours.pickupEnd!, 'HH:mm', date);
-
-        if(format(date, 'yyyy-MM-dd') === format(now, 'yyyy-MM-dd')) {
-            currentTime = new Date(Math.max(currentTime.getTime(), addMinutes(now, 30).getTime()));
-        }
+        let currentTime = parse(regularHours.pickupStart!.slice(0, 5), 'HH:mm', date);
+        let endTime = parse(regularHours.pickupEnd!.slice(0, 5), 'HH:mm', date);
 
         while (currentTime <= endTime) {
-            times.push(format(currentTime, 'HH:mm'));
+            times.push(format(currentTime, 'h:mm aaa'));
             currentTime = addMinutes(currentTime, 15);
         }
-
         return times;
 
     }

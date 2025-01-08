@@ -1,7 +1,7 @@
 'use client'
 import { useCart } from "@/app/context/cartContext"; 
 
-export const CheckoutSummary = () => {
+export const OrderSummary = () => {
     const {cartId, cartItems} = useCart();
     console.log(cartItems);
     return (

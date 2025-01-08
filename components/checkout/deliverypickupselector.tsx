@@ -8,7 +8,7 @@ import { Label } from "@/components/ui/label"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import { useBusinessHours } from '@/app/hooks/useBusinessHours'
-import { format } from 'date-fns';
+import { format, parse } from 'date-fns';
 import { FormControl, FormField, FormItem, FormLabel, FormMessage } from '../ui/form';
 
 interface Props {
@@ -18,9 +18,12 @@ interface Props {
 
 const DeliveryPickupSelector = ({ form, onComplete}: Props) => {
     const {businessHours, isLoading, error, getAvailablePickupTimes} = useBusinessHours();
+    console.log('businessHours', businessHours)
     const deliveryMethod = form.watch('delivery.method');
+    console.log('deliveryMethod', deliveryMethod)
     const selectedDate = form.watch('delivery.pickupDate');
-    const availableTimes = selectedDate ? getAvailablePickupTimes(selectedDate) : [];
+    console.log('selectedDate', selectedDate)
+    const availableTimes = selectedDate ? getAvailablePickupTimes(new Date(selectedDate)) : [];
 
     const handleContinue = () => {
         if(deliveryMethod === "pickup") {
@@ -57,8 +60,8 @@ const DeliveryPickupSelector = ({ form, onComplete}: Props) => {
                         <FormControl>   
                             <RadioGroup 
                                 onValueChange={field.onChange}
-                                defaultValue={field.value}
-                                className="space-y-4 mb-8"
+                                className="space-y-4"
+
                             >
                                 <div className="flex items-center space-x-2">
                                     <RadioGroupItem value="pickup" id="pickup" />
@@ -75,8 +78,8 @@ const DeliveryPickupSelector = ({ form, onComplete}: Props) => {
                 )}
             />
             
-            {deliveryMethod === 'delivery' && (
-                <div className="space-y-4 mb-8">
+            {deliveryMethod === 'pickup' && (
+                <div className="space-y-4 my-8">
                     <FormField 
                         control={form.control}
                         name="delivery.pickupDate"
@@ -85,18 +88,22 @@ const DeliveryPickupSelector = ({ form, onComplete}: Props) => {
                                 <FormLabel>Pickup Date</FormLabel>
                                 <Calendar
                                    mode="single"
-                                   selected={field.value}
+                                   selected={field.value ? new Date(field.value) : undefined}
                                    onSelect={field.onChange}
                                    disabled={(date) => {
                                        if (!businessHours) return true
                                        const dayOfWeek = format(date, 'EEEE').toLowerCase()
-                                       const dateStr = format(date, 'MM-dd-yyyy')
-                                       
+                                       const dateStr = format(date, 'yyyy-MM-dd')
+                                       const now = new Date()
+                                        if(format(date, 'yyyy-MM-dd') === format(new Date(), 'yyyy-MM-dd')) {
+                                            const orderingEnd = parse(businessHours.regularHours.find(h => h.day === dayOfWeek)?.orderingEnd!, 'HH:mm:ss', now) 
+                                            if(format(now, 'h:mm aaa') === format(orderingEnd, 'h:mm aaa')) return true
+                                        }   
                                        const specialSchedule = businessHours.specialSchedules.find(
                                            s => s.date === dateStr
                                        )
+                                       
                                        if (specialSchedule) return !specialSchedule.isOpen
-
                                        const regularHours = businessHours.regularHours.find(
                                            h => h.day === dayOfWeek
                                        )
