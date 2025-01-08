@@ -48,6 +48,12 @@ export const CartProvider = ({ children }: CartProviderProps) => {
 
     useEffect(() => {
         const savedCartId = localStorage.getItem('cartId');
+        const savedCartItems = localStorage.getItem('cartItems');
+        
+        if (savedCartItems) {
+            setCartItems(JSON.parse(savedCartItems));
+        }
+        
         if (!savedCartId) {
             setCartId('');
         }

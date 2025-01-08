@@ -16,8 +16,6 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 
-import { createClient } from '@/lib/supabase/client';
-
 interface FormModifier {
     id: number;
     name: string;
@@ -171,7 +169,6 @@ export default function ItemDetailsPage({ params }: { params: { id: string } }) 
         }
 
         const cartModifiers: CartItemModifier[] = data.modifiers.map(formMod => {
-            console.log(formMod)
             const modifier = item?.modifiers.find(m => m.id === formMod.id);
             if (!modifier) return [];
             return {

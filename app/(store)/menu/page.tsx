@@ -33,7 +33,7 @@ const MenuPage: React.FC = () => {
         const fetchData = async () => {
             try {
                 setIsLoading(true);
-                const response = await fetch('/api/main/items');
+                const response = await fetch('/api/store/items');
                 const data = await response.json();
                 setItems(data.items)
             } catch (error) {

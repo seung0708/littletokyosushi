@@ -3,17 +3,20 @@ import { useCart } from "../../context/cartContext";
 import { Button } from "@/components/ui/button";
 import { MinusIcon, PlusIcon, TrashIcon } from "lucide-react";
 import { CartItem } from "@/types/cart";
+import {useRouter} from 'next/navigation';
 
 
 const CartPage: React.FC = () => {
     const { cartItems, handleCartUpdate, removeItemFromCart} = useCart(); 
-    const onSubmit = async (e) => {
+    const router = useRouter();
+
+    const onSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-        console.log('cartItems', cartItems)
+        router.push('/checkout');
         
     }
 
-    const calculateTotalPrice = (basePrice: number, quantity: number, modifiers) => {
+    const calculateTotalPrice = (basePrice: number, quantity: number, modifiers: any) => {
         console.log('modifiers', modifiers)
         const modifierPrice = modifiers.reduce((total: number, mod: any) => {
             return total + mod.cart_item_modifier_options.reduce((optTotal: number, opt: any) => optTotal + opt.price, 0);
@@ -105,7 +108,7 @@ const CartPage: React.FC = () => {
                                                                 variant="ghost"
                                                                 size="sm"
                                                                 className="inline-flex p-2 hover:bg-white"
-                                                                onClick={() => removeItemFromCart(cartItem.id)}
+                                                                onClick={() => removeItemFromCart(cartItem.id || '')}
                                                                 
                                                             >
                                                                 <span className="sr-only">Remove</span>
