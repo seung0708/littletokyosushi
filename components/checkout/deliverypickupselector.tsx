@@ -91,23 +91,36 @@ const DeliveryPickupSelector = ({ form, onComplete}: Props) => {
                                    selected={field.value ? new Date(field.value) : undefined}
                                    onSelect={field.onChange}
                                    disabled={(date) => {
-                                       if (!businessHours) return true
-                                       const dayOfWeek = format(date, 'EEEE').toLowerCase()
-                                       const dateStr = format(date, 'yyyy-MM-dd')
-                                       const now = new Date()
-                                        if(format(date, 'yyyy-MM-dd') === format(new Date(), 'yyyy-MM-dd')) {
-                                            const orderingEnd = parse(businessHours.regularHours.find(h => h.day === dayOfWeek)?.orderingEnd!, 'HH:mm:ss', now) 
-                                            if(format(now, 'h:mm aaa') === format(orderingEnd, 'h:mm aaa')) return true
-                                        }   
-                                       const specialSchedule = businessHours.specialSchedules.find(
-                                           s => s.date === dateStr
-                                       )
+                                       if (!businessHours) return true;
                                        
-                                       if (specialSchedule) return !specialSchedule.isOpen
-                                       const regularHours = businessHours.regularHours.find(
-                                           h => h.day === dayOfWeek
-                                       )
-                                       return !regularHours?.isOpen
+                                       const dayOfWeek = format(date, 'EEEE').toLowerCase();
+                                       const dateStr = format(date, 'yyyy-MM-dd');
+                                       const now = new Date();
+                                       const today = format(now, 'yyyy-MM-dd');
+                                       
+                                       // For today's date, check if it's past ordering cutoff time
+                                       if (dateStr === today) {
+                                           const regularHours = businessHours.regularHours.find(h => h.day === dayOfWeek);
+                                           if (!regularHours?.orderingEnd) return true;
+                                           
+                                           const orderingEnd = parse(regularHours.orderingEnd, 'HH:mm:ss', now);
+                                           if (now > orderingEnd) return true;
+                                       }
+                                       
+                                       // Disable past dates
+                                       if (dateStr < today) return true;
+                                       
+                                       // Check if there's a special schedule
+                                       const specialSchedule = businessHours.specialSchedules.find(
+                                           schedule => format(new Date(schedule.date), 'yyyy-MM-dd') === dateStr
+                                       );
+                                       if (specialSchedule && !specialSchedule.isOpen) return true;
+                                       
+                                       // Check regular hours
+                                       const regularHours = businessHours.regularHours.find(h => h.day === dayOfWeek);
+                                       if (!regularHours?.isOpen) return true;
+                                       
+                                       return false;
                                    }}
                                    className="rounded-md border"
                                 />

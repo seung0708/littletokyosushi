@@ -34,7 +34,7 @@ const CheckoutSteps = () => {
     });
 
     const steps = [
-        { id: 'signin', name: 'Sign In', status: currentStep === 'signin' ? 'current' : 'complete' },
+        { id: 'signin', name: 'Customer Info', status: currentStep === 'signin' ? 'current' : 'complete' },
         { id: 'delivery-pickup', name: 'Delivery Method', status: currentStep === 'delivery-pickup' ? 'current' : currentStep === 'summary' ? 'complete' : 'upcoming' },
         { id: 'summary', name: 'Review & Pay', status: currentStep === 'summary' ? 'current' : 'upcoming' }
     ]
@@ -79,72 +79,79 @@ const CheckoutSteps = () => {
     };
 
     return (
-        <div className="mx-auto max-w-2xl px-4 py-16 sm:px-6 sm:py-24 lg:max-w-none lg:px-0">
-            <nav aria-label="Progress">
-                <ol role="list" className="flex items-center">
-                    {steps.map((step, stepIdx) => (
-                        <li key={step.id} className={`relative ${stepIdx !== steps.length - 1 ? 'pr-8 sm:pr-20' : ''}`}>
-                            <div className="flex items-center">
-                                <div className={`
-                                  h-8 w-8 rounded-full flex items-center justify-center
-                                ${step.status === 'complete' ? 'bg-red-600' : 
-                                step.status === 'current' ? 'border-2 border-red-600' : 
-                                'border-2 border-gray-300'}
-                                `}>
-                                  {step.status === 'complete' ? '✓' : stepIdx + 1}
-                                </div>
-                                {stepIdx !== steps.length - 1 && (
-                                <div className={`h-0.5 w-full sm:w-20 ${step.status === 'complete' ? 'bg-red-600' : 'bg-gray-300'}`} />
-                                )}
+      <div className="max-w-4xl mx-auto px-4 sm:px-6 sm:py-24">
+        <nav aria-label="Progress" className="mb-12">
+            <ol role="list" className="flex items-center justify-center space-x-8">
+                {steps.map((step, stepIdx) => (
+                    <li key={step.id} className="relative">
+                        <div className="flex items-center">
+                            <div className={`
+                                h-8 w-8 rounded-full flex items-center justify-center
+                                ${step.status === 'complete' ? 'bg-red-600 text-white' : 
+                                  step.status === 'current' ? 'border-2 border-red-600' : 
+                                  'border-2 border-gray-300'}
+                            `}>
+                                {step.status === 'complete' ? '✓' : stepIdx + 1}
                             </div>
-                            <span className="mt-2 block text-sm font-medium">{step.name}</span>
-                        </li>
-                    ))}
-                </ol>
-            </nav>
+                            {stepIdx !== steps.length - 1 && (
+                                <div className={`
+                                    hidden sm:block h-0.5 w-16
+                                    ${step.status === 'complete' ? 'bg-red-600' : 'bg-gray-300'}
+                                `} />
+                            )}
+                        </div>
+                        <span className="mt-2 block text-sm font-medium text-center">
+                            {step.name}
+                        </span>
+                    </li>
+                ))}
+            </ol>
+        </nav>
 
-            <div className="mt-8">
-              <Form {...form}>
-                <form onSubmit={form.handleSubmit(onSubmit)}>
-                  {currentStep === 'signin' && (
-                      <CheckoutCustomerSignIn 
-                        onComplete={() => handleNextStep()} 
-                      />
-                  )}
-
-                  {currentStep === 'delivery-pickup' && (
-                      <DeliveryPickupSelector
+        <Form {...form}>
+            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
+                {currentStep === 'signin' && (
+                    <CheckoutCustomerSignIn 
                         form={form}
-                        onComplete={() => handleNextStep()}
-                      />
-                  )}
-
-                  {currentStep === 'summary' && (
-                    <OrderSummary 
-                      form={form}
-                      onComplete={() => form.handleSubmit(onSubmit)()}
+                        onComplete={handleNextStep} 
                     />
-                  )}
-                </form>
-              </Form>
-            </div>
+                )}
 
-      {/* Navigation buttons */}
-      <div className="flex justify-between mt-8">
-        {currentStep !== 'signin' && (
-          <button onClick={handlePreviousStep} className="text-sm text-gray-600">
-            Back
-          </button>
-        )}
-        {currentStep !== 'summary' && (
-          <button 
-            onClick={handleNextStep}
-            className="bg-red-600 text-white px-4 py-2 rounded"
-          >
-            Continue
-          </button>
-        )}
-      </div>
+                {currentStep === 'delivery-pickup' && (
+                    <DeliveryPickupSelector
+                        form={form}
+                        onComplete={handleNextStep}
+                    />
+                )}
+
+                {currentStep === 'summary' && (
+                    <OrderSummary
+                        form={form}
+                        onComplete={() => form.handleSubmit(onSubmit)()}
+                    />
+                )}
+            </form>
+        </Form>
+
+        {/* Navigation buttons */}
+        <div className="flex justify-center space-x-4 mt-8">
+            {(currentStep !== 'signin' && currentStep !== 'summary') && (
+                <Button 
+                    variant="outline"
+                    onClick={handlePreviousStep}
+                >
+                    Back
+                </Button>
+            )}
+            {(currentStep !== 'signin' && currentStep !== 'summary') && (
+                <Button 
+                    onClick={handleNextStep}
+                    className="bg-red-600 text-white"
+                >
+                    Continue
+                </Button>
+            )}
+        </div>
     </div>
     )
 

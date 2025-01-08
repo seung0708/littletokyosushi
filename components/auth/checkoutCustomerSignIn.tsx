@@ -1,12 +1,18 @@
 'use client'
+import {UseFormReturn} from 'react-hook-form'
+import {type CheckoutFormValues} from '@/types/checkout'
 import { useAuth } from "@/app/context/authContext"
+import { FormControl, FormField, FormItem, FormLabel, FormMessage } from '../ui/form';
+import { Input } from '../ui/input';
+import { Button } from '../ui/button';
 
 interface CustomerSignInProps {
+    form: UseFormReturn<CheckoutFormValues>
     onComplete: () => void
 }
 
-const CheckoutCustomerSignIn: React.FC<CustomerSignInProps> = ({ onComplete }) => { 
-    const { signin } = useAuth()
+const CheckoutCustomerSignIn: React.FC<CustomerSignInProps> = ({ form, onComplete }) => { 
+    const { signin, googleSignin } = useAuth()
 
     const handleSignIn = async () => {
         try {
@@ -22,57 +28,94 @@ const CheckoutCustomerSignIn: React.FC<CustomerSignInProps> = ({ onComplete }) =
     }
 
     return (
-        <div className="w-full max-w-md mx-auto">
-            {/* Header */}
-            <div className="mb-6">
-                <h3 className="text-2xl font-bold text-gray-900">
-                    Sign in to your account
-                </h3>
-                <p className="mt-2 text-gray-600">
-                    Sign in for a faster checkout experience and to track your orders
-                </p>
-            </div>
+        <div className="w-full flex flex-col items-center justify-center max-w-4xl mx-auto">
+            <h3 className="text-2xl font-bold text-gray-900 mb-6">
+                Customer Information
+            </h3>
 
-            {/* Sign in form */}
-            <div className="space-y-4 mb-8">
-                <input
-                    type="email"
-                    placeholder="Email address"
-                    className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-red-500 focus:border-red-500"
-                />
-                <input
-                    type="password"
-                    placeholder="Password"
-                    className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-red-500 focus:border-red-500"
-                />
-            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                {/* Sign In Section */}
+                <div className="p-6 border rounded-lg shadow-sm space-y-4">
+                    <div>
+                        <h4 className="text-lg font-semibold">Sign In</h4>
+                        <p className="text-sm text-gray-500">
+                            Sign in for a faster checkout experience
+                        </p>
+                    </div>
 
-            {/* Buttons */}
-            <div className="space-y-4">
-                <button
-                    type="button"
-                    onClick={handleSignIn}
-                    className="w-full bg-red-600 text-white px-4 py-2 rounded-md hover:bg-red-700 transition-colors"
-                >
-                    Sign in
-                </button>
-                <button
-                    type="button"
-                    className="w-full border border-gray-300 text-gray-700 px-4 py-2 rounded-md hover:bg-gray-50 transition-colors"
-                >
-                    Sign in with Google
-                </button>
-            </div>
+                    <button
+                        type="button"
+                        onClick={() => signin}
+                        className="w-full bg-red-600 text-white px-4 py-2 rounded-md hover:bg-red-700 transition-colors"
+                    >
+                        Sign in
+                    </button>
 
-            {/* Continue as guest */}
-            <div className="mt-6 text-center">
-                <button
-                    type="button"
-                    onClick={handleContinueAsGuest}
-                    className="text-sm text-gray-500 hover:text-gray-700"
-                >
-                    Continue as guest
-                </button>
+                    <button
+                        type="button"
+                        onClick={() => googleSignin}
+                        className="w-full border border-gray-300 text-gray-700 px-4 py-2 rounded-md hover:bg-gray-50 transition-colors"
+                    >
+                        Sign in with Google
+                    </button>
+                </div>
+
+                {/* Guest Section */}
+                <div className="p-6 border rounded-lg shadow-sm space-y-4">
+                    <div>
+                        <h4 className="text-lg font-semibold">Continue as Guest</h4>
+                        <p className="text-sm text-gray-500">
+                            Please input your name and email to receive order updates
+                        </p>
+                    </div>
+
+                    <FormField
+                        control={form.control}
+                        name="customer.name"
+                        render={({ field }) => (
+                            <FormItem>
+                                <FormControl>
+                                    <Input placeholder="Name" {...field} />
+                                </FormControl>
+                                <FormMessage />
+                            </FormItem>
+                        )}
+                    />
+
+                    <FormField
+                        control={form.control}
+                        name="customer.email"
+                        render={({ field }) => (
+                            <FormItem>
+                                <FormControl>
+                                    <Input placeholder="Email" {...field} />
+                                </FormControl>
+                                <FormMessage />
+                            </FormItem>
+                        )}
+                    />
+
+                    {/* <FormField
+                        control={form.control}
+                        name="customer.phone"
+                        render={({ field }) => (
+                            <FormItem>
+                                <FormControl>
+                                    <Input placeholder="Phone" {...field} />
+                                </FormControl>
+                                <FormMessage />
+                            </FormItem>
+                        )}
+                    /> */}
+
+                    <Button
+                        type="button"
+                        onClick={handleContinueAsGuest}
+                        className="w-full bg-gray-900 text-white px-4 py-2 rounded-md hover:bg-gray-800 transition-colors"
+                    >
+                        Continue as guest
+                    </Button>
+                </div>
             </div>
         </div>
     )

@@ -1,18 +1,34 @@
 'use client'
+import { UseFormReturn } from "react-hook-form";
+import { type CheckoutFormValues } from "@/types/checkout";
 import { useCart } from "@/app/context/cartContext"; 
+import { Button } from "../ui/button";
+import {format} from 'date-fns';
 
-export const OrderSummary = () => {
+interface Props {
+  form: UseFormReturn<CheckoutFormValues>;
+  onComplete: () => void;
+}
+
+export const OrderSummary = ( {form, onComplete}: Props) => {
     const {cartId, cartItems} = useCart();
+    const deliveryMethod = form.watch('delivery.method');
+    const pickupDate = form.watch('delivery.pickupDate');
+    const pickupTime = form.watch('delivery.pickupTime');
+    const customer = form.watch('customer');
+
     console.log(cartItems);
     return (
         <>
         <h1 className="sr-only">Checkout</h1>
-          <section aria-labelledby="summary-heading" className="bg-red-900 py-12 text-red-300 md:px-10 lg:col-start-2 lg:row-start-1 lg:mx-auto lg:w-full lg:max-w-lg lg:bg-transparent lg:px-0 lg:pb-24 lg:pt-0">
+          <section aria-labelledby="summary-heading" className="bg-red-500 py-12 text-red-300 md:px-10 lg:col-start-2 lg:row-start-1 lg:mx-auto lg:w-full lg:max-w-lg lg:bg-transparent lg:px-0 lg:pb-24 lg:pt-0">
           {cartItems.map((item) => (
             <div className="mx-auto max-w-2xl px-4 lg:max-w-none lg:px-0">
               <h2 id="summary-heading" className="text-white text-2xl">Order summary</h2>
-              <ul role="list" className="divide-y divide-white divide-opacity-10 text-sm font-medium">
-                
+              <div>
+                <h4></h4>
+              </div>
+              <ul role="list" className="divide-y divide-white divide-opacity-10 text-sm font-medium">                
                     <li key={item?.id?.substring(0, 8)} className="flex items-start space-x-4 py-6">
                         <img src={`${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/menu-items/${item?.menu_item_image}`} alt="Front of zip tote bag with white canvas, white handles, and black drawstring top." className="h-20 w-20 flex-none rounded-md object-cover object-center" />
                         
@@ -82,4 +98,4 @@ export const OrderSummary = () => {
     )
 }
 
-export default CheckoutSummary
+export default OrderSummary
