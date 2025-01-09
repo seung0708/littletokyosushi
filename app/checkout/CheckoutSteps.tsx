@@ -1,4 +1,7 @@
 'use client'
+import PaymentForm from '@/components/checkout/paymentForm'
+import {Elements, useElements} from '@stripe/react-stripe-js';
+import {loadStripe} from '@stripe/stripe-js';
 import { useState } from 'react'
 import {useForm} from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
@@ -14,11 +17,18 @@ import OrderSummary from '@/components/checkout/orderSummary';
 
 type CheckoutStep =  'signin' | 'delivery-pickup' | 'summary';
 
+const stripePromise = loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY!);
+
 const CheckoutSteps = () => {
     const { user } = useAuth()
     const { cartItems } = useCart()
     const [currentStep, setCurrentStep] = useState<CheckoutStep>(user ? 'delivery-pickup' : 'signin');
-    
+    const [clientSecret, setClientSecret] = useState<string>('');
+
+    const updateClientSecret = (secret: string) => {
+        setClientSecret(secret);
+    };
+
     const form = useForm<CheckoutFormValues>({
         resolver: zodResolver(checkoutSchema),
         defaultValues: {
@@ -32,12 +42,46 @@ const CheckoutSteps = () => {
           },
         },
     });
-    console.log(form.getValues());
+    
     const steps = [
         { id: 'signin', name: 'Customer Info', status: currentStep === 'signin' ? 'current' : 'complete' },
         { id: 'delivery-pickup', name: 'Delivery Method', status: currentStep === 'delivery-pickup' ? 'current' : currentStep === 'summary' ? 'complete' : 'upcoming' },
         { id: 'summary', name: 'Review & Pay', status: currentStep === 'summary' ? 'current' : 'upcoming' }
     ]
+
+    const onSubmit = async (data: CheckoutFormValues) => {
+        const stripe = await stripePromise;
+        const elements = useElements();
+
+        if (!stripe || !elements) {
+            console.error('Stripe is not available');
+            return;
+        }
+        try {
+            const orderResponse = await fetch('api/orders', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(data),
+            });
+            if (!orderResponse.ok) { 
+                throw new Error('Failed to create order');  
+            }
+            const {orderId} = await orderResponse.json();
+            const {error} = await stripe.confirmPayment({
+                elements,
+                confirmParams: {
+                    return_url: `${window.location.origin}/order-confirmation/${orderId}`,
+                }
+            });
+            if (error) {
+                console.error('Payment error:', error);
+            }
+        } catch (error) {
+            console.error('Error creating order:', error);
+        }
+    };
 
     const handleNextStep = () => {
         switch (currentStep) {
@@ -74,9 +118,6 @@ const CheckoutSteps = () => {
       </div>
     }
 
-    const onSubmit = async (data: CheckoutFormValues) => {
-        console.log('Checkout Form Data:', data);
-    };
 
     return (
       <div className="max-w-4xl mx-auto px-4 sm:px-6 sm:py-24">
@@ -123,13 +164,27 @@ const CheckoutSteps = () => {
                         onComplete={handleNextStep}
                     />
                 )}
-
-                {currentStep === 'summary' && (
+                {currentStep === 'summary' && !clientSecret && (
                     <OrderSummary
                         form={form}
                         onComplete={() => form.handleSubmit(onSubmit)()}
+                        onClientSecretUpdate={updateClientSecret}
                     />
                 )}
+
+                {currentStep === 'summary' && clientSecret && (
+                    <Elements stripe={stripePromise} options={{ clientSecret }}>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                    <OrderSummary
+                        form={form}
+                        onComplete={() => form.handleSubmit(onSubmit)()}
+                        onClientSecretUpdate={updateClientSecret}
+                    />
+                        <PaymentForm clientSecret={clientSecret} />
+                    </div>
+                    </Elements>
+                )}
+
             </form>
         </Form>
 

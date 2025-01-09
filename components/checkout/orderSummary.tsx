@@ -2,21 +2,67 @@
 import { UseFormReturn } from "react-hook-form";
 import { type CheckoutFormValues } from "@/types/checkout";
 import { useCart } from "@/app/context/cartContext"; 
-import { Button } from "../ui/button";
 import {format} from 'date-fns';
+import { useEffect } from 'react';
 
 interface Props {
   form: UseFormReturn<CheckoutFormValues>;
   onComplete: () => void;
+  onClientSecretUpdate: (secret: string) => void;
 }
 
-export const OrderSummary = ( {form, onComplete}: Props) => {
+
+
+export const OrderSummary = ( {form, onComplete, onClientSecretUpdate}: Props) => {
     const {cartId, cartItems} = useCart();
     const deliveryMethod = form.watch('delivery.method');
     const pickupDate = new Date(form.watch('delivery.pickupDate'));
     const pickupTime = form.watch('delivery.pickupTime');
     const customer = form.watch('customer');
-    console.log(cartItems, customer, deliveryMethod, pickupDate, pickupTime);
+   
+    const subTotal = cartItems.reduce((acc, item) => {
+        const itemTotal = item.base_price * item.quantity;
+        const modifiersTotal = item.cart_item_modifiers?.reduce((modTotal, mod) => {
+          const optionsTotal = mod.cart_item_modifier_options?.reduce((optTotal, opt) => optTotal + opt.price, 0) || 0;
+          return modTotal + optionsTotal;
+        }, 0) || 0;
+        return acc + itemTotal + modifiersTotal;
+      }, 0) || 0;
+
+    const STRIPE_PERCENTAGE_FEE = 0.029;
+    const STRIPE_FIXED_FEE = 0.30;
+
+    const stripeFee = (subTotal * STRIPE_PERCENTAGE_FEE) + STRIPE_FIXED_FEE;
+    const total = stripeFee + subTotal;
+
+    useEffect(() => {
+      const createPaymentIntent = async () => {
+        try {
+          const paymentIntentResponse = await fetch('/api/payment-intent', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ amount: Math.round(total * 100) }),
+          });
+
+          if (!paymentIntentResponse.ok) {
+            const errorData = await paymentIntentResponse.json();
+            console.error('Payment Intent Error:', errorData);
+            return;
+          }
+
+          const data = await paymentIntentResponse.json();
+          onClientSecretUpdate(data.clientSecret);
+        } catch (error) {
+          console.error('Error creating payment intent:', error);
+        }
+      };
+
+      createPaymentIntent();
+   
+    }, [total]);
+
     return (
         <>
         <h1 className="sr-only">Checkout</h1>
@@ -32,9 +78,7 @@ export const OrderSummary = ( {form, onComplete}: Props) => {
                 <p>{pickupTime}</p>
               </div>
               <ul role="list" className="divide-y divide-white divide-opacity-10 text-sm font-medium">                
-                    <li key={item?.id?.substring(0, 8)} className="flex items-start space-x-4 py-6">
-                        <img src={`${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/menu-items/${item?.menu_item_image}`} alt="Front of zip tote bag with white canvas, white handles, and black drawstring top." className="h-20 w-20 flex-none rounded-md object-cover object-center" />
-                        
+                    <li key={item?.id?.substring(0, 8)} className="flex items-start space-x-4 py-6">  
                             <div className="flex-auto space-y-1">
                                 <h3 className="text-white">{item?.menu_item_name}</h3>
                                 {item?.cart_item_modifiers?.map(modifier => (
@@ -59,50 +103,23 @@ export const OrderSummary = ( {form, onComplete}: Props) => {
               <dl className="space-y-6 border-t border-white border-opacity-10 pt-6 text-sm font-medium">
                 <div className="flex items-center justify-between">
                   <dt>Subtotal</dt>
-                  <dd>
-                  ${
-                    (
-                        item.base_price * item.quantity + 
-                        (item.cart_item_modifiers?.reduce((total: number, modifier: any) => {
-                            const modifierTotal = modifier.cart_item_modifier_options?.reduce(
-                                (subTotal: number, option: any) => subTotal + (option.price || 0), 0) || 0; 
-                                return total + modifierTotal;
-                            }, 0) || 0
-                    ) 
-                    ).toFixed(2)
-                  }
-                  </dd>
+                  <dd>${subTotal.toFixed(2)}</dd>
                 </div>
                 <div className="flex items-center justify-between">
-                  <dt>Taxes & Fees</dt>
-                  <dd>$0</dd>
+                  <dt>Service Fee</dt>
+                  <dd>${stripeFee.toFixed(2)}</dd>
                 </div>
                 <div className="flex items-center justify-between border-t border-white border-opacity-10 pt-6 text-white">
                   <dt className="text-base">Total</dt>
                   <dd className="text-base">
-                  ${
-                    (
-                        item.base_price * item.quantity + 
-                        (item.cart_item_modifiers?.reduce((total: number, modifier: any) => {
-                            const modifierTotal = modifier.cart_item_modifier_options?.reduce(
-                                (subTotal: number, option: any) => subTotal + (option.price || 0), 0) || 0; 
-                                return total + modifierTotal;
-                            }, 0) || 0
-                    ) 
-                    ).toFixed(2)
-                  } + Taxes and fees
+                  ${total.toFixed(2)}
                   </dd>
                 </div>
               </dl>
             </div>
           ))} 
         </section>
-        <Button
-                onClick={onComplete}
-                className="w-full bg-red-600 text-white"
-            >
-                Place Order
-            </Button>
+        
       </>
     )
 }
