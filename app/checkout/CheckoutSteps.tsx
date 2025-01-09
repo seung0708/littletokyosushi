@@ -8,7 +8,7 @@ import { Form } from '@/components/ui/form'
 import { Button } from '@/components/ui/button'
 import { useCart } from '@/app/context/cartContext'
 import { useAuth } from '@/app/context/authContext'
-import CheckoutCustomerSignIn from '@/components/auth/checkoutCustomerSignIn'
+import CheckoutCustomerSignIn from '@/components/checkout/checkoutCustomerSignIn'
 import DeliveryPickupSelector from '@/components/checkout/deliverypickupselector';  
 import OrderSummary from '@/components/checkout/orderSummary';
 
@@ -32,7 +32,7 @@ const CheckoutSteps = () => {
           },
         },
     });
-
+    console.log(form.getValues());
     const steps = [
         { id: 'signin', name: 'Customer Info', status: currentStep === 'signin' ? 'current' : 'complete' },
         { id: 'delivery-pickup', name: 'Delivery Method', status: currentStep === 'delivery-pickup' ? 'current' : currentStep === 'summary' ? 'complete' : 'upcoming' },
@@ -133,7 +133,7 @@ const CheckoutSteps = () => {
             </form>
         </Form>
 
-        {/* Navigation buttons */}
+        {/* Navigation buttons
         <div className="flex justify-center space-x-4 mt-8">
             {(currentStep !== 'signin' && currentStep !== 'summary') && (
                 <Button 
@@ -151,7 +151,7 @@ const CheckoutSteps = () => {
                     Continue
                 </Button>
             )}
-        </div>
+        </div> */}
     </div>
     )
 

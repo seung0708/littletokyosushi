@@ -8,7 +8,7 @@ import { Label } from "@/components/ui/label"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import { useBusinessHours } from '@/app/hooks/useBusinessHours'
-import { format, parse } from 'date-fns';
+import { format, parse, isAfter } from 'date-fns';
 import { FormControl, FormField, FormItem, FormLabel, FormMessage } from '../ui/form';
 
 interface Props {
@@ -18,11 +18,8 @@ interface Props {
 
 const DeliveryPickupSelector = ({ form, onComplete}: Props) => {
     const {businessHours, isLoading, error, getAvailablePickupTimes} = useBusinessHours();
-    console.log('businessHours', businessHours)
     const deliveryMethod = form.watch('delivery.method');
-    console.log('deliveryMethod', deliveryMethod)
     const selectedDate = form.watch('delivery.pickupDate');
-    console.log('selectedDate', selectedDate)
     const availableTimes = selectedDate ? getAvailablePickupTimes(new Date(selectedDate)) : [];
 
     const handleContinue = () => {
@@ -150,7 +147,9 @@ const DeliveryPickupSelector = ({ form, onComplete}: Props) => {
                                         </SelectTrigger>
                                     </FormControl>
                                     <SelectContent>
-                                        {availableTimes.map((time) => (
+                                        {availableTimes.filter((time) => {
+                                            return isAfter(parse(time, 'h:mm aaa', new Date()), new Date());
+                                        }).map((time) => (
                                             <SelectItem key={time} value={time}>
                                                 {time}
                                             </SelectItem>

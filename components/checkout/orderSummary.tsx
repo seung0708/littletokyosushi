@@ -13,11 +13,10 @@ interface Props {
 export const OrderSummary = ( {form, onComplete}: Props) => {
     const {cartId, cartItems} = useCart();
     const deliveryMethod = form.watch('delivery.method');
-    const pickupDate = form.watch('delivery.pickupDate');
+    const pickupDate = new Date(form.watch('delivery.pickupDate'));
     const pickupTime = form.watch('delivery.pickupTime');
     const customer = form.watch('customer');
-
-    console.log(cartItems);
+    console.log(cartItems, customer, deliveryMethod, pickupDate, pickupTime);
     return (
         <>
         <h1 className="sr-only">Checkout</h1>
@@ -26,7 +25,11 @@ export const OrderSummary = ( {form, onComplete}: Props) => {
             <div className="mx-auto max-w-2xl px-4 lg:max-w-none lg:px-0">
               <h2 id="summary-heading" className="text-white text-2xl">Order summary</h2>
               <div>
-                <h4></h4>
+                <h4>{customer?.name}</h4>
+                <p>{customer?.email}</p>
+                <p>{deliveryMethod}</p>
+                <p>{format(pickupDate, 'EEE MMM dd yyyy')}</p>
+                <p>{pickupTime}</p>
               </div>
               <ul role="list" className="divide-y divide-white divide-opacity-10 text-sm font-medium">                
                     <li key={item?.id?.substring(0, 8)} className="flex items-start space-x-4 py-6">
@@ -92,9 +95,15 @@ export const OrderSummary = ( {form, onComplete}: Props) => {
                 </div>
               </dl>
             </div>
-          ))}
-          </section>
-        </>
+          ))} 
+        </section>
+        <Button
+                onClick={onComplete}
+                className="w-full bg-red-600 text-white"
+            >
+                Place Order
+            </Button>
+      </>
     )
 }
 
