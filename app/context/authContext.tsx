@@ -12,6 +12,7 @@ interface AuthContextType {
     signout: () => Promise<void>;
     googleSignin: () => Promise<void>;
     signup: (email: string, password: string) => Promise<void>;
+    signinAnonymously: (email: string, password: string) => Promise<void>;
     resetPassword: (password: string, token: string) => Promise<void>;
 };
 
@@ -134,6 +135,27 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         }
     };  
 
+    const signinAnonymously = async (email: string, name: string) => {
+        try {
+            const response = await fetch('/api/auth/signin-anonymously', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ email, name }),
+                credentials: 'include',
+            });
+            const data = await response.json();
+            console.log(data);
+            if (!response.ok) {
+                throw new Error(data.error || 'Failed to sign in anonymously');
+            }
+            setUser(data.user);
+        } catch (error) {
+            console.error('Error signing in anonymously:', error);
+        }
+    };
+
     const resetPassword = async (newPassword: string) => {
         try {
             const response = await fetch('/api/auth/update-password', {
@@ -154,7 +176,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     };
 
     return (    
-        <AuthContext.Provider value={{user, isLoading, signin, signout, googleSignin, resetPassword, signup}}>
+        <AuthContext.Provider value={{user, isLoading, signin, signout, googleSignin, resetPassword, signup, signinAnonymously}}>
             {children}
         </AuthContext.Provider>
     )

@@ -11,7 +11,6 @@ export async function GET() {
             .from('business_hours')
             .select('*')
         
-        console.log(regularHours, regularHoursError);
         if (regularHoursError) throw regularHoursError;
 
         const transformedRegularHours = regularHours.map(hour => ({

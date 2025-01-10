@@ -12,7 +12,7 @@ interface CustomerSignInProps {
 }
 
 const CheckoutCustomerSignIn: React.FC<CustomerSignInProps> = ({ form, onComplete }) => { 
-    const { signin, googleSignin } = useAuth()
+    const { signin, googleSignin, signinAnonymously } = useAuth()
 
     const handleSignIn = async () => {
         try {
@@ -24,7 +24,14 @@ const CheckoutCustomerSignIn: React.FC<CustomerSignInProps> = ({ form, onComplet
     }
 
     const handleContinueAsGuest = () => {
-        onComplete()
+        const { customer } = form.getValues()
+        try {
+            signinAnonymously(customer.email, customer.name)
+        } catch (error) {
+            console.error('Sign in failed:', error)
+        } finally {
+            onComplete()
+        }
     }
 
     return (
