@@ -10,6 +10,8 @@ import { Button } from "@/components/ui/button"
 import { useBusinessHours } from '@/app/hooks/useBusinessHours'
 import { format, parse, isAfter } from 'date-fns';
 import { FormControl, FormField, FormItem, FormLabel, FormMessage } from '../ui/form';
+import { Popover, PopoverTrigger, PopoverContent } from '../ui/popover';
+import { CalendarIcon } from 'lucide-react';
 
 interface Props {
     form: UseFormReturn<CheckoutFormValues>
@@ -35,20 +37,21 @@ const DeliveryPickupSelector = ({ form, onComplete}: Props) => {
         }
     }
 
-    if(isLoading) return <div>Laoding available times...</div> 
+    if(isLoading) return <div>Loading available times...</div> 
     if(error) return <div>Error loading business hours</div>
 
     return (
         <div className="w-full max-w-md mx-auto">
             <div className="mb-6">
                 <h3 className="text-2xl font-bold text-gray-900">
-                    Choose Delivery Method
+                    Choose Pickup Date and Time
                 </h3>
                 <p className="mt-2 text-gray-600">
-                    Select how you'd like to receive your order
+                    Orders can be picked up from 9:00 AM to 5:30 PM
+                    Ordering window is from 9:00 AM to 2:00 PM. Last order is at 1:45 PM
                 </p>
             </div>
-            <FormField 
+            {/* <FormField 
                 control={form.control}
                 name="delivery.method"
                 render={({ field }) => (
@@ -73,7 +76,7 @@ const DeliveryPickupSelector = ({ form, onComplete}: Props) => {
                         <FormMessage />
                     </FormItem>
                 )}
-            />
+            /> */}
             
             {deliveryMethod === 'pickup' && (
                 <div className="space-y-4 my-8">
@@ -83,46 +86,67 @@ const DeliveryPickupSelector = ({ form, onComplete}: Props) => {
                         render={({ field }) => (
                             <FormItem>
                                 <FormLabel>Pickup Date</FormLabel>
-                                <Calendar
-                                   mode="single"
-                                   selected={field.value ? new Date(field.value) : undefined}
-                                   onSelect={field.onChange}
-                                   disabled={(date) => {
-                                       if (!businessHours) return true;
+                                <Popover>
+                                    <PopoverTrigger asChild>
+                                        <FormControl>
+                                            <Button
+                                                variant={'outline'}
+                                                className={`
+                                                    w-full
+                                                    justify-start
+                                                    text-left font-normal
+                                                    ${!field.value && 'text-muted-foreground'}
+                                                `}
+                                            >
+                                                {field.value ? (
+                                                    format(new Date(field.value), 'PPP')
+                                                ) : (
+                                                    <span>Pick a date</span>
+                                                )}
+                                                <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                                            </Button>
+                                        </FormControl>
+                                    </PopoverTrigger>
+                                    <PopoverContent className="w-auto p-0" align="center">
+                                        <Calendar
+                                            mode="single"
+                                            selected={field.value ? new Date(field.value) : undefined}
+                                            onSelect={field.onChange}
+                                            disabled={(date) => {
+                                                if (!businessHours) return true;
                                        
-                                       const dayOfWeek = format(date, 'EEEE').toLowerCase();
-                                       const dateStr = format(date, 'yyyy-MM-dd');
-                                       const now = new Date();
-                                       const today = format(now, 'yyyy-MM-dd');
+                                                const dayOfWeek = format(date, 'EEEE').toLowerCase();
+                                                const dateStr = format(date, 'yyyy-MM-dd');
+                                                const now = new Date();
+                                                const today = format(now, 'yyyy-MM-dd');
                                        
-                                       // For today's date, check if it's past ordering cutoff time
-                                       if (dateStr === today) {
-                                           const regularHours = businessHours.regularHours.find(h => h.day === dayOfWeek);
-                                           if (!regularHours?.orderingEnd) return true;
-                                           
-                                           const orderingEnd = parse(regularHours.orderingEnd, 'HH:mm:ss', now);
-                                           if (now > orderingEnd) return true;
-                                       }
+                                                // For today's date, check if it's past ordering cutoff time
+                                                if (dateStr === today) {
+                                                    const orderingEnd = parse('13:45:00', 'HH:mm:ss', now);
+                                                    if (now > orderingEnd) return true;
+                                                }
                                        
-                                       // Disable past dates
-                                       if (dateStr < today) return true;
+                                                // Disable past dates
+                                                if (dateStr < today) return true;
                                        
-                                       // Check if there's a special schedule
-                                       const specialSchedule = businessHours.specialSchedules.find(
-                                           schedule => format(new Date(schedule.date), 'yyyy-MM-dd') === dateStr
-                                       );
-                                       if (specialSchedule && !specialSchedule.isOpen) return true;
+                                                // Check if there's a special schedule
+                                                const specialSchedule = businessHours.specialSchedules.find(
+                                                    schedule => format(new Date(schedule.date), 'yyyy-MM-dd') === dateStr
+                                                );
+                                                if (specialSchedule && !specialSchedule.isOpen) return true;
                                        
-                                       // Check regular hours
-                                       const regularHours = businessHours.regularHours.find(h => h.day === dayOfWeek);
-                                       if (!regularHours?.isOpen) return true;
-                                       
-                                       return false;
-                                   }}
-                                   className="rounded-md border"
-                                />
-                                <FormMessage />
-                            </FormItem>
+                                                // Check regular hours
+                                                const regularHours = businessHours.regularHours.find(h => h.day === dayOfWeek);
+                                                if (!regularHours?.isOpen) return true;
+                                                
+                                                return false;
+                                            }}
+                                            className="rounded-md border mx-auto"
+                                        />
+                                    </PopoverContent>
+                                </Popover>
+                            <FormMessage />
+                        </FormItem>
                         )}
                     />
 
@@ -130,7 +154,7 @@ const DeliveryPickupSelector = ({ form, onComplete}: Props) => {
             )}
 
             {selectedDate && (
-                <div className="mb-8 p-4 rounded-md">
+                <div className="mb-8 rounded-md">
                     <FormField
                         control={form.control}
                         name="delivery.pickupTime"
@@ -148,8 +172,11 @@ const DeliveryPickupSelector = ({ form, onComplete}: Props) => {
                                     </FormControl>
                                     <SelectContent>
                                         {availableTimes.filter((time) => {
+                                          if (format(new Date(selectedDate), 'yyyy-MM-dd') === format(new Date(), 'yyyy-MM-dd')) {
                                             return isAfter(parse(time, 'h:mm aaa', new Date()), new Date());
-                                        }).map((time) => (
+                                        } else {
+                                            return true;
+                                        }}).map((time) => (
                                             <SelectItem key={time} value={time}>
                                                 {time}
                                             </SelectItem>
@@ -163,7 +190,7 @@ const DeliveryPickupSelector = ({ form, onComplete}: Props) => {
                 </div>
             )}
 
-            {deliveryMethod === "delivery" && (
+            {/* {deliveryMethod === "delivery" && (
                 <div className="space-y-4">
                     <FormField
                         control={form.control}
@@ -220,7 +247,7 @@ const DeliveryPickupSelector = ({ form, onComplete}: Props) => {
                         )}
                     />
                 </div>
-            )}
+            )} */}
 
             <Button
                 type="button"

@@ -45,7 +45,7 @@ const CheckoutSteps = () => {
     
     const steps = [
         { id: 'signin', name: 'Customer Info', status: currentStep === 'signin' ? 'current' : 'complete' },
-        { id: 'delivery-pickup', name: 'Delivery Method', status: currentStep === 'delivery-pickup' ? 'current' : currentStep === 'summary' ? 'complete' : 'upcoming' },
+        { id: 'delivery-pickup', name: 'Pickup Date and Time', status: currentStep === 'delivery-pickup' ? 'current' : currentStep === 'summary' ? 'complete' : 'upcoming' },
         { id: 'summary', name: 'Review & Pay', status: currentStep === 'summary' ? 'current' : 'upcoming' }
     ]
 
@@ -180,7 +180,7 @@ const CheckoutSteps = () => {
                         onComplete={() => form.handleSubmit(onSubmit)()}
                         onClientSecretUpdate={updateClientSecret}
                     />
-                        <PaymentForm clientSecret={clientSecret} />
+                    <PaymentForm clientSecret={clientSecret} />
                     </div>
                     </Elements>
                 )}
