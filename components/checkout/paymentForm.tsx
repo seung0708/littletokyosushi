@@ -5,29 +5,38 @@ import { useState } from 'react';
 
 interface Props {
     clientSecret: string;
+    onPaymentComplete: () => void;
 }   
 
-const PaymentForm = ({clientSecret}: Props) => {
+const PaymentForm = ({ onPaymentComplete}: Props) => {
     const stripe = useStripe();
     const elements = useElements();
     const [error, setError] = useState<string | null>(null);
     const [processing, setProcessing] = useState(false);
     
     const handlePayment = async () => {
-        if (!stripe || !elements) return;
+        if (!stripe || !elements) {
+            return;
+        }
 
         setProcessing(true);
         setError(null);
 
-        const {error: submitError } = await elements.submit();
-
-        if (submitError) {
-            setError(submitError.message || 'Failed to submit payment details');
+        try {
+            const {error: submitError } = await elements.submit();
+            if (submitError) {
+                setError(submitError.message || 'Failed to submit payment details');
+                setProcessing(false);
+                return false; 
+            }
+            return true;
+        } catch (error) {
+            setError('An error occurred while processing your payment.');
+            return false;
+        } finally {
             setProcessing(false);
-            return false; 
         }
-
-        return true;
+        
     };
 
     return (
@@ -38,8 +47,15 @@ const PaymentForm = ({clientSecret}: Props) => {
                 type="submit"
                 disabled={!stripe || processing}
                 className="mt-4"
+                onClick={async (e) => {
+                    e.preventDefault();
+                    const success = await handlePayment();
+                    if (success) {
+                        onPaymentComplete();
+                    }
+                }}
             >
-                Pay
+                {processing ? 'Processing...' : 'Pay'}
             </Button>
         </div>
     )

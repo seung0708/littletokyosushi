@@ -50,6 +50,8 @@ const CheckoutSteps = () => {
     ]
 
     const onSubmit = async (data: CheckoutFormValues) => {
+        console.log('onSubmit started', data);
+        const { customer, delivery } = data;
         const stripe = await stripePromise;
         const elements = useElements();
 
@@ -58,17 +60,22 @@ const CheckoutSteps = () => {
             return;
         }
         try {
+            console.log('Creating order...');
             const orderResponse = await fetch('api/orders', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                 },
-                body: JSON.stringify(data),
+                body: JSON.stringify({customer, delivery}),
             });
             if (!orderResponse.ok) { 
                 throw new Error('Failed to create order');  
             }
-            const {orderId} = await orderResponse.json();
+            const responseData = await orderResponse.json();
+            console.log('Order response:', responseData);  // Add this
+            const {orderId} = responseData;
+
+            console.log('Confirming payment with orderId:', orderId);  // Add this
             const {error} = await stripe.confirmPayment({
                 elements,
                 confirmParams: {
@@ -164,25 +171,32 @@ const CheckoutSteps = () => {
                         onComplete={handleNextStep}
                     />
                 )}
-                {currentStep === 'summary' && !clientSecret && (
-                    <OrderSummary
-                        form={form}
-                        onComplete={() => form.handleSubmit(onSubmit)()}
-                        onClientSecretUpdate={updateClientSecret}
-                    />
-                )}
-
-                {currentStep === 'summary' && clientSecret && (
-                    <Elements stripe={stripePromise} options={{ clientSecret }}>
+                {currentStep === 'summary' &&  (
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                     <OrderSummary
                         form={form}
                         onComplete={() => form.handleSubmit(onSubmit)()}
                         onClientSecretUpdate={updateClientSecret}
                     />
-                    <PaymentForm clientSecret={clientSecret} />
+                    {clientSecret && (
+                        <Elements 
+                            stripe={stripePromise} 
+                            options={{ 
+                                clientSecret,
+                                appearance: {
+                                    theme: 'stripe',
+                                },
+                                loader: 'auto',
+                             }}
+                        >
+                            <PaymentForm onPaymentComplete={() => {
+                                const formData = form.getValues();
+                                onSubmit(formData);
+                            }} 
+                            />
+                        </Elements>
+                    )}
                     </div>
-                    </Elements>
                 )}
 
             </form>
