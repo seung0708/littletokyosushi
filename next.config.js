@@ -10,19 +10,6 @@ const nextConfig = {
       },
     ]
   },
-  async headers() {
-    return [
-      {
-        source: '/:path*',
-        headers: [
-          {
-            key: 'Content-Security-Policy',
-            value: "connect-src 'self' https://*.stripe.com https://r.stripe.com;",
-          },
-        ],
-      },
-    ];
-  },
 }
 
 module.exports = nextConfig

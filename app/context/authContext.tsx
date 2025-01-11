@@ -9,6 +9,7 @@ interface AuthContextType {
     user: User | null; 
     isLoading: boolean;
     signin: (email: string, password: string) => Promise<void>;
+    setUser: (user: User | null) => void;
     signout: () => Promise<void>;
     googleSignin: () => Promise<void>;
     signup: (email: string, password: string) => Promise<void>;
@@ -129,7 +130,6 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
             setUser(null);
             localStorage.removeItem('cartId');
             localStorage.removeItem('cartItems');
-            redirect('/');
         } catch (error) {
             console.error('Error signing out:', error);
         }
@@ -176,7 +176,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     };
 
     return (    
-        <AuthContext.Provider value={{user, isLoading, signin, signout, googleSignin, resetPassword, signup, signinAnonymously}}>
+        <AuthContext.Provider value={{user, isLoading, signin, signout, googleSignin, resetPassword, signup, signinAnonymously, setUser}}>
             {children}
         </AuthContext.Provider>
     )

@@ -37,6 +37,7 @@ export const CartProvider = ({ children }: CartProviderProps) => {
     
 
     useEffect(() => {
+        
         if(!user) {
             setCartId('');
             setCartItems([]);
@@ -59,7 +60,6 @@ export const CartProvider = ({ children }: CartProviderProps) => {
         }
         fetchCart();
     }, [cartId]);
-
 
     const fetchCart = async () => {
         setIsCartLoading(true);
