@@ -145,12 +145,12 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
                 body: JSON.stringify({ email, name }),
                 credentials: 'include',
             });
-            const data = await response.json();
-            console.log(data);
+            const user = await response.json();
+            console.log(user);
             if (!response.ok) {
-                throw new Error(data.error || 'Failed to sign in anonymously');
+                throw new Error(user.error || 'Failed to sign in anonymously');
             }
-            setUser(data.user);
+            setUser(user);
         } catch (error) {
             console.error('Error signing in anonymously:', error);
         }

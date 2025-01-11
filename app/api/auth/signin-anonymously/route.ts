@@ -6,19 +6,37 @@ export async function POST(req: Request) {
     const { email, name } = await req.json()
     const first_name = name.split(' ')[0]
     const last_name = name.split(' ')[1]
-    console.log(first_name, last_name)
+    
     try {
 
-        const { data: customer, error } = await supabase.from('customers').insert({
-            email: email,
-            first_name: first_name,
-            last_name: last_name
+       const { data: { user }, error } = await supabase.auth.signInAnonymously({
+           options: {
+                data: {
+                    email: email,
+                    first_name: first_name,
+                    last_name: last_name
+                }
+            }
         })
-        .single()
-        if (error) throw error;
-   
+        if (error) {
+            console.error('Error signing in anonymously:', error);
+            return NextResponse.json('error')
+        }
 
-        return NextResponse.json('success')
+        if (!user) {
+            return NextResponse.json('error')
+        }
+
+        const { data: customerData, error: customerError } = await supabase
+            .from('customers')
+            .insert({
+                id: user.id,
+                email: email,
+                first_name: first_name,
+                last_name: last_name
+            })
+
+        return NextResponse.json(user)
     } catch (error) {
         console.error('Error signing in anonymously:', error);
         return NextResponse.json('error')
