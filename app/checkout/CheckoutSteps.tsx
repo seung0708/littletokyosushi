@@ -21,7 +21,9 @@ const stripePromise = loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY!
 
 const CheckoutSteps = () => {
     const { user } = useAuth()
-    const { cartItems } = useCart()
+    const { cartId, cartItems } = useCart()
+    console.log(cartItems)
+    console.log(cartId)
     const [currentStep, setCurrentStep] = useState<CheckoutStep>(user ? 'delivery-pickup' : 'signin');
     const [clientSecret, setClientSecret] = useState<string>('');
 
