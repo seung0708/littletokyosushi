@@ -1,5 +1,5 @@
 'use client'
-import React, { createContext, useContext, useEffect, useState } from "react";
+import React, { createContext, useCallback, useContext, useEffect, useState } from "react";
 import { useAuth } from "./authContext";
 import { CartItem, Cart, CartItemModifier, CartItemModifierOption } from "@/types/cart";
 
@@ -38,7 +38,7 @@ export const CartProvider = ({ children }: CartProviderProps) => {
 
     useEffect(() => {
         
-        if(!user) {
+        if(user === null && localStorage.getItem('wasLoggedIn') === 'true') {
             setCartId('');
             setCartItems([]);
         } else if(userId) {
@@ -54,17 +54,16 @@ export const CartProvider = ({ children }: CartProviderProps) => {
         if (savedCartItems) {
             setCartItems(JSON.parse(savedCartItems));
         }
-        
-        if (!savedCartId) {
-            setCartId('');
-        }
+
         fetchCart();
-    }, [cartId]);
+    }, []);
+
 
     const fetchCart = async () => {
         setIsCartLoading(true);
         setCartError(null);
         try {
+            console.log('cartId', cartId);
             const response = await fetch(`/api/store/cart/${cartId}`, {
                 method: 'GET',
                 headers: {

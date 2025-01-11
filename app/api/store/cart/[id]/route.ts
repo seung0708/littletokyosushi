@@ -37,6 +37,7 @@ export async function GET(request: Request, { params }: { params: { id: string }
         completed_at: dbCart?.completed_at,
         cart_items: dbCart?.cart_items.map((cartItem: any) => ({
             id: cartItem?.id,
+            cart_id: dbCart?.id,
             base_price: cartItem?.base_price,
             special_instructions: cartItem?.special_instructions,
             total_price: cartItem?.total_price,

@@ -37,7 +37,6 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         const fetchUser = async () => {
             const {data: {user}, error}  = await supabase.auth.getUser();
             if (user) {
-                console.log(user);
                 setUser(user);
             } else {
                 setUser(null);
@@ -65,7 +64,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
             });
             const user = await response.json();
             setUser(user);
-            
+            localStorage.setItem('wasLoggedIn', 'true');
             if (!response.ok) {
                 throw new Error(user.error || 'Failed to sign up');
             }
@@ -91,6 +90,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
             const data = await response.json();
             console.log(data, data.user);
             setUser(data.user);
+            localStorage.setItem('wasLoggedIn', 'true');
         } catch (error) {
             console.error('Eror signing in:', error);
         }
@@ -108,7 +108,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
             if (!response.ok) {
                 throw new Error(result.error || 'Failed to sign in with Google');
             } 
-            
+            localStorage.setItem('wasLoggedIn', 'true');
         } catch (error) {
             console.error('Error signing in with Google:', error);
         }
@@ -128,6 +128,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
                 throw new Error(data.error || 'Failed to sign out');
             }
             setUser(null);
+            localStorage.setItem('wasLoggedIn', 'false');
             localStorage.removeItem('cartId');
             localStorage.removeItem('cartItems');
         } catch (error) {
@@ -151,6 +152,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
                 throw new Error(user.error || 'Failed to sign in anonymously');
             }
             setUser(user);
+            localStorage.setItem('wasLoggedIn', 'true');
         } catch (error) {
             console.error('Error signing in anonymously:', error);
         }
