@@ -9,7 +9,7 @@ interface HamburgerMenuProps {
     return (
         <Button 
             type="button"
-            className="rounded-md p-2 text-white-900"
+            className="rounded-md p-2 text-white-900 bg-black"
             onClick={toggleMenu}
         >
             <span className="sr-only">Open menu</span>

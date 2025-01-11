@@ -9,7 +9,7 @@ interface CloseMenuProps {
     return (
         <Button 
             type="button"
-            className="rounded-md p-2 text-white-900"
+            className="rounded-md p-2 text-white-900 bg-black"
             onClick={toggleMenu}
         >
             
