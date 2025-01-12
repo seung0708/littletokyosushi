@@ -47,7 +47,6 @@ export async function GET(
         }
 
         if (!item) {
-            console.log('Item not found:', { itemId: id });
             return NextResponse.json(
                 { error: 'Item not found' },
                 { status: 404 }

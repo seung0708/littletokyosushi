@@ -4,58 +4,46 @@ import { Button } from '../ui/button';
 import { useState } from 'react';
 
 interface Props {
+    orderId: string;
     clientSecret: string;
     onPaymentComplete: () => void;
 }   
 
-const PaymentForm = ({ onPaymentComplete}: Props) => {
+const PaymentForm = ({ onPaymentComplete, orderId, clientSecret}: Props) => {
     const stripe = useStripe();
     const elements = useElements();
-    const [error, setError] = useState<string | null>(null);
-    const [processing, setProcessing] = useState(false);
     
     const handlePayment = async () => {
         if (!stripe || !elements) {
+            console.error('Stripe or elements not initialized');
             return;
         }
 
-        setProcessing(true);
-        setError(null);
-
         try {
-            const {error: submitError } = await elements.submit();
-            if (submitError) {
-                setError(submitError.message || 'Failed to submit payment details');
-                setProcessing(false);
-                return false; 
-            }
-            return true;
+            console.log('Confirming payment in handlePayment...')
+            const {error} = await stripe.confirmPayment({
+                elements, 
+                confirmParams: {
+                    return_url: `${window.location.origin}/order/${orderId}`
+                }
+            });
+            return !error;
         } catch (error) {
-            setError('An error occurred while processing your payment.');
+            console.error('Error confirming payment:', error);
             return false;
-        } finally {
-            setProcessing(false);
-        }
-        
+        } 
     };
 
     return (
         <div className="flex flex-col space-y-4">
             <PaymentElement />
-            {error && <p className="text-red-500">{error}</p>}
             <Button
                 type="submit"
-                disabled={!stripe || processing}
+                disabled={!stripe}
                 className="mt-4"
-                onClick={async (e) => {
-                    e.preventDefault();
-                    const success = await handlePayment();
-                    if (success) {
-                        onPaymentComplete();
-                    }
-                }}
+                onClick={handlePayment}
             >
-                {processing ? 'Processing...' : 'Pay'}
+                Pay Now
             </Button>
         </div>
     )

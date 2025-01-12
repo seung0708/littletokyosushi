@@ -20,10 +20,8 @@ type CheckoutStep =  'signin' | 'delivery-pickup' | 'summary';
 const stripePromise = loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY!);
 
 const CheckoutSteps = () => {
-    const { user } = useAuth()
+    const { user, } = useAuth()
     const { cartId, cartItems } = useCart()
-    console.log(cartItems)
-    console.log(cartId)
     const [currentStep, setCurrentStep] = useState<CheckoutStep>(user ? 'delivery-pickup' : 'signin');
     const [clientSecret, setClientSecret] = useState<string>('');
 
@@ -53,14 +51,6 @@ const CheckoutSteps = () => {
 
     const onSubmit = async (data: CheckoutFormValues) => {
         console.log('onSubmit started', data);
-        const { customer, delivery } = data;
-        const stripe = await stripePromise;
-        const elements = useElements();
-
-        if (!stripe || !elements) {
-            console.error('Stripe is not available');
-            return;
-        }
         try {
             console.log('Creating order...');
             const orderResponse = await fetch('api/orders', {
@@ -68,25 +58,17 @@ const CheckoutSteps = () => {
                 headers: {
                     'Content-Type': 'application/json',
                 },
-                body: JSON.stringify({customer, delivery}),
+                body: JSON.stringify({
+                    customer: data.customer, 
+                    delivery: data.delivery
+                }),
             });
             if (!orderResponse.ok) { 
                 throw new Error('Failed to create order');  
             }
             const responseData = await orderResponse.json();
             console.log('Order response:', responseData);  // Add this
-            const {orderId} = responseData;
 
-            console.log('Confirming payment with orderId:', orderId);  // Add this
-            const {error} = await stripe.confirmPayment({
-                elements,
-                confirmParams: {
-                    return_url: `${window.location.origin}/order-confirmation/${orderId}`,
-                }
-            });
-            if (error) {
-                console.error('Payment error:', error);
-            }
         } catch (error) {
             console.error('Error creating order:', error);
         }
@@ -191,10 +173,12 @@ const CheckoutSteps = () => {
                                 loader: 'auto',
                              }}
                         >
-                            <PaymentForm onPaymentComplete={() => {
-                                const formData = form.getValues();
-                                onSubmit(formData);
-                            }} 
+                            <PaymentForm 
+                                orderId={responseData?.id}
+                                onPaymentComplete={() => {
+                                    const formData = form.getValues();
+                                    onSubmit(formData);
+                                }} 
                             />
                         </Elements>
                     )}

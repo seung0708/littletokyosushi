@@ -5,6 +5,7 @@ import { compareModifierOptions, createNewCartItemWithModifiers, getModifiersArr
 
 export async function GET(request: Request, { params }: { params: { id: string } }) {
     const { id: cartId } = params;
+    console.log('GET /api/store/cart/[id] -cartId', cartId);
     const supabase = createClient();
     console.log('GET /api/store/cart/[id] -cartId', cartId, params);
 

@@ -56,10 +56,10 @@ export const CartProvider = ({ children }: CartProviderProps) => {
         }
 
         fetchCart();
-    }, []);
-
-
+    }, [cartId]);
+    
     const fetchCart = async () => {
+        console.log('fetchCart');
         setIsCartLoading(true);
         setCartError(null);
         try {

@@ -22,7 +22,7 @@ const CheckoutCustomerSignIn: React.FC<CustomerSignInProps> = ({ form, onComplet
             console.error('Sign in failed:', error)
         }
     }
-
+ 
     const handleContinueAsGuest = () => {
         const { customer } = form.getValues()
         try {

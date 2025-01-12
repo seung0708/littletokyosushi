@@ -16,9 +16,7 @@ export async function GET(
             .eq('id', id)
             .single();
 
-        //console.log('itemWithModifiers:', itemWithModifiers);
         if (itemError) {
-            console.error('Failed to fetch item:', { error: itemError, itemId: id });
             return NextResponse.json(
                 { error: 'Failed to fetch item' },
                 { status: 500 }
@@ -26,7 +24,6 @@ export async function GET(
         }
 
         if (!itemWithModifiers) {
-            console.log('Item not found:', { itemId: id });
             return NextResponse.json(
                 { error: 'Item not found' },
                 { status: 404 }

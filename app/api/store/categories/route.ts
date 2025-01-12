@@ -8,7 +8,6 @@ export async function GET(req: Request) {
         const { data, error } = await supabase
         .from('categories')
         .select('*')
-        console.log(data, error);
         if (error) throw new Error(error.message);
         
         return NextResponse.json(data);
