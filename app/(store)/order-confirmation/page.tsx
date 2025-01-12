@@ -1,4 +1,82 @@
-const OrderSummaryPage: React.FC = () => {
+'use client';
+import { useEffect, useState } from 'react';
+import {useParams, useSearchParams} from 'next/navigation'
+import { Button } from "@/components/ui/button"
+import Link from 'next/link';
+
+interface OrderDetails {
+  id: string;
+  customer: {
+    name: string;
+    email: string;
+  };
+  delivery: {
+    method: string;
+    pickupDate: string;
+    pickupTime: string;
+  };
+  items: Array<{
+    id: string;
+    menu_item_name: string;
+    quantity: number;
+    price: number;
+    cart_item_modifiers?: Array<{
+      name: string;
+      cart_item_modifier_options?: Array<{
+        name: string;
+        price: number;
+      }>;
+    }>;
+  }>;
+  status: string;
+  total: number;
+  created_at: string;
+}
+
+
+const Page: React.FC = () => {
+  const params = useParams();
+  const searchParams = useSearchParams();
+  const [order, setOrder] = useState<OrderDetails | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    const verifyPaymentAndFetchOrder = async () => {
+      const orderId = params.id;
+      const paymentId = searchParams.get('payment_intent');
+      const paymentIntentSecret = searchParams.get('payment_intent_client_secret');
+      const redirectStatus = searchParams.get('redirect_status');
+      
+      if(!orderId || !paymentId || redirectStatus !== 'succeeded') {
+        throw new Error('Invalid order or payment details');
+      }
+       
+      try {
+        const response = await fetch(`/api/orders/${orderId}/verify-payment`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ paymentId, paymentIntentSecret }),
+        });
+
+        if (!response.ok) {
+          throw new Error('Payment verification failed');
+        }
+
+        const data = await response.json();
+        setOrder(data); 
+    } catch (error) {
+        console.error('Error verifying payment:', error);
+    } finally {
+        setLoading(false);
+    }
+  };
+
+  verifyPaymentAndFetchOrder();
+  }, [params.id, searchParams]);
+
     return (
         <div className="bg-white">
   <div className="mx-auto max-w-3xl px-4 py-16 sm:px-6 sm:py-24 lg:px-8">

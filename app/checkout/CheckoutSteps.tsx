@@ -24,6 +24,7 @@ const CheckoutSteps = () => {
     const { cartId, cartItems } = useCart()
     const [currentStep, setCurrentStep] = useState<CheckoutStep>(user ? 'delivery-pickup' : 'signin');
     const [clientSecret, setClientSecret] = useState<string>('');
+    const [orderData, setOrderData] = useState<any>(null);
 
     const updateClientSecret = (secret: string) => {
         setClientSecret(secret);
@@ -67,6 +68,8 @@ const CheckoutSteps = () => {
                 throw new Error('Failed to create order');  
             }
             const responseData = await orderResponse.json();
+            setOrderData(responseData);
+
             console.log('Order response:', responseData);  // Add this
 
         } catch (error) {
@@ -174,7 +177,7 @@ const CheckoutSteps = () => {
                              }}
                         >
                             <PaymentForm 
-                                orderId={responseData?.id}
+                                orderId={orderData?.id}
                                 onPaymentComplete={() => {
                                     const formData = form.getValues();
                                     onSubmit(formData);
