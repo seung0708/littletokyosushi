@@ -36,6 +36,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     useEffect(() => {
         const fetchUser = async () => {
             const {data: {user}, error}  = await supabase.auth.getUser();
+            console.log(user, error);
             if (user) {
                 setUser(user);
             } else {

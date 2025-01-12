@@ -125,4 +125,4 @@ const OrderSummary = ( {form, onComplete, onClientSecretUpdate}: Props) => {
     )
 }
 
-export default OrderSummary
+export default OrderSummary;
