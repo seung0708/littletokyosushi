@@ -1,6 +1,15 @@
 import {NextResponse} from 'next/server'
-import Stripe from 'stripe';
+import stripe from "@/lib/stripe/stripe";
 
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
-    apiVersion: '2023-10-16',
-});
+export async function POST(req: Request, { params }: { params: { orderId: string } }) {
+    try {
+        const { paymentId, paymentIntentSecret } = await req.json();
+        const stripePaymentIntent = await stripe.paymentIntents.retrieve(paymentId);
+        
+        if(stripePaymentIntent.status !== 'succeeded' || stripePaymentIntent.client_secret !== paymentIntentSecret) {
+            return NextResponse.json({ error: 'Payment verification failed' }, { status: 400 });
+        }
+
+    } catch (error) {
+        return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
+    }

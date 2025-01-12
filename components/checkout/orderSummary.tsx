@@ -7,13 +7,12 @@ import { useEffect } from 'react';
 
 interface Props {
   form: UseFormReturn<CheckoutFormValues>;
-  onComplete: () => void;
-  onClientSecretUpdate: (secret: string) => void;
+  onTotalCaluated: (total: number) => void;
 }
 
 
 
-const OrderSummary = ( {form, onComplete, onClientSecretUpdate}: Props) => {
+const OrderSummary = ( {form, onTotalCaluated}: Props) => {
     const {cartId, cartItems} = useCart();
     console.log('cartItems', cartItems);
     const deliveryMethod = form.watch('delivery.method');
@@ -37,31 +36,7 @@ const OrderSummary = ( {form, onComplete, onClientSecretUpdate}: Props) => {
     const total = stripeFee + subTotal;
 
     useEffect(() => {
-      const createPaymentIntent = async () => {
-        try {
-          const paymentIntentResponse = await fetch('/api/payment-intent', {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({ amount: Math.round(total * 100) }),
-          });
-
-          if (!paymentIntentResponse.ok) {
-            const errorData = await paymentIntentResponse.json();
-            console.error('Payment Intent Error:', errorData);
-            return;
-          }
-
-          const data = await paymentIntentResponse.json();
-          onClientSecretUpdate(data.clientSecret);
-        } catch (error) {
-          console.error('Error creating payment intent:', error);
-        }
-      };
-
-      createPaymentIntent();
-   
+        onTotalCaluated(total);
     }, [total]);
 
     return (

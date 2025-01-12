@@ -2,13 +2,15 @@
 import {PaymentElement, useStripe, useElements} from '@stripe/react-stripe-js';
 import { Button } from '../ui/button';
 import { useState } from 'react';
+import { CheckoutFormValues } from '@/types/checkout';
 
 interface Props {
-    orderId: string;
-    onPaymentComplete: () => void;
+    total: number;
+    formData: CheckoutFormValues;
+    cartItems: any[];
 }   
 
-const PaymentForm = ({ onPaymentComplete, orderId}: Props) => {
+const PaymentForm = ({total, formData, cartItems}: Props) => {
     const stripe = useStripe();
     const elements = useElements();
     
@@ -19,11 +21,31 @@ const PaymentForm = ({ onPaymentComplete, orderId}: Props) => {
         }
 
         try {
+
+            const orderResponse = await fetch('/api/orders', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    customer: formData.customer,
+                    delivery: formData.delivery,
+                    cartItems: cartItems,
+                    total: total
+                }),
+            });
+
+            if (!orderResponse.ok) {
+                throw new Error('Failed to create order');
+            }
+
+            const orderData = await orderResponse.json();
+
             console.log('Confirming payment in handlePayment...')
             const {error} = await stripe.confirmPayment({
                 elements, 
                 confirmParams: {
-                    return_url: `${window.location.origin}/order-confirmation/${orderId}`
+                    return_url: `${window.location.origin}/order-confirmation/${orderData.id}`,
                 }
             });
             return !error;

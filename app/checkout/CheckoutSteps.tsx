@@ -2,7 +2,7 @@
 import PaymentForm from '@/components/checkout/paymentForm'
 import {Elements, useElements} from '@stripe/react-stripe-js';
 import {loadStripe} from '@stripe/stripe-js';
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import {useForm} from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import Link from 'next/link'
@@ -20,11 +20,42 @@ type CheckoutStep =  'signin' | 'delivery-pickup' | 'summary';
 const stripePromise = loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY!);
 
 const CheckoutSteps = () => {
-    const { user, } = useAuth()
-    const { cartId, cartItems } = useCart()
+    const { user } = useAuth()
+    const { cartItems } = useCart()
     const [currentStep, setCurrentStep] = useState<CheckoutStep>(user ? 'delivery-pickup' : 'signin');
     const [clientSecret, setClientSecret] = useState<string>('');
     const [orderData, setOrderData] = useState<any>(null);
+    const [orderTotal, setOrderTotal] = useState<number>(0);
+
+     // Create payment intent when total changes
+     useEffect(() => {
+        const createPaymentIntent = async () => {
+            if (orderTotal > 0) {
+                try {
+                    const paymentIntentResponse = await fetch('/api/payment-intent', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({
+                            amount: Math.round(orderTotal * 100),
+                        }),
+                    });
+
+                    if (!paymentIntentResponse.ok) {
+                        throw new Error('Failed to create payment intent');
+                    }
+
+                    const { clientSecret } = await paymentIntentResponse.json();
+                    setClientSecret(clientSecret);
+                } catch (error) {
+                    console.error('Error creating payment intent:', error);
+                }
+            }
+        };
+
+        createPaymentIntent();
+    }, [orderTotal]);
 
     const updateClientSecret = (secret: string) => {
         setClientSecret(secret);
@@ -53,27 +84,49 @@ const CheckoutSteps = () => {
     const onSubmit = async (data: CheckoutFormValues) => {
         console.log('onSubmit started', data);
         try {
+            // First, create the order
             console.log('Creating order...');
-            const orderResponse = await fetch('api/orders', {
+            const orderResponse = await fetch('/api/orders', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                 },
                 body: JSON.stringify({
+                    customer_id: user?.id ?? '',
                     customer: data.customer, 
-                    delivery: data.delivery
+                    delivery: data.delivery,
+                    total: orderTotal
                 }),
             });
+    
             if (!orderResponse.ok) { 
                 throw new Error('Failed to create order');  
             }
-            const responseData = await orderResponse.json();
-            setOrderData(responseData);
-
-            console.log('Order response:', responseData);  // Add this
-
+    
+            const orderData = await orderResponse.json();
+            console.log('Order created:', orderData);
+            setOrderData(orderData);
+    
+            // Then create payment intent
+            const paymentIntentResponse = await fetch('/api/payment-intent', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    amount: Math.round(orderData.total * 100),
+                }),
+            });
+    
+            if (!paymentIntentResponse.ok) {
+                throw new Error('Failed to create payment intent');
+            }
+    
+            const { clientSecret } = await paymentIntentResponse.json();
+            updateClientSecret(clientSecret);
+    
         } catch (error) {
-            console.error('Error creating order:', error);
+            console.error('Error in checkout:', error);
         }
     };
 
@@ -162,8 +215,7 @@ const CheckoutSteps = () => {
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                     <OrderSummary
                         form={form}
-                        onComplete={() => form.handleSubmit(onSubmit)()}
-                        onClientSecretUpdate={updateClientSecret}
+                        onTotalCaluated={setOrderTotal}
                     />
                     {clientSecret && (
                         <Elements 
@@ -177,11 +229,9 @@ const CheckoutSteps = () => {
                              }}
                         >
                             <PaymentForm 
-                                orderId={orderData?.id}
-                                onPaymentComplete={() => {
-                                    const formData = form.getValues();
-                                    onSubmit(formData);
-                                }} 
+                             formData={form.getValues()}
+                             total={orderTotal}
+                             cartItems={cartItems}
                             />
                         </Elements>
                     )}

@@ -53,7 +53,7 @@ const Page: React.FC = () => {
       }
        
       try {
-        const response = await fetch(`/api/orders/${orderId}/verify-payment`, {
+        const response = await fetch(`/api/order-confirmation/${orderId}/verify-payment`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -195,4 +195,4 @@ const Page: React.FC = () => {
     )
 }
 
-export default OrderSummaryPage;
+export default Page;

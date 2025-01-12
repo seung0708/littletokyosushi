@@ -2,6 +2,7 @@ import {z} from 'zod'
 
 export const checkoutSchema = z.object({
     customer: z.object({
+        id: z.string().optional(),
         email: z.string().email("Valid email is required"),
         name: z.string().min(1, "Name is required"),
         phone: z.string().min(10, "Phone number is required"),
