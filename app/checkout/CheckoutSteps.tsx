@@ -27,6 +27,12 @@ const CheckoutSteps = () => {
     const [orderData, setOrderData] = useState<any>(null);
     const [orderTotal, setOrderTotal] = useState<number>(0);
 
+    useEffect(() => {
+        if(user && currentStep === 'signin') {
+            handleNextStep();
+        }
+    }, [user, currentStep]);
+
      // Create payment intent when total changes
      useEffect(() => {
         const createPaymentIntent = async () => {
@@ -199,7 +205,7 @@ const CheckoutSteps = () => {
 
         <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
-                {currentStep === 'signin' && (
+                {currentStep === 'signin' && !user && (
                     <CheckoutCustomerSignIn 
                         form={form}
                         onComplete={handleNextStep} 

@@ -3,7 +3,12 @@ import { createClient } from "@/lib/supabase/server";
 
 export async function POST(req: Request) {
     const { customer_id ,customer, delivery, total, cartItems } = await req.json();
-    console.log(customer_id, customer, delivery, total, cartItems);
+    console.log('cartItems', cartItems);
+
+    const modifiers = cartItems.map((item: any, index: number) => item.cart_item_modifiers[index]);
+    const modifierOptions = modifiers.map((modifier: any, index: number)  => modifier?.cart_item_modifier_options[index]);
+    console.log('modifiers', modifiers);
+    console.log('modifierOptions', modifierOptions);
 
     try {
         const supabase = await createClient();
@@ -40,10 +45,10 @@ export async function POST(req: Request) {
             .insert(
                 cartItems.map((item: any) => ({
                     order_id: orderData.id,
-                    item_id: item.id,
+                    item_id: item.menu_item_id,
                     quantity: item.quantity,
                     item_name: item.menu_item_name,
-                    price: item.price
+                    price: item.menu_item_price
                 }))
             )
             .select()
@@ -53,17 +58,20 @@ export async function POST(req: Request) {
             return NextResponse.json({ error: orderItemsError.message }, { status: 400 });
         }
 
-        const modifiersExist = cartItems?.some((item: any) => item?.modifiers?.length > 0);
+        const modifiersExist = cartItems?.some((item: any) => item?.cart_item_modifiers?.length > 0);
         console.log('modifiersExist', modifiersExist);
 
         if (modifiersExist) {
             const { data: orderItemModifiersData, error: orderItemModifiersError } = await supabase
                 .from('order_item_modifiers')
                 .insert(
-                    cartItems.map((item: any) => item?.modifiers?.map((modifier: any) => ({
-                        order_item_id: item.id,
-                        modifier_id: modifier.id,
-                    })))
+                    cartItems.flatMap((item: any, index: number) => 
+                        (item?.cart_item_modifiers || []).map((modifier: any, modifierIndex: number) => ({
+                            order_item_id: orderItemsData[index].id,
+                            modifier_id: modifier.modifier_id,
+                            modifier_name: modifier.name,
+                        }))
+                    )
                 )
                 .select();
             console.log('orderItemModifiersData', orderItemModifiersData, orderItemModifiersError);
@@ -72,7 +80,7 @@ export async function POST(req: Request) {
                 return NextResponse.json({ error: orderItemModifiersError.message }, { status: 400 });
             }
 
-            const modifierOptionsExist = cartItems?.map((item: any) => item?.modifiers)?.map((modifier: any) => modifier?.options)?.filter(Boolean).length > 0;
+            const modifierOptionsExist = cartItems?.some((item: any) => item?.cart_item_modifiers?.some((modifier: any) => modifier?.cart_item_modifier_options?.length > 0));
             console.log('modifierOptionsExist', modifierOptionsExist);
 
             if (!modifierOptionsExist) {
@@ -82,12 +90,24 @@ export async function POST(req: Request) {
             const { data: orderItemModifierOptionsData, error: orderItemModifierOptionsError } = await supabase
                 .from('order_item_modifier_options')
                 .insert(
-                    cartItems.map((item: any) => item?.modifiers?.map((modifier: any) => modifier?.options?.map((option: any) => ({
-                        order_item_modifier_id: option.id,
-                        option_id: option.id,
-                    }))))
-                )
+                    cartItems.flatMap((item: any, index: number) => 
+                        (item?.cart_item_modifiers || []).flatMap((modifier: any, modifierIndex: number) => 
+                        (modifier?.cart_item_modifier_options || []).map((option: any, optionIndex: number) => ({
+                            order_item_modifier_id: orderItemModifiersData[modifierIndex].id, // assuming this is the correct ID
+                            option_id: option.modifier_option_id,
+                            option_name: option.name,
+                            option_price: option.price
 
+                        }))
+                    ))
+                )
+                .select();
+
+            console.log('orderItemModifierOptionsData', orderItemModifierOptionsData, orderItemModifierOptionsError);
+
+            if (orderItemModifierOptionsError) {
+                return NextResponse.json({ error: orderItemModifierOptionsError.message }, { status: 400 });
+            }
         }
 
         return NextResponse.json(orderData);

@@ -12,7 +12,7 @@ interface CustomerSignInProps {
 }
 
 const CheckoutCustomerSignIn: React.FC<CustomerSignInProps> = ({ form, onComplete }) => { 
-    const { signin, googleSignin, signinAnonymously } = useAuth()
+    const {signin, googleSignin, signinAnonymously } = useAuth()
 
     const handleSignIn = async () => {
         try {

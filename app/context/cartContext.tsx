@@ -48,15 +48,19 @@ export const CartProvider = ({ children }: CartProviderProps) => {
     }, [userId, user]);
 
     useEffect(() => {
-        const savedCartId = localStorage.getItem('cartId');
         const savedCartItems = localStorage.getItem('cartItems');
         
         if (savedCartItems) {
             setCartItems(JSON.parse(savedCartItems));
+            return;
         }
-
-        fetchCart();
-    }, [cartId]);
+        
+        const loadCart = async () => {
+            await fetchCart();
+        };
+        
+        loadCart();
+    }, [cartId, userId]);
     
     const fetchCart = async () => {
         //console.log('fetchCart');
@@ -104,7 +108,7 @@ export const CartProvider = ({ children }: CartProviderProps) => {
                 }
             }
             // Case 2: User just signed in
-            else if (userId) {
+            else if (userId && user) {
                 // Check if user has an existing cart
                 const response = await fetch('/api/store/cart/user', {
                     headers: {
