@@ -1,7 +1,7 @@
 'use client';
 import { useEffect, useState } from 'react';
 import {useParams, useSearchParams} from 'next/navigation'
-import { Button } from "@/components/ui/button"
+import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 
 interface OrderDetails {
@@ -33,27 +33,58 @@ interface OrderDetails {
   created_at: string;
 }
 
+interface PageProps {
+  params: {
+    orderId: string;
+  };
+  searchParams: {
+    [key: string]: string | string[] | undefined;
+  };
+}
 
-const Page: React.FC = () => {
-  const params = useParams();
+
+const Page: React.FC<PageProps> = ({ params, searchParams: urlSearchParams }) => {
+  const router = useRouter();
   const searchParams = useSearchParams();
   const [order, setOrder] = useState<OrderDetails | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
+    const fetchOrder = async () => {
+      const orderId = params.orderId;
+      try {
+        const response = await fetch(`/api/orders/${orderId}`);
+        const data = await response.json();
+        console.log('fetched order', data);
+        setOrder(data.orderData);
+        setLoading(false);
+      } catch (error) {
+        console.error('Error fetching order:', error);
+        setError('Failed to fetch order. Please try again.');
+        setLoading(false);
+      }
+    };
+    fetchOrder();
+  }, [params.orderId]);
+
+  useEffect(() => {
     const verifyPaymentAndFetchOrder = async () => {
-      const orderId = params.id;
+      const orderId = params.orderId;
       const paymentId = searchParams.get('payment_intent');
       const paymentIntentSecret = searchParams.get('payment_intent_client_secret');
       const redirectStatus = searchParams.get('redirect_status');
+
+      console.log('url params', orderId, paymentId, paymentIntentSecret, redirectStatus);
       
       if(!orderId || !paymentId || redirectStatus !== 'succeeded') {
-        throw new Error('Invalid order or payment details');
+        setError('Payment verification failed');
+        setLoading(false);
+        return;
       }
        
       try {
-        const response = await fetch(`/api/order-confirmation/${orderId}/verify-payment`, {
+        const response = await fetch(`/api/orders/${orderId}/verify-payment`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -67,6 +98,9 @@ const Page: React.FC = () => {
 
         const data = await response.json();
         setOrder(data); 
+        localStorage.removeItem('cartItems');
+        localStorage.removeItem('cartId');
+        router.replace(`/order-confirmation/${orderId}`);
     } catch (error) {
         console.error('Error verifying payment:', error);
     } finally {
@@ -75,52 +109,43 @@ const Page: React.FC = () => {
   };
 
   verifyPaymentAndFetchOrder();
-  }, [params.id, searchParams]);
+  }, [params.orderId, searchParams, router]);
 
     return (
         <div className="bg-white">
   <div className="mx-auto max-w-3xl px-4 py-16 sm:px-6 sm:py-24 lg:px-8">
     <div className="max-w-xl">
-      <h1 className="text-base font-medium text-indigo-600">Thank you!</h1>
-      <p className="mt-2 text-4xl font-bold tracking-tight sm:text-5xl">It's on the way!</p>
-      <p className="mt-2 text-base text-gray-500">Your order #14034056 has shipped and will be with you soon.</p>
+      <h1 className="mt-2 text-4xl font-bold tracking-tight sm:text-5xl">Thanks for your Order!</h1>
+      <p className="mt-2 text-base text-gray-500">Your order #{order?.id?.substring(0, 8).toUpperCase()} has been successfully placed.</p>
 
-      <dl className="mt-12 text-sm font-medium">
+      {/*<dl className="mt-12 text-sm font-medium">
         <dt className="text-gray-900">Tracking number</dt>
         <dd className="mt-2 text-indigo-600">51547878755545848512</dd>
-      </dl>
+      </dl>*/}
     </div>
 
-    <div className="mt-10 border-t border-gray-200">
-      <h2 className="sr-only">Your order</h2>
+    <div className="mt-16 border-t border-gray-200 pt-10">
+      <h3 className="sr-only">Pickup information</h3>
 
-      <h3 className="sr-only">Items</h3>
-      <div className="flex space-x-6 border-b border-gray-200 py-10">
-        <img src="https://tailwindui.com/plus/img/ecommerce-images/confirmation-page-05-product-01.jpg" alt="Glass bottle with black plastic pour top and mesh insert." className="h-20 w-20 flex-none rounded-lg bg-gray-100 object-cover object-center sm:h-40 sm:w-40" />
-        <div className="flex flex-auto flex-col">
-          <div>
-            <h4 className="font-medium text-gray-900">
-              <a href="#">Cold Brew Bottle</a>
-            </h4>
-            <p className="mt-2 text-sm text-gray-600">This glass bottle comes with a mesh insert for steeping tea or cold-brewing coffee. Pour from any angle and remove the top for easy cleaning.</p>
-          </div>
-          <div className="mt-6 flex flex-1 items-end">
-            <dl className="flex space-x-4 divide-x divide-gray-200 text-sm sm:space-x-6">
-              <div className="flex">
-                <dt className="font-medium text-gray-900">Quantity</dt>
-                <dd className="ml-2 text-gray-700">1</dd>
-              </div>
-              <div className="flex pl-4 sm:pl-6">
-                <dt className="font-medium text-gray-900">Price</dt>
-                <dd className="ml-2 text-gray-700">$32.00</dd>
-              </div>
-            </dl>
-          </div>
+      <dl className="grid grid-cols-2 gap-x-6 text-sm">
+        <div>
+          <dt className="font-medium text-gray-900">Pickup Date</dt>
+          <dd className="mt-2 text-gray-700">{order?.pickup_date}</dd> 
+          <dt className="font-medium text-gray-900">Pickup Time</dt>
+          <dd className="mt-2 text-gray-700">{order?.pickup_time}</dd>
         </div>
-      </div>
-
-      <div className="sm:ml-40 sm:pl-6">
-        <h3 className="sr-only">Your information</h3>
+        <div>
+          <dt className="font-medium text-gray-900">Store Address</dt>
+          <dd className="mt-2 text-gray-700">333 S Alameda St, Los Angeles, CA 90013 Ste 100-I</dd>
+          <dt className="font-medium text-gray-900">Store Phone</dt>
+          <dd className="mt-2 text-gray-700">+1 (555) 555-5555</dd>
+          <dt className="font-medium text-gray-900">Store Email</dt>
+          <dd className="mt-2 text-gray-700">littletokyosushiinc@gmail.com</dd>
+          <dt className="font-medium text-gray-900">Pick up Instructions</dt>
+          <dd className="mt-2 text-gray-700">For new customers, we are located inside of the Little Tokyo Marketplace in Downtown Los Angeles. You can find us next to the bakery and poki place.</dd>
+        </div>
+      </dl>
+      {/* <h3 className="sr-only">Your information</h3>
 
         <h4 className="sr-only">Addresses</h4>
         <dl className="grid grid-cols-2 gap-x-6 py-10 text-sm">
@@ -144,8 +169,39 @@ const Page: React.FC = () => {
               </address>
             </dd>
           </div>
-        </dl>
+        </dl> */}
+    </div>
 
+    <div className="mt-10 border-t border-gray-200">
+      <h2 className="sr-only">Your order</h2>
+
+      <h3 className="sr-only">Items</h3>
+      <div className="flex space-x-6 border-b border-gray-200 py-10">
+      {order?.order_items.map((item) => (
+        <div className="flex flex-auto flex-col">
+          <div key={item.id.substring(0, 8)}>
+            <h4 className="font-medium text-gray-900">
+              <a href="#">{item.item_name}</a>
+            </h4>
+          </div>
+          <div className="mt-6 flex flex-1 items-end">
+            <dl className="flex space-x-4 divide-x divide-gray-200 text-sm sm:space-x-6">
+              <div className="flex">
+                <dt className="font-medium text-gray-900">Quantity</dt>
+                <dd className="ml-2 text-gray-700">{item.quantity}</dd>
+              </div>
+              <div className="flex pl-4 sm:pl-6">
+                <dt className="font-medium text-gray-900">Price</dt>
+                <dd className="ml-2 text-gray-700">{item.price}</dd>
+              </div>
+            </dl>
+          </div>
+        </div>
+      ))}
+      </div>
+
+      <div className="sm:ml-40 sm:pl-6">
+        
         <h4 className="sr-only">Payment</h4>
         <dl className="grid grid-cols-2 gap-x-6 border-t border-gray-200 py-10 text-sm">
           <div>

@@ -38,11 +38,11 @@ export const CartProvider = ({ children }: CartProviderProps) => {
 
     useEffect(() => {
         
-        if(user === null && localStorage.getItem('wasLoggedIn') === 'true') {
+        if(user === null && localStorage.getItem('wasLoggedIn') === 'false') {
             setCartId('');
             setCartItems([]);
         } else if(userId) {
-            console.log('useEffect userId', userId);
+            //console.log('useEffect userId', userId);
             handleCartUpdate();
         }
     }, [userId, user]);
@@ -59,11 +59,11 @@ export const CartProvider = ({ children }: CartProviderProps) => {
     }, [cartId]);
     
     const fetchCart = async () => {
-        console.log('fetchCart');
+        //console.log('fetchCart');
         setIsCartLoading(true);
         setCartError(null);
         try {
-            console.log('cartId', cartId);
+            //console.log('cartId', cartId);
             const response = await fetch(`/api/store/cart/${cartId}`, {
                 method: 'GET',
                 headers: {
@@ -90,7 +90,7 @@ export const CartProvider = ({ children }: CartProviderProps) => {
     };
 
     const handleCartUpdate = async (item?: CartItem) => {
-        console.log('handleCartUpdate', { userId, cartId, item });
+        //console.log('handleCartUpdate', { userId, cartId, item });
         
         try {
             // Case 1: Guest adding item

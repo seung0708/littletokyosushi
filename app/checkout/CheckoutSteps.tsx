@@ -95,7 +95,8 @@ const CheckoutSteps = () => {
                     customer_id: user?.id ?? '',
                     customer: data.customer, 
                     delivery: data.delivery,
-                    total: orderTotal
+                    total: orderTotal,
+                    cartItems: cartItems
                 }),
             });
     

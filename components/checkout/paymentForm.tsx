@@ -40,6 +40,7 @@ const PaymentForm = ({total, formData, cartItems}: Props) => {
             }
 
             const orderData = await orderResponse.json();
+            console.log('Order created:', orderData);
 
             console.log('Confirming payment in handlePayment...')
             const {error} = await stripe.confirmPayment({
