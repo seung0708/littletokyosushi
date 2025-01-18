@@ -3,26 +3,16 @@ import { createClient } from "@/lib/supabase/server";
 
 export async function POST(req: Request) {
     const { customer_id ,customer, delivery, total, cartItems } = await req.json();
-    console.log('cartItems', cartItems);
-
-    const modifiers = cartItems.map((item: any, index: number) => item.cart_item_modifiers[index]);
-    const modifierOptions = modifiers.map((modifier: any, index: number)  => modifier?.cart_item_modifier_options[index]);
-    console.log('modifiers', modifiers);
-    console.log('modifierOptions', modifierOptions);
 
     try {
         const supabase = await createClient();
         const { data: { user }, error: userError } = await supabase.auth.getUser();
-        
-        //console.log(user, userError);
 
         const { data: customerCart, error: customerError } = await supabase
             .from('carts')
             .select('*')
             .eq('customer_id', user?.id)
             .single();
-
-        //console.log(customerCart)
 
         const { data: orderData, error: orderError } = await supabase
             .from('orders')
@@ -34,8 +24,7 @@ export async function POST(req: Request) {
             })
             .select()
             .single()
-        console.log('orderData', orderData, orderError);
-
+    
         if (orderError) {
             return NextResponse.json({ error: orderError.message }, { status: 400 });
         }
@@ -52,14 +41,12 @@ export async function POST(req: Request) {
                 }))
             )
             .select()
-        console.log('orderItemsData', orderItemsData, orderItemsError);
 
         if (orderItemsError) {
             return NextResponse.json({ error: orderItemsError.message }, { status: 400 });
         }
 
         const modifiersExist = cartItems?.some((item: any) => item?.cart_item_modifiers?.length > 0);
-        console.log('modifiersExist', modifiersExist);
 
         if (modifiersExist) {
             const { data: orderItemModifiersData, error: orderItemModifiersError } = await supabase
@@ -74,15 +61,13 @@ export async function POST(req: Request) {
                     )
                 )
                 .select();
-            console.log('orderItemModifiersData', orderItemModifiersData, orderItemModifiersError);
 
             if (orderItemModifiersError) {
                 return NextResponse.json({ error: orderItemModifiersError.message }, { status: 400 });
             }
 
             const modifierOptionsExist = cartItems?.some((item: any) => item?.cart_item_modifiers?.some((modifier: any) => modifier?.cart_item_modifier_options?.length > 0));
-            console.log('modifierOptionsExist', modifierOptionsExist);
-
+        
             if (!modifierOptionsExist) {
                 return NextResponse.json({ error: 'Modifier options do not exist' }, { status: 400 });
             }
@@ -102,8 +87,6 @@ export async function POST(req: Request) {
                     ))
                 )
                 .select();
-
-            console.log('orderItemModifierOptionsData', orderItemModifierOptionsData, orderItemModifierOptionsError);
 
             if (orderItemModifierOptionsError) {
                 return NextResponse.json({ error: orderItemModifierOptionsError.message }, { status: 400 });

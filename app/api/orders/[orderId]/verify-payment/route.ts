@@ -12,13 +12,13 @@ export async function POST(req: Request, { params }: { params: { orderId: string
             .select('*')
             .eq('id', params.orderId)
             .single();
-
+        console.log('orderData', orderData);
         if (orderError) {
             return NextResponse.json({ error: orderError.message }, { status: 400 });
         }
 
         const stripePaymentIntent = await Stripe.paymentIntents.retrieve(paymentId);
-
+        console.log('stripePaymentIntent', stripePaymentIntent);
         if(stripePaymentIntent.status !== 'succeeded' || stripePaymentIntent.client_secret !== paymentIntentSecret) {
             return NextResponse.json({ error: 'Payment verification failed' }, { status: 400 });
         }
@@ -32,12 +32,13 @@ export async function POST(req: Request, { params }: { params: { orderId: string
         const {data: paymentData, error: paymentError } = await supabase
             .from('order_payments')
             .insert({
-                order_id: params.orderId,
-                payment_intent_id: paymentId, 
+                order_id: orderData.id,
+                payment_intent_id: stripePaymentIntent.id, 
                 amount: stripePaymentIntent.amount,
                 status: stripePaymentIntent.status, 
                 payment_method: stripePaymentIntent.payment_method_types[0],
             })
+            .select()
 
         console.log('Payment data:', paymentData);
 

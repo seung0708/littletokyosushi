@@ -49,24 +49,7 @@ const Page: React.FC<PageProps> = ({ params, searchParams: urlSearchParams }) =>
   const [order, setOrder] = useState<OrderDetails | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-
-  useEffect(() => {
-    const fetchOrder = async () => {
-      const orderId = params.orderId;
-      try {
-        const response = await fetch(`/api/orders/${orderId}`);
-        const data = await response.json();
-        console.log('fetched order', data);
-        setOrder(data.orderData);
-        setLoading(false);
-      } catch (error) {
-        console.error('Error fetching order:', error);
-        setError('Failed to fetch order. Please try again.');
-        setLoading(false);
-      }
-    };
-    fetchOrder();
-  }, [params.orderId]);
+  const [paymentVerified, setPaymentVerified] = useState(false);
 
   useEffect(() => {
     const verifyPaymentAndFetchOrder = async () => {
@@ -75,41 +58,48 @@ const Page: React.FC<PageProps> = ({ params, searchParams: urlSearchParams }) =>
       const paymentIntentSecret = searchParams.get('payment_intent_client_secret');
       const redirectStatus = searchParams.get('redirect_status');
 
-      if(!orderId || !paymentId || redirectStatus !== 'succeeded') {
-        setError('Payment verification failed');
-        setLoading(false);
-        return;
+      // Only verify payment if we have the required parameters and haven't verified yet
+      if(paymentId && paymentIntentSecret && redirectStatus === 'succeeded' && !paymentVerified) {
+        try {
+          const response = await fetch(`/api/orders/${orderId}/verify-payment`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ paymentId, paymentIntentSecret }),
+          });
+
+          if (!response.ok) {
+            throw new Error('Payment verification failed');
+          }
+
+          const data = await response.json();
+          if (data.clearCart) {
+            localStorage.removeItem('cartItems');
+            localStorage.removeItem('cartId');
+          }
+          setPaymentVerified(true);
+        } catch (error) {
+          console.error('Error verifying payment:', error);
+          setError('Payment verification failed');
+        }
       }
-       
+
+      // Always fetch the order
       try {
-        const response = await fetch(`/api/orders/${orderId}/verify-payment`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({ paymentId, paymentIntentSecret }),
-        });
-
-        if (!response.ok) {
-          throw new Error('Payment verification failed');
-        }
-
+        const response = await fetch(`/api/orders/${orderId}`);
         const data = await response.json();
-        if (data.clearCart) {
-          localStorage.removeItem('cartItems');
-          localStorage.removeItem('cartId');
-        }
         setOrder(data.orderData);
-        router.replace(`/order-confirmation/${orderId}`);
       } catch (error) {
-        console.error('Error verifying payment:', error);
+        console.error('Error fetching order:', error);
+        setError('Failed to fetch order. Please try again.');
       } finally {
         setLoading(false);
       }
     };
 
     verifyPaymentAndFetchOrder();
-  }, [params.orderId, searchParams, router]);
+  }, [params.orderId, searchParams, router, paymentVerified]);
 
   return (
     <div className="bg-white">

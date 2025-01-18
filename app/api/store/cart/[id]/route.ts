@@ -5,9 +5,7 @@ import { compareModifierOptions, createNewCartItemWithModifiers, getModifiersArr
 
 export async function GET(request: Request, { params }: { params: { id: string } }) {
     const { id: cartId } = params;
-    console.log('GET /api/store/cart/[id] -cartId', cartId);
     const supabase = createClient();
-    console.log('GET /api/store/cart/[id] -cartId', cartId, params);
 
     const {data: dbCart, error} = await supabase
     .from('carts')
@@ -70,7 +68,6 @@ export async function PATCH(request: Request,  { params }: { params: { id: strin
         const { customerId, cartItems } = await request.json()
         if(!cartItems) return NextResponse.json({ message: 'Cart items not found' });
         const newItems = cartItems[cartItems.length - 1]
-        console.log('newItems:', newItems);
         let isSameModifierOptions: boolean;
         const supabase = createClient();
 
@@ -101,7 +98,7 @@ export async function PATCH(request: Request,  { params }: { params: { id: strin
             }
 
         });
-        console.log('existingCartItem:', existingCartItem);
+
         if (existingCartItem) {
             if (existingCartItem.cart_item_modifiers.length > 0 && newItems.modifiers) {
                 console.log('Adding items from menu to cart...');

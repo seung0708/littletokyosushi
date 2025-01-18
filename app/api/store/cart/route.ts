@@ -4,7 +4,7 @@ import { NextResponse } from "next/server";
 export async function POST(request: Request) {
     const supabase = createClient();
     const { customer_id, items } = await request.json();
-    console.log('items', items);
+    //console.log('items', items);
     try {
     
         const { data: cart, error: createCartError } = await supabase
