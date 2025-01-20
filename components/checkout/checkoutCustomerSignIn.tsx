@@ -5,6 +5,7 @@ import { useAuth } from "@/app/context/authContext"
 import { FormControl, FormField, FormItem, FormLabel, FormMessage } from '../ui/form';
 import { Input } from '../ui/input';
 import { Button } from '../ui/button';
+import { createClient } from '@/lib/supabase/client';
 
 interface CustomerSignInProps {
     form: UseFormReturn<CheckoutFormValues>
@@ -12,7 +13,7 @@ interface CustomerSignInProps {
 }
 
 const CheckoutCustomerSignIn: React.FC<CustomerSignInProps> = ({ form, onComplete }) => { 
-    const {signin, googleSignin, signinAnonymously } = useAuth()
+    const {user,signin, googleSignin, signinAnonymously } = useAuth()
 
     const handleSignIn = async () => {
         try {
@@ -23,10 +24,10 @@ const CheckoutCustomerSignIn: React.FC<CustomerSignInProps> = ({ form, onComplet
         }
     }
  
-    const handleContinueAsGuest = () => {
+    const handleContinueAsGuest = async () => {
         const { customer } = form.getValues()
         try {
-            signinAnonymously(customer.email, customer.name)
+            await signinAnonymously(customer.email, customer.name)
         } catch (error) {
             console.error('Sign in failed:', error)
         } finally {
