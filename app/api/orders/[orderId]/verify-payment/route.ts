@@ -4,9 +4,9 @@ import {createClient} from "@/lib/supabase/server";
 
 export async function POST(req: Request, { params }: { params: { orderId: string } }) {
     const { paymentId, paymentIntentSecret } = await req.json();
-
+    const supabase = await createClient();
     try {
-        const supabase = await createClient();
+        //Get order data
         const { data: orderData, error: orderError } = await supabase
             .from('orders')
             .select('*')
@@ -18,27 +18,21 @@ export async function POST(req: Request, { params }: { params: { orderId: string
         }
 
         const stripePaymentIntent = await Stripe.paymentIntents.retrieve(paymentId);
-        console.log('stripePaymentIntent', stripePaymentIntent);
         if(stripePaymentIntent.status !== 'succeeded' || stripePaymentIntent.client_secret !== paymentIntentSecret) {
             return NextResponse.json({ error: 'Payment verification failed' }, { status: 400 });
         }
 
-        const {data: {user}, error: userError} = await supabase.auth.getUser();
-        if (userError) {
-            console.error('Error fetching user:', userError);
-            return NextResponse.json({ error: 'Failed to fetch user' }, { status: 500 });
-        }
-
         const {data: paymentData, error: paymentError } = await supabase
-            .from('order_payments')
-            .insert({
-                order_id: orderData.id,
-                payment_intent_id: stripePaymentIntent.id, 
-                amount: stripePaymentIntent.amount,
-                status: stripePaymentIntent.status, 
-                payment_method: stripePaymentIntent.payment_method_types[0],
-            })
-            .select()
+        .from('order_payments')
+        .insert({
+            order_id: orderData.id,
+            payment_intent_id: stripePaymentIntent.id, 
+            payment_status: stripePaymentIntent.status,
+            payment_method: stripePaymentIntent.payment_method_types[0],
+            amount: stripePaymentIntent.amount,
+        })
+        .select()
+        .single();
 
         console.log('Payment data:', paymentData);
 
@@ -48,7 +42,6 @@ export async function POST(req: Request, { params }: { params: { orderId: string
                 order_id: params.orderId,
                 status: 'paid',
                 notes: 'Payment successfullly processed'
-
             })
 
         if (statusError) {
@@ -67,12 +60,12 @@ export async function POST(req: Request, { params }: { params: { orderId: string
             console.error('Error updating order status:', orderErrorUpdate);
             return NextResponse.json({ error: 'Failed to update order status' }, { status: 500 });
         }
-
+ 
         // Clear the cart after successful payment verification
         const { error: cartError } = await supabase
             .from('carts')
             .update({ is_active: false })
-            .eq('id', orderData.cart_id);
+            .eq('customer_id', orderData.customer_id);
 
         if (cartError) {
             console.error('Error clearing cart:', cartError);

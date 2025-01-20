@@ -3,15 +3,17 @@ import { createClient } from "@/lib/supabase/server";
 
 export async function POST(req: Request) {
     const { customer_id ,customer, delivery, total, cartItems } = await req.json();
+    //console.log('POST /api/orders', customer_id, customer, delivery, total, cartItems);
+
+    
 
     try {
         const supabase = await createClient();
-        const { data: { user }, error: userError } = await supabase.auth.getUser();
 
         const { data: customerCart, error: customerError } = await supabase
             .from('carts')
             .select('*')
-            .eq('customer_id', user?.id)
+            .eq('customer_id', customer_id)
             .single();
 
         const { data: orderData, error: orderError } = await supabase
@@ -67,24 +69,36 @@ export async function POST(req: Request) {
             }
 
             const modifierOptionsExist = cartItems?.some((item: any) => item?.cart_item_modifiers?.some((modifier: any) => modifier?.cart_item_modifier_options?.length > 0));
-        
+
             if (!modifierOptionsExist) {
                 return NextResponse.json({ error: 'Modifier options do not exist' }, { status: 400 });
             }
 
+            // Create a mapping using both order_item_id and modifier_id
+            const modifierMapping = {};
+            orderItemModifiersData.forEach((orderMod) => {
+                const key = `${orderMod.order_item_id}_${orderMod.modifier_id}`;
+                modifierMapping[key] = orderMod.id;
+            });
+
+            // Then use the mapping with order item ID
             const { data: orderItemModifierOptionsData, error: orderItemModifierOptionsError } = await supabase
                 .from('order_item_modifier_options')
                 .insert(
                     cartItems.flatMap((item: any, index: number) => 
-                        (item?.cart_item_modifiers || []).flatMap((modifier: any, modifierIndex: number) => 
-                        (modifier?.cart_item_modifier_options || []).map((option: any, optionIndex: number) => ({
-                            order_item_modifier_id: orderItemModifiersData[modifierIndex].id, // assuming this is the correct ID
-                            option_id: option.modifier_option_id,
-                            option_name: option.name,
-                            option_price: option.price
-
-                        }))
-                    ))
+                        item?.cart_item_modifiers?.flatMap((modifier: any) => {
+                            // Get the corresponding order item ID for this cart item
+                            const orderItemId = orderItemsData[index].id;
+                            const key = `${orderItemId}_${modifier.modifier_id}`;
+                            
+                            return modifier?.cart_item_modifier_options?.map((option: any) => ({
+                                order_item_modifier_id: modifierMapping[key],
+                                option_id: option.modifier_option_id,
+                                option_name: option.name,
+                                option_price: option.price
+                            }));
+                        })
+                    )
                 )
                 .select();
 

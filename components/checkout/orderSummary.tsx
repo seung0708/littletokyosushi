@@ -14,7 +14,6 @@ interface Props {
 
 const OrderSummary = ( {form, onTotalCaluated}: Props) => {
     const {cartId, cartItems} = useCart();
-    console.log('cartItems', cartItems);
     const deliveryMethod = form.watch('delivery.method');
     const pickupDate = new Date(form.watch('delivery.pickupDate'));
     const pickupTime = form.watch('delivery.pickupTime');

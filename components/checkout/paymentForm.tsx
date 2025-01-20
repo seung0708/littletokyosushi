@@ -3,6 +3,7 @@ import {PaymentElement, useStripe, useElements} from '@stripe/react-stripe-js';
 import { Button } from '../ui/button';
 import { useState } from 'react';
 import { CheckoutFormValues } from '@/types/checkout';
+import { useAuth } from '@/app/context/authContext';
 
 interface Props {
     total: number;
@@ -11,6 +12,7 @@ interface Props {
 }   
 
 const PaymentForm = ({total, formData, cartItems}: Props) => {
+    const {user} = useAuth()
     const stripe = useStripe();
     const elements = useElements();
     
@@ -19,7 +21,7 @@ const PaymentForm = ({total, formData, cartItems}: Props) => {
             console.error('Stripe or elements not initialized');
             return;
         }
-
+        console.log(formData)
         try {
 
             const orderResponse = await fetch('/api/orders', {
@@ -28,6 +30,7 @@ const PaymentForm = ({total, formData, cartItems}: Props) => {
                     'Content-Type': 'application/json',
                 },
                 body: JSON.stringify({
+                    customer_id: user?.id ?? '',
                     customer: formData.customer,
                     delivery: formData.delivery,
                     cartItems: cartItems,

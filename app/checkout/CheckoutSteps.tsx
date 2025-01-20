@@ -33,6 +33,16 @@ const CheckoutSteps = () => {
         }
     }, [user, currentStep]);
 
+    useEffect(() => {
+        if (user) {
+            form.setValue('customer.email', user.user_metadata?.email || user.email || '');
+            form.setValue('customer.name', 
+                `${user.user_metadata?.first_name || ''} ${user.user_metadata?.last_name || ''}`.trim()
+            );
+            form.setValue('customer.phone', user.user_metadata?.phone || '');
+        }
+    }, [user]);
+
      // Create payment intent when total changes
      useEffect(() => {
         const createPaymentIntent = async () => {
@@ -90,30 +100,7 @@ const CheckoutSteps = () => {
     const onSubmit = async (data: CheckoutFormValues) => {
         console.log('onSubmit started', data);
         try {
-            // First, create the order
-            console.log('Creating order...');
-            const orderResponse = await fetch('/api/orders', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({
-                    customer_id: user?.id ?? '',
-                    customer: data.customer, 
-                    delivery: data.delivery,
-                    total: orderTotal,
-                    cartItems: cartItems
-                }),
-            });
-    
-            if (!orderResponse.ok) { 
-                throw new Error('Failed to create order');  
-            }
-    
-            const orderData = await orderResponse.json();
-            console.log('Order created:', orderData);
-            setOrderData(orderData);
-    
+         
             // Then create payment intent
             const paymentIntentResponse = await fetch('/api/payment-intent', {
                 method: 'POST',
@@ -236,7 +223,7 @@ const CheckoutSteps = () => {
                              }}
                         >
                             <PaymentForm 
-                             formData={form.getValues()}
+                             formData={form.watch()}
                              total={orderTotal}
                              cartItems={cartItems}
                             />
