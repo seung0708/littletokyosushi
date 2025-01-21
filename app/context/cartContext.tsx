@@ -83,7 +83,7 @@ export const CartProvider = ({ children }: CartProviderProps) => {
             const cart = await response.json();
             setCartId(cart.id);
             setCartItems(cart.cart_items);
-            localStorage.setItem('cartId', cart.id.substring(0, 8));
+            localStorage.setItem('cartId', cart.id);
             localStorage.setItem('cartItems', JSON.stringify(cart.cart_items));
         } catch (error) {
             console.error('Error fetching cart:', error);
@@ -117,6 +117,11 @@ export const CartProvider = ({ children }: CartProviderProps) => {
                     credentials: 'include'
                 });
                 const data = await response.json();
+                console.log('Cart update conditions:', {
+                    userId,
+                    cartId,
+                    hasExistingCart: data.status === 200
+                });
                 
                 if (data.status === 200) {
                     // User has existing cart - merge if anonymous cart exists
@@ -135,7 +140,7 @@ export const CartProvider = ({ children }: CartProviderProps) => {
                         const mergeData = await mergeResponse.json();
                         if (mergeData.status === 200) {
                             setCartId(mergeData.cartId);
-                            localStorage.setItem('cartId', mergeData.cartId.substring(0, 8));
+                            localStorage.setItem('cartId', mergeData.cartId);
                             await fetchCart();
                         }
                     } 
@@ -146,7 +151,7 @@ export const CartProvider = ({ children }: CartProviderProps) => {
                     }
                     console.log('Using existing user cart');
                     setCartId(data.cartId);
-                    localStorage.setItem('cartId', data.cartId.substring(0, 8));
+                    localStorage.setItem('cartId', data.cartId);
                     await fetchCart();
                 } else if (cartId) {
                     // No existing user cart - associate anonymous cart
@@ -164,7 +169,7 @@ export const CartProvider = ({ children }: CartProviderProps) => {
                     const data = await response.json();
                     if (data.status === 200) {
                         setCartId(data.cartId);
-                        localStorage.setItem('cartId', data.cartId.substring(0, 8));
+                        localStorage.setItem('cartId', data.cartId);
                         await fetchCart();
                     }
                 } else if (item) {
@@ -200,7 +205,7 @@ export const CartProvider = ({ children }: CartProviderProps) => {
             setCartSuccess(data.message);
             if(data.status === 200) {
                 setCartId(data.cartId); 
-                localStorage.setItem('cartId', data.cartId.substring(0, 8));
+                localStorage.setItem('cartId', data.cartId);
                 await fetchCart();
             };
         }
@@ -230,7 +235,7 @@ export const CartProvider = ({ children }: CartProviderProps) => {
             setCartSuccess(data.message);
             if(data.status === 200) {
                 setCartId(data.cartId);
-                localStorage.setItem('cartId', data.cartId.substring(0, 8));
+                localStorage.setItem('cartId', data.cartId);
                 await fetchCart();
             };
         }

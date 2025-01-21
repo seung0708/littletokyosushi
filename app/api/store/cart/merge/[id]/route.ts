@@ -4,7 +4,7 @@ import { NextResponse } from "next/server";
 export async function PATCH(request: Request, { params }: { params: { id: string } }) {
     const supabase = await createClient(); 
     const { customerId } = await request.json();
-
+    
     const { data: existingCart, error: existingCartError } = await supabase
         .from('carts')
         .select('*')

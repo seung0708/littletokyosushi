@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import { Cart, CartItem, CartItemModifier, CartItemModifierOption } from '@/types/cart';
-import { compareModifierOptions, createNewCartItemWithModifiers, getModifiersArray, updateExistingCartItem } from '@/utils/cart';
+import { findMatchingCartItem, createNewCartItemWithModifiers, getModifiersArray, updateExistingCartItem } from '@/utils/cart';
 
 export async function GET(request: Request, { params }: { params: { id: string } }) {
     const { id: cartId } = params;
@@ -80,8 +80,7 @@ export async function PATCH(request: Request,  { params }: { params: { id: strin
                 cart_item_modifier_options(id, cart_item_modifiers_id, modifier_option_id, modifier_id, modifier_option_price))))`)
             .eq('id', params.id)
             .single();
-        console.log('dbCart:', dbCart);
-        
+
         if (cartError) {
             console.error('Error fetching cart items:', cartError);
             return NextResponse.json(
@@ -89,33 +88,17 @@ export async function PATCH(request: Request,  { params }: { params: { id: strin
                 { status: 500 }
             );
         }
-        
-        const existingCartItem = dbCart.cart_items.find((cartItem: any) => {
-            if ( 'menu_item_id' in newItems) {
-                return cartItem.menu_item_id === newItems.menu_item_id;
-            } else if ('cart_item_id' in newItems) {
-                return cartItem.id === newItems.cart_item_id;
-            }
 
-        });
-
+        const existingCartItem = findMatchingCartItem(dbCart?.cart_items, newItems);
+        console.log('existingCartItem:', existingCartItem);
         if (existingCartItem) {
-            if (existingCartItem.cart_item_modifiers.length > 0 && newItems.modifiers) {
-                console.log('Adding items from menu to cart...');
-                isSameModifierOptions = await compareModifierOptions(existingCartItem, newItems);
-                console.log('isSameModifierOptions:', isSameModifierOptions);
-                if(isSameModifierOptions) {
-                    await updateExistingCartItem(supabase, existingCartItem, newItems);
-                } else {
-                    await createNewCartItemWithModifiers(supabase, existingCartItem, newItems);
-                }
-            } 
-            if (existingCartItem.cart_item_modifiers.length > 0 && newItems.cart_item_modifiers) {
-                await updateExistingCartItem(supabase, existingCartItem, newItems);
-            } 
-
-        } 
-        //console.log('existingCartItem.menu_item_id !== newItems.menu_item_id:', existingCartItem.menu_item_id !== newItems.menu_item_id);
+            // If we found an exact match (same item and same modifiers), update quantity
+            await updateExistingCartItem(supabase, existingCartItem, newItems);
+        } else {
+            // If no match found (either different item or different modifiers), create new
+            await createNewCartItemWithModifiers(supabase, null, newItems);
+        }
+        
         if (!existingCartItem) {
             const {data: cartItem, error} = await supabase
                 .from('cart_items')
