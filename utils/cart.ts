@@ -27,23 +27,43 @@ export async function updateExistingCartItem(supabase: any, existingCartItem: an
     return { data, error };
 }
 
-export async function compareModifierOptions(existingCartItem: any, newItems: any) {
-    const existingModifierOptions = existingCartItem.cart_item_modifiers.map((existingModifier: any) => 
-        existingModifier.cart_item_modifier_options.map((option: any) => option)
-    );
-    
-    const newModifierOptions = getModifiersArray(newItems).map((newModifier: any) => 
-        newModifier.modifier_options.map((option: any) => option)
-    );
+export function findMatchingCartItem(cartItems: any[], newItem: any) {
+    return cartItems.find((cartItem: any) => {
+        // First check if it's the same menu item
+        const isSameMenuItem = cartItem.menu_item_id === newItem.menu_item_id;
+        if (!isSameMenuItem) return false;
 
-    console.log('existingModifierOptions:', existingModifierOptions);
-    console.log('newModifierOptions:', newModifierOptions);
+        // If there are no modifiers on either item, it's a match
+        const existingModifiers = cartItem.cart_item_modifiers || [];
+        const newModifiers = getModifiersArray(newItem);
+        if (existingModifiers.length === 0 && newModifiers.length === 0) return true;
 
-    return existingModifierOptions.every((existingOptions: any, i: number) =>
-        existingOptions.every((existingOption: any, j: number) =>
-            existingOption.modifier_option_id === newModifierOptions[i]?.[j]?.modifier_option_id
-        )
-    );
+        // If one has modifiers and the other doesn't, not a match
+        if (existingModifiers.length === 0 || newModifiers.length === 0) return false;
+
+        // Compare modifiers and their options
+        return existingModifiers.every((existingModifier: any) => {
+            // Find matching modifier in new item
+            const matchingNewModifier = newModifiers.find((newModifier: any) => 
+                newModifier.modifier_id === existingModifier.modifier_id
+            );
+            if (!matchingNewModifier) return false;
+
+            // Compare modifier options
+            const existingOptions = existingModifier.cart_item_modifier_options || [];
+            const newOptions = matchingNewModifier.modifier_options || [];
+            
+            // If different number of options, not a match
+            if (existingOptions.length !== newOptions.length) return false;
+
+            // Check if all options match
+            return existingOptions.every((existingOption: any) => 
+                newOptions.some((newOption: any) => 
+                    existingOption.modifier_option_id === newOption.modifier_option_id
+                )
+            );
+        });
+    });
 }
 
 export async function createNewCartItemWithModifiers(supabase: any, existingCartItem: any, newItems: any) {

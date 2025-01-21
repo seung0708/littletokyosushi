@@ -5,8 +5,6 @@ export async function POST(req: Request) {
     const { customer_id ,customer, delivery, total, cartItems } = await req.json();
     //console.log('POST /api/orders', customer_id, customer, delivery, total, cartItems);
 
-    
-
     try {
         const supabase = await createClient();
 
