@@ -8,6 +8,7 @@ interface CartContextType {
     cartId: string;
     handleCartUpdate: (item: CartItem) => Promise<void>;
     removeItemFromCart: (itemId: string) => Promise<void>;
+    updateCartCustomerId: (customerId: string) => Promise<void>;
     isCartLoading: boolean;
     cartError: string | null;
 }
@@ -90,6 +91,27 @@ export const CartProvider = ({ children }: CartProviderProps) => {
             setCartError(error instanceof Error ? error.message : 'Failed to fetch cart');
         } finally {
             setIsCartLoading(false);
+        }
+    };
+
+    const updateCartCustomerId = async (customerId: string) => {
+        if (!cartId) return;
+        
+        const response = await fetch(`/api/store/cart/merge/${cartId}`, {
+            method: 'PATCH',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                customerId
+            }),
+            credentials: 'include',
+        });
+        const data = await response.json();
+        if (data.status === 200) {
+            setCartId(data.cartId);
+            localStorage.setItem('cartId', data.cartId);
+            await fetchCart();
         }
     };
 
@@ -274,6 +296,7 @@ export const CartProvider = ({ children }: CartProviderProps) => {
             cartId,
             handleCartUpdate,
             removeItemFromCart,
+            updateCartCustomerId,
             isCartLoading,
             cartError,
         }}>
