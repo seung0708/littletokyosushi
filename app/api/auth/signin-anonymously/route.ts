@@ -7,11 +7,10 @@ export async function POST(req: Request) {
         process.env.NEXT_PUBLIC_SUPABASE_URL!,
         process.env.SUPABASE_SERVICE_ROLE_KEY!, 
     )
-    const serverSupabase = createServerClient();
+    const serverSupabase = createServerClient(); 
     const { email, name } = await req.json()
     const first_name = name.split(' ')[0]
     const last_name = name.split(' ')[1]
-    //console.log(email, name, first_name, last_name)
 
     try {
 
@@ -21,19 +20,24 @@ export async function POST(req: Request) {
             .eq('email', email)
             .single()
         console.log('customer',customer)
+
         if (customer) {
             const { data: {user: existingUser}, error: usersError} = await supabase.auth.admin.getUserById(customer.id);
-
+            console.log('existingUser',existingUser)
+            if(existingUser && !existingUser.is_anonymous) { 
+                return NextResponse.json(
+                    { error: "An account with this email already exists. Please sign in instead." }, 
+                    { status: 400 }
+                );
+            }
             if (existingUser) {
-                console.log('user',existingUser.id)
                 const { data, error: signInError } = await serverSupabase.auth.signInWithPassword({
                     email: email, 
                     password: process.env.GUEST_DEFAULT_PASSWORD!
                 }) 
-                console.log('first sign in',data)
 
                 if (!data.user) {
-                    const { data: { user: updatedUser }, error: updateError } = await supabase.auth.admin.updateUserById(
+                    const { error: updateError } = await supabase.auth.admin.updateUserById(
                             existingUser.id, {
                             email: email,
                             password: process.env.GUEST_DEFAULT_PASSWORD!,
@@ -49,6 +53,8 @@ export async function POST(req: Request) {
                         email: email, 
                         password: process.env.GUEST_DEFAULT_PASSWORD!
                     })
+
+                    return NextResponse.json(data, { status: 200 })
                 }
 
                 return NextResponse.json(data, { status: 200 })
@@ -66,6 +72,7 @@ export async function POST(req: Request) {
                         }
                     }
              })
+             console.log('user',user)
              if (error) {
                  console.error('Error signing in anonymously:', error);
                  return NextResponse.json({ error: error.message }, { status: 400 })
@@ -92,14 +99,11 @@ export async function POST(req: Request) {
              }
      
              // Return user with customer data
-             return NextResponse.json({
-                ...user,
-                customer: customerData
-             })
+            return NextResponse.json({
+               user
+            })
         }
         
-     
-     
     } catch (error) {
         console.error('Error signing in anonymously:', error);
         return NextResponse.json({ error: 'Internal server error' }, { status: 500 })

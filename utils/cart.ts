@@ -28,14 +28,18 @@ export async function updateExistingCartItem(supabase: any, existingCartItem: an
 }
 
 export function findMatchingCartItem(cartItems: any[], newItem: any) {
+    
     return cartItems.find((cartItem: any) => {
         // First check if it's the same menu item
         const isSameMenuItem = cartItem.menu_item_id === newItem.menu_item_id;
+        
         if (!isSameMenuItem) return false;
 
         // If there are no modifiers on either item, it's a match
         const existingModifiers = cartItem.cart_item_modifiers || [];
+        
         const newModifiers = getModifiersArray(newItem);
+
         if (existingModifiers.length === 0 && newModifiers.length === 0) return true;
 
         // If one has modifiers and the other doesn't, not a match
@@ -44,15 +48,16 @@ export function findMatchingCartItem(cartItems: any[], newItem: any) {
         // Compare modifiers and their options
         return existingModifiers.every((existingModifier: any) => {
             // Find matching modifier in new item
-            const matchingNewModifier = newModifiers.find((newModifier: any) => 
-                newModifier.modifier_id === existingModifier.modifier_id
-            );
+            const matchingNewModifier = newModifiers.find((newModifier: any) => {
+                return newModifier.modifier_id === existingModifier.modifier_id
+            });
+            
             if (!matchingNewModifier) return false;
 
             // Compare modifier options
             const existingOptions = existingModifier.cart_item_modifier_options || [];
-            const newOptions = matchingNewModifier.modifier_options || [];
-            
+            const newOptions = matchingNewModifier.modifier_options || [];  
+
             // If different number of options, not a match
             if (existingOptions.length !== newOptions.length) return false;
 
@@ -66,12 +71,12 @@ export function findMatchingCartItem(cartItems: any[], newItem: any) {
     });
 }
 
-export async function createNewCartItemWithModifiers(supabase: any, existingCartItem: any, newItems: any) {
+export async function createNewCartItemWithModifiers(supabase: any, cartId: string, newItems: any) {
     // Create cart item
     const { data: cartItem, error } = await supabase
         .from('cart_items')
         .insert({
-            cart_id: existingCartItem.cart_id,
+            cart_id: cartId,
             base_price: newItems.base_price,
             total_price: newItems.total_price,
             quantity: newItems.quantity,
@@ -79,6 +84,7 @@ export async function createNewCartItemWithModifiers(supabase: any, existingCart
             special_instructions: newItems.special_instructions || '',
         })
         .select();
+
 
     if (error || !cartItem) {
         console.error('Error creating cart item:', error);

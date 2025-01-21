@@ -80,14 +80,14 @@ export async function PATCH(request: Request,  { params }: { params: { id: strin
                 cart_item_modifier_options(id, cart_item_modifiers_id, modifier_option_id, modifier_id, modifier_option_price))))`)
             .eq('id', params.id)
             .single();
-
-        if (cartError) {
-            console.error('Error fetching cart items:', cartError);
-            return NextResponse.json(
-                { error: 'Failed to fetch cart items' },
-                { status: 500 }
-            );
-        }
+        //console.log('dbCart:', dbCart);
+        // if (cartError) {
+        //     console.error('Error fetching cart items:', cartError);
+        //     return NextResponse.json(
+        //         { error: 'Failed to fetch cart items' },
+        //         { status: 500 }
+        //     );
+        // }
 
         const existingCartItem = findMatchingCartItem(dbCart?.cart_items, newItems);
         console.log('existingCartItem:', existingCartItem);
@@ -96,59 +96,14 @@ export async function PATCH(request: Request,  { params }: { params: { id: strin
             await updateExistingCartItem(supabase, existingCartItem, newItems);
         } else {
             // If no match found (either different item or different modifiers), create new
-            await createNewCartItemWithModifiers(supabase, null, newItems);
+            await createNewCartItemWithModifiers(supabase, dbCart?.id, newItems);
         }
         
-        if (!existingCartItem) {
-            const {data: cartItem, error} = await supabase
-                .from('cart_items')
-                .insert({
-                    cart_id: dbCart.id,
-                    base_price: newItems.base_price,
-                    total_price: newItems.total_price,
-                    quantity: newItems.quantity,
-                    menu_item_id: newItems.menu_item_id,
-                    special_instructions: newItems.special_instructions || '',
-                })
-                .select()
-
-            //console.log('new cart item:', cartItem);
-
-            if (getModifiersArray(newItems) && getModifiersArray(newItems).length > 0) {
-                const { data: cartItemModifier, error: cartItemModifierError } = await supabase
-                    .from('cart_item_modifiers')
-                    .insert(
-                        getModifiersArray(newItems).map((cartItemModifier: any) => ({
-                            cart_items_id: cartItem?.[0].id,
-                            modifier_id: cartItemModifier.modifier_id,
-                        }))
-                    )
-                    .select()
-
-                //console.log('new cart item modifier:', cartItemModifier);
-
-                const {error: cartItemModifierOptionError } = await supabase
-                    .from('cart_item_modifier_options')
-                    .insert(
-                        getModifiersArray(newItems).flatMap((newItemModifier: any, index: number) => 
-                            newItemModifier.modifier_options.map((newItemModifierOption: any) => ({
-                                cart_item_modifiers_id: cartItemModifier?.[index]?.id,
-                                modifier_option_id: newItemModifierOption.modifier_option_id,
-                                modifier_option_price: newItemModifierOption.price,
-                                modifier_id: newItemModifier.modifier_id
-                            }))
-                        )
-                    )
-            }
-        } else {
-            await updateExistingCartItem(supabase, existingCartItem, newItems);
-        }
-
         return NextResponse.json(
             { 
                 message: 'Cart updated successfully',
                 status: 200,
-                cartId: dbCart.id
+                cartId: dbCart?.id
             }
         )
 

@@ -63,13 +63,15 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
                 },
                 body: JSON.stringify({ email, password }),
             });
-            const user = await response.json();
-            setUser(user);
-            localStorage.setItem('wasLoggedIn', 'true');
-            if (!response.ok) {
-                throw new Error(user.error || 'Failed to sign up');
+            const data = await response.json();
+            if(data.user) {
+                setUser(data.user);
             }
-            redirect('/confirm');
+            
+            if (!response.ok) {
+                throw new Error(data.error || 'Failed to sign up');
+            }
+            return data;
         } catch (error) {
             console.error('Eror signing up:', error);
         }
@@ -89,9 +91,12 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
                 throw new Error('Failed to sign in');
             }
             const data = await response.json();
-            console.log(data, data.user);
-            setUser(data.user);
-            localStorage.setItem('wasLoggedIn', 'true');
+            console.log(data);
+            if(data.user) {
+                setUser(data.user);
+                return data.user
+            }
+            return data;
         } catch (error) {
             console.error('Eror signing in:', error);
         }
@@ -129,7 +134,6 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
                 throw new Error(data.error || 'Failed to sign out');
             }
             setUser(null);
-            localStorage.setItem('wasLoggedIn', 'false');
             localStorage.removeItem('cartId');
             localStorage.removeItem('cartItems');
         } catch (error) {
@@ -148,14 +152,12 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
                 credentials: 'include',
             });
             const data = await response.json();
-            console.log(data.user);
-            setUser(data.user);
-            if (!response.ok) {
-                throw new Error(data.error || 'Failed to sign in anonymously');
-            }
-            localStorage.setItem('wasLoggedIn', 'true');
+            setUser(data.user); 
+
+            return data; 
         } catch (error) {
             console.error('Error signing in anonymously:', error);
+            throw error; 
         }
     };
 
