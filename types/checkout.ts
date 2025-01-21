@@ -3,9 +3,11 @@ import {z} from 'zod'
 export const checkoutSchema = z.object({
     customer: z.object({
         id: z.string().optional(),
-        email: z.string().email("Valid email is required"),
-        name: z.string().min(1, "Name is required"),
+        guestEmail: z.string().email("Valid email is required"),  // For guest checkout
+        guestName: z.string().min(1, "Name is required"),  // For guest checkout
         phone: z.string().min(10, "Phone number is required"),
+        signinEmail: z.string().email("Valid email is required"),  // For sign in
+        password: z.string().min(8, "Password is required"),  // For sign in
     }),
     delivery: z.object({
         method: z.enum(["delivery", "pickup"], {required_error: "Please select a delivery method"}),

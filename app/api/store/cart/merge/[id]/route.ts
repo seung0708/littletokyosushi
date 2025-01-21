@@ -42,6 +42,20 @@ export async function PATCH(request: Request, { params }: { params: { id: string
             .eq('id', params.id)
             .select();
 
+            if (!updatedCart || updatedCart.length === 0) {
+                console.error('No cart was updated');
+                return NextResponse.json(
+                    { error: 'Failed to update cart' },
+                    { status: 500 }
+                );
+            }
+            
+            return NextResponse.json({
+                message: 'Cart updated successfully',
+                status: 200,
+                cartId: updatedCart[0].id
+            });
+
         if (updateError) {
             console.error('Error updating cart:', updateError);
             return NextResponse.json(

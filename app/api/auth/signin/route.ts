@@ -1,5 +1,6 @@
 import { signinFormSchema } from '@/schema-validations/auth';
-import { createClient } from '@/lib/supabase/server'
+import { createClient } from '@supabase/supabase-js';
+import { createClient as createServerClient } from '@/lib/supabase/server';
 import { NextResponse } from 'next/server';
 
 export async function POST(req: Request) { 
@@ -12,17 +13,29 @@ export async function POST(req: Request) {
   }
 
   const {email, password} = result.data; 
-  const supabase = await createClient()
+  const supabase = await createClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.SUPABASE_SERVICE_ROLE_KEY!, 
+  )
+  const serverSupabase = await createServerClient();
 
   try {
-    const { data, error } = await supabase.auth.signInWithPassword({
-      email, 
-      password
-    })
+    const { data: {users}, error } = await supabase.auth.admin.listUsers();
+    const existingUser = users.find(user => user.email === email && !user.is_anonymous);
+    
+    if (!existingUser) {
+      console.log('existingUser', existingUser);
+      return NextResponse.json({error: 'No account found with this email. Please sign up first.'})
+    }
+
+    const { data, error: signInError } = await serverSupabase.auth.signInWithPassword({
+      email,
+      password,
+    });
   
-    if (error) {
-      console.error('Login error:', error);
-      return NextResponse.json({error: error.message}, {status: 400})
+    if (signInError) {
+      console.error('Login error:', signInError);
+      return NextResponse.json({error: signInError.message}, {status: 400})
     }
     
     return NextResponse.json(data);

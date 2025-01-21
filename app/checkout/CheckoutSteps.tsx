@@ -80,14 +80,15 @@ const CheckoutSteps = () => {
     const form = useForm<CheckoutFormValues>({
         resolver: zodResolver(checkoutSchema),
         defaultValues: {
-          customer: {
-            email: user?.email ?? '',
-            name: user?.name ?? '',
-            phone: user?.phone ?? '',
-          },
-          delivery: {
-            method: 'pickup',
-          },
+            customer: {
+                signinEmail: user?.email ?? '',
+                guestEmail: user?.email ?? '',
+                guestName: user?.name ?? '',
+                phone: user?.phone ?? '',
+            },
+            delivery: {
+                method: 'pickup',
+            },
         },
     });
     
