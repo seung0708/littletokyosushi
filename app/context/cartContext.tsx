@@ -38,31 +38,17 @@ export const CartProvider = ({ children }: CartProviderProps) => {
     
 
     useEffect(() => {
-        
-        if(user === null && localStorage.getItem('wasLoggedIn') === 'false') {
-            setCartId('');
-            setCartItems([]);
-        } else if(userId) {
-            //console.log('useEffect userId', userId);
-            handleCartUpdate();
+        const savedCartId = localStorage.getItem('cartId');
+        if (savedCartId) {
+            setCartId(savedCartId);
         }
-    }, [userId, user]);
-
-    useEffect(() => {
         const savedCartItems = localStorage.getItem('cartItems');
-        
         if (savedCartItems) {
             setCartItems(JSON.parse(savedCartItems));
-            return;
-        }
-        
-        const loadCart = async () => {
-            await fetchCart();
-        };
-        
-        loadCart();
+        } 
+        fetchCart();        
     }, [cartId, userId]);
-    
+
     const fetchCart = async () => {
         //console.log('fetchCart');
         setIsCartLoading(true);
@@ -95,6 +81,7 @@ export const CartProvider = ({ children }: CartProviderProps) => {
     };
 
     const updateCartCustomerId = async (customerId: string) => {
+        console.log('updateCartCustomerId', { cartId, customerId });
         if (!cartId) return;
         
         const response = await fetch(`/api/store/cart/merge/${cartId}`, {

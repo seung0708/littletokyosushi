@@ -5,7 +5,7 @@ import { useAuth } from "@/app/context/authContext"
 import { FormControl, FormField, FormItem, FormLabel, FormMessage } from '../ui/form';
 import { Input } from '../ui/input';
 import { Button } from '../ui/button';
-import { createClient } from '@/lib/supabase/client';
+import { useCart } from '@/app/context/cartContext';
 
 interface CustomerSignInProps {
     form: UseFormReturn<CheckoutFormValues>
@@ -13,8 +13,8 @@ interface CustomerSignInProps {
 }
 
 const CheckoutCustomerSignIn: React.FC<CustomerSignInProps> = ({ form, onComplete }) => { 
-    const {user,signin, googleSignin, signinAnonymously } = useAuth()
-
+    const { user,signin, googleSignin, signinAnonymously } = useAuth()
+    const { updateCartCustomerId } = useCart()
     const handleSignIn = async () => {
         try {
             // Your sign in logic here
@@ -24,10 +24,11 @@ const CheckoutCustomerSignIn: React.FC<CustomerSignInProps> = ({ form, onComplet
         }
     }
  
-    const handleContinueAsGuest = async () => {
+    const handleContinueAsGuest = async() => {
         const { customer } = form.getValues()
         try {
             await signinAnonymously(customer.email, customer.name)
+            await updateCartCustomerId(user?.id)
         } catch (error) {
             console.error('Sign in failed:', error)
         } finally {
