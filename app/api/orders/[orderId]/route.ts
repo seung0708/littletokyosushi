@@ -3,7 +3,7 @@ import {createClient} from '@/lib/supabase/server';
 
 export async function GET(req: Request, { params }: { params: { orderId: string } }) {
     const supabase = createClient();
-    console.log('orderId', params.orderId);
+    
     try {
         const {data: orderData, error: orderError} = await supabase
             .from('orders')
@@ -11,7 +11,7 @@ export async function GET(req: Request, { params }: { params: { orderId: string 
             .eq('id', params.orderId)
             .single();
 
-        console.log('orderData', orderData);
+        
         
         if (orderError) {
             console.error('Error fetching order data:', orderError);

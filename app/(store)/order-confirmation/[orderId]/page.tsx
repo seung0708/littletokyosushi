@@ -1,9 +1,10 @@
 'use client';
-import { useEffect, useState, useRef } from 'react';
-import {useParams, useSearchParams} from 'next/navigation'
-import { useRouter } from 'next/navigation';
+import { useEffect, useState } from 'react';
+import {useSearchParams} from 'next/navigation'
+
 import Link from 'next/link';
 import { format } from 'date-fns';
+import { useCart } from '@/app/context/cartContext';
 
 interface OrderDetails {
   id: string;
@@ -44,13 +45,12 @@ interface PageProps {
 }
 
 const Page: React.FC<PageProps> = ({ params, searchParams: urlSearchParams }) => {
-  const router = useRouter();
   const searchParams = useSearchParams();
   const [order, setOrder] = useState<OrderDetails | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [paymentVerified, setPaymentVerified] = useState(false);
-
+  const { clearCart } = useCart();
 
   useEffect(() => {
     const verifyPaymentAndFetchOrder = async () => {
@@ -77,9 +77,9 @@ const Page: React.FC<PageProps> = ({ params, searchParams: urlSearchParams }) =>
 
           if (responseData.clearCart) {
             console.log('Clearing cart data...');
-            localStorage.removeItem('cartItems');
-            localStorage.removeItem('cartId');
+            clearCart();
           }
+          
           setPaymentVerified(true);
         } catch (error) {
           console.error('Error verifying payment:', error);
@@ -109,7 +109,7 @@ const Page: React.FC<PageProps> = ({ params, searchParams: urlSearchParams }) =>
     };
 
     verifyPaymentAndFetchOrder();
-  }, [params.orderId, searchParams, router]);
+  }, [params.orderId, searchParams]);
 
   return (
     <div className="bg-white">
@@ -137,16 +137,17 @@ const Page: React.FC<PageProps> = ({ params, searchParams: urlSearchParams }) =>
               <dd className="mt-2 text-gray-700">
                 {order && format(new Date(`${order.pickup_date}T${order.pickup_time}`), 'h:mm a')}
               </dd>
+              <dt className="mt-2 font-medium text-gray-900">Pick up Instructions</dt>
+              <dd className="mt-2 text-gray-700">
+                For new customers, we are located inside of the <strong>Little Tokyo Marketplace</strong> in Downtown Los Angeles. 
+                You can find us next to the bakery and poki place.
+              </dd>
             </div>
             <div>
-              <dt className="font-medium text-gray-900">Store Address</dt>
-              <dd className="mt-2 text-gray-700">333 S Alameda St, Los Angeles, CA 90013 Ste 100-I</dd>
-              <dt className="font-medium text-gray-900">Store Phone</dt>
-              <dd className="mt-2 text-gray-700">+1 (555) 555-5555</dd>
-              <dt className="font-medium text-gray-900">Store Email</dt>
-              <dd className="mt-2 text-gray-700">littletokyosushiinc@gmail.com</dd>
-              <dt className="font-medium text-gray-900">Pick up Instructions</dt>
-              <dd className="mt-2 text-gray-700">For new customers, we are located inside of the Little Tokyo Marketplace in Downtown Los Angeles. You can find us next to the bakery and poki place.</dd>
+              <dt className="font-medium text-md text-gray-900">Store Address</dt>
+              <dd className=" text-gray-700">333 S Alameda St, Los Angeles, CA 90013 Ste 100-I</dd>
+              <dt className="mt-2 font-medium text-md text-gray-900">Store Phone</dt>
+              <dd className="text-gray-700">(213) 617-0343</dd>
             </div>
           </dl>
           {/* <h3 className="sr-only">Your information</h3>
@@ -178,42 +179,35 @@ const Page: React.FC<PageProps> = ({ params, searchParams: urlSearchParams }) =>
         
         <div className="mt-10 border-t border-gray-200">
           <h2 className="sr-only">Your order</h2>
-
           <h3 className="sr-only">Items</h3>
-          <div className="flex space-x-6 border-b border-gray-200 py-10">
+          
+          <div className="divide-y divide-gray-200">
           {order?.order_items.map((item: any) => (  
-            <div key={item.id.substring(0, 8)} className="">
-              <div >
+            <div key={item.id.substring(0, 8)} className="py-6">
+              <div className="flex justify-between">
                 <h4 className="font-medium text-gray-900">
-                  <a href="#">{item.item_name}</a>
+                  {item.item_name}
+                  <span className="ml-2 text-gray-500">× {item.quantity}</span>
                 </h4>
-                {item.order_item_modifiers?.map((modifier: any) => (
-                  <div key={modifier.id.substring(0, 8)} className="mt-1">
-                    <p className="text-sm text-gray-500">
-                      {modifier.modifier_name}:
-                      {modifier.order_item_modifier_options?.map((option: any) => (
-                        <span key={option.id} className="ml-1">
-                          {option.option_name}
-                          {option.quantity > 1 && ` (${option.quantity})`}
-                          {option.price > 0 && ` +$${(option.price / 100).toFixed(2)}`}
-                        </span>
-                      ))}
-                    </p>
+                <p className="text-gray-900">${(item.price).toFixed(2)}</p>
+              </div>
+              {item.order_item_modifiers && item.order_item_modifiers.length > 0 && (
+                <div className="mt-2 flex flex-wrap gap-x-4">
+                  {item.order_item_modifiers.map((modifier: any) => (
+                  <div key={modifier.id.substring(0, 8)} className="text-sm text-gray-500">
+                    {modifier.modifier_name}:
+                    {modifier.order_item_modifier_options?.map((option: any, index: number) => (
+                    <span key={option.id}>
+                        {index > 0 && ', '}
+                        {option.option_name}
+                        {option.quantity > 1 && ` (${option.quantity})`}
+                        {option.price > 0 && ` +$${(option.price / 100).toFixed(2)}`}
+                    </span>
+                  ))}
                   </div>
                 ))}
-              </div>
-              <div className="mt-6 flex flex-1 items-end">
-                <dl className="flex space-x-4 divide-x divide-gray-200 text-sm sm:space-x-6">
-                  <div className="flex">
-                    <dt className="font-medium text-gray-900">Quantity</dt>
-                    <dd className="ml-2 text-gray-700">{item.quantity}</dd>
-                  </div>
-                  <div className="flex pl-4 sm:pl-6">
-                    <dt className="font-medium text-gray-900">Price</dt>
-                    <dd className="ml-2 text-gray-700">{item.price}</dd>
-                  </div>
-                </dl>
-              </div>
+                </div>
+              )}
             </div>
           ))}
           </div>
@@ -240,7 +234,7 @@ const Page: React.FC<PageProps> = ({ params, searchParams: urlSearchParams }) =>
 
             <h3 className="sr-only">Summary</h3>
 
-            <dl className="space-y-6 border-t border-gray-200 pt-10 text-sm">
+            <dl className="space-y-6 border-t border-gray-200 pt-10">
               {/* <div className="flex justify-between">
                 <dt className="font-medium text-gray-900">Subtotal</dt>
                 <dd className="text-gray-700"></dd>
@@ -256,9 +250,19 @@ const Page: React.FC<PageProps> = ({ params, searchParams: urlSearchParams }) =>
                 <dt className="font-medium text-gray-900">Shipping</dt>
                 <dd className="text-gray-700">$5.00</dd>
               </div> */}
-              <div className="flex justify-between">
-                <dt className="font-medium text-gray-900">Total</dt>
-                <dd className="text-gray-900">${order?.total}</dd>
+              <div className="flex flex-col gap-y-4">
+                <div className="flex justify-end gap-x-4">
+                  <dt className="font-medium text-gray-900">Subtotal</dt>
+                  <dd className="text-gray-900">${order?.sub_total.toFixed(2)}</dd>
+                </div>
+                <div className="flex justify-end gap-x-4">
+                  <dt className="font-medium text-gray-900">Service fee</dt>
+                  <dd className="text-gray-900">${order?.service_fee.toFixed(2)}</dd>
+                </div>
+                <div className="flex justify-end gap-x-4">
+                  <dt className="font-medium text-gray-900">Total</dt>
+                  <dd className="text-gray-900">${order?.total.toFixed(2)}</dd>
+                </div>
               </div>
             </dl>
           </div>

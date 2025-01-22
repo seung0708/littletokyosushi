@@ -7,7 +7,7 @@ import { useEffect } from 'react';
 
 interface Props {
   form: UseFormReturn<CheckoutFormValues>;
-  onTotalCaluated: (total: number) => void;
+  onTotalCaluated: (total: number, fees: {serviceFee: number, subTotal: number}) => void;
 }
 
 
@@ -28,15 +28,15 @@ const OrderSummary = ( {form, onTotalCaluated}: Props) => {
         return acc + itemTotal + modifiersTotal;
       }, 0) || 0;
 
-    const STRIPE_PERCENTAGE_FEE = 0.029;
-    const STRIPE_FIXED_FEE = 0.30;
+    const SERVICE_FEE_PERCENTAGE  = 0.029;
+    const SERVICE_FEE_FIXED = 0.30;
 
-    const stripeFee = (subTotal * STRIPE_PERCENTAGE_FEE) + STRIPE_FIXED_FEE;
-    const total = stripeFee + subTotal;
+    const serviceFee  = (subTotal * SERVICE_FEE_PERCENTAGE) + SERVICE_FEE_FIXED;
+    const total = serviceFee + subTotal;
 
     useEffect(() => {
-        onTotalCaluated(total);
-    }, [total]);
+        onTotalCaluated(total, {serviceFee, subTotal});
+    }, [total, subTotal, serviceFee]);
 
     return (
         <>
@@ -82,7 +82,7 @@ const OrderSummary = ( {form, onTotalCaluated}: Props) => {
                 </div>
                 <div className="flex items-center justify-between">
                   <dt>Service Fee</dt>
-                  <dd>${stripeFee.toFixed(2)}</dd>
+                  <dd>${serviceFee.toFixed(2)}</dd>
                 </div>
                 <div className="flex items-center justify-between border-t border-white border-opacity-10 pt-6 text-white">
                   <dt className="text-red-500">Total</dt>

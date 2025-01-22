@@ -26,6 +26,7 @@ const CheckoutSteps = () => {
     const [clientSecret, setClientSecret] = useState<string>('');
     const [orderData, setOrderData] = useState<any>(null);
     const [orderTotal, setOrderTotal] = useState<number>(0);
+    const [orderFees, setOrderFees] = useState<any>(null);
 
     useEffect(() => {
         if(user && currentStep === 'signin') {
@@ -72,6 +73,11 @@ const CheckoutSteps = () => {
 
         createPaymentIntent();
     }, [orderTotal]);
+
+    const handleTotalCalculated = (total: number, fees: {serviceFee: number, subTotal: number}) => {
+        setOrderTotal(total);
+        setOrderFees(fees);
+    };
 
     const updateClientSecret = (secret: string) => {
         setClientSecret(secret);
@@ -210,7 +216,7 @@ const CheckoutSteps = () => {
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                     <OrderSummary
                         form={form}
-                        onTotalCaluated={setOrderTotal}
+                        onTotalCaluated={handleTotalCalculated}
                     />
                     {clientSecret && (
                         <Elements 
@@ -227,6 +233,7 @@ const CheckoutSteps = () => {
                              formData={form.watch()}
                              total={orderTotal}
                              cartItems={cartItems}
+                             fees={orderFees}
                             />
                         </Elements>
                     )}

@@ -2,8 +2,8 @@ import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 
 export async function POST(req: Request) {
-    const { customer_id ,customer, delivery, total, cartItems } = await req.json();
-    console.log('POST /api/orders', customer_id, customer, delivery, total, cartItems);
+    const { customer_id ,customer, delivery, total, cartItems, fees } = await req.json();
+    //console.log('POST /api/orders', customer_id, customer, delivery, total, cartItems);
 
     try {
         const supabase = await createClient();
@@ -14,7 +14,9 @@ export async function POST(req: Request) {
                 customer_id: customer_id,
                 pickup_date: delivery.pickupDate,
                 pickup_time: delivery.pickupTime,
-                total: total
+                total: total,
+                service_fee: fees.serviceFee,
+                sub_total: fees.subTotal
             })
             .select()
             .single()

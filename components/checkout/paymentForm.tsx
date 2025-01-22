@@ -9,9 +9,10 @@ interface Props {
     total: number;
     formData: CheckoutFormValues;
     cartItems: any[];
+    fees: {serviceFee: number, subTotal: number};
 }   
 
-const PaymentForm = ({total, formData, cartItems}: Props) => {
+const PaymentForm = ({total, formData, cartItems, fees}: Props) => {
     const {user} = useAuth()
     const stripe = useStripe();
     const elements = useElements();
@@ -34,7 +35,8 @@ const PaymentForm = ({total, formData, cartItems}: Props) => {
                     customer: formData.customer,
                     delivery: formData.delivery,
                     cartItems: cartItems,
-                    total: total
+                    total: total, 
+                    fees: fees
                 }),
             });
 

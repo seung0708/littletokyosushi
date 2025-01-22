@@ -11,6 +11,7 @@ interface CartContextType {
     handleCartUpdate: (item: CartItem) => Promise<void>;
     removeItemFromCart: (itemId: string) => Promise<void>;
     updateCartCustomerId: (customerId: string) => Promise<void>;
+    clearCart: () => void;
     isCartLoading: boolean;
     cartError: string | null;
 }
@@ -56,14 +57,12 @@ export const CartProvider = ({ children }: CartProviderProps) => {
         }
     }, [cartId, userId, storageState]);
 
-    useEffect(() => {
-        const handleStorageChange = () => {
-            setStorageState(Date.now().toString());  // Force re-render on storage change
-        };
-        
-        window.addEventListener('storage', handleStorageChange);
-        return () => window.removeEventListener('storage', handleStorageChange);
-    }, []);
+    const clearCart = () => {
+        localStorage.removeItem('cartId');
+        localStorage.removeItem('cartItems');
+        setCartItems([]);
+        setCartId('');
+    };
 
     const fetchCart = async () => {
         if (!cartId) return;
@@ -294,6 +293,7 @@ export const CartProvider = ({ children }: CartProviderProps) => {
             handleCartUpdate,
             removeItemFromCart,
             updateCartCustomerId,
+            clearCart,
             isCartLoading,
             cartError,
         }}>
