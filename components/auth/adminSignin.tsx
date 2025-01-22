@@ -34,7 +34,7 @@ export default function AdminSignin() {
       setLoading(true);
       setError(null);
 
-      const response = await fetch('/api/auth/login', {
+      const response = await fetch('/api/auth/signin', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

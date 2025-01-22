@@ -13,7 +13,7 @@ export async function middleware(request: NextRequest) {
     //console.log('Checking admin auth for path:', path);
     
     // Skip auth check for these paths
-    const publicPaths = ['/login', '/api/auth/signin']
+    const publicPaths = ['/signin', '/api/auth/signin']
     if (publicPaths.includes(path)) {
       return response
     }
@@ -21,8 +21,8 @@ export async function middleware(request: NextRequest) {
     const { data: { user } } = await supabase.auth.getUser()
     
     if (!user) {
-      console.log('No user found, redirecting to login');
-      return NextResponse.redirect(new URL('/login', request.url))
+      console.log('No user found, redirecting to signin');
+      return NextResponse.redirect(new URL('/signin', request.url))
     }
 
     // First get the employee record

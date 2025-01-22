@@ -18,12 +18,12 @@ const nextConfig = {
           // Admin site (admin.localhost)
           {
             source: '/',
-            destination: '/login',
+            destination: '/signin',
             has: [{ type: 'host', value: 'admin.localhost' }]
           },
           {
-            source: '/login',
-            destination: '/login',
+            source: '/signin',
+            destination: '/signin',
             has: [{ type: 'host', value: 'admin.localhost' }]
           },
           {
