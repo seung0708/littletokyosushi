@@ -35,7 +35,7 @@ export async function PATCH(request: Request, { params }: { params: { id: string
     });
 
     // Case 1: Customer has no existing cart - just update the current cart
-    if (!existingCart || existingCartError?.code === 'PGRST116') {
+    if (!existingCart) {
         const { data: updatedCart, error: updateError } = await supabase
             .from('carts')
             .update({ customer_id: customerId })
@@ -49,12 +49,6 @@ export async function PATCH(request: Request, { params }: { params: { id: string
                     { status: 500 }
                 );
             }
-            
-            return NextResponse.json({
-                message: 'Cart updated successfully',
-                status: 200,
-                cartId: updatedCart[0].id
-            });
 
         if (updateError) {
             console.error('Error updating cart:', updateError);
@@ -98,12 +92,6 @@ export async function PATCH(request: Request, { params }: { params: { id: string
             { status: 500 }
         );
     }
-
-    // Delete the current cart
-    await supabase
-        .from('carts')
-        .delete()
-        .eq('id', currentCart.id);
 
     return NextResponse.json({
         message: 'Cart merged successfully',

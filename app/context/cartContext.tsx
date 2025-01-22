@@ -3,6 +3,8 @@ import React, { createContext, useCallback, useContext, useEffect, useState } fr
 import { useAuth } from "./authContext";
 import { CartItem, Cart, CartItemModifier, CartItemModifierOption } from "@/types/cart";
 
+import { useRouter } from "next/navigation";
+
 interface CartContextType {
     cartItems: CartItem[];
     cartId: string;
@@ -28,6 +30,7 @@ interface CartProviderProps {
 }
 
 export const CartProvider = ({ children }: CartProviderProps) => {
+    const router = useRouter();
     const { user } = useAuth();
     const userId = user?.id;
     const [cartItems, setCartItems] = useState<CartItem[]>([]);

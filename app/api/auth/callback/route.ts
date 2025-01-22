@@ -13,7 +13,7 @@ export async function GET(request: Request) {
   try {
     // Get the OAuth code from the URL
     const requestUrl = new URL(request.url);
-    console.log('requestUrl', requestUrl);
+
     const code = requestUrl.searchParams.get('code');
     
     if (!code) {
@@ -30,8 +30,7 @@ export async function GET(request: Request) {
     if (!session?.user?.email) {
       throw new Error('No user email found');
     }
-    console.log('session.user', session.user);
-    
+    console.log('session', session);
     // Check for existing anonymous user with this email
     const { data: { users }, error: usersError } = await supabase.auth.admin.listUsers();
     const anonymousUser = users.find(user => 
@@ -39,19 +38,56 @@ export async function GET(request: Request) {
       (user.email === session.user.email || user.user_metadata.email === session.user.email)
     );
     console.log('anonymousUser', anonymousUser);
-
-    if (anonymousUser) {
-      const { data: {user: updatedUser}, error: updateError } = await supabase.auth.admin.deleteUser(anonymousUser.id);
-    } else { 
-      const { error: customerError } = await supabase
-        .from('customers')
-        .insert({
-          id: session.user.id,
-          first_name: session.user.user_metadata.full_name.split(' ')[0],
-          last_name: session.user.user_metadata.full_name.split(' ')[1],
-          email: session.user.email,
-        })
+    const existingUser = users.find(user => user.email === session.user.email && !user.is_anonymous);
+    console.log('existingUser', existingUser);
+    if (existingUser) {
+      const { data: cart, error: customerCartError } = await supabase
+        .from('carts')
+        .select('*')
+        .eq('customer_id', existingUser.id)
+        .single();
+      console.log('customerCartError', customerCartError);
+      console.log('cart', cart);
+      if (!cart) {
+        console.log('No cart found for existing user');
+        const { error: cartError } = await supabase
+          .from('carts')
+          .update({
+            customer_id: session.user.id,
+          })
+          .eq('id', cart.id);
+        if (cartError) throw cartError;
+      }
+      return NextResponse.redirect(new URL('/checkout', request.url));
     }
+
+    // if (anonymousUser) {
+    //   const anonymousUserId = anonymousUser.id;
+    //   const { data: {cart}, error: cartError } = await supabase
+    //     .from('carts')
+    //     .select('*')
+    //     .eq('customer_id', anonymousUserId)
+    //     .single();
+    //   if (cart) {
+    //     const { error: cartError } = await supabase
+    //       .from('carts')
+    //       .update({
+    //         customer_id: session.user.id,
+    //       })
+    //       .eq('id', cart.id);
+    //     if (cartError) throw cartError;
+    //   }
+    //   const {error: updateError } = await supabase.auth.admin.deleteUser(anonymousUserId);
+    // } else { 
+    //   const { error: customerError } = await supabase
+    //     .from('customers')
+    //     .insert({
+    //       id: session.user.id,
+    //       first_name: session.user.user_metadata.full_name.split(' ')[0],
+    //       last_name: session.user.user_metadata.full_name.split(' ')[1],
+    //       email: session.user.email,
+    //     })
+    // }
     return NextResponse.redirect(new URL('/checkout', request.url));
   } catch (error) {
     console.error('Error in callback:', error);
