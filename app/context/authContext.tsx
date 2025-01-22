@@ -110,11 +110,11 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
                     'Content-Type': 'application/json',
                 },
             });
-            const result = await response.json();
-            if (!response.ok) {
-                throw new Error(result.error || 'Failed to sign in with Google');
-            } 
-            localStorage.setItem('wasLoggedIn', 'true');
+            if (response.redirected) {
+                window.location.href = response.url;
+            }
+            const data = await response.json();
+            console.log(data);
         } catch (error) {
             console.error('Error signing in with Google:', error);
         }

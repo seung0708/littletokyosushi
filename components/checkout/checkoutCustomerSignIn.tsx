@@ -67,9 +67,11 @@ const CheckoutCustomerSignIn: React.FC<CustomerSignInProps> = ({ form, onComplet
     const handleGoogleSignIn = async () => {  // Add Google handler
         try {
             await googleSignin()
-            onComplete()
+            
         } catch (error) {
             console.error('Google sign in failed:', error)
+        } finally {
+            onComplete()
         }
     }
  
