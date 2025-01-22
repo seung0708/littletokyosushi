@@ -1,9 +1,9 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
+import { sendOrderConfirmationEmail } from "@/lib/email-smtp";
 
 export async function POST(req: Request) {
-    const { customer_id ,customer, delivery, total, cartItems, fees } = await req.json();
-    //console.log('POST /api/orders', customer_id, customer, delivery, total, cartItems);
+    const { customer_id, customer, delivery, total, cartItems, fees } = await req.json();
 
     try {
         const supabase = await createClient();
@@ -19,7 +19,7 @@ export async function POST(req: Request) {
                 sub_total: fees.subTotal
             })
             .select()
-            .single()
+            .single();
     
         if (orderError) {
             return NextResponse.json({ error: orderError.message }, { status: 400 });
@@ -36,7 +36,7 @@ export async function POST(req: Request) {
                     price: item.menu_item_price
                 }))
             )
-            .select()
+            .select();
 
         if (orderItemsError) {
             return NextResponse.json({ error: orderItemsError.message }, { status: 400 });
@@ -101,9 +101,23 @@ export async function POST(req: Request) {
             }
         }
 
-        return NextResponse.json(orderData);
+        // Send confirmation email directly
+        try {
+            await sendOrderConfirmationEmail(
+                {
+                    ...orderData,
+                    items: cartItems
+                },
+                customer
+            );
+        } catch (emailError) {
+            console.error('Failed to send confirmation email:', emailError);
+            // Don't return error here as the order was still created successfully
+        }
 
+        return NextResponse.json(orderData);
     } catch (error) {
-        console.error(error);
+        console.error('Error creating order:', error);
+        return NextResponse.json({ error: 'Failed to create order' }, { status: 500 });
     }
 }

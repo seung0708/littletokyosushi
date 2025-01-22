@@ -1,0 +1,28 @@
+import { Resend } from 'resend';
+import OrderConfirmationEmail from '@/emails/order-confirmation';
+
+const resend = new Resend(process.env.RESEND_API_KEY);
+
+export async function sendOrderConfirmationEmail(order: any, customer: any) {
+    try {
+        const { data, error } = await resend.emails.send({
+            from: 'orders@resend.dev',  // Temporary test domain
+            to: 'seung.kim0708@gmail.com',
+            subject: `Order Confirmation #${order.id}`,
+            react: OrderConfirmationEmail({
+                order,
+                customer,
+            }),
+        });
+
+        if (error) {
+            console.error('Failed to send email:', error);
+            return { success: false, error };
+        }
+
+        return { success: true, data };
+    } catch (error) {
+        console.error('Error sending email:', error);
+        return { success: false, error };
+    }
+}

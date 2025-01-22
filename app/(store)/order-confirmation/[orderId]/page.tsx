@@ -197,12 +197,12 @@ const Page: React.FC<PageProps> = ({ params, searchParams: urlSearchParams }) =>
                   <div key={modifier.id.substring(0, 8)} className="text-sm text-gray-500">
                     {modifier.modifier_name}:
                     {modifier.order_item_modifier_options?.map((option: any, index: number) => (
-                    <span key={option.id}>
-                        {index > 0 && ', '}
-                        {option.option_name}
+                    <div key={option.id} className="ml-4 mt-1">
+                        {index > 0}
+                        • {option.option_name}
                         {option.quantity > 1 && ` (${option.quantity})`}
-                        {option.price > 0 && ` +$${(option.price / 100).toFixed(2)}`}
-                    </span>
+                        {`+$${(option.option_price).toFixed(2)}`}
+                    </div>
                   ))}
                   </div>
                 ))}
