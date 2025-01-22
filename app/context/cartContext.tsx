@@ -38,26 +38,38 @@ export const CartProvider = ({ children }: CartProviderProps) => {
     const [isCartLoading, setIsCartLoading] = useState(false);
     const [cartError, setCartError] = useState<string | null>(null);
     const [cartSuccess, setCartSuccess] = useState<string | null>(null);
-    
+    const [storageState, setStorageState] = useState('');
 
     useEffect(() => {
         const savedCartId = localStorage.getItem('cartId');
-        if (savedCartId) {
+        if (savedCartId && userId) {
+            updateCartCustomerId(userId);
+        } else if (savedCartId) {
             setCartId(savedCartId);
+            fetchCart();
         }
         const savedCartItems = localStorage.getItem('cartItems');
         if (savedCartItems) {
             setCartItems(JSON.parse(savedCartItems));
-        } 
-        fetchCart();        
-    }, [cartId, userId]);
+        } else {
+            setCartItems([]);  // Clear cart items if nothing in storage
+        }
+    }, [cartId, userId, storageState]);
+
+    useEffect(() => {
+        const handleStorageChange = () => {
+            setStorageState(Date.now().toString());  // Force re-render on storage change
+        };
+        
+        window.addEventListener('storage', handleStorageChange);
+        return () => window.removeEventListener('storage', handleStorageChange);
+    }, []);
 
     const fetchCart = async () => {
-        //console.log('fetchCart');
+        if (!cartId) return;
         setIsCartLoading(true);
         setCartError(null);
         try {
-            //console.log('cartId', cartId);
             const response = await fetch(`/api/store/cart/${cartId}`, {
                 method: 'GET',
                 headers: {
@@ -67,7 +79,9 @@ export const CartProvider = ({ children }: CartProviderProps) => {
             });
            
             if (!response.ok) {
-               throw new Error('Failed to fetch cart');
+               const errorData = await response.json();
+               console.error('Cart fetch failed:', errorData);
+               throw new Error(errorData.error || 'Failed to fetch cart');
             }
 
             const cart = await response.json();
@@ -84,7 +98,6 @@ export const CartProvider = ({ children }: CartProviderProps) => {
     };
 
     const updateCartCustomerId = async (customerId: string) => {
-        console.log('updateCartCustomerId', { cartId, customerId });
         if (!cartId) return;
         
         const response = await fetch(`/api/store/cart/merge/${cartId}`, {
@@ -106,7 +119,6 @@ export const CartProvider = ({ children }: CartProviderProps) => {
     };
 
     const handleCartUpdate = async (item?: CartItem) => {
-        //console.log('handleCartUpdate', { userId, cartId, item });
         
         try {
             // Case 1: Guest adding item
@@ -129,12 +141,7 @@ export const CartProvider = ({ children }: CartProviderProps) => {
                     credentials: 'include'
                 });
                 const data = await response.json();
-                console.log('Cart update conditions:', {
-                    userId,
-                    cartId,
-                    hasExistingCart: data.status === 200
-                });
-                
+                    
                 if (data.status === 200) {
                     // User has existing cart - merge if anonymous cart exists
                     if (cartId) {

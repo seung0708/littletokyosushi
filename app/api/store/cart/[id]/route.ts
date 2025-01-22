@@ -64,14 +64,14 @@ export async function GET(request: Request, { params }: { params: { id: string }
 }
 
 export async function PATCH(request: Request,  { params }: { params: { id: string } }) {
+    const supabase = createClient();
+    
     try {
         const { customerId, cartItems } = await request.json()
+
         if(!cartItems) return NextResponse.json({ message: 'Cart items not found' });
         const newItems = cartItems[cartItems.length - 1]
-        let isSameModifierOptions: boolean;
-        const supabase = createClient();
-
-
+        
         const { data: dbCart, error: cartError } = await supabase
             .from('carts')
             .select(`id, customer_id, completed_at, 
@@ -80,14 +80,13 @@ export async function PATCH(request: Request,  { params }: { params: { id: strin
                 cart_item_modifier_options(id, cart_item_modifiers_id, modifier_option_id, modifier_id, modifier_option_price))))`)
             .eq('id', params.id)
             .single();
-        //console.log('dbCart:', dbCart);
-        // if (cartError) {
-        //     console.error('Error fetching cart items:', cartError);
-        //     return NextResponse.json(
-        //         { error: 'Failed to fetch cart items' },
-        //         { status: 500 }
-        //     );
-        // }
+                
+        if (!dbCart?.customer_id && customerId) {
+            await supabase
+                .from('carts')
+                .update({ customer_id: customerId })
+                .eq('id', params.id)
+        }
 
         const existingCartItem = findMatchingCartItem(dbCart?.cart_items, newItems);
         console.log('existingCartItem:', existingCartItem);

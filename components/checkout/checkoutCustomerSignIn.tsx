@@ -33,8 +33,8 @@ const CheckoutCustomerSignIn: React.FC<CustomerSignInProps> = ({ form, onComplet
             setSignInError('')
             const data = await signin(customer.signinEmail, customer.password)
             console.log('Sign in data:', data)
-            if (data.user) {
-                await updateCartCustomerId(data.user?.id)
+            if (data?.id) {
+                await updateCartCustomerId(data?.id)
                 onComplete()
             } else {
                 setSignInError(data.error);

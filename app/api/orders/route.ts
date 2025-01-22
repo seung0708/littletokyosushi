@@ -3,21 +3,15 @@ import { createClient } from "@/lib/supabase/server";
 
 export async function POST(req: Request) {
     const { customer_id ,customer, delivery, total, cartItems } = await req.json();
-    //console.log('POST /api/orders', customer_id, customer, delivery, total, cartItems);
+    console.log('POST /api/orders', customer_id, customer, delivery, total, cartItems);
 
     try {
         const supabase = await createClient();
 
-        const { data: customerCart, error: customerError } = await supabase
-            .from('carts')
-            .select('*')
-            .eq('customer_id', customer_id)
-            .single();
-
         const { data: orderData, error: orderError } = await supabase
             .from('orders')
             .insert({
-                customer_id: customerCart.customer_id,
+                customer_id: customer_id,
                 pickup_date: delivery.pickupDate,
                 pickup_time: delivery.pickupTime,
                 total: total

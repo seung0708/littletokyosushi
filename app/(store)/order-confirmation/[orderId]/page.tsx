@@ -47,10 +47,10 @@ const Page: React.FC<PageProps> = ({ params, searchParams: urlSearchParams }) =>
   const router = useRouter();
   const searchParams = useSearchParams();
   const [order, setOrder] = useState<OrderDetails | null>(null);
-  console.log('order', order);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [paymentVerified, setPaymentVerified] = useState(false);
+
 
   useEffect(() => {
     const verifyPaymentAndFetchOrder = async () => {
@@ -59,9 +59,7 @@ const Page: React.FC<PageProps> = ({ params, searchParams: urlSearchParams }) =>
       const paymentIntentSecret = searchParams.get('payment_intent_client_secret');
       const redirectStatus = searchParams.get('redirect_status');
     
-      // Only verify payment if we have the required parameters and haven't verified yet
       if(paymentId && paymentIntentSecret && redirectStatus === 'succeeded' && !paymentVerified) {
-        console.log('Starting payment verification...');
         try {
           const response = await fetch(`/api/orders/${orderId}/verify-payment`, {
             method: 'POST',
@@ -71,10 +69,7 @@ const Page: React.FC<PageProps> = ({ params, searchParams: urlSearchParams }) =>
             body: JSON.stringify({ paymentId, paymentIntentSecret }),
           });
 
-          console.log('Verification response status:', response.status);
           const responseData = await response.json();
-
-          console.log('Verification response:', responseData);
 
           if (!response.ok) {
             throw new Error(`Payment verification failed: ${responseData.error || 'Unknown error'}`);
@@ -101,7 +96,6 @@ const Page: React.FC<PageProps> = ({ params, searchParams: urlSearchParams }) =>
 
       // Always fetch the order
       try {
-        console.log('Fetching order details...');
         const response = await fetch(`/api/orders/${orderId}`);
         const data = await response.json();
         console.log('Order data:', data);
@@ -115,7 +109,7 @@ const Page: React.FC<PageProps> = ({ params, searchParams: urlSearchParams }) =>
     };
 
     verifyPaymentAndFetchOrder();
-  }, [params.orderId, searchParams, router, paymentVerified]);
+  }, [params.orderId, searchParams, router]);
 
   return (
     <div className="bg-white">

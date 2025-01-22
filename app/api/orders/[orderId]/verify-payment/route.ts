@@ -4,6 +4,7 @@ import {createClient} from "@/lib/supabase/server";
 
 export async function POST(req: Request, { params }: { params: { orderId: string } }) {
     const { paymentId, paymentIntentSecret } = await req.json();
+    console.log('POST /api/orders/[orderId]/verify-payment', paymentId, paymentIntentSecret);
     const supabase = await createClient();
     try {
         //Get order data
@@ -18,11 +19,12 @@ export async function POST(req: Request, { params }: { params: { orderId: string
         }
 
         const stripePaymentIntent = await Stripe.paymentIntents.retrieve(paymentId);
+        console.log('stripePaymentIntent', stripePaymentIntent);
         if(stripePaymentIntent.status !== 'succeeded' || stripePaymentIntent.client_secret !== paymentIntentSecret) {
             return NextResponse.json({ error: 'Payment verification failed' }, { status: 400 });
         }
 
-        const {data: paymentData, error: paymentError } = await supabase
+        const {data, error: paymentError } = await supabase
         .from('order_payments')
         .insert({
             order_id: orderData.id,
@@ -33,8 +35,7 @@ export async function POST(req: Request, { params }: { params: { orderId: string
         })
         .select()
         .single();
-
-        console.log('Payment data:', paymentData);
+        console.log('Payment data:', data);
 
         const {error: statusError} = await supabase
             .from('order_status_history')
@@ -64,7 +65,7 @@ export async function POST(req: Request, { params }: { params: { orderId: string
         // Clear the cart after successful payment verification
         const { error: cartError } = await supabase
             .from('carts')
-            .update({ is_active: false })
+            .delete()
             .eq('customer_id', orderData.customer_id);
 
         if (cartError) {

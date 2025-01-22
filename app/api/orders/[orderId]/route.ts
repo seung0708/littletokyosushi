@@ -11,7 +11,7 @@ export async function GET(req: Request, { params }: { params: { orderId: string 
             .eq('id', params.orderId)
             .single();
 
-        console.log('Raw order data:', JSON.stringify(orderData, null, 2));
+        console.log('orderData', orderData);
         
         if (orderError) {
             console.error('Error fetching order data:', orderError);
