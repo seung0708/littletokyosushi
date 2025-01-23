@@ -42,14 +42,22 @@ export async function POST(req: Request, { params }: { params: { orderId: string
             console.log('verify-payment Error updating payment:', paymentError);
         }
 
+
         // Insert status record
         const {error: statusError} = await supabase
             .from('order_status_history')
-            .insert({
-                order_id: params.orderId,
-                status: 'paid',
-                notes: 'Payment successfully processed'
-            });
+            .insert([
+                {
+                    order_id: params.orderId,
+                    status: 'paid',
+                    notes: 'Payment successfully processed'
+                },
+                {
+                    order_id: params.orderId,
+                    status: 'not_started',
+                    notes: 'Order ready for kitchen'
+                }
+            ]);
 
         if (statusError) {
             console.error('Error updating order status:', statusError);
@@ -59,7 +67,7 @@ export async function POST(req: Request, { params }: { params: { orderId: string
         const {error: orderErrorUpdate} = await supabase
             .from('orders')
             .update({
-                status: 'paid',
+                status: 'not_started',
             })
             .eq('id', params.orderId);
 

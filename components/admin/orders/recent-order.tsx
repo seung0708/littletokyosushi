@@ -5,8 +5,11 @@ import { Button } from "@/components/ui/button"
 import { DropdownMenu, DropdownMenuCheckboxItem, DropdownMenuContent,   DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
 import { Pagination, PaginationContent, PaginationItem } from "@/components/ui/pagination"
 
-export default function RecentOrder() {
-    return (
+import { useEffect, useState } from "react"
+
+export default function RecentOrder({order}: {order: any}) {
+  
+  return (
         <div>
           <Card
             className="overflow-hidden" x-chunk="dashboard-05-chunk-4"
