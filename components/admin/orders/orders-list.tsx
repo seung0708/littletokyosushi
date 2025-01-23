@@ -97,7 +97,7 @@ export default function OrdersList() {
                     <TableRow key={order.id} className="bg-accent">
                       {/* Each cell becomes a link */}
                       <TableCell>
-                        <Link href={`/admin/orders/${order.id}`} className="block hover:opacity-80">
+                        <Link href={`/orders/${order.id.substring(0, 8)}`} className="block hover:opacity-80">
                           <div className="font-medium">
                             {order.customers.first_name} {order.customers.last_name}
                           </div>
@@ -107,24 +107,24 @@ export default function OrdersList() {
                         </Link>
                       </TableCell>
                       <TableCell className="hidden sm:table-cell">
-                        <Link href={`/admin/orders/${order.id}`} className="block hover:opacity-80">
+                        <Link href={`/orders/${order.id.substring(0, 8)}`} className="block hover:opacity-80">
                           {order.order_type.toUpperCase()}
                         </Link>
                       </TableCell>
                       <TableCell className="hidden sm:table-cell">
-                        <Link href={`/admin/orders/${order.id}`} className="block hover:opacity-80">
+                        <Link href={`/orders/${order.id.substring(0, 8)}`} className="block hover:opacity-80">
                           <Badge className="text-xs" variant="secondary">
                             {order.status.toUpperCase().split('_').join(' ')}
                           </Badge>
                         </Link>
                       </TableCell>
                       <TableCell className="hidden md:table-cell">
-                        <Link href={`/admin/orders/${order.id}`} className="block hover:opacity-80">
+                        <Link href={`/orders/${order.id.substring(0, 8)}`} className="block hover:opacity-80">
                           {format(new Date(order.created_at), "MMMM d, yyyy h:mm a")}
                         </Link>
                       </TableCell>
                       <TableCell className="text-right">
-                        <Link href={`/admin/orders/${order.id}`} className="block hover:opacity-80">
+                        <Link href={`/orders/${order.id.substring(0, 8)}`} className="block hover:opacity-80">
                           ${order.total}
                         </Link>
                       </TableCell>
