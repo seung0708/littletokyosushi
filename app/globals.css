@@ -78,3 +78,53 @@ body {
     @apply bg-background text-foreground;
   }
 }
+
+@media print {
+  /* First, reset the document */
+  html, body {
+    margin: 0 !important;
+    padding: 0 !important;
+    height: auto !important;
+    min-height: 0 !important;
+  }
+
+  /* Hide everything except print container */
+  body > *:not(#print-container) {
+    display: none !important;
+  }
+
+  /* Position the print container */
+  #print-container {
+    display: block !important;
+    position: absolute !important;  /* Change to absolute */
+    left: 0 !important;
+    top: 0 !important;
+    margin: 0 !important;
+    padding: 8px !important;
+    width: 72mm !important;
+    max-width: 72mm !important;
+    min-height: 0 !important;
+    height: auto !important;
+    overflow: visible !important;
+  }
+
+  /* Make sure all content is visible */
+  #print-container * {
+    display: block !important;
+    visibility: visible !important;
+    overflow: visible !important;
+  }
+
+  /* Set page size */
+  @page {
+    size: 72mm auto;
+    margin: 0;
+  }
+}
+
+/* Hide print container during normal viewing */
+@media screen {
+  #print-container {
+    display: none !important;
+  }
+}

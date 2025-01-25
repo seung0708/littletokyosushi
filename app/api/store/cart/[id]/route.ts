@@ -4,8 +4,8 @@ import { Cart, CartItem, CartItemModifier, CartItemModifierOption } from '@/type
 import { findMatchingCartItem, createNewCartItemWithModifiers, getModifiersArray, updateExistingCartItem } from '@/utils/cart';
 
 export async function GET(request: Request, { params }: { params: { id: string } }) {
-    const { id: cartId } = params;
-    const supabase = createClient();
+    const { id: cartId } = await params;
+    const supabase = await createClient();
 
     const {data: dbCart, error} = await supabase
     .from('carts')

@@ -2,17 +2,16 @@ import {NextResponse} from 'next/server';
 import {createClient} from '@/lib/supabase/server';
 
 export async function GET(req: Request, { params }: { params: { orderId: string } }) {
-    const supabase = createClient();
+    const { orderId } = await params;
+    const supabase = await createClient();
     
     try {
         const {data: orderData, error: orderError} = await supabase
             .from('orders')
             .select(`*, order_items(*, order_item_modifiers(*, order_item_modifier_options(*)))`)
-            .eq('id', params.orderId)
+            .eq('id', orderId)
             .single();
 
-        
-        
         if (orderError) {
             console.error('Error fetching order data:', orderError);
             return NextResponse.json({ error: 'Failed to fetch order data' }, { status: 500 });

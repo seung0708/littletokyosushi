@@ -3,6 +3,8 @@ import Stripe from "@/lib/stripe/stripe";
 import {createClient} from "@/lib/supabase/server";
 
 export async function POST(req: Request, { params }: { params: { orderId: string } }) {
+    console.log('POST /api/orders/[orderId]/verify-payment ', params);
+    const {orderId} = await params;
     const { paymentId, paymentIntentSecret } = await req.json();
     console.log('POST /api/orders/[orderId]/verify-payment ', paymentId, paymentIntentSecret);
     const supabase = await createClient();
@@ -12,7 +14,7 @@ export async function POST(req: Request, { params }: { params: { orderId: string
         const { data: orderData, error: orderError } = await supabase
             .from('orders')
             .select('*')
-            .eq('id', params.orderId)
+            .eq('id', orderId)
             .single();
         
         if (orderError) {
@@ -48,12 +50,12 @@ export async function POST(req: Request, { params }: { params: { orderId: string
             .from('order_status_history')
             .insert([
                 {
-                    order_id: params.orderId,
+                    order_id: orderId,
                     status: 'paid',
                     notes: 'Payment successfully processed'
                 },
                 {
-                    order_id: params.orderId,
+                    order_id: orderId,
                     status: 'not_started',
                     notes: 'Order ready for kitchen'
                 }
@@ -69,7 +71,7 @@ export async function POST(req: Request, { params }: { params: { orderId: string
             .update({
                 status: 'not_started',
             })
-            .eq('id', params.orderId);
+            .eq('id', orderId);
 
         if (orderErrorUpdate) {
             console.error('Error updating order status:', orderErrorUpdate);
@@ -111,7 +113,7 @@ export async function POST(req: Request, { params }: { params: { orderId: string
         const latestStatus = await supabase
             .from('order_status_history')
             .select('created_at')
-            .eq('order_id', params.orderId)
+            .eq('order_id', orderId)
             .eq('status', 'paid')
             .order('created_at', { ascending: false })
             .limit(1)
@@ -121,7 +123,7 @@ export async function POST(req: Request, { params }: { params: { orderId: string
             const { error: deleteStatusError } = await supabase
                 .from('order_status_history')
                 .delete()
-                .eq('order_id', params.orderId)
+                .eq('order_id', orderId)
                 .eq('status', 'paid')
                 .lt('created_at', latestStatus.data.created_at);
 
@@ -133,7 +135,7 @@ export async function POST(req: Request, { params }: { params: { orderId: string
         return NextResponse.json({ 
             message: 'Payment verified successfully', 
             status: 200, 
-            orderId: params.orderId,
+            orderId: orderId,
             clearCart: true // Signal to client to clear localStorage
         });
         

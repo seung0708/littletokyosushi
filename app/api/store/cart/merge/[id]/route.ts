@@ -2,6 +2,7 @@ import {createClient} from "@/lib/supabase/server";
 import { NextResponse } from "next/server";
 
 export async function PATCH(request: Request, { params }: { params: { id: string } }) {
+    const { id } = await params;
     const supabase = await createClient(); 
     const { customerId } = await request.json();
     
@@ -9,7 +10,7 @@ export async function PATCH(request: Request, { params }: { params: { id: string
     const { data: currentCart, error: cartError } = await supabase
         .from('carts')
         .select('*')
-        .eq('id', params.id)
+        .eq('id', id)
         .single();
     
     if (cartError) {
@@ -39,7 +40,7 @@ export async function PATCH(request: Request, { params }: { params: { id: string
         const { data: updatedCart, error: updateError } = await supabase
             .from('carts')
             .update({ customer_id: customerId })
-            .eq('id', params.id)
+            .eq('id', id)
             .select();
 
             if (!updatedCart || updatedCart.length === 0) {

@@ -43,7 +43,7 @@ const OrderSummary = ( {form, onTotalCaluated}: Props) => {
         <h1 className="sr-only">Checkout</h1>
           <section aria-labelledby="summary-heading" className="py-12 text-red-500 md:px-10 lg:col-2 lg:row-start-1 lg:mx-auto lg:w-full lg:max-w-lg lg:bg-transparent lg:px-0 lg:pb-24 lg:pt-0">
           {cartItems.map((item) => (
-            <div className="mx-auto max-w-2xl px-4 lg:max-w-none lg:px-0">
+            <div key={item?.id?.substring(0, 8)} className="mx-auto max-w-2xl px-4 lg:max-w-none lg:px-0">
               <h2 id="summary-heading" className="text-white text-2xl">Order summary</h2>
               <div>
                 <h4>{customer?.name}</h4>

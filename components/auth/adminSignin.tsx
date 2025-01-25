@@ -43,7 +43,7 @@ export default function AdminSignin() {
       });
       //console.log(data, response);
       const result = await response.json();
-      console.log(result);
+
       if (!response.ok) {
         throw new Error(result.error || 'Failed to login');
       }

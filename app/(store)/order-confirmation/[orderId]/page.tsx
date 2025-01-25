@@ -1,5 +1,5 @@
 'use client';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, use } from 'react';
 import {useSearchParams} from 'next/navigation'
 
 import Link from 'next/link';
@@ -36,15 +36,14 @@ interface OrderDetails {
 }
 
 interface PageProps {
-  params: {
-    orderId: string;
-  };
+  params: Promise<{orderId: string}>;
   searchParams: {
     [key: string]: string | string[] | undefined;
   };
 }
 
-const Page: React.FC<PageProps> = ({ params, searchParams: urlSearchParams }) => {
+const Page: React.FC<PageProps> = ({params, searchParams: urlSearchParams }) => {
+  const {orderId} = use(params)
   const searchParams = useSearchParams();
   const [order, setOrder] = useState<OrderDetails | null>(null);
   const [loading, setLoading] = useState(true);
@@ -54,7 +53,6 @@ const Page: React.FC<PageProps> = ({ params, searchParams: urlSearchParams }) =>
 
   useEffect(() => {
     const verifyPaymentAndFetchOrder = async () => {
-      const orderId = params.orderId;
       const paymentId = searchParams.get('payment_intent');
       const paymentIntentSecret = searchParams.get('payment_intent_client_secret');
       const redirectStatus = searchParams.get('redirect_status');
@@ -109,14 +107,14 @@ const Page: React.FC<PageProps> = ({ params, searchParams: urlSearchParams }) =>
     };
 
     verifyPaymentAndFetchOrder();
-  }, [params.orderId, searchParams]);
+  }, [orderId, searchParams]);
 
   return (
     <div className="bg-white">
       <div className="mx-auto max-w-3xl px-4 py-16 sm:px-6 sm:py-24 lg:px-8">
         <div className="max-w-xl">
           <h1 className="mt-2 text-4xl font-bold tracking-tight sm:text-5xl">Thanks for your Order!</h1>
-          <p className="mt-2 text-base text-gray-500">Your order #{order?.id?.substring(0, 8).toUpperCase()} has been successfully placed.</p>
+          <p className="mt-2 text-base text-gray-500">Your order #{order?.short_id} has been successfully placed.</p>
 
           {/*<dl className="mt-12 text-sm font-medium">
             <dt className="text-gray-900">Tracking number</dt>

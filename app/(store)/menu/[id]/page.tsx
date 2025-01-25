@@ -1,5 +1,5 @@
 'use client'
-import {useEffect, useState} from 'react';
+import {useEffect, useState, use} from 'react';
 import { Item, Modifier } from '@/types/definitions';
 import { CartItem, CartItemModifier, CartItemModifierOption } from '@/types/cart';
 import Image from 'next/image';
@@ -55,7 +55,8 @@ const formSchema = z.object({
 
 type FormData = z.infer<typeof formSchema>;
 
-export default function ItemDetailsPage({ params }: { params: { id: string } }) {
+export default function ItemDetailsPage({ params }: { params: Promise<{ id: string }> }) {
+    const {id} = use(params);
     const [item, setItem] = useState<Item | null>(null);
     const [loading, setLoading] = useState(true);
     const [loadingImage, setLoadingImage] = useState(true);
@@ -132,7 +133,7 @@ export default function ItemDetailsPage({ params }: { params: { id: string } }) 
             
             try {
                 setLoading(true);
-                const response = await fetch(`/api/store/items/${params.id}`);
+                const response = await fetch(`/api/store/items/${id}`);
                 if (!response.ok) throw new Error('Failed to fetch item');
                 const data = await response.json();
                 
@@ -147,7 +148,7 @@ export default function ItemDetailsPage({ params }: { params: { id: string } }) 
             }
         };
         fetchItem();
-    }, [params.id, form]);
+    }, [id, form]);
 
     const calculateTotalPrice = (basePrice: number, quantity: number, modifiers: FormModifier[]) => {
         const modifierPrice = modifiers.reduce((total, mod) => {
