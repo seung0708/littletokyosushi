@@ -1,5 +1,5 @@
 'use client'
-import RecentOrder from "@/components/admin/orders/recent-order";
+import RecentOrder from "@/components/admin/orders/recentOrder/recent-order";
 
 import {useState, useEffect, use} from 'react'
 import AdminLoading from "../../../loading";

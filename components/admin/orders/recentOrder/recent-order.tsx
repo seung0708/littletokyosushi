@@ -12,8 +12,8 @@ import { format } from "date-fns"
 import { motion, AnimatePresence } from "framer-motion"
 import { useState, useEffect } from "react"
 import ReactDOM from "react-dom"
-import PrepTimeTimer from "./prep-time-timer"
-import PrintReceipt from "./print-receipt"
+import PrepTimeTimer from "../prep-time-timer"
+import PrintReceipt from "../print-receipt"
 
 export default function RecentOrder({order}: {order: any}) {
   console.log(order)
@@ -26,6 +26,15 @@ export default function RecentOrder({order}: {order: any}) {
       .min(5, "Prep time must be at least 5 minutes")
       .max(180, "Prep time cannot exceed 180 minutes"),
   })
+
+  const refundSchema = z.object({
+    amount: z.number()
+      .min(0.01, "Refund amount must be greater than 0")
+      .max(order.total, "Refund cannot exceed order total"),
+    reason: z.string()
+      .min(1, "Reason is required")
+      .max(500, "Reason cannot exceed 500 characters")
+  });
 
   const form = useForm<z.infer<typeof prepTimeSchema>>({
     resolver: zodResolver(prepTimeSchema),
