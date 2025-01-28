@@ -6,23 +6,13 @@ import { Badge } from "@/components/ui/badge"
 import { usePathname } from "next/navigation"
 import clsx from "clsx"
 import { useState } from "react"
-import { useRouter } from "next/navigation"
 
-// components/admin/sidebar.tsx
 export default function Sidebar() {
-  const [openMenus, setOpenMenus] = useState<{ [key: string]: boolean }>({
-    menu: false,
-    orders: false
-  })
   const pathname = usePathname()
-  const router = useRouter()
 
-  const toggleMenu = (menu: string) => {
-    setOpenMenus(prev => ({
-      ...prev,
-      [menu]: !prev[menu]
-    }))
-  }
+  // Check if a section should be expanded based on the current path
+  const isMenuExpanded = pathname.startsWith('/items')
+  const isOrdersExpanded = pathname.startsWith('/orders')
 
   return (
     <aside className="hidden border-2 w-60 bg-gray-100 p-4 border-r md:flex md:flex-col">
@@ -52,7 +42,6 @@ export default function Sidebar() {
             <div className="relative">
               <Link 
                 href="/orders"
-                onClick={() => toggleMenu('orders')}
                 className={clsx(
                   'flex items-center text-gray-700 rounded-lg px-2 w-full', 
                   {
@@ -68,7 +57,7 @@ export default function Sidebar() {
                 </div>
               </Link>
               
-              {openMenus.orders && (
+              {isOrdersExpanded && (
                 <div className="mt-1 ml-4 space-y-1">
                   <Link 
                     href="/orders/history"
@@ -91,7 +80,6 @@ export default function Sidebar() {
             <div className="relative">
               <Link 
                 href="/items"
-                onClick={() => toggleMenu('menu')}
                 className={clsx(
                   'flex items-center text-gray-700 rounded-lg px-2 w-full', 
                   {
@@ -107,7 +95,7 @@ export default function Sidebar() {
                 </div>
               </Link>
               
-              {openMenus.menu && (
+              {isMenuExpanded && (
                 <div className="mt-1 ml-4 space-y-1">
                   <Link 
                     href="/items/modifiers"

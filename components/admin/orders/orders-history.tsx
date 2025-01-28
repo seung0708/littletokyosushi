@@ -29,7 +29,8 @@ interface Order {
 }
 
 export default function OrdersHistory() {
-  const [orders, setOrders] = useState<Order[]>([]) // Initialize as empty array
+  const [orders, setOrders] = useState<Order[]>([]) 
+  console.log(orders)
   const [searchQuery, setSearchQuery] = useState('')
   const [loading, setLoading] = useState(true)
   const supabase = createClient()
@@ -37,31 +38,14 @@ export default function OrdersHistory() {
   const fetchArchivedOrders = async () => {
     try {
       setLoading(true)
-      const { data, error } = await supabase
-        .from('orders')
-        .select(`
-          *,
-          customers(*),
-          order_items(
-            *,
-            menu_items(*)
-          )
-        `)
-        .eq('archived', true)
-        .order('completed_at', { ascending: false })
-
-      if (error) {
-        console.error('Supabase error:', error)
-        throw error
-      }
-
-      // Ensure data is an array
-      setOrders(Array.isArray(data) ? data : [])
+      const response = await fetch(`/api/admin/orders?archived=true`)
+      if (!response.ok) throw new Error('Failed to fetch orders')
+      const data = await response.json()
+      setOrders(data)
     } catch (error) {
-      console.error('Error fetching archived orders:', error)
-      setOrders([]) // Set to empty array on error
+        console.error('Error:', error)
     } finally {
-      setLoading(false)
+        setLoading(false)
     }
   }
 
@@ -104,13 +88,6 @@ export default function OrdersHistory() {
       default:
         return 'secondary'
     }
-  }
-
-  const formatCurrency = (amount: number) => {
-    return new Intl.NumberFormat('en-US', {
-      style: 'currency',
-      currency: 'USD'
-    }).format(amount)
   }
 
   return (
@@ -157,7 +134,7 @@ export default function OrdersHistory() {
                 filteredOrders.map((order) => (
                   <TableRow key={order.id}>
                     <TableCell className="font-medium">{order.short_id}</TableCell>
-                    <TableCell>{order.customers?.name || 'Anonymous'}</TableCell>
+                    <TableCell>{`${order.customers?.first_name} ${order.customers?.last_name}` || 'Anonymous'}</TableCell>
                     <TableCell>{order.order_items?.length || 0} items</TableCell>
                     <TableCell>{order.total.toFixed(2)}</TableCell>
                     <TableCell>
@@ -169,7 +146,7 @@ export default function OrdersHistory() {
                       {format(new Date(order.completed_at || order.updated_at), 'MMM d, h:mm a')}
                     </TableCell>
                     <TableCell>
-                      <Link href={`/admin/orders/${order.short_id}`}>
+                      <Link  href={`/orders/${order.short_id}`}>
                         <Button variant="outline" size="sm">
                           View Details
                         </Button>
