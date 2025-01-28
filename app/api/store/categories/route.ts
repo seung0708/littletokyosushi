@@ -1,4 +1,3 @@
-// app/api/store/categories/route.ts
 import { createClient } from "@/lib/supabase/server";
 import { NextResponse } from "next/server";
 import { APIError } from "@/lib/utils/api-error";
@@ -8,15 +7,13 @@ export async function GET(req: Request) {
 
     try {
         const { data, error } = await supabase
-            .from('categories')
-            .select('*, menu_items(count)')
-            .order('display_order', { ascending: true });
+        .from('categories')
+        .select('*')
 
         if (error) {
-            console.error('Database error fetching categories:', error);
             throw new APIError('Failed to fetch categories', 500);
         }
-
+        
         if (!data || data.length === 0) {
             return NextResponse.json([]);
         }
@@ -29,8 +26,6 @@ export async function GET(req: Request) {
         return NextResponse.json(activeCategories);
 
     } catch (error) {
-        console.error('Error fetching categories:', error);
-        
         if (error instanceof APIError) {
             return NextResponse.json(
                 { error: error.message },
