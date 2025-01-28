@@ -10,7 +10,7 @@ export default function OrderDetails({order}: {order: any}) {
       <CardContent className="p-6 text-sm">
         <div className="grid gap-3">
           <div className="font-semibold">Order Details</div>
-          <OrderItems order={order.items} />
+          <OrderItems order={order} />
           <Separator className="my-2" />
           <OrderSummary order={order} />   
         </div>
