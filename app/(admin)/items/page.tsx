@@ -24,7 +24,7 @@ export default function ItemsPage() {
         const query = searchParams.get('query') || '';
         const currentPage = Number(searchParams.get('page')) || 1;
 
-        const response = await fetch(`/api/items?query=${encodeURIComponent(query)}&page=${currentPage}`);
+        const response = await fetch(`/api/admin/items?query=${encodeURIComponent(query)}&page=${currentPage}`);
         const data = await response.json();
         
         if (!response.ok) {
