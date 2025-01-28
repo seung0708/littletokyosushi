@@ -11,7 +11,7 @@ export async function GET(request: Request, { params }: { params: { orderId: str
         .select('*')
         .eq('order_id', orderId)
         .order('created_at', { ascending: false });
-    console.log(data, error)
+    
     if (error) {
         return NextResponse.json({ error: error.message }, { status: 400 });
     }

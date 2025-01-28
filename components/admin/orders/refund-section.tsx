@@ -22,7 +22,6 @@ interface RefundSectionProps {
     const fetchRefundHistory = async () => {
       const response = await fetch(`/api/admin/orders/${order.short_id}/refunds`);
       const data = await response.json();
-      console.log(data)
       setRefundHistory(data);
     };
   

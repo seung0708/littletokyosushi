@@ -14,7 +14,8 @@ export async function GET() {
               )
             )
           `)
-          .order('created_at', { ascending: false });
+          .order('created_at', { ascending: false })
+          .eq('archived', false);
 
     if (error) {
         return NextResponse.json({ error: error.message }, { status: 500 });

@@ -1,27 +1,44 @@
 import { Button } from "@/components/ui/button";
 import { Printer } from "lucide-react";
 
-export default function ActionButtons({order, onMarkReady, onPrint}) {
+interface ActionButtonsProps {
+    order: any
+    onMarkReady: () => void
+    onComplete: () => void
+    onPrint: () => void
+  }
+  
+  export default function ActionButtons({ order, onMarkReady, onComplete, onPrint }: ActionButtonsProps) {
     return (
-        <div className="flex gap-2 w-full">
+      <div className="flex gap-2 mt-4">
         {order.status === 'preparing' && (
-          <Button
+          <Button 
             onClick={onMarkReady}
-            type="button"
-            className="flex-1 bg-green-600 hover:bg-green-700"
+            variant="default"
+            className="flex items-center gap-2"
           >
             Mark as Ready
           </Button>
         )}
+        
+        {order.status === 'ready' && (
+          <Button 
+            onClick={onComplete}
+            variant="default"
+            className="flex items-center gap-2"
+          >
+            Complete Order
+          </Button>
+        )}
+  
         <Button
           onClick={onPrint}
-          type="button"
           variant="outline"
           className="flex items-center gap-2"
         >
           <Printer className="h-4 w-4" />
-          <span>Print Receipt</span>
+          Print Receipt
         </Button>
-      </div>    
-    )
-}
+      </div>
+    );
+  }

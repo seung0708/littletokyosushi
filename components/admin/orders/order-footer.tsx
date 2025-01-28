@@ -12,9 +12,10 @@ interface OrderFooterProps {
     isConfirmed: boolean
     form: any
     onSubmit: (values: any) => void
+    onComplete: () => void
   }
 
-export default function OrderFooter({order, onMarkReady, onPrint, isConfirmed, form, onSubmit}: OrderFooterProps) {
+export default function OrderFooter({order, onMarkReady, onPrint, isConfirmed, form, onSubmit, onComplete}: OrderFooterProps) {
     return (
         <CardFooter className="flex flex-row items-center border-t bg-muted/50 px-6 py-3">
         <Form {...form}>
@@ -82,7 +83,7 @@ export default function OrderFooter({order, onMarkReady, onPrint, isConfirmed, f
                   </motion.div>
                 )}
               </AnimatePresence>
-              <ActionButtons order={order} onMarkReady={onMarkReady} onPrint={onPrint} />
+              <ActionButtons order={order} onMarkReady={onMarkReady} onPrint={onPrint} onComplete={onComplete} />
             </div>
           </form>
         </Form>

@@ -21,6 +21,7 @@ export async function GET(req: Request, { params }: { params: { orderId: string 
         )
     `)
     .eq('short_id', orderId)
+    .eq('archived', false)
     .single();
 
     const order = {

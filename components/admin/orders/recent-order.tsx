@@ -35,6 +35,32 @@ export default function RecentOrder({order: initialOrder}: {order: any}) {
     },
   })
 
+
+  const onComplete = async () => {
+    try {
+      const response = await fetch(`/api/orders/${order.short_id}`, { 
+        method: "PATCH",
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ 
+          status: 'completed',
+          archived: true,
+          completed_at: new Date().toISOString()
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const updatedOrder = await response.json();
+      setOrder(updatedOrder);
+    } catch (error) {
+      console.error('Error completing order:', error);
+    }
+  };
+
   const onRefund = async (values: any) => {
     try {
       const response = await fetch(`/api/admin/orders/${order.short_id}/refunds`, {
@@ -82,25 +108,26 @@ export default function RecentOrder({order: initialOrder}: {order: any}) {
 
   const onMarkReady = async () => {
     try {
-      const response = await fetch(`/api/admin/orders/${order.short_id}`, {
+      const response = await fetch(`/api/orders/${order.short_id}`, {
         method: "PATCH",
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ status: 'ready' }),
+        body: JSON.stringify({ 
+          status: 'ready'
+        }),
       });
 
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
 
-      // Get the updated order data
       const updatedOrder = await response.json();
-      setOrder(updatedOrder); // Update the order state
+      setOrder(updatedOrder); // Update the order state with complete data
     } catch (error) {
       console.error('Error marking order as ready:', error);
     }
-  }
+  };
   const onPrint = () => {
     const originalBodyWidth = document.body.style.width;
     document.body.style.width = '72mm';
@@ -132,6 +159,7 @@ export default function RecentOrder({order: initialOrder}: {order: any}) {
             isConfirmed={isConfirmed} 
             form={form} 
             onSubmit={onSubmit} 
+            onComplete={onComplete}
           />
         </Card>
       </motion.div>
