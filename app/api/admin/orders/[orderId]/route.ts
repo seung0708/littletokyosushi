@@ -1,6 +1,10 @@
 import { createClient } from "@/lib/supabase/server";
 import { NextResponse } from "next/server";
-import { sendPrepTimeNotificationEmail, sendOrderReadyNotificationEmail } from "@/lib/email-smtp";
+import { 
+    sendOrderCompletedEmail,
+    sendPrepTimeNotificationEmail,
+    sendOrderReadyNotificationEmail
+} from '@/lib/email-smtp';
 
 export async function GET(req: Request, { params }: { params: { orderId: string } }) {
     const { orderId } = await params;
@@ -21,7 +25,7 @@ export async function GET(req: Request, { params }: { params: { orderId: string 
         )
     `)
     .eq('short_id', orderId)
-    .single(); 
+    .single();  // Remove the archived filter to get both types
 
     const order = {
       id: data?.id,
@@ -80,59 +84,100 @@ export async function GET(req: Request, { params }: { params: { orderId: string 
     return NextResponse.json(order);
 }
 
+// app/api/admin/orders/[orderId]/route.ts
 export async function PATCH(req: Request, { params }: { params: { orderId: string } }) {
     const { orderId } = await params;
     const { prepTime, status } = await req.json();
     const supabase = await createClient();
 
     try {
-        if (prepTime) {
-            // Existing prep time update logic
-            const { data: orderData, error: orderError } = await supabase
-                .from('orders')
-                .update({
-                    prep_time_minutes: prepTime,
-                    prep_time_confirmed_at: new Date(),
-                    status: 'preparing'
-                })
-                .eq('short_id', orderId);
+        // Get current order data first for comparison
+        const { data: currentOrder } = await supabase
+            .from('orders')
+            .select('*, customers(*)')
+            .eq('short_id', orderId)
+            .single();
 
-            if (orderError) throw orderError;
+        if (!currentOrder) {
+            return NextResponse.json({ error: 'Order not found' }, { status: 404 });
+        }
 
-            // Send email notification
-            const { data: order } = await supabase
-                .from('orders')
-                .select('*, customers(*)')
-                .eq('short_id', orderId)
-                .single();
-
-            if (order) {
-                await sendPrepTimeNotificationEmail(order, order.customers);
+        // Validate status transitions
+        if (status) {
+            // Can't mark as ready without prep time
+            if (status === 'ready' && !currentOrder.prep_time_confirmed_at) {
+                return NextResponse.json({ 
+                    error: 'Cannot mark order as ready before setting prep time' 
+                }, { status: 400 });
             }
-        } else if (status === 'ready') {
-            const { data: orderData, error: orderError } = await supabase
-                .from('orders')
-                .update({
-                    status: 'ready',
-                    ready_at: new Date()
-                })
-                .eq('short_id', orderId);
 
-            if (orderError) throw orderError;
-
-            // Fetch the updated order with customer data for email
-            const { data: order } = await supabase
-                .from('orders')
-                .select('*, customers(*)')
-                .eq('short_id', orderId)
-                .single();
-
-            if (order) {
-                await sendOrderReadyNotificationEmail(order, order.customers);
+            // Can't complete an order that's not ready
+            if (status === 'completed' && currentOrder.status !== 'ready') {
+                return NextResponse.json({ 
+                    error: 'Can only complete orders that are ready' 
+                }, { status: 400 });
             }
         }
 
-        return NextResponse.json({ success: true });
+        // Validate prep time
+        if (prepTime) {
+            if (prepTime <= 0) {
+                return NextResponse.json({ 
+                    error: 'Prep time must be greater than 0 minutes' 
+                }, { status: 400 });
+            }
+        }
+
+        let updateData = {};
+
+        if (prepTime) {
+            updateData = {
+                prep_time_minutes: prepTime,
+                prep_time_confirmed_at: new Date(),
+                status: 'preparing'
+            };
+        } else if (status === 'ready') {
+            updateData = {
+                status: 'ready',
+                ready_at: new Date()
+            };
+        } else if (status === 'completed') {
+            updateData = {
+                status: 'completed',
+                completed_at: new Date(),
+                archived: true
+            };
+        }
+
+        // Update the order
+        const { data: updatedOrder, error: updateError } = await supabase
+            .from('orders')
+            .update(updateData)
+            .eq('short_id', orderId)
+            .select('*, customers(*)')
+            .single();
+
+        if (updateError) throw updateError;
+
+        // Send appropriate email notifications
+        if (updatedOrder && updatedOrder.customers) {
+            let emailResult;
+            
+            if (prepTime) {
+                emailResult = await sendPrepTimeNotificationEmail(updatedOrder, updatedOrder.customers);
+            } else if (status === 'ready') {
+                emailResult = await sendOrderReadyNotificationEmail(updatedOrder, updatedOrder.customers);
+            } else if (status === 'completed') {
+                emailResult = await sendOrderCompletedEmail(updatedOrder, updatedOrder.customers);
+            }
+
+            if (emailResult && !emailResult.success) {
+                console.error('Failed to send email notification:', emailResult.error);
+                // Continue with the order update even if email fails
+            }
+        }
+
+        return NextResponse.json(updatedOrder);
     } catch (error) {
         console.error('Error updating order:', error);
         return NextResponse.json({ error: 'Failed to update order' }, { status: 500 });

@@ -1,5 +1,6 @@
 import { createClient } from "@/lib/supabase/server";
 import { NextResponse } from "next/server";
+import { APIError } from "@/lib/utils/api-error";
 
 export async function GET(
     request: Request,
@@ -8,54 +9,62 @@ export async function GET(
     const supabase = await createClient();
 
     try {
-        // Fetch the menu item
+        // Validate ID
         const id = parseInt(params.id);
+        if (isNaN(id)) {
+            throw new APIError('Invalid item ID', 400);
+        }
+
+        // Fetch the menu item with all related data
         const { data: itemWithModifiers, error: itemError } = await supabase
             .from('menu_items')
-            .select('*, modifiers(*, modifier_options(*))')
+            .select(`
+                *,
+                categories(*),
+                modifiers(
+                    *,
+                    modifier_options(*)
+                )
+            `)
             .eq('id', id)
             .single();
 
         if (itemError) {
-            return NextResponse.json(
-                { error: 'Failed to fetch item' },
-                { status: 500 }
-            );
+            console.error('Database error fetching item:', itemError);
+            throw new APIError('Failed to fetch item details', 500);
         }
 
         if (!itemWithModifiers) {
+            throw new APIError('Item not found', 404);
+        }
+
+        // Format prices as numbers
+        const formattedItem = {
+            ...itemWithModifiers,
+            price: parseFloat(itemWithModifiers.price),
+            modifiers: itemWithModifiers.modifiers?.map(modifier => ({
+                ...modifier,
+                modifier_options: modifier.modifier_options?.map(option => ({
+                    ...option,
+                    price: parseFloat(option.price)
+                }))
+            }))
+        };
+
+        return NextResponse.json(formattedItem);
+
+    } catch (error) {
+        console.error('Error fetching menu item:', error);
+        
+        if (error instanceof APIError) {
             return NextResponse.json(
-                { error: 'Item not found' },
-                { status: 404 }
+                { error: error.message },
+                { status: error.status }
             );
         }
 
-        const item = {
-            id: itemWithModifiers.id,
-            name: itemWithModifiers.name,
-            description: itemWithModifiers.description,
-            price: itemWithModifiers.price,
-            image_urls: itemWithModifiers.image_urls,
-            modifiers: itemWithModifiers.modifiers.map((mod: any) => ({
-                id: mod.id,
-                name: mod.name,
-                min_selections: mod.min_selections,
-                max_selections: mod.max_selections,
-                is_required: mod.is_required,
-                modifier_options: mod.modifier_options.map((opt: any) => ({
-                    id: opt.id,
-                    modifier_id: opt.modifier_id,
-                    modifier_option_id: opt.id,
-                    name: opt.name,
-                    price: opt.price
-                }))
-            }))
-        }
-        return NextResponse.json(item);
-    } catch (error) {
-        console.error('Unexpected error in GET /api/main/items/[id]:', error);
         return NextResponse.json(
-            { error: 'Internal server error' },
+            { error: 'An unexpected error occurred while fetching the item' },
             { status: 500 }
         );
     }

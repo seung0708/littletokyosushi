@@ -1,19 +1,46 @@
+// app/api/store/categories/route.ts
 import { createClient } from "@/lib/supabase/server";
 import { NextResponse } from "next/server";
+import { APIError } from "@/lib/utils/api-error";
 
 export async function GET(req: Request) {
     const supabase = await createClient();
 
     try {
         const { data, error } = await supabase
-        .from('categories')
-        .select('*')
-        if (error) throw new Error(error.message);
+            .from('categories')
+            .select('*, menu_items(count)')
+            .order('display_order', { ascending: true });
+
+        if (error) {
+            console.error('Database error fetching categories:', error);
+            throw new APIError('Failed to fetch categories', 500);
+        }
+
+        if (!data || data.length === 0) {
+            return NextResponse.json([]);
+        }
         
-        return NextResponse.json(data);
+        // Filter out categories with no items
+        const activeCategories = data.filter(category => 
+            category.menu_items?.[0]?.count > 0
+        );
+
+        return NextResponse.json(activeCategories);
 
     } catch (error) {
-        console.error(error);
-        return NextResponse.json({ error: 'Failed to fetch menu data' }, { status: 500 });
+        console.error('Error fetching categories:', error);
+        
+        if (error instanceof APIError) {
+            return NextResponse.json(
+                { error: error.message },
+                { status: error.status }
+            );
+        }
+
+        return NextResponse.json(
+            { error: 'An unexpected error occurred while fetching categories' },
+            { status: 500 }
+        );
     }
 }
