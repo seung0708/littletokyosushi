@@ -1,37 +1,18 @@
-import {Card, CardContent, CardDescription, CardFooter, CardHeader,CardTitle} from "@/components/ui/card"
-import { Progress } from "@/components/ui/progress"
-
-export default function OrderSummary() {
-    return (
-      <>
-            <Card x-chunk="dashboard-05-chunk-1">
-              <CardHeader className="pb-2">
-                <CardDescription>This Week</CardDescription>
-                <CardTitle className="text-4xl">$1,329</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="text-xs text-muted-foreground">
-                  +25% from last week
-                </div>
-              </CardContent>
-              <CardFooter>
-                <Progress value={25} aria-label="25% increase" />
-              </CardFooter>
-            </Card>
-            <Card x-chunk="dashboard-05-chunk-2">
-              <CardHeader className="pb-2">
-                <CardDescription>This Month</CardDescription>
-                <CardTitle className="text-4xl">$5,329</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="text-xs text-muted-foreground">
-                  +10% from last month
-                </div>
-              </CardContent>
-              <CardFooter>
-                <Progress value={12} aria-label="12% increase" />
-              </CardFooter>
-            </Card>
-        </>
-    )
+export default function OrderSummary({order}: {order: any}) {
+  return (
+    <ul className="grid gap-3">
+      <li className="flex items-center justify-between">
+        <span className="text-muted-foreground">Subtotal</span>
+        <span>${order.subtotal.toFixed(2)}</span>
+      </li>
+      <li className="flex items-center justify-between">
+        <span className="text-muted-foreground">Service Fee</span>
+        <span>${order.serviceFee.toFixed(2)}</span>
+      </li>
+      <li className="flex items-center justify-between font-semibold">
+        <span className="text-muted-foreground">Total</span>
+        <span>${order.total.toFixed(2)}</span>
+      </li>
+    </ul>
+  )
 }
