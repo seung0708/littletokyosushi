@@ -27,7 +27,7 @@ interface Order {
 }
 
 export default function PrintReceipt({ order }: { order: Order }) {
-  console.log(order)
+  
   return (
     <div id="print-container" style={{
       padding: '8px',

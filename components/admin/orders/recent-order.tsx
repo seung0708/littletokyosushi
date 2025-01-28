@@ -18,7 +18,8 @@ import { OrderHeader } from "./order-header"
 import OrderDetails from "./order-details"
 import OrderFooter from "./order-footer"
 
-export default function RecentOrder({order}: {order: any}) {
+export default function RecentOrder({order: initialOrder}: {order: any}) {
+  const [order, setOrder] = useState(initialOrder);
   const [isConfirmed, setIsConfirmed] = useState(false);
   
   const prepTimeSchema = z.object({
@@ -34,6 +35,28 @@ export default function RecentOrder({order}: {order: any}) {
     },
   })
 
+  const onRefund = async (values: any) => {
+    try {
+      const response = await fetch(`/api/admin/orders/${order.short_id}/refunds`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(values)
+      });
+  
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.message || 'Failed to process refund');
+      }
+  
+      // Show success message or update UI
+    } catch (error) {
+      console.error('Error processing refund:', error);
+      // Show error message
+    }
+  };
+
   const onSubmit = async (values: z.infer<typeof prepTimeSchema>) => {
     try {
       let response = await fetch(`/api/admin/orders/${order.short_id}`, {
@@ -48,6 +71,9 @@ export default function RecentOrder({order}: {order: any}) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
 
+      // Get the updated order data
+      const updatedOrder = await response.json();
+      setOrder(updatedOrder); // Update the order state
       setIsConfirmed(true);
     } catch (error) {
       console.error('Error updating prep time:', error);
@@ -67,11 +93,14 @@ export default function RecentOrder({order}: {order: any}) {
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
+
+      // Get the updated order data
+      const updatedOrder = await response.json();
+      setOrder(updatedOrder); // Update the order state
     } catch (error) {
       console.error('Error marking order as ready:', error);
     }
   }
-
   const onPrint = () => {
     const originalBodyWidth = document.body.style.width;
     document.body.style.width = '72mm';
@@ -95,7 +124,7 @@ export default function RecentOrder({order}: {order: any}) {
       >
         <Card className="overflow-hidden" x-chunk="dashboard-05-chunk-4">
           <OrderHeader order={order} />
-          <OrderDetails order={order} />
+          <OrderDetails order={order} onRefund={onRefund} />
           <OrderFooter 
             order={order} 
             onMarkReady={onMarkReady} 
