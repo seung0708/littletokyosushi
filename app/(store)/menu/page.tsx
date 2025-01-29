@@ -68,7 +68,7 @@ const MenuPage: React.FC = () => {
     }
 
     return (
-        <section id="menu" className="py-24 sm:py-32">
+        <section id="menu" className="bg-black text-white py-24 sm:py-32">
             <div className="categories flex flex-wrap sm:flex-nowrap justify-center gap-2 text-white text-[14px] sm:text-sm md:text-md lg:text-lg">
                 {categories.map(category => (
                     <button 

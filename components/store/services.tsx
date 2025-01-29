@@ -3,7 +3,7 @@ import Image from "next/image";
 const Services: React.FC = () => {
     return (
         <section aria-labelledby="services-heading">
-            <div className="py-24 sm:py-32">
+            <div className="bg-black text-white py-24 sm:py-32">
                 <div className="w-4/5 mx-auto grid grid-cols-1 gap-y-12 sm:grid-cols-1 sm:gap-x-6 lg:grid-cols-3 lg:gap-x-8 lg:gap-y-0 ">
                     <div className="text-center md:flex md:items-start md:text-left lg:block lg:text-center">
                         <div className="md:flex-shrink-0">
