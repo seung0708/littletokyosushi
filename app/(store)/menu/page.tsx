@@ -25,8 +25,8 @@ export interface Items {
 }
 
 const MenuPage: React.FC = () => {
-    const [selectedCategory, setSelectedCategory] = useState<number | null>(null);
     const [items, setItems] = useState<Items[]>([]);
+    console.log(items);
     const [categories, setCategories] = useState<Category[]>([]);
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
@@ -50,39 +50,42 @@ const MenuPage: React.FC = () => {
                 console.error('Error fetching menu data:', error);
                 if(error instanceof APIError) {
                     setError(error.message);
-                } else {
-                    setError('An unexpected error occurred. Please try again.');
                 }
             } finally {
                 setIsLoading(false);
             }
         };
-
         fetchData();
     }, []);
 
-    const filteredItems = selectedCategory ? items.filter(item => item.category_id === selectedCategory) : items;
-    
-    if (isLoading) {
-        return <div>Loading...</div>;
-    }
+    // Group items by category
+    const itemsByCategory = items.reduce((acc, item) => {
+        const categoryId = item.categories.id;
+        if (!acc[categoryId]) {
+            acc[categoryId] = {
+                name: item.categories.name,
+                items: []
+            };
+        }
+        acc[categoryId].items.push(item);
+        return acc;
+    }, {} as Record<number, { name: string; items: Items[] }>);
+
+    if (isLoading) return <div>Loading...</div>;
+    if (error) return <div>Error: {error}</div>;
 
     return (
         <section id="menu" className="bg-black text-white py-24 sm:py-32">
-            <div className="categories flex flex-wrap sm:flex-nowrap justify-center gap-2 text-white text-[14px] sm:text-sm md:text-md lg:text-lg">
-                {categories.map(category => (
-                    <button 
-                        className="bg-red-500 hover:bg-red-800 rounded-full px-4 py-1" 
-                        key={category?.id} 
-                        onClick={() => setSelectedCategory(category?.id)}
-                    >
-                        {category.name}
-                    </button>
+            <div className="container mx-auto px-4">
+                {Object.entries(itemsByCategory).map(([categoryId, category]) => (
+                    <div key={categoryId} className="mb-12 text-center">
+                        <h2 className="text-4xl text-red-500 font-bold mb-6">{category.name.split('')[0].toUpperCase() + category.name.substring(1)}</h2>
+                        <MenuItems items={category.items} />
+                    </div>
                 ))}
             </div>
-            <MenuItems items={filteredItems} />
-        </section>
-    )
-}
+    </section>
+    );
+};
 
-export default MenuPage
+export default MenuPage;

@@ -16,7 +16,8 @@ export async function GET(request: Request) {
         const { data, error } = await supabase
             .from('menu_items')
             .select('*, categories(*)')
-        
+            .order('category_id', { ascending: true })
+            
         if (error) throw new Error(error.message);
         
         return NextResponse.json(data);

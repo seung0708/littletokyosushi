@@ -7,13 +7,13 @@ interface MenuItemsProps {
 }
 
 const MenuItems: React.FC<MenuItemsProps> = ({items}) => {
-    //console.log(items);
+
     const router = useRouter();
     
     const openProductDetails = (id: number) => {
         router.push(`/menu/${id}`)
     }
-
+    
     return (
         <section className="menu__items mt-6">
             <div className="mt-6 grid grid-cols-2 gap-y-6 sm:gap-x-6 md:grid-cols-3">
@@ -23,7 +23,7 @@ const MenuItems: React.FC<MenuItemsProps> = ({items}) => {
                         <div className="w-full overflow-hidden rounded-md">
                             <Image 
                                 src={`${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/menu-items/${item.image_urls[0]}`} 
-                                className='bg-black h-32 mx-auto sm:h-48 md:h-64 lg:72 object-contain' 
+                                className='h-32 mx-auto sm:h-48 md:h-64 lg:72 object-contain' 
                                 alt={`${item.name} image`} 
                                 height={500}
                                 width={500}
