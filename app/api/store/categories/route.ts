@@ -9,7 +9,6 @@ export async function GET(req: Request) {
         const { data, error } = await supabase
         .from('categories')
         .select('*')
-
         if (error) {
             throw new APIError('Failed to fetch categories', 500);
         }
@@ -18,12 +17,7 @@ export async function GET(req: Request) {
             return NextResponse.json([]);
         }
         
-        // Filter out categories with no items
-        const activeCategories = data.filter(category => 
-            category.menu_items?.[0]?.count > 0
-        );
-
-        return NextResponse.json(activeCategories);
+        return NextResponse.json(data);
 
     } catch (error) {
         if (error instanceof APIError) {

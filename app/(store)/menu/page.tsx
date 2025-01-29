@@ -1,7 +1,8 @@
 'use client';
 import {useState, useEffect} from 'react';
 import MenuItems from "../../../components/store/menuItems"
-import { createClient } from "@/lib/supabase/client";
+import { apiRequest } from "@/lib/utils/api-fetch";
+import { APIError } from "@/lib/utils/api-error";
 
 interface Category {
     id: number;
@@ -28,37 +29,30 @@ const MenuPage: React.FC = () => {
     const [items, setItems] = useState<Items[]>([]);
     const [categories, setCategories] = useState<Category[]>([]);
     const [isLoading, setIsLoading] = useState(true);
+    const [error, setError] = useState<string | null>(null);
 
     useEffect(() => {
         const fetchData = async () => {
+            setIsLoading(true);
+            setError(null);
             try {
-                setIsLoading(true);
-                const response = await fetch('/api/store/items');
-                const data = await response.json();
-                setItems(data.items)
+                const categoriesData = await apiRequest<Category[]>('/api/store/categories', {
+                    timeout: 5000, 
+                    retries: 3, 
+                });
+                setCategories(categoriesData)
+                const itemsData = await apiRequest<Items[]>('/api/store/items', {
+                    timeout: 5000, 
+                    retries: 3, 
+                });
+                setItems(itemsData);
             } catch (error) {
-                console.error('Error fetching data:', error);
-            } finally {
-                setIsLoading(false);
-            }
-        };
-
-        fetchData();
-    }, []);
-
-    useEffect(() => {
-        const fetchData = async () => {
-            try {
-                setIsLoading(true);
-                const itemsResponse = await fetch('/api/store/items');
-                const items = await itemsResponse.json();
-                setItems(items.items)
-
-                const categoriesResponse = await fetch('/api/store/categories');
-                const categories = await categoriesResponse.json();
-                setCategories(categories)
-            } catch (error) {
-                console.error('Error fetching data:', error);
+                console.error('Error fetching menu data:', error);
+                if(error instanceof APIError) {
+                    setError(error.message);
+                } else {
+                    setError('An unexpected error occurred. Please try again.');
+                }
             } finally {
                 setIsLoading(false);
             }

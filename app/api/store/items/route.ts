@@ -19,7 +19,7 @@ export async function GET(request: Request) {
         
         if (error) throw new Error(error.message);
         
-        return NextResponse.json({ items: data });
+        return NextResponse.json(data);
 
     } catch (error) {
         console.error('Error fetching menu items:', error);

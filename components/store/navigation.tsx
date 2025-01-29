@@ -22,8 +22,8 @@ const Navbar: React.FC<NavbarProps> = ({isOpen, toggleMenu}) => {
             </div>
             <div className="flex items-center space-x-2">
                 <div className="hidden md:flex space-x-4">
-                    <NavLink href="/#about" className="" showSpan={true}>About</NavLink>       
-                    <NavLink href="/#contact" showSpan={true}>Contact</NavLink>
+                    <NavLink href="/about" className="" showSpan={true}>About</NavLink>       
+                    <NavLink href="/contact" showSpan={true}>Contact</NavLink>
                     <NavLink href="/menu" className="" showSpan={true}>Menu</NavLink>
                 </div>
                 <CartIcon />  

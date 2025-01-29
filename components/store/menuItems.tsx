@@ -7,6 +7,7 @@ interface MenuItemsProps {
 }
 
 const MenuItems: React.FC<MenuItemsProps> = ({items}) => {
+    //console.log(items);
     const router = useRouter();
     
     const openProductDetails = (id: number) => {
