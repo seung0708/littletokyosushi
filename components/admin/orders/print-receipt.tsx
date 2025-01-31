@@ -1,103 +1,131 @@
-'use client'
-import {format} from 'date-fns';
+import { Database } from '@/types/database.types';
 
-interface OrderItem {
-  name: string;
-  quantity: number;
-  price: number;
-  itemModifiers?: Array<{
-    name: string;
-    options: Array<{
-      name: string;
-    }>;
-  }>;
+type Order = Database['public']['Tables']['orders']['Row'] & {
+    customer: Database['public']['Tables']['customers']['Row'];
+    order_items: Array<
+        Database['public']['Tables']['order_items']['Row'] & {
+            menu_item: Database['public']['Tables']['items']['Row'];
+            order_item_modifiers: Array<
+                Database['public']['Tables']['order_item_modifiers']['Row'] & {
+                    order_item_modifier_options: Array<
+                        Database['public']['Tables']['order_item_modifier_options']['Row']
+                    >;
+                }
+            >;
+        }
+    >;
+};
+
+interface PrintReceiptProps {
+    order: Order;
 }
 
-interface Order {
-  short_id: string;
-  created_at: string;
-  type: string;
-  items: OrderItem[];
-  subtotal: number;
-  serviceFee: number;
-  total: number;
-  customerFirstName: string;
-  customerLastName: string;
-  customerPhone: string;
-}
+const PrintReceipt = async ({ order }: PrintReceiptProps) => {
+    const calculateItemTotal = (item: Order['order_items'][0]) => {
+        const modifierTotal = item.order_item_modifiers.reduce((total, modifier) => {
+            return total + modifier.order_item_modifier_options.reduce((optTotal, opt) => 
+                optTotal + opt.price, 0
+            );
+        }, 0);
+        return (item.base_price + modifierTotal) * item.quantity;
+    };
 
-export default function PrintReceipt({ order }: { order: Order }) {
-  
-  return (
-    <div id="print-container" style={{
-      padding: '8px',
-      fontFamily: 'monospace',
-      fontSize: '12px',
-      lineHeight: 1.3,
-      background: 'white',
-      color: 'black',
-      width: '72mm',
-      maxWidth: '72mm',
-      overflow: 'hidden',
-      margin: '0 auto',
-      pageBreakInside: 'avoid',
-      pageBreakAfter: 'always',
-      boxSizing: 'border-box',
-      breakBefore: 'page',
-      breakAfter: 'page',
-      breakInside: 'avoid'
-    }}>
-      <div style={{ textAlign: 'center', marginBottom: '8px' }}>
-        <h1 style={{ fontSize: '18px', fontWeight: 'bold', marginBottom: '4px' }}>LITTLE TOKYO SUSHI</h1>
-        <div style={{ fontSize: '16px' }}>#{order.short_id} - {order.type.toUpperCase()}</div>
-        <div style={{ fontSize: '14px' }}>
-        {order.type === 'pickup' && (
-                  <>
-                    {format(new Date(order.pickupDate), 'EEEE, MMMM d, yyyy')}{' '}
-                    {order.pickupTime && (
-                      <>
-                        {(() => {
-                          const [hours, minutes] = order.pickupTime.split(':');
-                          const date = new Date();
-                          date.setHours(parseInt(hours, 10));
-                          date.setMinutes(parseInt(minutes, 10));
-                          return format(date, 'h:mm a');
-                        })()}
-                      </>
-                    )}
-                  </>
-                )}
-        </div>
-      </div>
+    // Set up print styling
+    const originalBodyWidth = document.body.style.width;
+    document.body.style.width = '72mm';
+    document.body.style.margin = '0';
+    document.body.style.padding = '0';
 
-      <hr style={{ border: 'none', borderTop: '1px solid black', margin: '8px 0' }} />
+    // Create print content
+    const printWindow = window.open('', '_blank');
+    if (!printWindow) {
+        throw new Error('Failed to open print window');
+    }
 
-      {order.items.map((item, index) => (
-        <div key={index} style={{ margin: '4px 0' }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '16px' }}>
-            <span>{item.quantity}x {item.name}</span>
-    
-          </div>
-          {item.itemModifiers?.map((mod, modIndex) => (
-            mod.options.map((opt, optIndex) => (
-              <div key={`${modIndex}-${optIndex}`} style={{ paddingLeft: '8px', fontSize: '14px' }}>
-                - {opt.name}
-              </div>
-            ))
-          ))}
-        </div>
-      ))}
+    printWindow.document.write(`
+        <html>
+        <head>
+            <title>Order Receipt #${order.id}</title>
+            <style>
+                body {
+                    font-family: monospace;
+                    width: 72mm;
+                    margin: 0;
+                    padding: 8px;
+                }
+                .header {
+                    text-align: center;
+                    margin-bottom: 16px;
+                }
+                .item {
+                    margin-bottom: 8px;
+                }
+                .modifier {
+                    padding-left: 16px;
+                    font-size: 0.9em;
+                }
+                .total {
+                    margin-top: 16px;
+                    border-top: 1px dashed black;
+                    padding-top: 8px;
+                }
+                .footer {
+                    margin-top: 16px;
+                    text-align: center;
+                    font-size: 0.9em;
+                }
+            </style>
+        </head>
+        <body>
+            <div class="header">
+                <h2>Little Tokyo Sushi</h2>
+                <p>Order #${order.id}</p>
+                <p>${new Date(order.created_at || '').toLocaleString()}</p>
+            </div>
 
-      <hr style={{ border: 'none', borderTop: '1px solid black', margin: '8px 0' }} />
+            <div class="customer">
+                <p>Customer: ${order.customer.name || 'Guest'}</p>
+                ${order.customer.phone ? `<p>Phone: ${order.customer.phone}</p>` : ''}
+            </div>
 
-      <div style={{ textAlign: 'center', margin: '8px 0', fontSize: '13px' }}>
-        <div>{order.customerFirstName} {order.customerLastName}</div>
-        {order.customerPhone && <div>{order.customerPhone}</div>}
-      </div>
+            <div class="items">
+                ${order.order_items.map(item => `
+                    <div class="item">
+                        <p>${item.quantity}x ${item.menu_item.name} - $${calculateItemTotal(item).toFixed(2)}</p>
+                        ${item.order_item_modifiers.map(modifier => `
+                            <div class="modifier">
+                                ${modifier.name}:
+                                ${modifier.order_item_modifier_options.map(option => 
+                                    `${option.name} (+$${option.price.toFixed(2)})`
+                                ).join(', ')}
+                            </div>
+                        `).join('')}
+                        ${item.notes ? `<div class="modifier">Note: ${item.notes}</div>` : ''}
+                    </div>
+                `).join('')}
+            </div>
 
-      <div style={{ textAlign: 'center', marginTop: '8px', fontSize: '13px' }}>
-        <div>Thank you!</div>
-      </div>
-    </div>
-  );
-}
+            <div class="total">
+                <p><strong>Total: $${order.total.toFixed(2)}</strong></p>
+            </div>
+
+            <div class="footer">
+                <p>Thank you for your order!</p>
+                <p>Visit us again at Little Tokyo Sushi</p>
+            </div>
+        </body>
+        </html>
+    `);
+
+    // Print and cleanup
+    printWindow.document.close();
+    printWindow.print();
+    printWindow.close();
+
+    // Restore original body styling
+    document.body.style.width = originalBodyWidth;
+    document.body.style.margin = '';
+    document.body.style.padding = '';
+};
+
+export default PrintReceipt;

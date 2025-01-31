@@ -2,7 +2,7 @@
 "use client"
 
 import { useState, useEffect } from 'react'
-import { format } from 'date-fns'
+import { formatDistanceToNow } from 'date-fns'
 import Link from 'next/link'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Badge } from "@/components/ui/badge"
@@ -10,27 +10,26 @@ import { Button } from "@/components/ui/button"
 import { createClient } from '@/lib/supabase/client'
 import { Input } from "@/components/ui/input"
 import { Search } from "lucide-react"
+import { Database } from '@/types/database.types';
 
-interface Order {
-  id: string
-  short_id: string
-  status: string
-  total: number
-  completed_at: string
-  updated_at: string
-  archived: boolean
-  customers?: {
-    name: string
-  }
-  order_items?: Array<{
-    id: string
-    menu_items: any
-  }>
-}
+type Order = Database['public']['Tables']['orders']['Row'] & {
+    customer: Database['public']['Tables']['customers']['Row'];
+    order_items: Array<
+        Database['public']['Tables']['order_items']['Row'] & {
+            menu_item: Database['public']['Tables']['items']['Row'];
+            order_item_modifiers: Array<
+                Database['public']['Tables']['order_item_modifiers']['Row'] & {
+                    order_item_modifier_options: Array<
+                        Database['public']['Tables']['order_item_modifier_options']['Row']
+                    >;
+                }
+            >;
+        }
+    >;
+};
 
 export default function OrdersHistory() {
   const [orders, setOrders] = useState<Order[]>([]) 
-  console.log(orders)
   const [searchQuery, setSearchQuery] = useState('')
   const [loading, setLoading] = useState(true)
   const supabase = createClient()
@@ -73,8 +72,8 @@ export default function OrdersHistory() {
   const filteredOrders = Array.isArray(orders) ? orders.filter(order => {
     const searchLower = searchQuery.toLowerCase()
     return (
-      order.short_id.toLowerCase().includes(searchLower) ||
-      (order.customers?.name || '').toLowerCase().includes(searchLower) ||
+      order.id.toLowerCase().includes(searchLower) ||
+      (order.customer?.name || '').toLowerCase().includes(searchLower) ||
       order.status.toLowerCase().includes(searchLower)
     )
   }) : []
@@ -116,37 +115,42 @@ export default function OrdersHistory() {
               <TableRow>
                 <TableHead>Order ID</TableHead>
                 <TableHead>Customer</TableHead>
-                <TableHead>Items</TableHead>
-                <TableHead>Total</TableHead>
                 <TableHead>Status</TableHead>
-                <TableHead>Completed At</TableHead>
+                <TableHead>Total</TableHead>
+                <TableHead>Created</TableHead>
                 <TableHead>Actions</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {filteredOrders.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={7} className="text-center py-4">
+                  <TableCell colSpan={6} className="text-center py-4">
                     No archived orders found
                   </TableCell>
                 </TableRow>
               ) : (
                 filteredOrders.map((order) => (
                   <TableRow key={order.id}>
-                    <TableCell className="font-medium">{order.short_id}</TableCell>
-                    <TableCell>{`${order.customers?.first_name} ${order.customers?.last_name}` || 'Anonymous'}</TableCell>
-                    <TableCell>{order.order_items?.length || 0} items</TableCell>
-                    <TableCell>{order.total.toFixed(2)}</TableCell>
+                    <TableCell className="font-medium">{order.id}</TableCell>
+                    <TableCell>{order.customer.name || 'Anonymous'}</TableCell>
                     <TableCell>
-                      <Badge variant={getStatusBadgeVariant(order.status)}>
-                        {order.status.toUpperCase()}
+                      <Badge 
+                        variant={
+                          order.status === 'completed' ? 'default' :
+                          order.status === 'pending' ? 'secondary' :
+                          order.status === 'processing' ? 'destructive' :
+                          'outline'
+                        }
+                      >
+                        {order.status}
                       </Badge>
                     </TableCell>
+                    <TableCell>${order.total.toFixed(2)}</TableCell>
                     <TableCell>
-                      {format(new Date(order.completed_at || order.updated_at), 'MMM d, h:mm a')}
+                      {order.created_at && formatDistanceToNow(new Date(order.created_at), { addSuffix: true })}
                     </TableCell>
                     <TableCell>
-                      <Link  href={`/orders/${order.short_id}`}>
+                      <Link  href={`/orders/${order.id}`}>
                         <Button variant="outline" size="sm">
                           View Details
                         </Button>

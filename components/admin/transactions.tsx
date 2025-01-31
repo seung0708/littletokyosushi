@@ -2,7 +2,7 @@ import Link from 'next/link';
 
 import { Badge } from '@/components/ui/badge';
 import { ArrowUpRight } from 'lucide-react';
-import { Button } from '@/components/ui/button';
+import { buttonVariants } from '@/components/ui/button';
 import { Card, CardHeader, CardTitle, CardContent, CardDescription } from '@/components/ui/card';
 import { Table, TableHeader, TableRow, TableHead, TableCell, TableBody } from '@/components/ui/table'
 
@@ -18,12 +18,17 @@ export default function Transactions() {
                 Recent transactions from your store.
               </CardDescription>
             </div>
-            <Button asChild size="sm" className="ml-auto gap-1">
-              <Link href="#">
-                View All
-                <ArrowUpRight className="h-4 w-4" />
-              </Link>
-            </Button>
+            <Link 
+              href="#" 
+              className={buttonVariants({ 
+                variant: "default", 
+                size: "sm", 
+                className: "ml-auto gap-1" 
+              })}
+            >
+              View All
+              <ArrowUpRight className="h-4 w-4" />
+            </Link>
           </CardHeader>
           <CardContent>
             <Table>

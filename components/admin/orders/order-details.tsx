@@ -1,29 +1,122 @@
-import {Card, CardContent, CardDescription, CardFooter, CardHeader,CardTitle} from "@/components/ui/card"
+'use client';
 
-import OrderItems from "./order-items"
-import { Separator } from "@radix-ui/react-dropdown-menu"
-import OrderSummary from "./order-summary"
-import CustomerInfo from "./customer-info"
-import RefundSection from "./refund-section"
+import { Database } from '@/types/database.types';
+import { Badge } from "@/components/ui/badge";
+import { formatDistanceToNow } from 'date-fns';
+import RefundSection from './refund-section';
+
+type Order = Database['public']['Tables']['orders']['Row'] & {
+    customer: Database['public']['Tables']['customers']['Row'];
+    order_items: Array<
+        Database['public']['Tables']['order_items']['Row'] & {
+            menu_item: Database['public']['Tables']['items']['Row'];
+            order_item_modifiers: Array<
+                Database['public']['Tables']['order_item_modifiers']['Row'] & {
+                    order_item_modifier_options: Array<
+                        Database['public']['Tables']['order_item_modifier_options']['Row']
+                    >;
+                }
+            >;
+        }
+    >;
+};
 
 interface OrderDetailsProps {
-  order: any;
-  onRefund: (values: any) => Promise<void>;
+    order: Order;
+    onRefund: (values: any) => Promise<void>;
 }
 
-export default function OrderDetails({order, onRefund}: OrderDetailsProps) {
+const OrderDetails: React.FC<OrderDetailsProps> = ({ order, onRefund }) => {
+    const calculateItemTotal = (item: Order['order_items'][0]) => {
+        const modifierTotal = item.order_item_modifiers.reduce((total, modifier) => {
+            return total + modifier.order_item_modifier_options.reduce((optTotal, opt) => 
+                optTotal + opt.price, 0
+            );
+        }, 0);
+        return (item.base_price + modifierTotal) * item.quantity;
+    };
+
     return (
-      <CardContent className="p-6 text-sm">
-        <div className="grid gap-3">
-          <div className="font-semibold">Order Details</div>
-          <OrderItems order={order} />
-          <Separator className="my-2" />
-          <OrderSummary order={order} />
-          <Separator className="my-2" />   
-          <RefundSection order={order} onRefund={onRefund} />
+        <div className="p-6">
+            <div className="flex justify-between items-start mb-6">
+                <div>
+                    <h2 className="text-2xl font-bold text-gray-900">Order #{order.id}</h2>
+                    <p className="text-sm text-gray-500 mt-1">
+                        Placed {order.created_at && formatDistanceToNow(new Date(order.created_at), { addSuffix: true })}
+                    </p>
+                </div>
+                <Badge 
+                    variant={
+                        order.status === 'completed' ? 'default' :
+                        order.status === 'pending' ? 'secondary' :
+                        order.status === 'processing' ? 'destructive' :
+                        'outline'
+                    }
+                >
+                    {order.status}
+                </Badge>
+            </div>
+
+            <div className="border-t border-gray-200 pt-6">
+                <h3 className="text-lg font-medium text-gray-900 mb-4">Customer Details</h3>
+                <div className="grid grid-cols-2 gap-4">
+                    <div>
+                        <p className="text-sm font-medium text-gray-500">Name</p>
+                        <p className="mt-1">{order.customer.name || 'Guest'}</p>
+                    </div>
+                    <div>
+                        <p className="text-sm font-medium text-gray-500">Email</p>
+                        <p className="mt-1">{order.customer.email || 'N/A'}</p>
+                    </div>
+                    <div>
+                        <p className="text-sm font-medium text-gray-500">Phone</p>
+                        <p className="mt-1">{order.customer.phone || 'N/A'}</p>
+                    </div>
+                </div>
+            </div>
+
+            <div className="border-t border-gray-200 pt-6 mt-6">
+                <h3 className="text-lg font-medium text-gray-900 mb-4">Order Items</h3>
+                <div className="space-y-4">
+                    {order.order_items.map((item) => (
+                        <div key={item.id} className="flex justify-between">
+                            <div>
+                                <p className="font-medium">{item.menu_item.name}</p>
+                                {item.order_item_modifiers.map((modifier) => (
+                                    <div key={modifier.id} className="ml-4 text-sm text-gray-500">
+                                        {modifier.name}:
+                                        {modifier.order_item_modifier_options.map((option) => (
+                                            <span key={option.id} className="ml-2">
+                                                {option.name} (+${option.price.toFixed(2)})
+                                            </span>
+                                        ))}
+                                    </div>
+                                ))}
+                                {item.notes && (
+                                    <p className="text-sm text-gray-500 ml-4">Note: {item.notes}</p>
+                                )}
+                            </div>
+                            <div className="text-right">
+                                <p>${calculateItemTotal(item).toFixed(2)}</p>
+                                <p className="text-sm text-gray-500">Qty: {item.quantity}</p>
+                            </div>
+                        </div>
+                    ))}
+                </div>
+            </div>
+
+            <div className="border-t border-gray-200 pt-6 mt-6">
+                <div className="flex justify-between text-base font-medium text-gray-900">
+                    <p>Total</p>
+                    <p>${order.total.toFixed(2)}</p>
+                </div>
+            </div>
+
+            <div className="border-t border-gray-200 pt-6 mt-6">
+                <RefundSection order={order} onRefund={onRefund} />
+            </div>
         </div>
-        <Separator className="my-4" />
-        <CustomerInfo order={order} />
-      </CardContent>
-    )
-}
+    );
+};
+
+export default OrderDetails;

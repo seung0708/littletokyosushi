@@ -1,12 +1,33 @@
+'use client';
+
+import { useState } from 'react';
+import { Database } from '@/types/database.types';
 import { Button } from "@/components/ui/button"
 import { CardFooter } from "@/components/ui/card"
 import { Form, FormControl, FormField, FormItem } from "@/components/ui/form"
 import { Input } from "@/components/ui/input"
 import { AnimatePresence, motion } from "framer-motion"
 import ActionButtons from "./action-buttons"
+import PrintReceipt from './print-receipt';
+
+type Order = Database['public']['Tables']['orders']['Row'] & {
+    customer: Database['public']['Tables']['customers']['Row'];
+    order_items: Array<
+        Database['public']['Tables']['order_items']['Row'] & {
+            menu_item: Database['public']['Tables']['items']['Row'];
+            order_item_modifiers: Array<
+                Database['public']['Tables']['order_item_modifiers']['Row'] & {
+                    order_item_modifier_options: Array<
+                        Database['public']['Tables']['order_item_modifier_options']['Row']
+                    >;
+                }
+            >;
+        }
+    >;
+};
 
 interface OrderFooterProps {
-    order: any
+    order: Order
     onMarkReady: () => void
     onPrint: () => void
     isConfirmed: boolean
@@ -16,6 +37,17 @@ interface OrderFooterProps {
   }
 
 export default function OrderFooter({order, onMarkReady, onPrint, isConfirmed, form, onSubmit, onComplete}: OrderFooterProps) {
+    const [isPrinting, setIsPrinting] = useState(false);
+
+    const handlePrint = async () => {
+        setIsPrinting(true);
+        try {
+            await PrintReceipt({ order });
+        } finally {
+            setIsPrinting(false);
+        }
+    };
+
     return (
         <CardFooter className="flex flex-row items-center border-t bg-muted/50 px-6 py-3">
         <Form {...form}>
@@ -83,7 +115,7 @@ export default function OrderFooter({order, onMarkReady, onPrint, isConfirmed, f
                   </motion.div>
                 )}
               </AnimatePresence>
-              <ActionButtons order={order} onMarkReady={onMarkReady} onPrint={onPrint} onComplete={onComplete} />
+              <ActionButtons order={order} onMarkReady={onMarkReady} onPrint={handlePrint} onComplete={onComplete} />
             </div>
           </form>
         </Form>

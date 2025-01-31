@@ -5,28 +5,51 @@ import Logo from "@/components/store/ui/nav/logo";
 import CartIcon from "@/components/store/ui/nav/cart-icon";
 
 interface NavbarProps {
-    isOpen: boolean
-    toggleMenu: () => void
-
+    isOpen: boolean;
+    toggleMenu: () => void;
 }
 
 const Navbar: React.FC<NavbarProps> = ({isOpen, toggleMenu}) => {
     return(
-        <nav className="flex items-center justify-between py-2 px-4">
-            <div className="md:hidden">
-                {isOpen ? (
-                    <CloseMenu toggleMenu={toggleMenu} />
-                ) : (
-                    <HamburgerMenu toggleMenu={toggleMenu} />
-                )}
+        <nav className="flex items-center justify-between">
+            <div className="md:hidden flex items-center">
+                <button 
+                    className="p-2 -ml-2 hover:bg-white/10 rounded-lg transition-colors"
+                    onClick={toggleMenu}
+                    aria-expanded={isOpen}
+                    aria-label="Toggle menu"
+                >
+                    {isOpen ? <CloseMenu toggleMenu={toggleMenu} /> : <HamburgerMenu toggleMenu={toggleMenu} />}
+                </button>
             </div>
-            <div className="flex items-center space-x-2">
-                <div className="hidden md:flex space-x-4">
-                    <NavLink href="/about" className="" showSpan={true}>About</NavLink>       
-                    <NavLink href="/contact" showSpan={true}>Contact</NavLink>
-                    <NavLink href="/menu" className="" showSpan={true}>Menu</NavLink>
+            
+            <div className="flex items-center space-x-2 sm:space-x-4">
+                <div className="hidden md:flex items-center space-x-6">
+                    <NavLink 
+                        href="/about" 
+                        className="text-sm hover:text-gray-300 transition-colors" 
+                        showSpan={true}
+                    >
+                        About
+                    </NavLink>       
+                    <NavLink 
+                        href="/contact" 
+                        className="text-sm hover:text-gray-300 transition-colors" 
+                        showSpan={true}
+                    >
+                        Contact
+                    </NavLink>
+                    <NavLink 
+                        href="/menu" 
+                        className="text-sm hover:text-gray-300 transition-colors" 
+                        showSpan={true}
+                    >
+                        Menu
+                    </NavLink>
                 </div>
-                <CartIcon />  
+                <div className="relative">
+                    <CartIcon />  
+                </div>
             </div>
             
         </nav>

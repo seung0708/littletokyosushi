@@ -1,60 +1,100 @@
-'use client'
-import { Card, CardContent } from "@/components/ui/card"
-import { motion } from "framer-motion"
-import { OrderHeader } from "./order-header"
-import OrderDetails from "./order-details"
-import { Button } from "@/components/ui/button"
-import Link from "next/link"
+'use client';
+
+import { useState, useEffect } from 'react';
+import { Database } from '@/types/database.types';
+import OrderDetails from './order-details';
+import OrderFooter from './order-footer';
+import RefundSection from './refund-section';
+import { createClient } from '@/lib/supabase/client';
+
+type Order = Database['public']['Tables']['orders']['Row'] & {
+    customer: Database['public']['Tables']['customers']['Row'];
+    order_items: Array<
+        Database['public']['Tables']['order_items']['Row'] & {
+            menu_item: Database['public']['Tables']['items']['Row'];
+            order_item_modifiers: Array<
+                Database['public']['Tables']['order_item_modifiers']['Row'] & {
+                    order_item_modifier_options: Array<
+                        Database['public']['Tables']['order_item_modifier_options']['Row']
+                    >;
+                }
+            >;
+        }
+    >;
+};
 
 interface OrderViewProps {
-    order: any
-    onRefund: (values: any) => Promise<void>
+    orderId: string;
 }
 
-export default function OrderView({order, onRefund}: OrderViewProps) {
+const OrderView: React.FC<OrderViewProps> = ({ orderId }) => {
+    const [order, setOrder] = useState<Order | null>(null);
+    const [isLoading, setIsLoading] = useState(true);
+    const [error, setError] = useState<string | null>(null);
+    const supabase = createClient();
 
-  const onPrint = () => {
-    const originalBodyWidth = document.body.style.width;
-    document.body.style.width = '72mm';
-    document.body.style.margin = '0';
-    document.body.style.padding = '0';
-    
-    window.print();
-    
-    document.body.style.width = originalBodyWidth;
-    document.body.style.margin = '';
-    document.body.style.padding = '';
-  };
+    useEffect(() => {
+        const fetchOrder = async () => {
+            try {
+                const { data: orderData, error: orderError } = await supabase
+                    .from('orders')
+                    .select(`
+                        *,
+                        customer:customers(*),
+                        order_items(
+                            *,
+                            menu_item:items(*),
+                            order_item_modifiers(
+                                *,
+                                order_item_modifier_options(*)
+                            )
+                        )
+                    `)
+                    .eq('id', orderId)
+                    .single();
 
-  return (
-    <>
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        exit={{ opacity: 0, y: -20 }}
-        transition={{ duration: 0.2 }}
-      >
-        <Card>
-          <OrderHeader order={order} />
-          <CardContent className="grid gap-6">
-            <OrderDetails order={order} onRefund={onRefund} />
-            <div className="flex justify-between">
-              <Button
-                onClick={onPrint}
-                variant="outline"
-                className="flex items-center gap-2"
-              >
-                Print Receipt
-              </Button>
-              {!order.archived && (
-                <Link href={`/orders/${order.short_id}/edit`}>
-                  <Button>Edit Order</Button>
-                </Link>
-              )}
+                if (orderError) throw orderError;
+                setOrder(orderData);
+            } catch (err) {
+                console.error('Error fetching order:', err);
+                setError(err instanceof Error ? err.message : 'Failed to fetch order');
+            } finally {
+                setIsLoading(false);
+            }
+        };
+
+        if (orderId) {
+            fetchOrder();
+        }
+    }, [orderId, supabase]);
+
+    if (isLoading) {
+        return (
+            <div className="flex items-center justify-center min-h-screen">
+                <div className="text-center">Loading order details...</div>
             </div>
-          </CardContent>
-        </Card>
-      </motion.div>
-    </>
-  )
-}
+        );
+    }
+
+    if (error || !order) {
+        return (
+            <div className="flex items-center justify-center min-h-screen">
+                <div className="text-center text-red-500">
+                    {error || 'Order not found'}
+                </div>
+            </div>
+        );
+    }
+
+    return (
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+            <div className="bg-white shadow-lg rounded-lg overflow-hidden">
+                <OrderDetails order={order} />
+                <RefundSection order={order} />
+                <OrderFooter order={order} />
+            </div>
+        </div>
+    );
+};
+
+export default OrderView;

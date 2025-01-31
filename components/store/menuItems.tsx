@@ -1,44 +1,52 @@
-import { Items } from '../../app/(store)/menu/page';
-import { useRouter } from "next/navigation";
+import { Database } from '@/types/database.types';
 import Image from 'next/image';
+import Link from 'next/link';
 
-interface MenuItemsProps {
-    items: Items[]
-}
+type MenuItem = Database['public']['Tables']['menu_items']['Row'];
 
-const MenuItems: React.FC<MenuItemsProps> = ({items}) => {
+type MenuItemsProps = {
+    items: MenuItem[];
+    categories: Record<string, { name: string; items: MenuItem[] }>;
+};
 
-    const router = useRouter();
-    
-    const openProductDetails = (id: number) => {
-        router.push(`/menu/${id}`)
-    }
-    
+const MenuItems: React.FC<MenuItemsProps> = ({ items, categories }) => {
     return (
-        <section className="menu__items mt-6">
-            <div className="mt-6 grid grid-cols-2 gap-y-6 sm:gap-x-6 md:grid-cols-3">
-            {items.map((item) => (
-                <button onClick={() => openProductDetails(item.id)} key={item.id}>
-                    <div className="w-4/5 mx-auto group relative rounded-md" >
-                        <div className="w-full overflow-hidden rounded-md">
-                            <Image 
-                                src={`${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/menu-items/${item.image_urls[0]}`} 
-                                className='h-32 mx-auto sm:h-48 md:h-64 lg:72 object-contain' 
-                                alt={`${item.name} image`} 
-                                height={500}
-                                width={500}
-                            />
-                        </div>
-                        <div className="w-3/5 mx-auto">
-                            <h3 className="text-wrap text-[13px] sm:text-sm md:text-md lg:text-lg"> {item.name}</h3>
-                            <p className="mt-1 text-[13px] sm:text-sm md:text-md lg:text-lg">${item.price.toFixed(2)}</p>
-                        </div>
+        <div className="space-y-12">
+            {Object.entries(categories).map(([categoryId, category]) => (
+                <div key={categoryId} className="space-y-4">
+                    <h2 className="text-2xl font-bold tracking-tight">{category.name}</h2>
+                    <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
+                        {items.filter(item => item.category_id === categoryId).map((item) => (
+                            <Link 
+                                key={item.id} 
+                                href={`/menu/${item.id}`}
+                                className="group relative overflow-hidden rounded-lg bg-gray-100 p-4 hover:bg-gray-200 transition-colors"
+                            >
+                                <div className="aspect-h-1 aspect-w-1 w-full overflow-hidden rounded-lg bg-gray-200">
+                                    {item.image_url && (
+                                        <Image
+                                            src={`${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/menu-items/${item.image_url}`}
+                                            alt={item.name}
+                                            className="h-full w-full object-cover object-center"
+                                            width={300}
+                                            height={300}
+                                        />
+                                    )}
+                                </div>
+                                <div className="mt-4">
+                                    <h3 className="text-lg font-medium">{item.name}</h3>
+                                    {item.description && (
+                                        <p className="mt-1 text-sm text-gray-600">{item.description}</p>
+                                    )}
+                                    <p className="mt-2 text-lg font-medium">${item.price.toFixed(2)}</p>
+                                </div>
+                            </Link>
+                        ))}
                     </div>
-                </button>
+                </div>
             ))}
-            </div>
-        </section>
-    )
-}
+        </div>
+    );
+};
 
 export default MenuItems;
