@@ -1,23 +1,17 @@
-import { Button } from '@/components/ui/button';
 import Svg from '../svg';
 
 interface CloseMenuProps {
     toggleMenu: () => void;   
 }
 
- const CloseMenu: React.FC<CloseMenuProps> = ({toggleMenu}) => {
+const CloseMenu: React.FC<CloseMenuProps> = ({toggleMenu}) => {
     return (
-        <Button 
-            type="button"
-            className="rounded-md p-2 text-white-900 bg-black"
-            onClick={toggleMenu}
-        >
-            
+        <>
             <span className="sr-only">Close menu</span>
             <Svg className="h-6 w-6">
                 <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
             </Svg>
-        </Button>
+        </>
     )
 }
 

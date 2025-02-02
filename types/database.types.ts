@@ -11,13 +11,13 @@ export interface Database {
     Tables: {
       menu_items: {
         Row: {
-          id: string
+          id: number
           created_at?: string
           name: string
           description?: string
           price: number
           category_id: string
-          image_url?: string
+          image_urls?: string[]
           is_available: boolean
           modifiers?: Json[]
           categories?: {

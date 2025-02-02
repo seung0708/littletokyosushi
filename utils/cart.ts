@@ -3,15 +3,22 @@ export function getModifiersArray(newItems: any) {
 }
 
 export async function updateExistingCartItem(supabase: any, existingCartItem: any, newItems: any) {
-    let updatedQuantity = 0;
+    let updatedQuantity = existingCartItem.quantity;
+    
+    // If updating from cart page (has cart_item_id)
     if ('cart_item_id' in newItems) { 
-        updatedQuantity += newItems.quantity;
+        updatedQuantity = newItems.quantity;
     } 
-    if ('menu_item_id' in newItems) { 
-        console.log('existingCartItem.quantity', existingCartItem.quantity);
-        console.log('newItems.quantity', newItems.quantity);
-        updatedQuantity += existingCartItem.quantity + newItems.quantity;
+    // If adding from menu page (has menu_item_id)
+    else if ('menu_item_id' in newItems) { 
+        updatedQuantity += newItems.quantity;
     }
+
+    console.log('Updating quantity:', {
+        existingQuantity: existingCartItem.quantity,
+        newQuantity: newItems.quantity,
+        updatedQuantity
+    });
 
     const { data, error } = await supabase
         .from('cart_items')
@@ -28,8 +35,13 @@ export async function updateExistingCartItem(supabase: any, existingCartItem: an
 }
 
 export function findMatchingCartItem(cartItems: any[], newItem: any) {
-    
     return cartItems.find((cartItem: any) => {
+        // If updating from cart page (has cart_item_id)
+        if ('cart_item_id' in newItem) {
+            return cartItem.id === newItem.cart_item_id;
+        }
+
+        // If adding from menu page (has menu_item_id)
         // First check if it's the same menu item
         const isSameMenuItem = cartItem.menu_item_id === newItem.menu_item_id;
         
@@ -37,7 +49,6 @@ export function findMatchingCartItem(cartItems: any[], newItem: any) {
 
         // If there are no modifiers on either item, it's a match
         const existingModifiers = cartItem.cart_item_modifiers || [];
-        
         const newModifiers = getModifiersArray(newItem);
 
         if (existingModifiers.length === 0 && newModifiers.length === 0) return true;

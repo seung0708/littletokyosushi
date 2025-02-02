@@ -120,9 +120,15 @@ export default function ItemDetailsPage({ params }: { params: Promise<{ id: stri
 
     useEffect(() => {
         if (item?.modifiers) {
-            form.setValue('modifiers', item.modifiers.map(mod => ({
+            form.setValue('modifiers', item?.modifiers.map(mod => ({
                 ...mod,
-                modifier_options: []
+                modifier_options: [] as {
+                    id: number;
+                    name: string;
+                    modifier_id: number;
+                    modifier_option_id: number;
+                    price: number;
+                }[]
             })));
         }
     }, [item]);
@@ -175,8 +181,8 @@ export default function ItemDetailsPage({ params }: { params: Promise<{ id: stri
             return {
                 id: modifier.id,
                 modifier_id: modifier.id,
-                modifier_name: modifier.name,
-                modifier_options: formMod.modifier_options.map(opt => ({
+                name: modifier.name,
+                cart_item_modifier_options: formMod.modifier_options.map(opt => ({
                     modifier_option_id: opt.id,
                     name: opt.name,
                     price: opt.price
@@ -188,20 +194,29 @@ export default function ItemDetailsPage({ params }: { params: Promise<{ id: stri
             menu_item_id: item?.id || 0,
             menu_item_name: item?.name || '',
             menu_item_image: item?.image_urls[0] || '',
-            quantity: data.quantity,
+            menu_item_price: item?.price || 0,
             base_price: item?.price || 0,
-            special_instructions: data.special_instructions || '',
-            total_price: calculateTotalPrice(item?.price || 0, data.quantity, data.modifiers),
-            modifiers: cartModifiers
+            total_price: (item?.price || 0) * data.quantity,
+            quantity: data.quantity,
+            special_instructions: data.special_instructions,
+            cart_item_modifiers: cartModifiers
         };
 
         try {
             await handleCartUpdate(cartItem);
             form.reset();
-            form.setValue('modifiers', item?.modifiers.map(mod => ({
-                ...mod,
-                modifier_options: []
-            })));
+            if (item?.modifiers) {
+                form.setValue('modifiers', item.modifiers.map(mod => ({
+                    ...mod,
+                    modifier_options: [] as {
+                        id: number;
+                        name: string;
+                        modifier_id: number;
+                        modifier_option_id: number;
+                        price: number;
+                    }[]
+                })));
+            }
         } catch (error) {
             console.error('Error adding item to cart:', error);
         }
@@ -212,203 +227,259 @@ export default function ItemDetailsPage({ params }: { params: Promise<{ id: stri
     };
 
     if (loading || !item) {
-        return <div>Loading...</div>;
+        return (
+            <div className="min-h-screen bg-black text-white">
+                <div className="w-full bg-black pt-28">
+                    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                        <div className="flex flex-col items-center justify-center min-h-[400px]">
+                            <div className="w-8 h-8 border-t-2 border-red-500 rounded-full animate-spin mb-4"></div>
+                            <p className="text-gray-400">Loading menu item...</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        );
     }
 
     return (
-        <div className="container mx-auto px-4 py-8 pt-24">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                <div className="relative">
-                    {loadingImage && (
-                        <div className="absolute inset-0 flex items-center justify-center bg-gray-100">
-                            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-gray-900"></div>
-                        </div>
-                    )}
-                    <Image
-                        src={`${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/menu-items/${item.image_urls[selectedImage]}`}
-                        alt={item.name}
-                        width={500}
-                        height={500}
-                        className="w-full h-auto rounded-lg shadow-lg"
-                        onLoad={handleImageLoad}
-                        priority
-                    />
-                    {item.image_urls.length > 1 && (
-                        <div className="flex mt-4 space-x-2">
-                            {item.image_urls.map((_, index) => (
-                                <button
-                                    key={index}
-                                    onClick={() => setSelectedImage(index)}
-                                    className={`w-3 h-3 rounded-full ${
-                                        selectedImage === index ? 'bg-primary' : 'bg-gray-300'
-                                    }`}
-                                />
-                            ))}
-                        </div>
-                    )}
-                </div>
-
-                <div>
-                    <h1 className="text-3xl font-bold mb-4">{item.name}</h1>
-                    <p className="text-gray-600 mb-4">{item.description}</p>
-                    <p className="text-2xl float-right font-bold mb-6">${item.price.toFixed(2)}</p>
-                    <Form {...form}>
-                        <form 
-                            onSubmit={(e) => {
-                                e.preventDefault();
-                                const data = form.getValues();
-                                onSubmit(data);
-                            }} 
-                            className="space-y-6"
-                        >
-                        <FormField
-                            control={form.control}
-                            name="quantity"
-                            render={({ field }) => (
-                                <FormItem>
-                                    <div className="flex items-center space-x-4">
-                                        <Button
-                                            type="button"
-                                            variant="outline"
-                                            size="icon"
-                                            onClick={() => {
-                                                const newQuantity = Math.max(1, field.value - 1);
-                                                form.setValue('quantity', newQuantity);
-                                            }}
-                                        >
-                                            <MinusIcon className="h-4 w-4" />
-                                        </Button>
-                                        <span className="text-xl font-semibold">{field.value}</span>
-                                        <Button
-                                            type="button"
-                                            variant="outline"
-                                            size="icon"
-                                            onClick={() => {
-                                                const newQuantity = field.value + 1;
-                                                form.setValue('quantity', newQuantity);
-                                            }}
-                                        >
-                                            <PlusIcon className="h-4 w-4" />
-                                        </Button>
+        <div className="min-h-screen bg-black text-white">
+            <div className="w-full bg-black pt-20 sm:pt-28">
+                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12">
+                        {/* Image Section */}
+                        <div className="space-y-6">
+                            <div className="relative aspect-square w-full overflow-hidden rounded-xl bg-gradient-to-b from-black/30 to-black/40 backdrop-blur-sm 
+                                          border border-white/10">
+                                {loadingImage && (
+                                    <div className="absolute inset-0 flex items-center justify-center bg-black/20 backdrop-blur-sm">
+                                        <div className="w-8 h-8 border-t-2 border-red-500 rounded-full animate-spin"></div>
                                     </div>
-                                </FormItem>
-                            )}
-                        />    
-                        {item.modifiers?.map((modifier, index) => (
-                            <div key={modifier.id} className="space-y-4">
-                                <Separator />
-                                <div className="flex justify-between items-center">
-                                    <FormLabel>{modifier.name}</FormLabel>
-                                        <p className="text-sm text-gray-500">
-                                            {modifier.is_required ? (
-                                                <span>Required</span>
-                                                ) : (
-                                                    <span>Optional</span>
-                                                )}
-                                        </p>
-                                </div>                            
-                                <FormField
-                                    control={form.control}
-                                    name={`modifiers.${index}.modifier_options`}
-                                    render={({ field }) => (
-                                        <FormItem>
-                                            <FormControl>
-                                            {modifier.max_selections === 1 ? (
-                                                <RadioGroup
-                                                    value={field.value?.[0]?.id?.toString() || ''}
-                                                    onValueChange={(value) => {
-                                                        const selectedOption = modifier.modifier_options.find(
-                                                            opt => opt.id.toString() === value
-                                                        );
-                                                        if (selectedOption) {
-                                                            handleModifierChange(
-                                                                modifier.id,
-                                                                selectedOption,
-                                                                true
-                                                            );
-                                                        }
-                                                    }}
-                                                    className="space-y-2"
-                                                >
-                                                    {modifier.modifier_options.map((option) => (
-                                                        <div key={option.id} className="flex items-center space-x-2">
-                                                            <RadioGroupItem value={option.id.toString()} id={`${modifier.id}-${option.id}`} />
-                                                            <Label htmlFor={`${modifier.id}-${option.id}`} className="flex justify-between w-full">
-                                                                <span>{option.name}</span>
-                                                                <span>+${option.price.toFixed(2)}</span>
-                                                            </Label>
-                                                        </div>
-                                                    ))}
-                                                </RadioGroup>
-                                            ) : (
-                                                <div className="space-y-2">
-                                                    {modifier.modifier_options.map((option) => {
-                                                        const isSelected = (field.value || []).some(opt => opt.id === option.id);
-                                                        const atMaxSelections = (field.value || []).length >= modifier.max_selections;
-                                                        const isDisabled = !isSelected && atMaxSelections;
-                                                        
-                                                        return (
-                                                            <div key={option.id} className="flex items-center space-x-2">
-                                                                <Checkbox
-                                                                    id={`${modifier.id}-${option.id}`}
-                                                                    checked={isSelected}
-                                                                    disabled={isDisabled}
-                                                                    onCheckedChange={(checked) => {
-                                                                        handleModifierChange(
-                                                                            modifier.id,
-                                                                            option,
-                                                                            checked as boolean
-                                                                        );
-                                                                    }}
-                                                                />
-                                                                <Label htmlFor={`${modifier.id}-${option.id}`} className="flex justify-between w-full">
-                                                                    <span>{option.name}</span>
-                                                                    <span>+${option.price.toFixed(2)}</span>
-                                                                </Label>
-                                                            </div>
-                                                        );
-                                                    })}
-                                                </div>
-                                            )}
-                                            </FormControl>
-                                            <div className="text-sm text-red-500 mt-1">
-                                                {modifier.is_required && (field.value?.length || 0) < modifier.min_selections && (
-                                                    <span>Please select at least {modifier.min_selections} option{modifier.min_selections > 1 ? 's' : ''}</span>
-                                                )}
-                                                {(field.value?.length || 0) > modifier.max_selections && (
-                                                    <span>Cannot select more than {modifier.max_selections} option{modifier.max_selections > 1 ? 's' : ''}</span>
-                                                )}
-                                            </div>
-                                        </FormItem>
-                                    )}
+                                )}
+                                <Image
+                                    src={`${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/menu-items/${item.image_urls[selectedImage]}`}
+                                    alt={item.name}
+                                    fill
+                                    className="object-cover"
+                                    onLoad={handleImageLoad}
+                                    priority
+                                    sizes="(min-width: 1024px) 50vw, 100vw"
                                 />
                             </div>
-                        ))}
-                        <Separator />
-                        <FormField
-                            control={form.control}
-                            name="special_instructions"
-                            render={({ field }) => (
-                                <FormItem>
-                                    <FormControl>
-                                        <Textarea
-                                            {...field} 
-                                            placeholder="Special Instructions (optional)"
+                            {item.image_urls.length > 1 && (
+                                <div className="flex justify-center space-x-3">
+                                    {item.image_urls.map((_, index) => (
+                                        <button
+                                            key={index}
+                                            onClick={() => setSelectedImage(index)}
+                                            className={`w-2 h-2 rounded-full transition-colors ${
+                                                selectedImage === index 
+                                                    ? 'bg-red-500' 
+                                                    : 'bg-gray-600 hover:bg-gray-500'
+                                            }`}
                                         />
-                                    </FormControl>
-                                    <FormMessage />
-                                </FormItem>
-                                    )}
-                                />
-                        <Button 
-                            type="submit" 
-                            className="w-full bg-red-500 hover:bg-red-600"
-                            disabled={!isFormValid()}
-                        >
-                            Add to Cart
-                        </Button>
-                        </form>
-                    </Form>
+                                    ))}
+                                </div>
+                            )}
+                        </div>
+
+                        {/* Content Section */}
+                        <div className="lg:pt-8">
+                            <div className="space-y-6">
+                                <div>
+                                    <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold mb-3">{item.name}</h1>
+                                    <p className="text-gray-400 text-base sm:text-lg">{item.description}</p>
+                                </div>
+
+                                <div className="flex items-center justify-between">
+                                    <div className="text-xl sm:text-2xl font-bold text-red-400">
+                                        ${item.price.toFixed(2)}
+                                    </div>
+                                </div>
+
+                                <Form {...form}>
+                                    <form 
+                                        onSubmit={(e) => {
+                                            e.preventDefault();
+                                            const data = form.getValues();
+                                            onSubmit(data);
+                                        }} 
+                                        className="space-y-8"
+                                    >
+                                        <div className="bg-gradient-to-b from-black/30 to-black/40 backdrop-blur-sm 
+                                                      border border-white/10 rounded-xl p-4 sm:p-6">
+                                            <FormField
+                                                control={form.control}
+                                                name="quantity"
+                                                render={({ field }) => (
+                                                    <FormItem>
+                                                        <FormLabel className="text-lg font-medium mb-3">Quantity</FormLabel>
+                                                        <div className="flex items-center space-x-4 bg-black/20 rounded-lg p-2 w-fit">
+                                                            <Button
+                                                                type="button"
+                                                                variant="ghost"
+                                                                size="sm"
+                                                                className="h-8 w-8 text-gray-300 hover:text-white hover:bg-black/30"
+                                                                onClick={() => {
+                                                                    const newQuantity = Math.max(1, field.value - 1);
+                                                                    form.setValue('quantity', newQuantity);
+                                                                }}
+                                                            >
+                                                                <MinusIcon className="h-4 w-4" />
+                                                            </Button>
+                                                            <span className="w-8 text-center text-lg">{field.value}</span>
+                                                            <Button
+                                                                type="button"
+                                                                variant="ghost"
+                                                                size="sm"
+                                                                className="h-8 w-8 text-gray-300 hover:text-white hover:bg-black/30"
+                                                                onClick={() => {
+                                                                    const newQuantity = field.value + 1;
+                                                                    form.setValue('quantity', newQuantity);
+                                                                }}
+                                                            >
+                                                                <PlusIcon className="h-4 w-4" />
+                                                            </Button>
+                                                        </div>
+                                                    </FormItem>
+                                                )}
+                                            />
+                                        </div>
+
+                                        {item.modifiers?.map((modifier, index) => (
+                                            <div key={modifier.id} 
+                                                 className="bg-gradient-to-b from-black/30 to-black/40 backdrop-blur-sm 
+                                                          border border-white/10 rounded-xl p-4 sm:p-6 space-y-4">
+                                                <div className="flex justify-between items-center">
+                                                    <FormLabel className="text-lg font-medium">{modifier.name}</FormLabel>
+                                                    <span className={`text-sm px-2 py-1 rounded-full ${
+                                                        modifier.is_required 
+                                                            ? 'bg-red-500/10 text-red-400 border border-red-500/20' 
+                                                            : 'bg-gray-500/10 text-gray-400 border border-gray-500/20'
+                                                    }`}>
+                                                        {modifier.is_required ? 'Required' : 'Optional'}
+                                                    </span>
+                                                </div>
+                                                <FormField
+                                                    control={form.control}
+                                                    name={`modifiers.${index}.modifier_options`}
+                                                    render={({ field }) => (
+                                                        <FormItem>
+                                                            <FormControl>
+                                                                {modifier.max_selections === 1 ? (
+                                                                    <RadioGroup
+                                                                        value={field.value?.[0]?.id?.toString() || ''}
+                                                                        onValueChange={(value) => {
+                                                                            const selectedOption = modifier.modifier_options.find(
+                                                                                opt => opt.id.toString() === value
+                                                                            );
+                                                                            if (selectedOption) {
+                                                                                handleModifierChange(
+                                                                                    modifier.id,
+                                                                                    selectedOption,
+                                                                                    true
+                                                                                );
+                                                                            }
+                                                                        }}
+                                                                        className="space-y-3"
+                                                                    >
+                                                                        {modifier.modifier_options.map((option) => (
+                                                                            <div key={option.id} 
+                                                                                 className="flex items-center space-x-3 bg-black/20 rounded-lg p-3 
+                                                                                          hover:bg-black/30 transition-colors">
+                                                                                <RadioGroupItem 
+                                                                                    value={option.id.toString()} 
+                                                                                    id={`${modifier.id}-${option.id}`}
+                                                                                    className="border-white/20"
+                                                                                />
+                                                                                <Label 
+                                                                                    htmlFor={`${modifier.id}-${option.id}`} 
+                                                                                    className="flex justify-between w-full text-sm sm:text-base"
+                                                                                >
+                                                                                    <span>{option.name}</span>
+                                                                                    <span className="text-red-400">+${option.price.toFixed(2)}</span>
+                                                                                </Label>
+                                                                            </div>
+                                                                        ))}
+                                                                    </RadioGroup>
+                                                                ) : (
+                                                                    <div className="space-y-3">
+                                                                        {modifier.modifier_options.map((option) => {
+                                                                            const isSelected = (field.value || []).some(opt => opt.id === option.id);
+                                                                            const atMaxSelections = (field.value || []).length >= modifier.max_selections;
+                                                                            const isDisabled = !isSelected && atMaxSelections;
+                                                                            
+                                                                            return (
+                                                                                <div key={option.id} 
+                                                                                     className={`flex items-center space-x-3 bg-black/20 rounded-lg p-3 
+                                                                                              transition-colors ${
+                                                                                                  isDisabled 
+                                                                                                      ? 'opacity-50 cursor-not-allowed' 
+                                                                                                      : 'hover:bg-black/30'
+                                                                                              }`}>
+                                                                                    <Checkbox
+                                                                                        id={`${modifier.id}-${option.id}`}
+                                                                                        checked={isSelected}
+                                                                                        disabled={isDisabled}
+                                                                                        onCheckedChange={(checked) => {
+                                                                                            handleModifierChange(
+                                                                                                modifier.id,
+                                                                                                option,
+                                                                                                checked as boolean
+                                                                                            );
+                                                                                        }}
+                                                                                        className="border-white/20"
+                                                                                    />
+                                                                                    <Label 
+                                                                                        htmlFor={`${modifier.id}-${option.id}`}
+                                                                                        className="flex justify-between w-full text-sm sm:text-base"
+                                                                                    >
+                                                                                        <span>{option.name}</span>
+                                                                                        <span className="text-red-400">+${option.price.toFixed(2)}</span>
+                                                                                    </Label>
+                                                                                </div>
+                                                                            );
+                                                                        })}
+                                                                    </div>
+                                                                )}
+                                                            </FormControl>
+                                                        </FormItem>
+                                                    )}
+                                                />
+                                            </div>
+                                        ))}
+
+                                        <div className="bg-gradient-to-b from-black/30 to-black/40 backdrop-blur-sm 
+                                                      border border-white/10 rounded-xl p-4 sm:p-6">
+                                            <FormField
+                                                control={form.control}
+                                                name="special_instructions"
+                                                render={({ field }) => (
+                                                    <FormItem>
+                                                        <FormLabel className="text-lg font-medium mb-3">Special Instructions</FormLabel>
+                                                        <FormControl>
+                                                            <Textarea
+                                                                {...field}
+                                                                placeholder="Any special requests?"
+                                                                className="bg-black/20 border-white/10 resize-none focus:ring-red-500"
+                                                            />
+                                                        </FormControl>
+                                                    </FormItem>
+                                                )}
+                                            />
+                                        </div>
+
+                                        <Button 
+                                            type="submit" 
+                                            className="w-full bg-red-600 hover:bg-red-700 text-white py-6 text-lg font-semibold"
+                                            disabled={!isFormValid()}
+                                        >
+                                            Add to Cart
+                                        </Button>
+                                    </form>
+                                </Form>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>

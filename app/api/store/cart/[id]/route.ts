@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
-import { Cart, CartItem, CartItemModifier, CartItemModifierOption } from '@/types/cart';
+import { Cart } from '@/types/cart';
 import { findMatchingCartItem, createNewCartItemWithModifiers, getModifiersArray, updateExistingCartItem } from '@/utils/cart';
 
 export async function GET(request: Request, { params }: { params: { id: string } }) {
@@ -64,8 +64,8 @@ export async function GET(request: Request, { params }: { params: { id: string }
 }
 
 export async function PATCH(request: Request,  { params }: { params: { id: string } }) {
-    const supabase = createClient();
-    
+    const {id} = await params;
+    const supabase = await createClient();
     try {
         const { customerId, cartItems } = await request.json()
 
@@ -78,24 +78,28 @@ export async function PATCH(request: Request,  { params }: { params: { id: strin
                 cart_items(id, cart_id, menu_item_id, quantity, base_price, total_price, special_instructions,
                     cart_item_modifiers(id, cart_items_id, modifier_id,
                 cart_item_modifier_options(id, cart_item_modifiers_id, modifier_option_id, modifier_id, modifier_option_price))))`)
-            .eq('id', params.id)
-            .single();
+            .eq('id', id)
+            .single() as { data: Cart | null, error: any };
                 
+        if (cartError) {
+            return NextResponse.json({ error: 'Failed to fetch cart' }, { status: 500 });
+        }
+
         if (!dbCart?.customer_id && customerId) {
             await supabase
                 .from('carts')
                 .update({ customer_id: customerId })
-                .eq('id', params.id)
+                .eq('id', id)
         }
 
-        const existingCartItem = findMatchingCartItem(dbCart?.cart_items, newItems);
+        const existingCartItem = findMatchingCartItem(dbCart?.cart_items || [], newItems);
         console.log('existingCartItem:', existingCartItem);
         if (existingCartItem) {
             // If we found an exact match (same item and same modifiers), update quantity
             await updateExistingCartItem(supabase, existingCartItem, newItems);
         } else {
             // If no match found (either different item or different modifiers), create new
-            await createNewCartItemWithModifiers(supabase, dbCart?.id, newItems);
+            await createNewCartItemWithModifiers(supabase, dbCart?.id || '', newItems);
         }
         
         return NextResponse.json(
@@ -117,10 +121,9 @@ export async function PATCH(request: Request,  { params }: { params: { id: strin
 
 
 export async function DELETE(request: Request, { params }: { params: { id: string } }) {
-    console.log('DELETE /api/store/cart/[id]', params.id);
+    const { id } = await params;
     const { itemId } = await request.json();
-    console.log('itemId:', itemId);
-    const supabase = createClient();
+    const supabase = await createClient();
     try {
         const { data: dbCart, error: cartError } = await supabase
             .from('carts')
@@ -128,7 +131,7 @@ export async function DELETE(request: Request, { params }: { params: { id: strin
                 cart_items(id, base_price, total_price, quantity, special_instructions, menu_items(id, name, price, image_urls), 
                 cart_item_modifiers(id, modifiers(id, name), 
                     cart_item_modifier_options(id, modifier_id, modifier_options(id, name, price))))`)
-            .eq('id', params.id)
+            .eq('id', id)
             .single();
         
 
@@ -139,9 +142,8 @@ export async function DELETE(request: Request, { params }: { params: { id: strin
                 { status: 500 }
             );
         }
-        console.log('dbCart:', dbCart);
+
         const cartItem = dbCart?.cart_items.find((cartItem: any) => cartItem.id === itemId);
-        console.log('cartItem:', cartItem);
 
         if (!cartItem) {
             return NextResponse.json(

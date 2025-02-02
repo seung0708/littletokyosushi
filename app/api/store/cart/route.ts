@@ -79,6 +79,7 @@ export async function POST(request: Request) {
 
         return NextResponse.json({
             message: 'Cart created successfully',
+            status: 200,
             cart,
             cartItems
         });

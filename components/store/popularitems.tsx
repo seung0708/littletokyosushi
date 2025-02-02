@@ -28,7 +28,7 @@ const PopularItems: React.FC = () => {
     const [current, setCurrent] = useState(0);
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
-    const popularItemIds = ['64', '2', '11', '19', '35', '34', '59', '64']; // IDs are strings in database
+    const popularItemIds = [64, 2, 11, 19, 35, 34, 59, 64]; // IDs are strings in database
 
     // Fetch items
     useEffect(() => {
@@ -38,6 +38,7 @@ const PopularItems: React.FC = () => {
                     timeout: 5000,
                     retries: 3,
                 });
+                
                 setItems(data);
             } catch (error) {
                 console.error('Error fetching popular items:', error);
@@ -130,7 +131,7 @@ const PopularItems: React.FC = () => {
                                         <Link href={`menu/${item.id}`}>
                                             <div className="relative group rounded-lg overflow-hidden aspect-[3/2]">
                                                 <Image 
-                                                    src={`${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/menu-items/${item.image_url}`}
+                                                    src={`${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/menu-items/${item?.image_urls?.[0]}`}
                                                     alt={`${item.name} image`}
                                                     className="h-full w-full object-contain transition-transform duration-300 group-hover:scale-105"
                                                     width={500}
@@ -153,8 +154,8 @@ const PopularItems: React.FC = () => {
                             </CarouselItem>
                         ))}
                     </CarouselContent>
-                    <CarouselPrevious className="hidden md:flex" />
-                    <CarouselNext className="hidden md:flex" />
+                    {/* <CarouselPrevious className="hidden md:flex" />
+                    <CarouselNext className="hidden md:flex" /> */}
                 </Carousel>
             </div>
 

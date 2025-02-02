@@ -49,22 +49,27 @@ const CheckoutSteps = () => {
         const createPaymentIntent = async () => {
             if (orderTotal > 0) {
                 try {
+                    const amount = Math.round(orderTotal * 100);
+                    console.log('Creating payment intent with amount:', amount);
+                    
                     const paymentIntentResponse = await fetch('/api/payment-intent', {
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/json',
                         },
                         body: JSON.stringify({
-                            amount: Math.round(orderTotal * 100),
+                            amount: amount,
                         }),
                     });
 
+                    const responseData = await paymentIntentResponse.json();
+                    
                     if (!paymentIntentResponse.ok) {
-                        throw new Error('Failed to create payment intent');
+                        console.error('Payment intent creation failed:', responseData);
+                        throw new Error(responseData.error || 'Failed to create payment intent');
                     }
 
-                    const { clientSecret } = await paymentIntentResponse.json();
-                    setClientSecret(clientSecret);
+                    setClientSecret(responseData.clientSecret);
                 } catch (error) {
                     console.error('Error creating payment intent:', error);
                 }
@@ -168,17 +173,17 @@ const CheckoutSteps = () => {
 
 
     return (
-      <div className="max-w-4xl mx-auto px-4 sm:px-6 sm:py-24">
+      <div className="max-w-4xl mx-auto">
         <nav aria-label="Progress" className="mb-12">
             <ol role="list" className="flex items-center justify-center space-x-8">
                 {steps.map((step, stepIdx) => (
                     <li key={step.id} className="relative">
                         <div className="flex items-center">
                             <div className={`
-                                h-8 w-8 rounded-full flex items-center justify-center
+                                h-8 w-8 rounded-full flex items-center justify-center text-sm font-medium
                                 ${step.status === 'complete' ? 'bg-red-600 text-white' : 
-                                  step.status === 'current' ? 'border-2 border-red-600' : 
-                                  'border-2 border-gray-300'}
+                                  step.status === 'current' ? 'border-2 border-red-600 text-white' : 
+                                  'border-2 border-gray-300 text-gray-300'}
                             `}>
                                 {step.status === 'complete' ? '✓' : stepIdx + 1}
                             </div>
@@ -189,7 +194,7 @@ const CheckoutSteps = () => {
                                 `} />
                             )}
                         </div>
-                        <span className="mt-2 block text-sm font-medium text-center">
+                        <span className="mt-2 block text-sm font-medium text-center text-gray-200">
                             {step.name}
                         </span>
                     </li>
@@ -197,8 +202,9 @@ const CheckoutSteps = () => {
             </ol>
         </nav>
 
-        <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
+        <div className="bg-gradient-to-b from-black/30 to-black/40 backdrop-blur-sm border border-white/10 rounded-xl p-8">
+            <Form {...form}>
+                <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
                 {currentStep === 'signin' && !user && (
                     <CheckoutCustomerSignIn 
                         form={form}
@@ -224,9 +230,17 @@ const CheckoutSteps = () => {
                             options={{ 
                                 clientSecret,
                                 appearance: {
-                                    theme: 'stripe',
-                                },
-                                loader: 'auto',
+                                    theme: 'night',
+                                    variables: {
+                                        colorPrimary: '#dc2626',
+                                        colorBackground: '#000000',
+                                        colorText: '#ffffff',
+                                        colorDanger: '#df1b41',
+                                        fontFamily: 'system-ui, sans-serif',
+                                        spacingUnit: '4px',
+                                        borderRadius: '4px',
+                                    },
+                                }
                              }}
                         >
                             <PaymentForm 
@@ -262,6 +276,7 @@ const CheckoutSteps = () => {
                 </Button>
             )}
         </div> */}
+    </div>
     </div>
     )
 

@@ -35,7 +35,7 @@ const MenuPage: React.FC = () => {
 
     if (isLoading) {
         return (
-            <div className="container mx-auto px-4 py-8">
+            <div className="flex justify-center items-center min-h-[200px] py-12">
                 <div className="text-center">Loading menu items...</div>
             </div>
         );
@@ -43,7 +43,7 @@ const MenuPage: React.FC = () => {
 
     if (error) {
         return (
-            <div className="container mx-auto px-4 py-8">
+            <div className="flex justify-center items-center min-h-[200px] py-12">
                 <div className="text-center text-red-500">
                     {error}
                 </div>
@@ -52,24 +52,41 @@ const MenuPage: React.FC = () => {
     }
 
     // Group items by category
-    const itemsByCategory = items.reduce<Record<string, { name: string; items: MenuItem[] }>>((acc, item) => {
-        const categoryId = item.category_id;
+    const categories = items.reduce<{ name: string; items: MenuItem[] }[]>((acc, item) => {
         const categoryName = item.categories?.name || 'Uncategorized';
         
-        if (!acc[categoryId]) {
-            acc[categoryId] = {
+        let category = acc.find(cat => cat.name === categoryName);
+        if (!category) {
+            category = {
                 name: categoryName,
                 items: []
             };
+            acc.push(category);
         }
-        acc[categoryId].items.push(item);
+        category.items.push(item);
         return acc;
-    }, {});
+    }, []);
 
     return (
-        <div className="container mx-auto px-4 py-8">
-            <MenuItems items={items} categories={itemsByCategory} />
-        </div>
+        <>
+            <div className="w-full bg-black pt-20 sm:pt-28">
+                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                    <div className="text-center">
+                        <h1 className="text-3xl sm:text-4xl font-bold text-white mb-3 sm:mb-4">Our Menu</h1>
+                        <div className="w-16 sm:w-24 h-1 bg-red-600 mx-auto mb-3 sm:mb-4"></div>
+                        <p className="text-base sm:text-lg text-gray-300 pb-4">
+                            Discover our selection of authentic Japanese dishes
+                        </p>
+                    </div>
+                </div>
+            </div>
+            
+            <div className="px-4 sm:px-6 lg:px-8 py-8 sm:py-12 bg-black text-white">
+                <div className="max-w-7xl mx-auto">
+                    <MenuItems categories={categories} />
+                </div>
+            </div>
+        </>
     );
 };
 

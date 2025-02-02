@@ -2,18 +2,23 @@ import { createClient } from "@/lib/supabase/server";
 import { NextResponse } from "next/server";
 import { APIError } from "@/lib/utils/api-error";
 
-export async function GET(
-    request: Request,
-    { params }: { params: { id: string } }
-) {
+interface ModifierOption {
+    id: string;
+    name: string;
+    price: string;
+}
+
+interface Modifier {
+    id: string;
+    name: string;
+    modifier_options?: ModifierOption[];
+}
+
+export async function GET(request: Request, { params }: { params: { id: string } }) {
+    const { id } = await params;
     const supabase = await createClient();
 
     try {
-        // Validate ID
-        const id = parseInt(params.id);
-        if (isNaN(id)) {
-            throw new APIError('Invalid item ID', 400);
-        }
 
         // Fetch the menu item with all related data
         const { data: itemWithModifiers, error: itemError } = await supabase
@@ -42,9 +47,9 @@ export async function GET(
         const formattedItem = {
             ...itemWithModifiers,
             price: parseFloat(itemWithModifiers.price),
-            modifiers: itemWithModifiers.modifiers?.map(modifier => ({
+            modifiers: itemWithModifiers.modifiers?.map((modifier: Modifier) => ({
                 ...modifier,
-                modifier_options: modifier.modifier_options?.map(option => ({
+                modifier_options: modifier.modifier_options?.map((option: ModifierOption) => ({
                     ...option,
                     price: parseFloat(option.price)
                 }))

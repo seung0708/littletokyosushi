@@ -1,7 +1,6 @@
 'use client';
 import {PaymentElement, useStripe, useElements} from '@stripe/react-stripe-js';
 import { Button } from '../ui/button';
-import { useState } from 'react';
 import { CheckoutFormValues } from '@/types/checkout';
 import { useAuth } from '@/app/context/authContext';
 
@@ -63,7 +62,18 @@ const PaymentForm = ({total, formData, cartItems, fees}: Props) => {
 
     return (
         <div className="flex flex-col space-y-4">
-            <PaymentElement />
+            <PaymentElement 
+                options={{
+                    wallets: {
+                        applePay: 'never',
+                        googlePay: 'never',
+                        cashapp: 'never'
+                    },
+                    fields: {
+                        billingDetails: 'never'
+                    }
+                }}
+            />
             <Button
                 type="submit"
                 disabled={!stripe}

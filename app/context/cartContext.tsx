@@ -83,11 +83,12 @@ export const CartProvider = ({ children }: CartProviderProps) => {
                throw new Error(errorData.error || 'Failed to fetch cart');
             }
 
-            const cart = await response.json();
-            setCartId(cart.id);
-            setCartItems(cart.cart_items);
-            localStorage.setItem('cartId', cart.id);
-            localStorage.setItem('cartItems', JSON.stringify(cart.cart_items));
+            const data = await response.json();
+            console.log('fetched cart', data);
+            setCartId(data.id);
+            setCartItems(data.cart_items);
+            localStorage.setItem('cartId', data.id);
+            localStorage.setItem('cartItems', JSON.stringify(data.cart_items));
         } catch (error) {
             console.error('Error fetching cart:', error);
             setCartError(error instanceof Error ? error.message : 'Failed to fetch cart');
@@ -222,8 +223,8 @@ export const CartProvider = ({ children }: CartProviderProps) => {
             console.log('createNewCart data', data);
             setCartSuccess(data.message);
             if(data.status === 200) {
-                setCartId(data.cartId); 
-                localStorage.setItem('cartId', data.cartId);
+                setCartId(data.cart.id ); 
+                localStorage.setItem('cartId', data.cart.id);
                 await fetchCart();
             };
         }
