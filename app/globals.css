@@ -8,6 +8,11 @@ body {
   padding: 0;
 }
 
+/* Target the Stripe phone number field's optional label more specifically */
+.StripeElement.StripeElement--optional {
+  display: none !important;
+}
+
 @layer utilities {
   .text-balance {
     text-wrap: balance;

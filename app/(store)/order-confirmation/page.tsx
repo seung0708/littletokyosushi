@@ -59,7 +59,7 @@ const Page: React.FC<PageProps> = ({params, searchParams: urlSearchParams }) => 
     
       if(paymentId && paymentIntentSecret && redirectStatus === 'succeeded' && !paymentVerified) {
         try {
-          const response = await fetch(`/api/orders/${orderId}/verify-payment`, {
+          const response = await fetch(`/api/orders/verify-payment`, {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',

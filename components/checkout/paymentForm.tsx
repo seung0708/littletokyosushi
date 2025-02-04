@@ -3,6 +3,7 @@ import {PaymentElement, useStripe, useElements} from '@stripe/react-stripe-js';
 import { Button } from '../ui/button';
 import { CheckoutFormValues } from '@/types/checkout';
 import { useAuth } from '@/app/context/authContext';
+import { useSearchParams } from 'next/navigation';
 
 interface Props {
     total: number;
@@ -15,65 +16,82 @@ const PaymentForm = ({total, formData, cartItems, fees}: Props) => {
     const {user} = useAuth()
     const stripe = useStripe();
     const elements = useElements();
+    const searchParams = useSearchParams();
     
     const handlePayment = async () => {
-        if (!stripe || !elements) {
-            console.error('Stripe or elements not initialized');
-            return;
-        }
-        console.log(formData)
-        try {
+        if (!stripe || !elements) return;
 
-            const orderResponse = await fetch('/api/orders', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
+        const addressElement = elements.getElement('address');
+        const addressDetails = await addressElement?.getValue();
+
+        if(user?.id && addressDetails) {
+            await fetch('/api/customers', {
+                method: 'PATCH',
+                headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
-                    customer_id: user?.id ?? '',
-                    customer: formData.customer,
-                    delivery: formData.delivery,
-                    cartItems: cartItems,
-                    total: total, 
-                    fees: fees
-                }),
+                    customer_id: user?.id,
+                    address: JSON.stringify(addressDetails)
+                })
+            });
+        }
+
+        try {
+            // Create payment intent with metadata first
+            const response = await fetch('/api/payment-intent', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    amount: Math.round(total * 100),
+                    metadata: {
+                        customer_id: user?.id,
+                        customer: JSON.stringify({
+                            name: formData.name,
+                            email: formData.email
+                        }),
+                        delivery: JSON.stringify({
+                            method: formData.deliveryMethod,
+                            pickupDate: formData.pickupDate,
+                            pickupTime: formData.pickupTime
+                        }),
+                        cart_items: JSON.stringify(cartItems),
+                        fees: JSON.stringify(fees),
+                        total: JSON.stringify(total),
+                        address: JSON.stringify(addressDetails)
+                    }
+                })
             });
 
-            if (!orderResponse.ok) {
-                throw new Error('Failed to create order');
+            const { clientSecret } = await response.json();
+            if (!clientSecret) {
+                throw new Error('Failed to create payment intent');
             }
 
-            const orderData = await orderResponse.json();
-            console.log('Order created:', orderData);
+            // Then confirm the payment
+            const { error: submitError } = await elements.submit();
+            if (submitError) {
+                console.error('Error submitting payment:', submitError);
+                return;
+            }
 
-            console.log('Confirming payment in handlePayment...')
-            const {error} = await stripe.confirmPayment({
-                elements, 
+            const { error: confirmError } = await stripe.confirmPayment({
+                elements,
+                clientSecret,  // Add this line
                 confirmParams: {
-                    return_url: `${window.location.origin}/order-confirmation/${orderData.id}`,
-                }
+                    return_url: `${window.location.origin}/order-confirmation`,
+                },
             });
-            return !error;
+
+            if (confirmError) {
+                console.error('Error confirming payment:', confirmError);
+            }
         } catch (error) {
-            console.error('Error confirming payment:', error);
-            return false;
-        } 
+            console.error('Error:', error);
+        }
     };
 
     return (
         <div className="flex flex-col space-y-4">
-            <PaymentElement 
-                options={{
-                    wallets: {
-                        applePay: 'never',
-                        googlePay: 'never',
-                        cashapp: 'never'
-                    },
-                    fields: {
-                        billingDetails: 'never'
-                    }
-                }}
-            />
+            <PaymentElement />
             <Button
                 type="submit"
                 disabled={!stripe}

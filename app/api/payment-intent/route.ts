@@ -3,7 +3,7 @@ import { NextResponse } from "next/server";
 
 export async function POST(request: Request) {
     try {
-        const { amount } = await request.json();
+        const { amount, metadata } = await request.json();
         
         if (!amount) {
             return NextResponse.json(
@@ -12,17 +12,17 @@ export async function POST(request: Request) {
             );
         }
 
-        console.log('Creating payment intent with amount:', amount);
         const paymentIntent = await stripe.paymentIntents.create({
             amount,
             currency: "usd",
-            payment_method_types: ['card'], // Only allow card payments
-            automatic_payment_methods: {
-                enabled: false, // Disable automatic payment methods
-            },
+            payment_method_types: ['card'], 
+            metadata: metadata
         });
         
-        return NextResponse.json({ clientSecret: paymentIntent.client_secret });
+        return NextResponse.json({ 
+            clientSecret: paymentIntent.client_secret,
+            paymentIntentId: paymentIntent.id
+        });
     } catch (error: any) {
         console.error("Error creating payment intent:", {
             error: error.message,

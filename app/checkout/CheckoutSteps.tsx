@@ -1,6 +1,6 @@
 'use client'
 import PaymentForm from '@/components/checkout/paymentForm'
-import {Elements, useElements} from '@stripe/react-stripe-js';
+import {Elements, AddressElement} from '@stripe/react-stripe-js';
 import {loadStripe} from '@stripe/stripe-js';
 import { useEffect, useState } from 'react'
 import {useForm} from 'react-hook-form'
@@ -17,6 +17,16 @@ import OrderSummary from '@/components/checkout/orderSummary';
 
 type CheckoutStep =  'signin' | 'delivery-pickup' | 'summary';
 
+interface CustomerAddress {
+    line1?: string;
+    line2?: string;
+    city?: string;
+    state?: string;
+    postal_code?: string;
+    country?: string;
+    phone?: string;
+}
+
 const stripePromise = loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY!);
 
 const CheckoutSteps = () => {
@@ -27,6 +37,7 @@ const CheckoutSteps = () => {
     const [orderData, setOrderData] = useState<any>(null);
     const [orderTotal, setOrderTotal] = useState<number>(0);
     const [orderFees, setOrderFees] = useState<any>(null);
+    const [customerAddress, setCustomerAddress] = useState<CustomerAddress | null>(null);
 
     useEffect(() => {
         if(user && currentStep === 'signin') {
@@ -44,13 +55,36 @@ const CheckoutSteps = () => {
         }
     }, [user]);
 
+    useEffect(() => {
+        const fetchCustomerAddress = async () => {
+            if (user?.id) {
+                try {
+                    const response = await fetch(`/api/customers?customer_id=${user.id}`);
+                    const data = await response.json();
+                    // Only try to parse if data.address exists and is a string
+                    if (data?.address && typeof data.address === 'string') {
+                        setCustomerAddress(JSON.parse(data.address));
+                    } else {
+                        // Set to null or empty object if no address exists
+                        setCustomerAddress(null);
+                    }
+                } catch (error) {
+                    console.error('Error fetching customer address:', error);
+                    // Set to null or empty object on error
+                    setCustomerAddress(null);
+                }
+            }
+        };
+    
+        fetchCustomerAddress();
+    }, [user?.id]);
+
      // Create payment intent when total changes
      useEffect(() => {
         const createPaymentIntent = async () => {
             if (orderTotal > 0) {
                 try {
                     const amount = Math.round(orderTotal * 100);
-                    console.log('Creating payment intent with amount:', amount);
                     
                     const paymentIntentResponse = await fetch('/api/payment-intent', {
                         method: 'POST',
@@ -110,7 +144,6 @@ const CheckoutSteps = () => {
     ]
 
     const onSubmit = async (data: CheckoutFormValues) => {
-        console.log('onSubmit started', data);
         try {
          
             // Then create payment intent
@@ -121,7 +154,15 @@ const CheckoutSteps = () => {
                 },
                 body: JSON.stringify({
                     amount: Math.round(orderData.total * 100),
-                }),
+                    metadata: {
+                        customer_id: user?.id, 
+                        customer: JSON.stringify(form.getValues().customer),
+                        delivery: JSON.stringify(form.getValues().delivery),
+                        cart_items: JSON.stringify(cartItems),
+                        fees: JSON.stringify(orderFees),
+                        total: JSON.stringify(orderData.total),
+                    }
+                })
             });
     
             if (!paymentIntentResponse.ok) {
@@ -173,9 +214,9 @@ const CheckoutSteps = () => {
 
 
     return (
-      <div className="max-w-4xl mx-auto">
-        <nav aria-label="Progress" className="mb-12">
-            <ol role="list" className="flex items-center justify-center space-x-8">
+        <div className="max-w-4xl mx-auto">
+            <nav aria-label="Progress" className="mb-12">
+                <ol role="list" className="flex items-center justify-center space-x-8">
                 {steps.map((step, stepIdx) => (
                     <li key={step.id} className="relative">
                         <div className="flex items-center">
@@ -199,15 +240,14 @@ const CheckoutSteps = () => {
                         </span>
                     </li>
                 ))}
-            </ol>
-        </nav>
-
-        <div className="bg-gradient-to-b from-black/30 to-black/40 backdrop-blur-sm border border-white/10 rounded-xl p-8">
-            <Form {...form}>
-                <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
-                {currentStep === 'signin' && !user && (
-                    <CheckoutCustomerSignIn 
-                        form={form}
+                </ol>
+            </nav>
+            <div className="bg-gradient-to-b from-black/30 to-black/40 backdrop-blur-sm border border-white/10 rounded-xl p-8">
+                <Form {...form}>
+                    <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
+                    {currentStep === 'signin' && !user && (
+                        <CheckoutCustomerSignIn 
+                            form={form}
                         onComplete={handleNextStep} 
                     />
                 )}
@@ -218,16 +258,18 @@ const CheckoutSteps = () => {
                         onComplete={handleNextStep}
                     />
                 )}
-                {currentStep === 'summary' &&  (
+                {currentStep === 'summary' && (
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                    <OrderSummary
-                        form={form}
-                        onTotalCaluated={handleTotalCalculated}
-                    />
-                    {clientSecret && (
+                        <div>
+                            <OrderSummary
+                                form={form}
+                                onTotalCaluated={handleTotalCalculated}
+                            />
+                        </div>
+                        {clientSecret && (
                         <Elements 
                             stripe={stripePromise} 
-                            options={{ 
+                            options={{
                                 clientSecret,
                                 appearance: {
                                     theme: 'night',
@@ -240,24 +282,62 @@ const CheckoutSteps = () => {
                                         spacingUnit: '4px',
                                         borderRadius: '4px',
                                     },
-                                }
-                             }}
+                                },
+                            }}
                         >
-                            <PaymentForm 
-                             formData={form.watch()}
-                             total={orderTotal}
-                             cartItems={cartItems}
-                             fees={orderFees}
-                            />
+                            <div className="space-y-4">
+                                <h2 className="text-red-500 text-3xl pb-6">Billing Address</h2>
+                                <AddressElement 
+                                    options={{
+                                        mode: 'billing',
+                                        allowedCountries: ['US'],
+                                        autocomplete: {
+                                            mode: 'automatic'
+                                        },
+                                        defaultValues: {
+                                            name: form.watch('customer.name'),
+                                            address: {
+                                                line1: customerAddress?.line1 || '',
+                                                line2: customerAddress?.line2 || '',
+                                                city: customerAddress?.city || '',
+                                                state: customerAddress?.state || '',
+                                                postal_code: customerAddress?.postal_code || '',
+                                                country: customerAddress?.country || 'US',
+                                            },
+                                            phone: customerAddress?.phone || ''
+                                        },
+                                        fields: {
+                                            phone: 'always'
+                                        },
+                                        validation: {
+                                            phone: {
+                                                required: 'always',
+                                            }
+                                        },
+                                    }}
+                                />
+                                <PaymentForm 
+                                    formData={form.watch()}
+                                    total={orderTotal}
+                                    cartItems={cartItems}
+                                    fees={orderFees}
+                                />
+                            </div>
                         </Elements>
                     )}
                     </div>
                 )}
+                </form>
+            </Form>
+        </div>
+    </div>
+    )
 
-            </form>
-        </Form>
+}
 
-        {/* Navigation buttons
+export default CheckoutSteps;
+
+ {/* Navigation buttons
         <div className="flex justify-center space-x-4 mt-8">
             {(currentStep !== 'signin' && currentStep !== 'summary') && (
                 <Button 
@@ -276,10 +356,3 @@ const CheckoutSteps = () => {
                 </Button>
             )}
         </div> */}
-    </div>
-    </div>
-    )
-
-}
-
-export default CheckoutSteps;
