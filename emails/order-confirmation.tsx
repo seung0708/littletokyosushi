@@ -41,10 +41,7 @@ interface OrderConfirmationEmailProps {
 
 export default function OrderConfirmationEmail({ order, customer }: OrderConfirmationEmailProps) {
   const pickupDate = new Date(`${order.pickup_date}T${order.pickup_time}`);
-  const modifiers = order.items.flatMap((item) => item.cart_item_modifiers || []);
-  const modifierOptions = modifiers.flatMap((modifier) => modifier.cart_item_modifier_options || []);
-  console.log('modifierOptions', modifierOptions);
-
+  
   return (
     <Html>
       <Head />
@@ -70,26 +67,26 @@ export default function OrderConfirmationEmail({ order, customer }: OrderConfirm
                     <Text style={itemText}>
                       {item.quantity} x {item.menu_item_name}
                     </Text>
+                    {item.cart_item_modifiers?.map((modifier) => (
+                      <Text key={modifier.name} style={modifierText}>
+                        {modifier.name}:
+                        {modifier.cart_item_modifier_options?.map((option) => (
+                          <Text key={option.name} style={optionText}>
+                            • {option.name} (+${option.price.toFixed(2)})
+                          </Text>
+                        ))}
+                      </Text>
+                    ))}
+                    {item.special_instructions && (
+                      <Text style={specialInstructionsText}>
+                        Special Instructions: {item.special_instructions}
+                      </Text>
+                    )}
                   </Column>
-                  <Column>
-                    <Text style={itemPrice}>
-                      ${(item.total_price * item.quantity).toFixed(2)}
-                    </Text>
+                  <Column align="right">
+                    <Text style={priceText}>${item.total_price.toFixed(2)}</Text>
                   </Column>
                 </Row>
-                {item.cart_item_modifiers?.map((modifier, modIndex) => (
-                  <div key={modIndex} style={modifierContainer}>
-                    <Text style={modifierText}>
-                      {modifier.name}:
-                    </Text>
-                      {modifier.cart_item_modifier_options?.map((option, optIndex) => (
-                        <Text key={optIndex} style={{...modifierText, marginLeft: '12px'}}>
-                          {optIndex > 0}
-                          • {option.name} {`(+${(option.price).toFixed(2)})`}
-                        </Text>
-                      ))}
-                  </div>
-                ))}
               </div>
             ))}
 

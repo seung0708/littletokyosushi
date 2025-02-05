@@ -5,14 +5,13 @@ import AdminLoading from "@/app/(admin)/loading";
 import OrderView from "@/components/admin/orders/order-view";
 import RecentOrder from "@/components/admin/orders/recent-order";
 
-const OrderPage = ({ params }: { params: Promise<{ orderId: string }> }) => {
-    const {orderId} = use(params)
+const OrderPage = ({ params }: { params: { orderId: string } }) => {
     const [order, setOrder] = useState()
 
     useEffect(() => {
         const fetchOrder = async () => {
             try {
-                const response = await fetch(`/api/admin/orders/${orderId}`)
+                const response = await fetch(`/api/admin/orders/${params.orderId}`)
                 if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`)
                 const order = await response.json()
                 setOrder(order)
@@ -22,7 +21,7 @@ const OrderPage = ({ params }: { params: Promise<{ orderId: string }> }) => {
         }
 
         fetchOrder()
-    }, [])
+    }, [params.orderId])
 
     const onRefund = async (values: any) => {
         try {

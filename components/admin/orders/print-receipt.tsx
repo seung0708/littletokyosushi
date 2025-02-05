@@ -1,3 +1,4 @@
+'use client';
 import { Database } from '@/types/database.types';
 
 type Order = Database['public']['Tables']['orders']['Row'] & {
@@ -20,14 +21,14 @@ interface PrintReceiptProps {
     order: Order;
 }
 
-const PrintReceipt = async ({ order }: PrintReceiptProps) => {
+const PrintReceipt = ({ order }: PrintReceiptProps) => {
     const calculateItemTotal = (item: Order['order_items'][0]) => {
-        const modifierTotal = item.order_item_modifiers.reduce((total, modifier) => {
-            return total + modifier.order_item_modifier_options.reduce((optTotal, opt) => 
+        const modifierTotal = item.itemModifiers.reduce((total, modifier) => {
+            return total + modifier.options.reduce((optTotal, opt) => 
                 optTotal + opt.price, 0
             );
         }, 0);
-        return (item.base_price + modifierTotal) * item.quantity;
+        return (item.basePrice + modifierTotal) * item.quantity;
     };
 
     // Set up print styling
@@ -45,7 +46,7 @@ const PrintReceipt = async ({ order }: PrintReceiptProps) => {
     printWindow.document.write(`
         <html>
         <head>
-            <title>Order Receipt #${order.id}</title>
+            <title>Order Receipt #${order.short_id}</title>
             <style>
                 body {
                     font-family: monospace;
@@ -84,18 +85,18 @@ const PrintReceipt = async ({ order }: PrintReceiptProps) => {
             </div>
 
             <div class="customer">
-                <p>Customer: ${order.customer.name || 'Guest'}</p>
-                ${order.customer.phone ? `<p>Phone: ${order.customer.phone}</p>` : ''}
+                <p>Customer: ${order.customerFirstName + ' ' + order.customerLastName || 'Guest'}</p>
+                ${order.customerPhone ? `<p>Phone: ${order.customerPhone}</p>` : ''}
             </div>
 
             <div class="items">
-                ${order.order_items.map(item => `
+                ${order.items.map(item => `
                     <div class="item">
-                        <p>${item.quantity}x ${item.menu_item.name} - $${calculateItemTotal(item).toFixed(2)}</p>
-                        ${item.order_item_modifiers.map(modifier => `
+                        <p>${item.quantity}x ${item.name} - $${calculateItemTotal(item).toFixed(2)}</p>
+                        ${item.itemModifiers.map(modifier => `
                             <div class="modifier">
                                 ${modifier.name}:
-                                ${modifier.order_item_modifier_options.map(option => 
+                                ${modifier.options.map(option => 
                                     `${option.name} (+$${option.price.toFixed(2)})`
                                 ).join(', ')}
                             </div>

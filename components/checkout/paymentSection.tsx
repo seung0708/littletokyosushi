@@ -11,10 +11,9 @@ interface Props {
     customerAddress: any;
     onSubmit: (data: CheckoutFormValues) => Promise<void>; 
     form: UseFormReturn<CheckoutFormValues>; 
-    order: any;
 }
 
-const PaymentSection = ({ customerAddress, onSubmit, form, order }: Props) => {
+const PaymentSection = ({ customerAddress, onSubmit, form }: Props) => {
     const stripe = useStripe();
     const elements = useElements();
     const { user } = useAuth();
@@ -76,7 +75,7 @@ const PaymentSection = ({ customerAddress, onSubmit, form, order }: Props) => {
             }
 
             
-            await onSubmit(form.getValues());
+            const order = await onSubmit(form.getValues());
 
              // Wait for order data to be available
             if (!order?.short_id || !order?.total) {

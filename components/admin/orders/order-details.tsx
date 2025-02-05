@@ -1,5 +1,3 @@
-'use client';
-
 import { Database } from '@/types/database.types';
 import { Badge } from "@/components/ui/badge";
 import { formatDistanceToNow } from 'date-fns';
@@ -7,12 +5,12 @@ import RefundSection from './refund-section';
 
 type Order = Database['public']['Tables']['orders']['Row'] & {
     customer: Database['public']['Tables']['customers']['Row'];
-    order_items: Array<
+    items: Array<
         Database['public']['Tables']['order_items']['Row'] & {
-            menu_item: Database['public']['Tables']['items']['Row'];
-            order_item_modifiers: Array<
+            menu_item: Database['public']['Tables']['menu_items']['Row'];
+            itemModifiers: Array<
                 Database['public']['Tables']['order_item_modifiers']['Row'] & {
-                    order_item_modifier_options: Array<
+                    options: Array<
                         Database['public']['Tables']['order_item_modifier_options']['Row']
                     >;
                 }
@@ -27,20 +25,22 @@ interface OrderDetailsProps {
 }
 
 const OrderDetails: React.FC<OrderDetailsProps> = ({ order, onRefund }) => {
+    
     const calculateItemTotal = (item: Order['order_items'][0]) => {
-        const modifierTotal = item.order_item_modifiers.reduce((total, modifier) => {
-            return total + modifier.order_item_modifier_options.reduce((optTotal, opt) => 
+        console.log('item', item);
+        const modifierTotal = item.itemModifiers.reduce((total, modifier) => {
+            return total + modifier.options.reduce((optTotal, opt) => 
                 optTotal + opt.price, 0
             );
         }, 0);
-        return (item.base_price + modifierTotal) * item.quantity;
+        return (item.basePrice + modifierTotal) * item.quantity;
     };
 
     return (
         <div className="p-6">
             <div className="flex justify-between items-start mb-6">
                 <div>
-                    <h2 className="text-2xl font-bold text-gray-900">Order #{order.id}</h2>
+                    <h2 className="text-2xl font-bold text-gray-900">Order #{order.short_id}</h2>
                     <p className="text-sm text-gray-500 mt-1">
                         Placed {order.created_at && formatDistanceToNow(new Date(order.created_at), { addSuffix: true })}
                     </p>
@@ -62,15 +62,15 @@ const OrderDetails: React.FC<OrderDetailsProps> = ({ order, onRefund }) => {
                 <div className="grid grid-cols-2 gap-4">
                     <div>
                         <p className="text-sm font-medium text-gray-500">Name</p>
-                        <p className="mt-1">{order.customer.name || 'Guest'}</p>
+                        <p className="mt-1">{order.customerFirstName + ' ' + order.customerLastName || 'Guest'}</p>
                     </div>
                     <div>
                         <p className="text-sm font-medium text-gray-500">Email</p>
-                        <p className="mt-1">{order.customer.email || 'N/A'}</p>
+                        <p className="mt-1">{order.customerEmail || 'N/A'}</p>
                     </div>
                     <div>
                         <p className="text-sm font-medium text-gray-500">Phone</p>
-                        <p className="mt-1">{order.customer.phone || 'N/A'}</p>
+                        <p className="mt-1">{order.customerPhone || 'N/A'}</p>
                     </div>
                 </div>
             </div>
@@ -78,14 +78,14 @@ const OrderDetails: React.FC<OrderDetailsProps> = ({ order, onRefund }) => {
             <div className="border-t border-gray-200 pt-6 mt-6">
                 <h3 className="text-lg font-medium text-gray-900 mb-4">Order Items</h3>
                 <div className="space-y-4">
-                    {order.order_items.map((item) => (
+                    {order.items.map((item) => (
                         <div key={item.id} className="flex justify-between">
                             <div>
-                                <p className="font-medium">{item.menu_item.name}</p>
-                                {item.order_item_modifiers.map((modifier) => (
+                                <p className="font-medium">{item.name}</p>
+                                {item.itemModifiers.map((modifier) => (
                                     <div key={modifier.id} className="ml-4 text-sm text-gray-500">
                                         {modifier.name}:
-                                        {modifier.order_item_modifier_options.map((option) => (
+                                        {modifier.options.map((option) => (
                                             <span key={option.id} className="ml-2">
                                                 {option.name} (+${option.price.toFixed(2)})
                                             </span>

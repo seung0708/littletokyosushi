@@ -36,28 +36,29 @@ interface OrderDetails {
 }
 
 interface PageProps {
-  params: Promise<{orderId: string}>;
+  params: {
+    orderId: string;
+  };
   searchParams: {
     [key: string]: string | string[] | undefined;
   };
 }
 
-const Page: React.FC<PageProps> = () => {
+const Page: React.FC<PageProps> = ({params, searchParams: urlSearchParams }) => {
   const searchParams = useSearchParams();
   const [order, setOrder] = useState<OrderDetails | null>(null);
   const [orderId, setOrderId] = useState<string | null>(null);
-  console.log('Order ID:', orderId);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [paymentVerified, setPaymentVerified] = useState(false);
   const { clearCart } = useCart();
 
   useEffect(() => {
-    const verifyPaymentAndFetchOrder = async () => {
+    const verifyPayment = async () => {
       const paymentId = searchParams.get('payment_intent');
       const paymentIntentSecret = searchParams.get('payment_intent_client_secret');
       const redirectStatus = searchParams.get('redirect_status');
-      
+
       if(paymentId && paymentIntentSecret && redirectStatus === 'succeeded' && !paymentVerified) {
         try {
           const verifyResponse = await fetch('/api/orders/verify-payment', {
@@ -98,9 +99,13 @@ const Page: React.FC<PageProps> = () => {
           alreadyVerified: paymentVerified
         });
       }
+    };
+    verifyPayment();
+  },[paymentVerified]);
 
-      // Always fetch the order
-      try {
+  useEffect(() => {
+    const fetchOrder = async () => {
+    try {
         const response = await fetch(`/api/orders/${orderId}`);
         const data = await response.json();
         console.log('Order data:', data);
@@ -112,9 +117,9 @@ const Page: React.FC<PageProps> = () => {
         setLoading(false);
       }
     };
+    fetchOrder();
+  },[orderId]);
 
-    verifyPaymentAndFetchOrder();
-  }, [orderId, searchParams]);
 
   return (
     <div className="bg-white">
@@ -190,29 +195,38 @@ const Page: React.FC<PageProps> = () => {
           {order?.order_items.map((item: any) => (  
             <div key={item.id.substring(0, 8)} className="py-6">
               <div className="flex justify-between">
-                <h4 className="font-medium text-gray-900">
-                  {item.item_name}
-                  <span className="ml-2 text-gray-500">× {item.quantity}</span>
-                </h4>
-                <p className="text-gray-900">${(item.price).toFixed(2)}</p>
+                <h4 className="font-medium text-gray-900">{item.item_name}<span className="ml-2 text-gray-500">× {item.quantity}</span></h4>
+                <p className="text-gray-900">${(item.quantity * item.price).toFixed(2)}</p>
               </div>
               {item.order_item_modifiers && item.order_item_modifiers.length > 0 && (
-                <div className="mt-2 flex flex-wrap gap-x-4">
+                <div className="mt-2 flex flex-wrap gap-x-4 text-sm text-gray-500">
                   {item.order_item_modifiers.map((modifier: any) => (
-                  <div key={modifier.id.substring(0, 8)} className="text-sm text-gray-500">
+                  <div key={modifier.id.substring(0, 8)} className="">
                     {modifier.modifier_name}:
                     {modifier.order_item_modifier_options?.map((option: any, index: number) => (
                     <div key={option.id} className="ml-4 mt-1">
-                        {index > 0}
-                        • {option.option_name}
+                        {index > 0 && '•'}
+                        {option.option_name}
                         {option.quantity > 1 && ` (${option.quantity})`}
                         {`+$${(option.option_price).toFixed(2)}`}
                     </div>
                   ))}
                   </div>
                 ))}
+                {item.special_instructions && (
+                  <div>
+                      <p>Special instructions</p>
+                      <p>{item.special_instructions}</p>
+                  </div>
+                )}
                 </div>
               )}
+              {item.special_instructions && (
+                <>
+                    
+                    
+                </>
+                )}
             </div>
           ))}
           </div>

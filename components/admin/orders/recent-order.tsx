@@ -18,8 +18,7 @@ import { OrderHeader } from "./order-header"
 import OrderDetails from "./order-details"
 import OrderFooter from "./order-footer"
 
-export default function RecentOrder({order: initialOrder}: {order: any}) {
-  const [order, setOrder] = useState(initialOrder);
+export default function RecentOrder({order}: {order: any}) {
   const [isConfirmed, setIsConfirmed] = useState(false);
   
   const prepTimeSchema = z.object({
@@ -55,7 +54,6 @@ export default function RecentOrder({order: initialOrder}: {order: any}) {
       }
 
       const updatedOrder = await response.json();
-      setOrder(updatedOrder);
     } catch (error) {
       console.error('Error completing order:', error);
     }

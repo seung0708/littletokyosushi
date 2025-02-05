@@ -170,21 +170,24 @@ export interface Database {
           created_at?: string
           email?: string
           phone?: string
-          name?: string
+          first_name?: string
+          last_name?: string
         }
         Insert: {
           id?: string
           created_at?: string
           email?: string
           phone?: string
-          name?: string
+          first_name?: string
+          last_name?: string
         }
         Update: {
           id?: string
           created_at?: string
           email?: string
           phone?: string
-          name?: string
+          first_name?: string
+          last_name?: string
         }
       }
       carts: {

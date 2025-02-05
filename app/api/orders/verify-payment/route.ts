@@ -26,10 +26,10 @@ export async function POST(req: Request) {
 
         const { data: orderData, error: orderError } = await supabase
             .from('orders')
-            .select('id')
+            .select('*')
             .eq('short_id', orderId)
             .single();
-
+        
         if (orderError) {
             console.error('Error fetching order:', orderError);
             return NextResponse.json({ error: 'Failed to fetch order' }, { status: 500 });
@@ -53,7 +53,6 @@ export async function POST(req: Request) {
         if (paymentError) {
             console.log('verify-payment Error updating payment:', paymentError);
         }
-
 
         // Insert status record
         const {error: statusError} = await supabase

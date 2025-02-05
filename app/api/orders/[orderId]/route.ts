@@ -22,7 +22,7 @@ export async function GET(req: Request, { params }: { params: { orderId: string 
             return NextResponse.json({ error: 'Order not found' }, { status: 404 });
         }
 
-        return NextResponse.json({ message: 'Order data fetched successfully', status: 200, orderData: orderData});
+        return NextResponse.json({ message: 'Order data fetched successfully', status: 200, orderData});
 
     } catch (error) {
         console.error('Error in GET /api/orders/[orderId]:', error); 

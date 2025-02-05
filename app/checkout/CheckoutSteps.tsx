@@ -215,7 +215,7 @@ const CheckoutSteps = () => {
             }
 
             const order = await orderResponse.json();
-            setOrderData(order);
+            return order;
             
         } catch (error) {
             console.error('Error in checkout:', error);
@@ -312,7 +312,6 @@ const CheckoutSteps = () => {
                                         customerAddress={customerAddress}
                                         onSubmit={onSubmit}
                                         form={form}
-                                        order={orderData}
                                     />
                                 </Elements>
                             ) : (
