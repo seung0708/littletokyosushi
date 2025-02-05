@@ -4,7 +4,7 @@ import { sendOrderConfirmationEmail } from "@/lib/email-smtp";
 
 export async function POST(req: Request) {
     const { customer_id, customer, delivery, total, cartItems, fees } = await req.json();
-
+    
     try {
         const supabase = await createClient();
 

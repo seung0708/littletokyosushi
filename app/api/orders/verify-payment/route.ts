@@ -7,123 +7,150 @@ export async function POST(req: Request) {
     const supabase = await createClient();
 
     try {
-        // First verify the payment
-        const stripePaymentIntent = await Stripe.paymentIntents.retrieve(paymentId);
+        // First get the payment intent to get the order ID
+        const paymentIntent = await Stripe.paymentIntents.retrieve(paymentId);
         
-        if(stripePaymentIntent.status !== 'succeeded' || stripePaymentIntent.client_secret !== paymentIntentSecret) {
+        if (paymentIntent.status !== 'succeeded') {
+            return NextResponse.json({ error: 'Payment not successful' }, { status: 400 });
+        }
+        
+        if(paymentIntent.status !== 'succeeded' || paymentIntent.client_secret !== paymentIntentSecret) {
             return NextResponse.json({ error: 'Payment verification failed' }, { status: 400 });
         }
 
-        // Get order data from payment intent metadata
-        const metadata = stripePaymentIntent.metadata;
-        console.log('Payment Intent Metadata:', metadata);
-
-        // Add safety checks
-        if (!metadata.customer || !metadata.delivery || !metadata.cart_items || !metadata.fees || !metadata.total || !metadata.address) {
-            console.error('Missing metadata:', metadata);
-            return NextResponse.json({ error: 'Missing required metadata' }, { status: 400 });
+        const orderId = paymentIntent.metadata.order_id;
+        console.log('Order ID:', orderId);
+        if (!orderId) {
+            return NextResponse.json({ error: 'No order ID found' }, { status: 400 });
         }
 
-        try {
-            const customer = JSON.parse(metadata.customer);
-            const delivery = JSON.parse(metadata.delivery);
-            const cartItems = JSON.parse(metadata.cart_items);
-            const fees = JSON.parse(metadata.fees);
-            const total = JSON.parse(metadata.total);
-            const address = JSON.parse(metadata.address);
+        const { data: orderData, error: orderError } = await supabase
+            .from('orders')
+            .select('id')
+            .eq('short_id', orderId)
+            .single();
 
-            // Create the order
-            const { data: orderData, error: orderError } = await supabase
-                .from('orders')
-                .insert({
-                    customer_id: metadata.customer_id,
-                    customer,
-                    delivery,
-                    items: cartItems,
-                    fees,
-                    total,
-                    status: 'pending',
-                    address
-                })
-                .select()
-                .single();
+        if (orderError) {
+            console.error('Error fetching order:', orderError);
+            return NextResponse.json({ error: 'Failed to fetch order' }, { status: 500 });
+        }
 
-            if (orderError) {
-                console.error('Error creating order:', orderError);
-                return NextResponse.json({ error: orderError.message }, { status: 400 });
-            }
+        if (!orderData) {
+            return NextResponse.json({ error: 'Order not found' }, { status: 404 });
+        }
 
-            // Insert payment record
-            const {error: paymentError } = await supabase
-                .from('order_payments')
-                .insert({
+        // Insert payment record
+        const {error: paymentError } = await supabase
+            .from('order_payments')
+            .insert({
+                order_id: orderData.id,
+                payment_intent_id: paymentIntent.id, 
+                payment_status: paymentIntent.status,
+                payment_method: paymentIntent.payment_method_types[0],
+                amount: paymentIntent.amount,
+            });
+
+        if (paymentError) {
+            console.log('verify-payment Error updating payment:', paymentError);
+        }
+
+
+        // Insert status record
+        const {error: statusError} = await supabase
+            .from('order_status_history')
+            .insert([
+                {
                     order_id: orderData.id,
-                    payment_intent_id: stripePaymentIntent.id, 
-                    payment_status: stripePaymentIntent.status,
-                    payment_method: stripePaymentIntent.payment_method_types[0],
-                    amount: stripePaymentIntent.amount,
-                });
-
-            if (paymentError) {
-                console.error('Error creating payment record:', paymentError);
-                return NextResponse.json({ error: 'Failed to create payment record' }, { status: 500 });
-            }
-
-            // Insert status record
-            const {error: statusError} = await supabase
-                .from('order_status_history')
-                .insert([
-                    {
-                        order_id: orderData.id,
-                        status: 'paid',
-                        notes: 'Payment successfully processed'
-                    },
-                    {
-                        order_id: orderData.id,
-                        status: 'not_started',
-                        notes: 'Order ready for kitchen'
-                    }
-                ]);
-
-            if (statusError) {
-                console.error('Error updating order status:', statusError);
-                return NextResponse.json({ error: 'Failed to update order status' }, { status: 500 });
-            }
-            
-            // Update order status
-            const {error: orderErrorUpdate} = await supabase
-                .from('orders')
-                .update({
+                    status: 'paid',
+                    notes: 'Payment successfully processed'
+                },
+                {
+                    order_id: orderData.id,
                     status: 'not_started',
-                })
-                .eq('id', orderData.id);
-
-            if (orderErrorUpdate) {
-                console.error('Error updating order status:', orderErrorUpdate);
-                return NextResponse.json({ error: 'Failed to update order status' }, { status: 500 });
-            }
-    
-            // Clear the cart after successful payment verification
-            if (metadata.customer_id) {
-                const { error: cartError } = await supabase
-                    .from('carts')
-                    .delete()
-                    .eq('customer_id', metadata.customer_id);
-
-                if (cartError) {
-                    console.error('Error clearing cart:', cartError);
+                    notes: 'Order ready for kitchen'
                 }
-            }
+            ]);
 
-            return NextResponse.json({ success: true, orderId: orderData.id });
+        if (statusError) {
+            console.error('Error updating order status:', statusError);
+            return NextResponse.json({ error: 'Failed to update order status' }, { status: 500 });
+        }
+        
+        const {error: orderErrorUpdate} = await supabase
+            .from('orders')
+            .update({
+                status: 'not_started',
+            })
+            .eq('id', orderData.id);
 
-        } catch (parseError) {
-            console.error('Error parsing metadata:', parseError);
-            return NextResponse.json({ error: 'Invalid metadata format' }, { status: 400 });
+        if (orderErrorUpdate) {
+            console.error('Error updating order status:', orderErrorUpdate);
+            return NextResponse.json({ error: 'Failed to update order status' }, { status: 500 });
+        }
+ 
+        // Clear the cart after successful payment verification
+        const { error: cartError } = await supabase
+            .from('carts')
+            .delete()
+            .eq('customer_id', orderData.customer_id);
+
+        if (cartError) {
+            console.error('Error clearing cart:', cartError);
         }
 
+        // Clean up duplicate payment records - keep only the latest
+        const latestPayment = await supabase
+            .from('order_payments')
+            .select('created_at')
+            .eq('order_id', orderData.id)
+            .order('created_at', { ascending: false })
+            .limit(1)
+            .single();
+
+        if (latestPayment.data) {
+            const { error: deletePaymentError } = await supabase
+                .from('order_payments')
+                .delete()
+                .eq('order_id', orderData.id)
+                .lt('created_at', latestPayment.data.created_at);
+
+            if (deletePaymentError) {
+                console.error('Error cleaning up duplicate payments:', deletePaymentError);
+            }
+        }
+
+        // Clean up duplicate status records - keep only the latest
+        const latestStatus = await supabase
+            .from('order_status_history')
+            .select('created_at')
+            .eq('order_id', orderData.id)
+            .eq('status', 'paid')
+            .order('created_at', { ascending: false })
+            .limit(1)
+            .single();
+
+        if (latestStatus.data) {
+            const { error: deleteStatusError } = await supabase
+                .from('order_status_history')
+                .delete()
+                .eq('order_id', orderData.id)
+                .eq('status', 'paid')
+                .lt('created_at', latestStatus.data.created_at);
+
+            if (deleteStatusError) {
+                console.error('Error cleaning up duplicate statuses:', deleteStatusError);
+            }
+        }
+ 
+        return NextResponse.json({ 
+            message: 'Payment verified successfully', 
+            status: 200, 
+            orderId: orderData.id,
+            clearCart: true // Signal to client to clear localStorage
+        });
+        
     } catch (error) {
-        console.error('Error:', error);
-        return NextResponse.json({ error: 'Failed to process payment' }, { status: 500 });
+        console.error('Error verifying payment:', error);
+        return NextResponse.json({ error: 'Failed to verify payment' }, { status: 500 });
     }
 }

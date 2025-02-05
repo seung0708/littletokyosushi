@@ -1,8 +1,8 @@
 'use client'
-import PaymentForm from '@/components/checkout/paymentForm'
-import {Elements, AddressElement} from '@stripe/react-stripe-js';
+
+import {Elements} from '@stripe/react-stripe-js';
 import {loadStripe} from '@stripe/stripe-js';
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import {useForm} from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import Link from 'next/link'
@@ -14,6 +14,7 @@ import { useAuth } from '@/app/context/authContext'
 import CheckoutCustomerSignIn from '@/components/checkout/checkoutCustomerSignIn'
 import DeliveryPickupSelector from '@/components/checkout/deliverypickupselector';  
 import OrderSummary from '@/components/checkout/orderSummary';
+import PaymentSection from '@/components/checkout/paymentSection';
 
 type CheckoutStep =  'signin' | 'delivery-pickup' | 'summary';
 
@@ -79,48 +80,64 @@ const CheckoutSteps = () => {
         fetchCustomerAddress();
     }, [user?.id]);
 
-     // Create payment intent when total changes
-     useEffect(() => {
-        const createPaymentIntent = async () => {
-            if (orderTotal > 0) {
-                try {
-                    const amount = Math.round(orderTotal * 100);
-                    
-                    const paymentIntentResponse = await fetch('/api/payment-intent', {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                        },
-                        body: JSON.stringify({
-                            amount: amount,
-                        }),
-                    });
-
-                    const responseData = await paymentIntentResponse.json();
-                    
-                    if (!paymentIntentResponse.ok) {
-                        console.error('Payment intent creation failed:', responseData);
-                        throw new Error(responseData.error || 'Failed to create payment intent');
-                    }
-
-                    setClientSecret(responseData.clientSecret);
-                } catch (error) {
-                    console.error('Error creating payment intent:', error);
-                }
+    const createPaymentIntent = async () => {
+        try {
+            if (!orderTotal) {
+                console.error('No order total available:', orderTotal);
+                return;
             }
-        };
+            const paymentIntentResponse = await fetch('/api/payment-intent', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    amount: Math.round(orderTotal * 100)
+                })
+            });
 
-        createPaymentIntent();
-    }, [orderTotal]);
+            const responseText = await paymentIntentResponse.text();
 
-    const handleTotalCalculated = (total: number, fees: {serviceFee: number, subTotal: number}) => {
+
+            if (!paymentIntentResponse.ok) {
+                console.error('Payment intent creation failed:', responseText);
+                return;
+            }
+
+            const { clientSecret } = JSON.parse(responseText);
+            if (clientSecret) {
+                setClientSecret(clientSecret);
+            } else {
+                console.error('No client secret in response');
+            }
+        } catch (error) {
+            console.error('Error creating payment intent:', error);
+        }
+    };
+    
+    const calculateOrderTotal = useCallback(() => {
+        if (!cartItems?.length) {
+            return;
+        }
+    
+        const subTotal = cartItems.reduce((acc, item) => {
+            const itemTotal = item.base_price * item.quantity;
+            const modifiersTotal = item.cart_item_modifiers?.reduce((modTotal, mod) => {
+                const optionsTotal = mod.cart_item_modifier_options?.reduce((optTotal, opt) => 
+                    optTotal + opt.price, 0) || 0;
+                return modTotal + optionsTotal;
+            }, 0) || 0;
+            return acc + itemTotal + modifiersTotal;
+        }, 0);
+        
+        const serviceFee = subTotal * 0.1;
+        const total = subTotal + serviceFee;
+
         setOrderTotal(total);
-        setOrderFees(fees);
-    };
+        setOrderFees({ serviceFee, subTotal });
+    }, [cartItems]);
 
-    const updateClientSecret = (secret: string) => {
-        setClientSecret(secret);
-    };
+    useEffect(() => {
+        calculateOrderTotal();
+    }, [calculateOrderTotal]);
 
     const form = useForm<CheckoutFormValues>({
         resolver: zodResolver(checkoutSchema),
@@ -143,52 +160,24 @@ const CheckoutSteps = () => {
         { id: 'summary', name: 'Review & Pay', status: currentStep === 'summary' ? 'current' : 'upcoming' }
     ]
 
-    const onSubmit = async (data: CheckoutFormValues) => {
-        try {
-         
-            // Then create payment intent
-            const paymentIntentResponse = await fetch('/api/payment-intent', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({
-                    amount: Math.round(orderData.total * 100),
-                    metadata: {
-                        customer_id: user?.id, 
-                        customer: JSON.stringify(form.getValues().customer),
-                        delivery: JSON.stringify(form.getValues().delivery),
-                        cart_items: JSON.stringify(cartItems),
-                        fees: JSON.stringify(orderFees),
-                        total: JSON.stringify(orderData.total),
-                    }
-                })
-            });
-    
-            if (!paymentIntentResponse.ok) {
-                throw new Error('Failed to create payment intent');
-            }
-    
-            const { clientSecret } = await paymentIntentResponse.json();
-            updateClientSecret(clientSecret);
-    
-        } catch (error) {
-            console.error('Error in checkout:', error);
-        }
-    };
-
     const handleNextStep = () => {
-        switch (currentStep) {
-            case 'signin': 
-                setCurrentStep('delivery-pickup')
-                break;
-            case 'delivery-pickup':
-                setCurrentStep('summary')
-                break;
-            default:
-                break;
-        }
+    switch (currentStep) {
+        case 'signin': 
+            setCurrentStep('delivery-pickup');
+            break;
+        case 'delivery-pickup':
+            if (!orderTotal || orderTotal <= 0) {
+                console.log('Cannot proceed - no order total');
+                return;
+            }
+            console.log('Moving to summary with total:', orderTotal);
+            setCurrentStep('summary');
+            setTimeout(() => {
+                createPaymentIntent();
+            }, 0);
+            break;
     }
+};
 
     const handlePreviousStep = () => {
         switch (currentStep) {
@@ -202,6 +191,37 @@ const CheckoutSteps = () => {
                 break;
         }
     }
+
+    const onSubmit = async (data: CheckoutFormValues) => {
+        try {
+            // Create order
+
+            const orderResponse = await fetch('/api/orders', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    customer_id: user?.id,
+                    customer: data.customer,
+                    delivery: data.delivery,
+                    fees: orderFees,
+                    total: orderTotal,
+                    cartItems,
+                    status: 'pending',
+                })
+            });
+
+            if (!orderResponse.ok) {
+                throw new Error('Failed to create order');
+            }
+
+            const order = await orderResponse.json();
+            setOrderData(order);
+            
+        } catch (error) {
+            console.error('Error in checkout:', error);
+        }
+    };
+
 
     if (!cartItems || cartItems.length === 0) {
       <div className="text-center py-12">
@@ -258,73 +278,49 @@ const CheckoutSteps = () => {
                         onComplete={handleNextStep}
                     />
                 )}
+              
                 {currentStep === 'summary' && (
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                         <div>
                             <OrderSummary
                                 form={form}
-                                onTotalCaluated={handleTotalCalculated}
+                                orderTotal={orderTotal}
+                                orderFees={orderFees}
                             />
                         </div>
-                        {clientSecret && (
-                        <Elements 
-                            stripe={stripePromise} 
-                            options={{
-                                clientSecret,
-                                appearance: {
-                                    theme: 'night',
-                                    variables: {
-                                        colorPrimary: '#dc2626',
-                                        colorBackground: '#000000',
-                                        colorText: '#ffffff',
-                                        colorDanger: '#df1b41',
-                                        fontFamily: 'system-ui, sans-serif',
-                                        spacingUnit: '4px',
-                                        borderRadius: '4px',
-                                    },
-                                },
-                            }}
-                        >
-                            <div className="space-y-4">
-                                <h2 className="text-red-500 text-3xl pb-6">Billing Address</h2>
-                                <AddressElement 
+                        <div>
+                            {clientSecret ? (
+                                <Elements 
+                                    stripe={stripePromise} 
                                     options={{
-                                        mode: 'billing',
-                                        allowedCountries: ['US'],
-                                        autocomplete: {
-                                            mode: 'automatic'
-                                        },
-                                        defaultValues: {
-                                            name: form.watch('customer.name'),
-                                            address: {
-                                                line1: customerAddress?.line1 || '',
-                                                line2: customerAddress?.line2 || '',
-                                                city: customerAddress?.city || '',
-                                                state: customerAddress?.state || '',
-                                                postal_code: customerAddress?.postal_code || '',
-                                                country: customerAddress?.country || 'US',
+                                        clientSecret,
+                                        appearance: {
+                                            theme: 'night',
+                                            variables: {
+                                                colorPrimary: '#dc2626',
+                                                colorBackground: '#000000',
+                                                colorText: '#ffffff',
+                                                colorDanger: '#df1b41',
+                                                fontFamily: 'system-ui, sans-serif',
+                                                spacingUnit: '4px',
+                                                borderRadius: '4px',
                                             },
-                                            phone: customerAddress?.phone || ''
-                                        },
-                                        fields: {
-                                            phone: 'always'
-                                        },
-                                        validation: {
-                                            phone: {
-                                                required: 'always',
-                                            }
                                         },
                                     }}
-                                />
-                                <PaymentForm 
-                                    formData={form.watch()}
-                                    total={orderTotal}
-                                    cartItems={cartItems}
-                                    fees={orderFees}
-                                />
-                            </div>
-                        </Elements>
-                    )}
+                                >
+                                    <PaymentSection 
+                                        customerAddress={customerAddress}
+                                        onSubmit={onSubmit}
+                                        form={form}
+                                        order={orderData}
+                                    />
+                                </Elements>
+                            ) : (
+                                <div className="h-full flex items-center justify-center">
+                                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-red-600"></div>
+                                </div>
+                            )}
+                        </div>
                     </div>
                 )}
                 </form>

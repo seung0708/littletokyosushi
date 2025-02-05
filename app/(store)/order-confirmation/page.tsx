@@ -42,10 +42,11 @@ interface PageProps {
   };
 }
 
-const Page: React.FC<PageProps> = ({params, searchParams: urlSearchParams }) => {
-  const {orderId} = use(params)
+const Page: React.FC<PageProps> = () => {
   const searchParams = useSearchParams();
   const [order, setOrder] = useState<OrderDetails | null>(null);
+  const [orderId, setOrderId] = useState<string | null>(null);
+  console.log('Order ID:', orderId);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [paymentVerified, setPaymentVerified] = useState(false);
@@ -56,24 +57,30 @@ const Page: React.FC<PageProps> = ({params, searchParams: urlSearchParams }) => 
       const paymentId = searchParams.get('payment_intent');
       const paymentIntentSecret = searchParams.get('payment_intent_client_secret');
       const redirectStatus = searchParams.get('redirect_status');
-    
+      
       if(paymentId && paymentIntentSecret && redirectStatus === 'succeeded' && !paymentVerified) {
         try {
-          const response = await fetch(`/api/orders/verify-payment`, {
+          const verifyResponse = await fetch('/api/orders/verify-payment', {
             method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({ paymentId, paymentIntentSecret }),
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                paymentId,
+                paymentIntentSecret
+            })
           });
 
-          const responseData = await response.json();
-
-          if (!response.ok) {
-            throw new Error(`Payment verification failed: ${responseData.error || 'Unknown error'}`);
+          if (!verifyResponse.ok) {
+            const errorText = await verifyResponse.text();
+            console.error('Verification response:', errorText);
+            throw new Error(`Payment verification failed: ${errorText}`);
           }
 
-          if (responseData.clearCart) {
+          const verifyData = await verifyResponse.json();
+          
+          setOrderId(verifyData.orderId);
+          console.log('Verify response:', verifyData);
+
+          if (verifyData.clearCart) {
             console.log('Clearing cart data...');
             clearCart();
           }

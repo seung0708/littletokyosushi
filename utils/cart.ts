@@ -95,7 +95,7 @@ export async function createNewCartItemWithModifiers(supabase: any, cartId: stri
             special_instructions: newItems.special_instructions || '',
         })
         .select();
-
+    console.log('createNewCartItemWithModifierscartItem:', cartItem);
 
     if (error || !cartItem) {
         console.error('Error creating cart item:', error);
@@ -112,7 +112,7 @@ export async function createNewCartItemWithModifiers(supabase: any, cartId: stri
             }))
         )
         .select();
-
+    console.log('createNewCartItemWithModifierscartItemModifier:', cartItemModifier);
     if (modifierError) {
         console.error('Error creating modifiers:', modifierError);
         return { error: modifierError };

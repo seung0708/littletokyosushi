@@ -33,18 +33,20 @@ export async function GET(req: Request) {
 export async function PATCH(req: Request) { 
     try {
         const { customer_id, address } = await req.json();
+        const { line1, line2, city, state, zip, country, phone } = address.value;
+        console.log('Updating customer address:', { customer_id, address });
         const supabase = await createClient();
 
         const { data, error } = await supabase
             .from('customers')
             .update({
-                line1: address.line1,
-                line2: address.line2,
-                city: address.city,
-                state: address.state,
-                zip: address.zip,
-                country: address.country,
-                phone: address.phone,
+                line1: line1,
+                line2: line2,
+                city: city,
+                state: state,
+                zip: zip,
+                country: country,
+                phone: phone,
                 updated_at: new Date().toISOString()
             })
             .eq('id', customer_id)

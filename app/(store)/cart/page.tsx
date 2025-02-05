@@ -17,7 +17,6 @@ const CartPage: React.FC = () => {
     }
 
     const calculateTotalPrice = (basePrice: number, quantity: number, modifiers: any) => {
-        console.log('modifiers', modifiers)
         const modifierPrice = modifiers.reduce((total: number, mod: any) => {
             return total + mod.cart_item_modifier_options.reduce((optTotal: number, opt: any) => optTotal + opt.price, 0);
         }, 0);

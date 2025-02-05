@@ -1,26 +1,11 @@
 import { createClient } from "@/lib/supabase/server";
 import { NextResponse } from "next/server"; 
-import { APIError } from "@/lib/utils/api-error";
 
 export async function POST(request: Request) {
     const supabase = await createClient();
-    
+    const { customer_id, items } = await request.json();
+    //console.log('items', items);
     try {
-        const { customer_id, items } = await request.json();
-        
-        if (!items || !Array.isArray(items) || items.length === 0) {
-            throw new APIError('Invalid cart items', 400);
-        }
-
-        // Validate items structure
-        for (const item of items) {
-            if (!item.menu_item_id || !item.quantity || !item.base_price) {
-                throw new APIError('Invalid item structure', 400);
-            }
-            if (item.quantity <= 0) {
-                throw new APIError('Item quantity must be greater than 0', 400);
-            }
-        }
     
         const { data: cart, error: createCartError } = await supabase
             .from('carts')
@@ -32,9 +17,11 @@ export async function POST(request: Request) {
         
         if (createCartError) {
             console.error('Error creating cart:', createCartError);
-            throw new APIError('Failed to create cart', 500);
+            return NextResponse.json(
+                { error: 'Failed to create cart' },
+                { status: 500 }
+            );
         }
-
         const { data: cartItems, error: createCartItemsError } = await supabase
             .from('cart_items')
             .insert(
@@ -48,78 +35,64 @@ export async function POST(request: Request) {
                 }))
             )
             .select();
-
+        
         if (createCartItemsError) {
-            // Cleanup the cart if items creation fails
-            await supabase.from('carts').delete().eq('id', cart.id);
             console.error('Error creating cart items:', createCartItemsError);
-            throw new APIError('Failed to create cart items', 500);
+            return NextResponse.json(
+                { error: 'Failed to create cart items' },
+                { status: 500 }
+            );
         }
         
-        if (items[0].modifiers && items[0].modifiers.length > 0) {
-            const { error: createCartItemModifiersError } = await supabase
+        if (items[0].cart_item_modifiers && items[0].cart_item_modifiers.length > 0) {
+            const { data: createItemModifiers, error: createCartItemModifiersError } = await supabase
                 .from('cart_item_modifiers')
                 .insert(
-                    items[0].modifiers.map((modifier: any) => ({
-                        cart_item_id: cartItems[0].id,
+                    items[0].cart_item_modifiers.map((modifier: any) => ({
+                        cart_items_id: cartItems?.[0].id,
                         modifier_id: modifier.id,
-                        quantity: modifier.quantity,
-                        price: modifier.price
                     }))
-                );
+                ).select();
 
             if (createCartItemModifiersError) {
-                // Cleanup if modifier creation fails
-                await supabase.from('cart_items').delete().eq('cart_id', cart.id);
-                await supabase.from('carts').delete().eq('id', cart.id);
                 console.error('Error creating cart item modifiers:', createCartItemModifiersError);
-                throw new APIError('Failed to add modifiers to cart items', 500);
+                return NextResponse.json(
+                    { error: 'Failed to create cart item modifiers' },
+                    { status: 500 }
+                );
             }
-        }
+            const {error: createCartItemModifierOptionsError} = await supabase
+                .from('cart_item_modifier_options')
+                .insert(
+                    items[0].cart_item_modifiers.flatMap((modifier: any, index: number) => 
+                        modifier.cart_item_modifier_options.map((option: any) => ({
+                            cart_item_modifiers_id: createItemModifiers?.[index]?.id, 
+                            modifier_option_id: option.modifier_option_id,
+                            modifier_option_price: option.price,
+                            modifier_id: modifier.id,
+                        }))
+                    )
+                )
+            if (createCartItemModifierOptionsError) {
+                console.error('Error creating cart item modifier options:', createCartItemModifierOptionsError);
+                return NextResponse.json(
+                    { error: 'Failed to create cart item modifier options' },
+                    { status: 500 }
+                );
+            }
 
-        return NextResponse.json({
-            message: 'Cart created successfully',
-            status: 200,
-            cart,
-            cartItems
-        });
-
-    } catch (error) {
-        console.error('Cart creation error:', error);
-        
-        if (error instanceof APIError) {
-            return NextResponse.json(
-                { error: error.message },
-                { status: error.status }
-            );
         }
 
         return NextResponse.json(
-            { error: 'An unexpected error occurred' },
+            { message: 'Cart created successfully', cartId: cart.id, cartItems , status: 200 }
+        );
+
+
+    } catch (error) {
+        console.error('Error in cart items API:', error);
+        return NextResponse.json(    
+            { error: 'Internal server error' }, 
             { status: 500 }
         );
-    }
+    }    
 }
-
-// export const DELETE = async (request: Request) => {
-//     const supabase = createClient();
-//     const { cartId } = await request.json();
-//     if(!cartId) return;
-//     try {
-//         const { error } = await supabase.from('carts').delete().eq('id', cartId);
-//         if (error) {
-//             console.error('Error deleting cart:', error);
-//             return NextResponse.json(
-//                 { error: 'Error deleting cart' },
-//                 { status: 500 }
-//             );
-//         }
-//         return NextResponse.json({ message: 'Cart deleted successfully' }, { status: 200 });
-//     } catch (error) {
-//         console.error('Error deleting cart:', error);
-//         return NextResponse.json(
-//             { error: 'Error deleting cart' },
-//             { status: 500 }
-//         );
-//     }
-// }

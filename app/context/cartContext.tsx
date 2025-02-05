@@ -84,7 +84,6 @@ export const CartProvider = ({ children }: CartProviderProps) => {
             }
 
             const data = await response.json();
-            console.log('fetched cart', data);
             setCartId(data.id);
             setCartItems(data.cart_items);
             localStorage.setItem('cartId', data.id);
@@ -203,6 +202,7 @@ export const CartProvider = ({ children }: CartProviderProps) => {
     };
 
     const createNewCart = async (item: CartItem) => {
+        console.log('createNewCart', { item });
         try {
             const response = await fetch('/api/store/cart', {
                 method: 'POST',
@@ -223,8 +223,8 @@ export const CartProvider = ({ children }: CartProviderProps) => {
             console.log('createNewCart data', data);
             setCartSuccess(data.message);
             if(data.status === 200) {
-                setCartId(data.cart.id ); 
-                localStorage.setItem('cartId', data.cart.id);
+                setCartId(data.cartId ); 
+                localStorage.setItem('cartId', data.cartId);
                 await fetchCart();
             };
         }

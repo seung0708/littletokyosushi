@@ -80,7 +80,7 @@ export async function PATCH(request: Request,  { params }: { params: { id: strin
                 cart_item_modifier_options(id, cart_item_modifiers_id, modifier_option_id, modifier_id, modifier_option_price))))`)
             .eq('id', id)
             .single() as { data: Cart | null, error: any };
-                
+            
         if (cartError) {
             return NextResponse.json({ error: 'Failed to fetch cart' }, { status: 500 });
         }
@@ -93,7 +93,6 @@ export async function PATCH(request: Request,  { params }: { params: { id: strin
         }
 
         const existingCartItem = findMatchingCartItem(dbCart?.cart_items || [], newItems);
-        console.log('existingCartItem:', existingCartItem);
         if (existingCartItem) {
             // If we found an exact match (same item and same modifiers), update quantity
             await updateExistingCartItem(supabase, existingCartItem, newItems);

@@ -3,41 +3,23 @@ import { UseFormReturn } from "react-hook-form";
 import { type CheckoutFormValues } from "@/types/checkout";
 import { useCart } from "@/app/context/cartContext"; 
 import {format} from 'date-fns';
-import { useEffect } from 'react';
+import { useEffect, useMemo } from 'react';
 
 interface Props {
   form: UseFormReturn<CheckoutFormValues>;
-  onTotalCaluated: (total: number, fees: {serviceFee: number, subTotal: number}) => void;
+  orderTotal: number;
+  orderFees: {serviceFee: number, subTotal: number};
 }
 
 
 
-const OrderSummary = ( {form, onTotalCaluated}: Props) => {
+const OrderSummary = ( {form, orderTotal, orderFees}: Props) => {
     const {cartId, cartItems} = useCart();
     const deliveryMethod = form.watch('delivery.method');
     const pickupDate = new Date(form.watch('delivery.pickupDate'));
     const pickupTime = form.watch('delivery.pickupTime');
     const customer = form.watch('customer');
    
-    const subTotal = cartItems.reduce((acc, item) => {
-        const itemTotal = item.base_price * item.quantity;
-        const modifiersTotal = item.cart_item_modifiers?.reduce((modTotal, mod) => {
-          const optionsTotal = mod.cart_item_modifier_options?.reduce((optTotal, opt) => optTotal + opt.price, 0) || 0;
-          return modTotal + optionsTotal;
-        }, 0) || 0;
-        return acc + itemTotal + modifiersTotal;
-      }, 0) || 0;
-
-    const SERVICE_FEE_PERCENTAGE  = 0.029;
-    const SERVICE_FEE_FIXED = 0.30;
-
-    const serviceFee  = (subTotal * SERVICE_FEE_PERCENTAGE) + SERVICE_FEE_FIXED;
-    const total = serviceFee + subTotal;
-
-    useEffect(() => {
-        onTotalCaluated(total, {serviceFee, subTotal});
-    }, [total, subTotal, serviceFee]);
-
     return (
         <>
         <h1 className="sr-only">Checkout</h1>
@@ -58,14 +40,14 @@ const OrderSummary = ( {form, onTotalCaluated}: Props) => {
                                 <h3><span>{item?.quantity} x </span>{item?.menu_item_name}</h3>
                                 
                                 {item?.cart_item_modifiers?.map(modifier => (
-                                    <>
+                                    <div key={modifier?.id}>
                                     <p className="font-bold">{modifier?.name}</p>
                                     {modifier?.cart_item_modifier_options?.map(option => (
                                         <>
                                         <p>{option?.name} +<span>${option?.price.toFixed(2)}</span></p>
                                         </>
                                     ))}
-                                    </>
+                                    </div>
                                 ))}
                             </div>
                             <div>
@@ -79,16 +61,16 @@ const OrderSummary = ( {form, onTotalCaluated}: Props) => {
               <dl className="space-y-6 border-t border-red-500 border-opacity-10 pt-6 text-sm font-medium">
                 <div className="flex items-center justify-between">
                   <dt>Subtotal</dt>
-                  <dd>${subTotal.toFixed(2)}</dd>
+                  <dd>${orderFees.subTotal.toFixed(2)}</dd>
                 </div>
                 <div className="flex items-center justify-between">
                   <dt>Service Fee</dt>
-                  <dd>${serviceFee.toFixed(2)}</dd>
+                  <dd>${orderFees.serviceFee.toFixed(2)}</dd>
                 </div>
                 <div className="flex items-center justify-between border-t border-white border-opacity-10 pt-6 text-white">
                   <dt>Total</dt>
                   <dd>
-                  ${total.toFixed(2)}
+                  ${orderTotal.toFixed(2)}
                   </dd>
                 </div>
               </dl>

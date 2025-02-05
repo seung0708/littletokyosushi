@@ -11,7 +11,7 @@ export async function GET(req: Request, { params }: { params: { orderId: string 
             .select(`*, order_items(*, order_item_modifiers(*, order_item_modifier_options(*)))`)
             .eq('id', orderId)
             .single();
-
+        
         if (orderError) {
             console.error('Error fetching order data:', orderError);
             return NextResponse.json({ error: 'Failed to fetch order data' }, { status: 500 });
