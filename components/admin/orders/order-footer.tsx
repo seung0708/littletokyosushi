@@ -8,23 +8,8 @@ import { Form, FormControl, FormField, FormItem } from "@/components/ui/form"
 import { Input } from "@/components/ui/input"
 import { AnimatePresence, motion } from "framer-motion"
 import ActionButtons from "./action-buttons"
-import PrintReceipt from './print-receipt';
+import { Order, OrderItem, OrderItemModifier, OrderItemModifierOption } from '@/types/order';
 
-type Order = Database['public']['Tables']['orders']['Row'] & {
-    customer: Database['public']['Tables']['customers']['Row'];
-    order_items: Array<
-        Database['public']['Tables']['order_items']['Row'] & {
-            menu_item: Database['public']['Tables']['items']['Row'];
-            order_item_modifiers: Array<
-                Database['public']['Tables']['order_item_modifiers']['Row'] & {
-                    order_item_modifier_options: Array<
-                        Database['public']['Tables']['order_item_modifier_options']['Row']
-                    >;
-                }
-            >;
-        }
-    >;
-};
 
 interface OrderFooterProps {
     order: Order

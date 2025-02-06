@@ -1,4 +1,7 @@
 'use client'
+
+import Image from 'next/image';
+
 import {UseFormReturn} from 'react-hook-form'
 import {type CheckoutFormValues} from '@/types/checkout'
 import { useAuth } from "@/app/context/authContext"
@@ -7,7 +10,6 @@ import { Input } from '../ui/input';
 import { Button } from '../ui/button';
 import { useCart } from '@/app/context/cartContext';
 import { useEffect, useState } from 'react';
-import Image from 'next/image';
 
 interface CustomerSignInProps {
     form: UseFormReturn<CheckoutFormValues>
@@ -15,7 +17,7 @@ interface CustomerSignInProps {
 }
 
 const CheckoutCustomerSignIn: React.FC<CustomerSignInProps> = ({ form, onComplete }) => { 
-    const { user, signup, googleSignin, signin, signinAnonymously } = useAuth()
+    const { signup, googleSignin, signin, signinAnonymously } = useAuth()
     const [isSignUp, setIsSignUp] = useState(false)
     const { updateCartCustomerId } = useCart()
     const [signInError, setSignInError] = useState<string>('')
@@ -32,15 +34,12 @@ const CheckoutCustomerSignIn: React.FC<CustomerSignInProps> = ({ form, onComplet
         const { customer } = form.getValues()
         try {
             setSignInError('')
-            const data = await signin(customer.signinEmail, customer.password)
-            console.log('Sign in data:', data)
-            if (data?.id) {
-                await updateCartCustomerId(data?.id)
+            const response = await signin(customer.signinEmail, customer.password)
+            console.log('Sign in data:', response)
+            if (response?.id) {
+                await updateCartCustomerId(response?.id)
                 onComplete()
-            } else {
-                setSignInError(data.error);
-            }
-            
+            } 
         } catch (error) {
             console.error('Sign in failed:', error)
             setSignInError('Sign in failed')
@@ -51,15 +50,12 @@ const CheckoutCustomerSignIn: React.FC<CustomerSignInProps> = ({ form, onComplet
         const { customer } = form.getValues()
         try {
             setSignUpError('')
-            const data = await signup(customer.signinEmail, customer.password)
-            console.log('Sign up data:', data?.user)
-            if (data?.user) {
-                await updateCartCustomerId(data?.user?.id)
+            const response = await signup(customer.signinEmail, customer.password)
+            console.log('Sign up data:', response)
+            if (response) {
+                await updateCartCustomerId(response?.id || '')
                 onComplete()
-            } else {
-                setSignUpError(data?.error)
             }
-            
         } catch (error) {
             console.error('Sign up failed:', error)
         }
@@ -80,15 +76,12 @@ const CheckoutCustomerSignIn: React.FC<CustomerSignInProps> = ({ form, onComplet
         const { customer } = form.getValues()
         try {
             setGuestError('')
-            const data = await signinAnonymously(customer.guestEmail, customer.guestName)
-            console.log('New user:', data)
-            if (data?.error) {
-                setGuestError(data.error)
-            } else {
-                await updateCartCustomerId(data?.user?.id)
+            const response = await signinAnonymously(customer.guestEmail, customer.guestName)
+            console.log('New user:', response)
+            if (response) {
+                await updateCartCustomerId(response?.id || '')
                 onComplete()
-            }
-            
+            } 
         } catch (error) {
             setGuestError('Sign in failed')
             console.error('Sign in failed:', error)

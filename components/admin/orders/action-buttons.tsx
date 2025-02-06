@@ -3,22 +3,7 @@
 import { Database } from '@/types/database.types';
 import { Button } from "@/components/ui/button";
 import { Printer } from "lucide-react";
-
-type Order = Database['public']['Tables']['orders']['Row'] & {
-    customer: Database['public']['Tables']['customers']['Row'];
-    order_items: Array<
-        Database['public']['Tables']['order_items']['Row'] & {
-            menu_item: Database['public']['Tables']['items']['Row'];
-            order_item_modifiers: Array<
-                Database['public']['Tables']['order_item_modifiers']['Row'] & {
-                    order_item_modifier_options: Array<
-                        Database['public']['Tables']['order_item_modifier_options']['Row']
-                    >;
-                }
-            >;
-        }
-    >;
-};
+import { Order } from '@/types/order';
 
 interface ActionButtonsProps {
     order: Order;

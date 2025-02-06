@@ -11,32 +11,12 @@ import {
   Column,
 } from '@react-email/components';
 import { format } from 'date-fns';
+import { Order, OrderItem, OrderItemModifier, OrderItemModifierOption } from '@/types/order';
+import { Customer } from '@/types/customer';
 
 interface OrderConfirmationEmailProps {
-  order: {
-    id: string;
-    pickup_date: string;
-    pickup_time: string;
-    total: number;
-    sub_total: number;
-    service_fee: number;
-    items: Array<{
-      menu_item_name: string;
-      quantity: number;
-      total_price: number;
-      cart_item_modifiers?: Array<{
-        name: string;
-        cart_item_modifier_options?: Array<{
-          name: string;
-          price: number;
-        }>;
-      }>;
-    }>;
-  };
-  customer: {
-    name: string;
-    email: string;
-  };
+  order: Order;
+  customer: Customer;
 }
 
 export default function OrderConfirmationEmail({ order, customer }: OrderConfirmationEmailProps) {
@@ -45,32 +25,32 @@ export default function OrderConfirmationEmail({ order, customer }: OrderConfirm
   return (
     <Html>
       <Head />
-      <Preview>Your Little Tokyo Sushi order confirmation #{order.id}</Preview>
+      <Preview>Your Little Tokyo Sushi order confirmation #{order.short_id || ''}</Preview>
       <Body style={main}>
         <Container style={container}>
           <Heading style={h1}>Thank you for your order!</Heading>
           
-          <Text style={text}>Hi {customer.name},</Text>
+          <Text style={text}>Hi {customer.first_name},</Text>
           <Text style={text}>Here are your order details:</Text>
 
           <Section style={orderDetails}>
-            <Text style={orderNumber}>Order #{order.id.substring(0, 8)}</Text>
+            <Text style={orderNumber}>Order #{order.short_id}</Text>
             <Text style={text}>
             Pickup Time: {format(new Date(order.pickup_date.split('+')[0]), 'EEE, M/d/yy')} at {order.pickup_time}
             </Text>
             
             <Text style={sectionTitle}>Order Items:</Text>
-            {order.items.map((item, index) => (
+            {order.items.map((item: OrderItem, index) => (
               <div key={index}>
                 <Row style={itemRow}>
                   <Column>
                     <Text>
-                      {item.quantity} x {item.menu_item_name}
+                      {item.quantity} x {item.item_name}
                     </Text>
-                    {item.cart_item_modifiers?.map((modifier) => (
+                    {item.modifiers?.map((modifier: OrderItemModifier) => (
                       <Text key={modifier.name}>
                         {modifier.name}:
-                        {modifier.cart_item_modifier_options?.map((option) => (
+                        {modifier.options?.map((option: OrderItemModifierOption) => (
                           <Text key={option.name}>
                             • {option.name} (+${option.price.toFixed(2)})
                           </Text>
@@ -84,7 +64,7 @@ export default function OrderConfirmationEmail({ order, customer }: OrderConfirm
                     )}
                   </Column>
                   <Column align="right">
-                    <Text>${item.total_price.toFixed(2)}</Text>
+                    <Text>${item.price.toFixed(2)}</Text>
                   </Column>
                 </Row>
               </div>

@@ -1,19 +1,18 @@
 'use client';
 import { createContext, useContext, useEffect, useState } from 'react';
-import { User } from '@supabase/supabase-js';
+import { User } from '@/types/user';
 import { createClient } from '@/lib/supabase/client';
 import { useRouter, redirect } from 'next/navigation';
-import { revalidatePath } from 'next/cache';
 
 interface AuthContextType {
     user: User | null; 
     isLoading: boolean;
-    signin: (email: string, password: string) => Promise<void>;
+    signin: (email: string, password: string) => Promise<User | null>;
     setUser: (user: User | null) => void;
     signout: () => Promise<void>;
     googleSignin: () => Promise<void>;
-    signup: (email: string, password: string) => Promise<void>;
-    signinAnonymously: (email: string, password: string) => Promise<void>;
+    signup: (email: string, password: string) => Promise<User | null>;
+    signinAnonymously: (email: string, password: string) => Promise<User | null>;
     resetPassword: (password: string, token: string) => Promise<void>;
 };
 
@@ -31,27 +30,39 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     const [user, setUser] = useState<User | null>(null);
     const [isLoading, setIsLoading] = useState(true);
     const supabase = createClient();
-    const router = useRouter();
 
     useEffect(() => {
         const fetchUser = async () => {
-            const {data: {user}, error}  = await supabase.auth.getUser();
-            //console.log(user, error);
-            if (user) {
-                setUser(user);
+          try {
+            const { data: { user }, error }  = await supabase.auth.getUser();
+            if (error) {
+                console.log('Error getting user:', error);
+                setUser(null);
+                return;
+            }
+            setUser(user as User);
+          } catch (error) {
+            console.log('Error getting user:', error);
+            setUser(null);
+          } finally {
+            setIsLoading(false);
+          }
+        }
+
+        fetchUser();
+
+        const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
+            if (session) {
+                setUser(session.user as User);
             } else {
                 setUser(null);
             }
-            setIsLoading(false);
-      
-            const {data: {subscription}} = await supabase.auth.onAuthStateChange(async (_event, session) => {
-                setUser(session?.user ?? null);
-                setIsLoading(false);
-            })
+        });
 
-            return () => subscription.unsubscribe();
+        return () => {
+            subscription?.unsubscribe();
         }
-        fetchUser();
+
     }, []); 
 
     const signup = async (email: string, password: string) => {

@@ -1,23 +1,7 @@
-import { Database } from '@/types/database.types';
 import { Badge } from "@/components/ui/badge";
-import { formatDistanceToNow } from 'date-fns';
 import RefundSection from './refund-section';
-
-type Order = Database['public']['Tables']['orders']['Row'] & {
-    customer: Database['public']['Tables']['customers']['Row'];
-    items: Array<
-        Database['public']['Tables']['order_items']['Row'] & {
-            menu_item: Database['public']['Tables']['menu_items']['Row'];
-            itemModifiers: Array<
-                Database['public']['Tables']['order_item_modifiers']['Row'] & {
-                    options: Array<
-                        Database['public']['Tables']['order_item_modifier_options']['Row']
-                    >;
-                }
-            >;
-        }
-    >;
-};
+import { Order, OrderItem, OrderItemModifier, OrderItemModifierOption, OrderStatus } from '@/types/order';
+import { calculateItemTotal } from '@/utils/item';
 
 interface OrderDetailsProps {
     order: Order;
@@ -25,27 +9,18 @@ interface OrderDetailsProps {
 }
 
 const OrderDetails: React.FC<OrderDetailsProps> = ({ order, onRefund }) => {
-    const calculateItemTotal = (item: Order['order_items'][0]) => {
-        
-        const modifierTotal = item.itemModifiers.reduce((total, modifier) => {
-            return total + modifier.options.reduce((optTotal, opt) => 
-                optTotal + opt.price, 0
-            );
-        }, 0);
-        return (item.price + modifierTotal) * item.quantity;
-    };
-
     return (
         <div className="p-6">
             <div className="flex justify-between items-start mb-6">
-               
                 <Badge 
-                    variant={
-                        order.status === 'completed' ? 'default' :
-                        order.status === 'pending' ? 'secondary' :
-                        order.status === 'processing' ? 'destructive' :
-                        'outline'
-                    }
+                   variant={
+                    order.status === OrderStatus.COMPLETED ? 'default' :
+                    order.status === OrderStatus.PENDING ? 'secondary' :
+                    order.status === OrderStatus.PREPARING ? 'destructive' :
+                    order.status === OrderStatus.READY ? 'default' :
+                    order.status === OrderStatus.CANCELLED ? 'destructive' :
+                    'outline'
+                }
                 >
                     {order.status.split('_').join(' ').toUpperCase()}
                 </Badge>
@@ -56,11 +31,11 @@ const OrderDetails: React.FC<OrderDetailsProps> = ({ order, onRefund }) => {
                 <div className="grid grid-cols-2 gap-4">
                     <div>
                         <p className="text-sm font-medium text-gray-500">Name</p>
-                        <p className="mt-1">{order.customerFirstName + ' ' + order.customerLastName || 'Guest'}</p>
+                        <p className="mt-1">{order.customer.first_name + ' ' + order.customer.last_name || 'Guest'}</p>
                     </div>
                     <div>
                         <p className="text-sm font-medium text-gray-500">Phone</p>
-                        <p className="mt-1">{order.customerPhone || 'N/A'}</p>
+                        <p className="mt-1">{order.customer.phone || 'N/A'}</p>
                     </div>
                 </div>
             </div>
@@ -71,8 +46,8 @@ const OrderDetails: React.FC<OrderDetailsProps> = ({ order, onRefund }) => {
                     {order.items.map((item) => (
                         <div key={item.id} className="flex justify-between">
                             <div>
-                                <p className="font-medium">{item.name}</p>
-                                {item.itemModifiers.map((modifier) => (
+                                <p className="font-medium">{item.item_name}</p>
+                                {item?.modifiers?.map((modifier: OrderItemModifier) => (
                                     <div key={modifier.id} className="ml-4 text-sm text-gray-500">
                                         {modifier.name}:
                                         {modifier.options.map((option) => (
@@ -84,8 +59,8 @@ const OrderDetails: React.FC<OrderDetailsProps> = ({ order, onRefund }) => {
                                 ))}
                                 <div>
                                 <p className="text-sm text-gray-500">Special Instructions</p>
-                                {item.specialInstructions && (
-                                    <p className="text-sm text-gray-500 ml-4">Note: {item.specialInstructions}</p>
+                                {item.special_instructions && (
+                                    <p className="text-sm text-gray-500 ml-4">Note: {item.special_instructions}</p>
                                 )}
                                 </div>
                             </div>

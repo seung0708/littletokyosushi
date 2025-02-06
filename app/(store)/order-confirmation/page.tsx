@@ -1,39 +1,9 @@
 'use client';
 import { useEffect, useState, use } from 'react';
 import {useSearchParams} from 'next/navigation'
-
-import Link from 'next/link';
-import { format } from 'date-fns';
 import { useCart } from '@/app/context/cartContext';
-
-interface OrderDetails {
-  id: string;
-  customer: {
-    name: string;
-    email: string;
-  };
-  delivery: {
-    method: string;
-    pickup_date: string;
-    pickup_time: string;
-  };
-  items: Array<{
-    id: string;
-    menu_item_name: string;
-    quantity: number;
-    price: number;
-    cart_item_modifiers?: Array<{
-      name: string;
-      cart_item_modifier_options?: Array<{
-        name: string;
-        price: number;
-      }>;
-    }>;
-  }>;
-  status: string;
-  total: number;
-  created_at: string;
-}
+import { format } from 'date-fns';
+import {Order, OrderStatus, OrderType} from '@/types/order';
 
 interface PageProps {
   params: {
@@ -47,7 +17,7 @@ interface PageProps {
 const Page: React.FC<PageProps> = ({params, searchParams: urlSearchParams }) => {
   
   const searchParams = useSearchParams();
-  const [order, setOrder] = useState<OrderDetails | null>(null);
+  const [order, setOrder] = useState<Order | null>(null);
   const [orderId, setOrderId] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -204,7 +174,7 @@ const Page: React.FC<PageProps> = ({params, searchParams: urlSearchParams }) => 
           <h3 className="sr-only">Items</h3>
           
           <div className="divide-y divide-gray-200">
-          {order?.order_items.map((item: any) => (  
+          {order?.items.map((item: any) => (  
             <div key={item.id.substring(0, 8)} className="py-6">
               <div className="flex justify-between">
                 <h4 className="font-medium text-gray-900">{item.item_name}<span className="ml-2 text-gray-500">× {item.quantity}</span></h4>

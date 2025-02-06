@@ -1,35 +1,19 @@
-'use client'
-import { useForm } from "react-hook-form"
+import OrderDetails from "./order-details";
+import OrderFooter from "./order-footer";
 
-import {Card} from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
-import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel } from "@/components/ui/form"
-import { Input } from "@/components/ui/input"
-import { z } from "zod"
-import { zodResolver } from "@hookform/resolvers/zod"
-import { format } from "date-fns"
-import { motion, AnimatePresence } from "framer-motion"
-import { useState, useEffect } from "react"
-import ReactDOM from "react-dom"
-import PrepTimeTimer from "./prep-time-timer"
-import PrintReceipt from "./print-receipt"
-import { OrderHeader } from "./order-header"
-import OrderDetails from "./order-details"
-import OrderFooter from "./order-footer"
+import { useForm } from "react-hook-form";
+import {Card} from "@/components/ui/card";
+import { z } from "zod";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { format } from "date-fns";
+import { motion} from "framer-motion";
+import { useState } from "react";
+import { OrderHeader } from "./order-header";
+import {Order, OrderItemModifier, OrderItemModifierOption} from "@/types/order";
+import { calculateItemTotal } from "@/utils/item";
 
-export default function RecentOrder({order}: {order: any}) {
-  const [showPrintReceipt, setShowPrintReceipt] = useState(false);
+export default function RecentOrder({order}: {order: Order}) {
   const [isConfirmed, setIsConfirmed] = useState(false);
-
-  const calculateItemTotal = (item: Order['order_items'][0]) => {
-    const modifierTotal = item.itemModifiers.reduce((total: number, modifier) => {
-        return total + modifier.options.reduce((optTotal, opt) => 
-            optTotal + opt.price, 0
-        );
-    }, 0);
-
-    return (item.price + modifierTotal) * item.quantity;
-};
   
   const prepTimeSchema = z.object({
     prepTime: z.number()
@@ -40,10 +24,9 @@ export default function RecentOrder({order}: {order: any}) {
   const form = useForm<z.infer<typeof prepTimeSchema>>({
     resolver: zodResolver(prepTimeSchema),
     defaultValues: {
-      prepTime: order.prepTime || 10
+      prepTime: order.prep_time_minutes || 10
     },
   })
-
 
   const onComplete = async () => {
     try {
@@ -146,7 +129,7 @@ export default function RecentOrder({order}: {order: any}) {
     iframe.contentWindow?.document.write(`
         <html>
         <head>
-            <title>Order Receipt #${order.short_id.toUpperCase()}</title>
+            <title>Order Receipt #${order?.short_id?.toUpperCase()}</title>
             <style>
               @page {
                 margin: 8px;
@@ -193,12 +176,12 @@ export default function RecentOrder({order}: {order: any}) {
         <body>
             <div class="header">
                 <h2>Little Tokyo Sushi</h2>
-                <p>Order #${order.short_id.toUpperCase()}</p>
+                <p>Order #${order?.short_id?.toUpperCase()}</p>
                 <p>
-                    ${format(new Date(order.pickupDate.split('+')[0]), 'EEE, M/d/yy')} 
-                    ${order.pickupTime && (
+                    ${format(new Date(order?.pickup_date?.split('+')[0]), 'EEE, M/d/yy')} 
+                    ${order?.pickup_time && (
                         `${(() => {
-                            const [hours, minutes] = order.pickupTime.split(':');
+                            const [hours, minutes] = order?.pickup_time?.split(':');
                             const date = new Date();
                             date.setHours(parseInt(hours, 10));
                             date.setMinutes(parseInt(minutes, 10));
@@ -209,22 +192,22 @@ export default function RecentOrder({order}: {order: any}) {
             </div>
 
             <div class="customer">
-                <p>Customer: ${order.customerFirstName + ' ' + order.customerLastName || 'Guest'}</p>
-                ${order.customerPhone ? `<p>Phone: ${order.customerPhone}</p>` : ''}
+                <p>Customer: ${order.customer?.first_name + ' ' + order.customer?.last_name || 'Guest'}</p>
+                ${order.customer?.phone ? `<p>Phone: ${order.customer?.phone}</p>` : ''}
             </div>
 
             <div class="items">
                 ${order.items.map(item => `
                     <div class="item">
-                        <p>${item.quantity}x ${item.name} - $${calculateItemTotal(item).toFixed(2)}</p>
-                        ${item.itemModifiers.map(modifier => `
+                        <p>${item.quantity}x ${item.item_name} - $${calculateItemTotal(item).toFixed(2)}</p>
+                        ${item?.modifiers?.map((modifier: OrderItemModifier) => `
                             <div class="modifier">
-                                ${modifier.options.map(option => 
+                                ${modifier.options?.map((option: OrderItemModifierOption) => 
                                     `<p>• ${option.name}</p>`
                                 ).join('')}
                             </div>
                         `).join('')}
-                        ${item.notes ? `<div class="modifier">Note: ${item.notes}</div>` : ''}
+                        ${item?.special_instructions ? `<div class="modifier">Note: ${item.special_instructions}</div>` : ''}
                     </div>
                 `).join('')}
             </div>
@@ -269,12 +252,6 @@ export default function RecentOrder({order}: {order: any}) {
           />
         </Card>
       </motion.div>
-      {showPrintReceipt && (
-        <PrintReceipt 
-          order={order} 
-          onClose={() => setShowPrintReceipt(false)}
-        />
-      )}
     </>
   );
 }
