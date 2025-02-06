@@ -61,48 +61,48 @@ export default function AdminSignin() {
   }
 
   return (
-    <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6 w-full max-w-md mx-auto p-8">
-        <FormField
-          control={form.control}
-          name="email"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Email</FormLabel>
-              <FormControl>
-                <Input placeholder="admin@example.com" {...field} />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
+      <Form {...form}>
+        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+          <FormField
+            control={form.control}
+            name="email"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Email</FormLabel>
+                <FormControl>
+                  <Input placeholder="admin@example.com" autoComplete="email" {...field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={form.control}
+            name="password"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Password</FormLabel>
+                <FormControl>
+                  <Input type="password" placeholder="••••••••" autoComplete="password" {...field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          {error && (
+            <div className="text-red-600 text-sm">{error}</div>
           )}
-        />
 
-        <FormField
-          control={form.control}
-          name="password"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Password</FormLabel>
-              <FormControl>
-                <Input type="password" placeholder="••••••••" {...field} />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-
-        {error && (
-          <div className="text-red-600 text-sm">{error}</div>
-        )}
-
-        <Button
-          type="submit"
-          className="w-full"
-          disabled={loading}
-        >
-          {loading ? 'Logging in...' : 'Login'}
-        </Button>
-      </form>
-    </Form>
+          <Button
+            type="submit"
+            className="w-full"
+            disabled={loading}
+          >
+            {loading ? 'Logging in...' : 'Login'}
+          </Button>
+        </form>
+      </Form>
   );
 }

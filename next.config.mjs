@@ -27,8 +27,8 @@ const nextConfig = {
             has: [{ type: 'host', value: 'admin.localhost' }]
           },
           {
-            source: '/dashboard',
-            destination: '/admin/dashboard',
+            source: '/',
+            destination: '/dashboard',
             has: [{ type: 'host', value: 'admin.localhost' }]
           },
           {
@@ -37,7 +37,17 @@ const nextConfig = {
             has: [{ type: 'host', value: 'admin.localhost' }]
           }
         ];
-    }
+    },
+    images: {
+      remotePatterns: [
+        {
+          protocol: 'https',
+          hostname: 'bgicdxzqgxuqjvdxkfqh.supabase.co',
+          port: '',
+          pathname: '/**',
+        },
+      ]
+    },
 };
 
 export default nextConfig;

@@ -139,7 +139,7 @@ const CheckoutCustomerSignIn: React.FC<CustomerSignInProps> = ({ form, onComplet
                                     Sign In
                                 </Button>
                                 <Button onClick={handleGoogleSignIn} className="w-full bg-red-500" variant="default">
-                                    <Image src="/assets/images/google.svg" alt="Google Logo" width={20} height={20} className="inline-block mr-2" />
+                                    <Image src="/google.svg" alt="Google Logo" width={20} height={20} className="inline-block mr-2" />
                                     Continue with Google
                                 </Button>
                                 <p className="text-sm text-center">

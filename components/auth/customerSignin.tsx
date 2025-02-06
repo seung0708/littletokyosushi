@@ -64,7 +64,7 @@ export default function CustomerSignin() {
                         <FormItem>
                             <FormLabel>Email</FormLabel>
                             <FormControl>
-                                <Input placeholder="Enter your email" {...field} />
+                                <Input placeholder="Enter your email" autoComplete="email" {...field} />
                             </FormControl>
                             <FormMessage />
                         </FormItem>
@@ -80,6 +80,7 @@ export default function CustomerSignin() {
                                 <Input
                                     type="password"
                                     placeholder="Enter your password"
+                                    autoComplete="current-password"
                                     {...field}
                                 />  
                             </FormControl>
@@ -103,8 +104,8 @@ export default function CustomerSignin() {
             </div>
         </Form>
         <hr className="my-4" />  
-        <div className="flex items-center justify-center mt-4">
-        <Button variant={"outline"} type="button" onClick={handleGoogleSignin}>
+        <div className="flex items-center justify-center">
+        <Button variant={"default"} type="button" onClick={handleGoogleSignin}>
             <Image src="/google.svg" alt="Google Logo" width={20} height={20} /> Sign in with Google
         </Button>
         </div>
