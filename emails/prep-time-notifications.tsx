@@ -11,7 +11,7 @@ import {
   interface PrepTimeNotificationEmailProps {
     order: {
       short_id: string;
-      prep_time: number;
+      prepTime: number;
     };
     customer: {
       name: string;
@@ -19,6 +19,7 @@ import {
   }
   
   export default function PrepTimeNotificationEmail({ order, customer }: PrepTimeNotificationEmailProps) {
+    
     return (
       <Html>
         <Head />
@@ -31,7 +32,7 @@ import {
               Great news! Your order #{order.short_id} is now being prepared by our kitchen.
             </Text>
             <Text>
-              Estimated preparation time: {order.prep_time} minutes
+              Estimated preparation time: {order.prepTime} minutes
             </Text>
             <Text>
               We'll notify you when your order is ready for pickup.

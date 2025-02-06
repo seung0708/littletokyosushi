@@ -1,5 +1,8 @@
 'use client';
 import { Database } from '@/types/database.types';
+import { format, parseISO } from 'date-fns';
+
+
 
 type Order = Database['public']['Tables']['orders']['Row'] & {
     customer: Database['public']['Tables']['customers']['Row'];
@@ -19,47 +22,49 @@ type Order = Database['public']['Tables']['orders']['Row'] & {
 
 interface PrintReceiptProps {
     order: Order;
+    onClose?: () => void;
 }
 
-const PrintReceipt = ({ order }: PrintReceiptProps) => {
+const PrintReceipt = ({ order, onClose }: PrintReceiptProps) => {
     const calculateItemTotal = (item: Order['order_items'][0]) => {
-        const modifierTotal = item.itemModifiers.reduce((total, modifier) => {
+        const modifierTotal = item.itemModifiers.reduce((total: number, modifier) => {
             return total + modifier.options.reduce((optTotal, opt) => 
                 optTotal + opt.price, 0
             );
         }, 0);
-        return (item.basePrice + modifierTotal) * item.quantity;
+
+        return (item.price + modifierTotal) * item.quantity;
     };
 
-    // Set up print styling
-    const originalBodyWidth = document.body.style.width;
-    document.body.style.width = '72mm';
-    document.body.style.margin = '0';
-    document.body.style.padding = '0';
-
     // Create print content
-    const printWindow = window.open('', '_blank');
-    if (!printWindow) {
-        throw new Error('Failed to open print window');
-    }
+    const iframe = document.createElement('iframe');
+    iframe.style.display = 'none';
+    document.body.appendChild(iframe);
 
-    printWindow.document.write(`
+    iframe.contentWindow?.document.write(`
         <html>
         <head>
             <title>Order Receipt #${order.short_id}</title>
             <style>
+                * {
+                    font-size: 18px;
+                }
                 body {
                     font-family: monospace;
                     width: 72mm;
                     margin: 0;
-                    padding: 8px;
                 }
                 .header {
                     text-align: center;
-                    margin-bottom: 16px;
+                }
+                .header h2 {
+                    font-size: 28px;
+                }
+                .header p {
+                    font-size: 16px;
                 }
                 .item {
-                    margin-bottom: 8px;
+                    margin-bottom: 4px;
                 }
                 .modifier {
                     padding-left: 16px;
@@ -80,8 +85,19 @@ const PrintReceipt = ({ order }: PrintReceiptProps) => {
         <body>
             <div class="header">
                 <h2>Little Tokyo Sushi</h2>
-                <p>Order #${order.id}</p>
-                <p>${new Date(order.created_at || '').toLocaleString()}</p>
+                <p>Order #${order.short_id}</p>
+                <p>
+                    ${format(new Date(order.pickupDate.split('+')[0]), 'EEE, M/d/yy')} 
+                    ${order.pickupTime && (
+                        `${(() => {
+                            const [hours, minutes] = order.pickupTime.split(':');
+                            const date = new Date();
+                            date.setHours(parseInt(hours, 10));
+                            date.setMinutes(parseInt(minutes, 10));
+                            return format(date, 'h:mm a');
+                          })()}`
+                      )}
+                </p>
             </div>
 
             <div class="customer">
@@ -95,9 +111,8 @@ const PrintReceipt = ({ order }: PrintReceiptProps) => {
                         <p>${item.quantity}x ${item.name} - $${calculateItemTotal(item).toFixed(2)}</p>
                         ${item.itemModifiers.map(modifier => `
                             <div class="modifier">
-                                ${modifier.name}:
                                 ${modifier.options.map(option => 
-                                    `${option.name} (+$${option.price.toFixed(2)})`
+                                    `${option.name}`
                                 ).join(', ')}
                             </div>
                         `).join('')}
@@ -119,14 +134,10 @@ const PrintReceipt = ({ order }: PrintReceiptProps) => {
     `);
 
     // Print and cleanup
-    printWindow.document.close();
-    printWindow.print();
-    printWindow.close();
-
-    // Restore original body styling
-    document.body.style.width = originalBodyWidth;
-    document.body.style.margin = '';
-    document.body.style.padding = '';
+    iframe.contentWindow?.document.close();
+    iframe.contentWindow?.print();
+    document.body.removeChild(iframe);
+    onClose?.();
 };
 
 export default PrintReceipt;

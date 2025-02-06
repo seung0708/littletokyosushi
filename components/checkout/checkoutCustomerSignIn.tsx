@@ -7,6 +7,7 @@ import { Input } from '../ui/input';
 import { Button } from '../ui/button';
 import { useCart } from '@/app/context/cartContext';
 import { useEffect, useState } from 'react';
+import Image from 'next/image';
 
 interface CustomerSignInProps {
     form: UseFormReturn<CheckoutFormValues>
@@ -95,126 +96,152 @@ const CheckoutCustomerSignIn: React.FC<CustomerSignInProps> = ({ form, onComplet
     }
 
     return (
-        <div className="space-y-6">
-            <div className="space-y-4">
-                <div className="text-center">
-                    <h2 className="text-xl font-semibold text-gray-900">
-                        {isSignUp ? 'Create an account' : 'Sign in to your account'}
-                    </h2>
-                    <p className="mt-1 text-sm text-gray-500">
-                        {isSignUp ? 'Create an account for a faster checkout experience' : 'For a faster checkout experience'}
-                    </p>
+        <div className="grid md:grid-cols-2 gap-8">
+            {/* Returning Customer Column */}
+            <div className="bg-black text-white p-6 rounded-lg">
+                <div className="text-center mb-6">
+                    <h2 className="text-xl font-semibold">Returning Customer</h2>
+                    <p className="text-sm">Sign in to your account</p>
                 </div>
 
-                {/* Email field */}
-                <FormField
-                    control={form.control}
-                    name="customer.signinEmail"
-                    render={({ field }) => (
-                        <FormItem>
-                            <FormLabel>Email</FormLabel>
-                            <FormControl>
-                                <Input {...field} type="email" placeholder="Enter your email" />
-                            </FormControl>
-                            <FormMessage />
-                        </FormItem>
+                <div className="space-y-4">
+                    {!isSignUp ? (
+                        <>
+                            <FormField
+                                control={form.control}
+                                name="customer.signinEmail"
+                                render={({ field }) => (
+                                    <FormItem>
+                                        <FormLabel>Email</FormLabel>
+                                        <FormControl>
+                                            <Input placeholder="Enter your email" autoComplete="email" {...field} />
+                                        </FormControl>
+                                        <FormMessage />
+                                    </FormItem>
+                                )}
+                            />
+                            <FormField
+                                control={form.control}
+                                name="customer.password"
+                                render={({ field }) => (
+                                    <FormItem>
+                                        <FormLabel>Password</FormLabel>
+                                        <FormControl>
+                                            <Input type="password" placeholder="Enter your password" autoComplete="current-password" {...field} />
+                                        </FormControl>
+                                        <FormMessage />
+                                    </FormItem>
+                                )}
+                            />
+                            {signInError && <p className="text-red-500 text-sm">{signInError}</p>}
+                            <div className="space-y-4">
+                                <Button onClick={handleSignIn} className="w-full bg-red-500" variant="default">
+                                    Sign In
+                                </Button>
+                                <Button onClick={handleGoogleSignIn} className="w-full bg-red-500" variant="default">
+                                    <Image src="/assets/images/google.svg" alt="Google Logo" width={20} height={20} className="inline-block mr-2" />
+                                    Continue with Google
+                                </Button>
+                                <p className="text-sm text-center">
+                                    Don't have an account?{' '}
+                                    <button
+                                        type="button"
+                                        onClick={() => setIsSignUp(true)}
+                                        className="text-red-600 hover:text-red-700"
+                                    >
+                                        Sign Up
+                                    </button>
+                                </p>
+                            </div>
+                        </>
+                    ) : (
+                        <>
+                            <FormField
+                                control={form.control}
+                                name="customer.signinEmail"
+                                render={({ field }) => (
+                                    <FormItem>
+                                        <FormLabel>Email</FormLabel>
+                                        <FormControl>
+                                            <Input placeholder="Enter your email" autoComplete="email" {...field} />
+                                        </FormControl>
+                                        <FormMessage />
+                                    </FormItem>
+                                )}
+                            />
+                            <FormField
+                                control={form.control}
+                                name="customer.password"
+                                render={({ field }) => (
+                                    <FormItem>
+                                        <FormLabel>Password</FormLabel>
+                                        <FormControl>
+                                            <Input type="password" placeholder="Create a password" autoComplete="current-password" {...field} />
+                                        </FormControl>
+                                        <FormMessage />
+                                    </FormItem>
+                                )}
+                            />
+                            {signUpError && <p className="text-red-500 text-sm">{signUpError}</p>}
+                            <div className="space-y-4">
+                                <Button onClick={handleSignUp} className="w-full" variant="default">
+                                    Create Account
+                                </Button>
+                                <p className="text-sm text-center">
+                                    Already have an account?{' '}
+                                    <button
+                                        type="button"
+                                        onClick={() => setIsSignUp(false)}
+                                        className="text-red-600 hover:text-red-700"
+                                    >
+                                        Sign In
+                                    </button>
+                                </p>
+                            </div>
+                        </>
                     )}
-                />
+                </div>
+            </div>
 
-                {/* Password field */}
-                <FormField
-                    control={form.control}
-                    name="customer.password"
-                    render={({ field }) => (
-                        <FormItem>
-                            <FormLabel>Password</FormLabel>
-                            <FormControl>
-                                <Input {...field} type="password" placeholder="Enter your password" />
-                            </FormControl>
-                            <FormMessage />
-                        </FormItem>
-                    )}
-                />
-
-                {/* Sign in/up button */}
-                <button
-                    type="button"
-                    onClick={isSignUp ? handleSignUp : handleSignIn}
-                    className="w-full bg-red-600 text-white px-4 py-2 rounded-md hover:bg-red-700 transition-colors"
-                >
-                    {isSignUp ? 'Sign up' : 'Sign in'}
-                </button>
-
-                {/* Toggle link */}
-                <div className="text-center">
-                    <button 
-                        type="button"
-                        onClick={() => setIsSignUp(!isSignUp)}
-                        className="text-sm text-blue-600 hover:text-red-500"
-                    >
-                        {isSignUp ? 'Already have an account? Sign in' : 'Don\'t have an account? Sign up'}
-                    </button>
+            {/* Guest Checkout Column */}
+            <div className="bg-black p-6 rounded-lg shadow-md">
+                <div className="text-center text-white mb-6">
+                    <h2 className="text-xl font-semibold">Guest Checkout</h2>
+                    <p className="text-sm">Continue without an account</p>
                 </div>
 
-                {/* Only show Google sign in for sign in view */}
-                {!isSignUp && (
-                    <button
-                        type="button"
-                        onClick={handleGoogleSignIn}
-                        className="w-full bg-white text-gray-900 px-4 py-2 rounded-md border border-gray-300 hover:bg-gray-50 transition-colors flex items-center justify-center gap-2"
-                    >
-                        <svg className="w-5 h-5" viewBox="0 0 24 24">
-                            {/* ... Google SVG ... */}
-                        </svg>
-                        Sign in with Google
-                    </button>
-                )}
-                {!isSignUp && signInError && <p className="text-red-500">{signInError}</p>}
-                {isSignUp && signUpError && <p className="text-red-500">{signUpError}</p>}
-                <div className="relative">
-                    <div className="absolute inset-0 flex items-center">
-                        <span className="w-full border-t" />
-                    </div>
-                    <div className="relative flex justify-center text-xs uppercase">
-                        <span className="bg-white px-2 text-gray-500">Or continue as guest</span>
-                    </div>
+                <div className="space-y-4">
+                    <FormField
+                        control={form.control}
+                        name="customer.guestEmail"
+                        render={({ field }) => (
+                            <FormItem>
+                                <FormLabel>Email</FormLabel>
+                                <FormControl>
+                                    <Input placeholder="Enter your email" autoComplete="email" {...field} />
+                                </FormControl>
+                                <FormMessage />
+                            </FormItem>
+                        )}
+                    />
+                    <FormField
+                        control={form.control}
+                        name="customer.guestName"
+                        render={({ field }) => (
+                            <FormItem>
+                                <FormLabel>Name</FormLabel>
+                                <FormControl>
+                                    <Input placeholder="Enter your name" autoComplete="name" {...field} className="text-gray-800" />
+                                </FormControl>
+                                <FormMessage />
+                            </FormItem>
+                        )}
+                    />
+                    {guestError && <p className="text-red-500 text-sm">{guestError}</p>}
+                    <Button onClick={handleContinueAsGuest} className="w-full bg-red-500" variant="default">
+                        Continue as Guest
+                    </Button>
                 </div>
-
-                <FormField
-                    control={form.control}
-                    name="customer.guestName"
-                    render={({ field }) => (
-                        <FormItem>
-                            <FormLabel>Name</FormLabel>
-                            <FormControl>
-                                <Input {...field} placeholder="Enter your name" />
-                            </FormControl>
-                            <FormMessage />
-                        </FormItem>
-                    )}
-                />
-
-                <FormField
-                    control={form.control}
-                    name="customer.guestEmail"
-                    render={({ field }) => (
-                        <FormItem>
-                            <FormLabel>Email</FormLabel>
-                            <FormControl>
-                                <Input {...field} placeholder="Enter your email" />
-                            </FormControl>
-                        </FormItem>
-                    )}
-                />
-                  
-                <button
-                    type="button"
-                    onClick={handleContinueAsGuest}
-                    className="w-full bg-gray-100 text-gray-900 px-4 py-2 rounded-md hover:bg-gray-200 transition-colors"
-                >
-                    Continue as Guest
-                </button>
-                {guestError && <p className="text-red-500">{guestError}</p>}  
             </div>
         </div>
     )

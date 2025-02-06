@@ -56,7 +56,7 @@ export default function OrderConfirmationEmail({ order, customer }: OrderConfirm
           <Section style={orderDetails}>
             <Text style={orderNumber}>Order #{order.id.substring(0, 8)}</Text>
             <Text style={text}>
-              Pickup Time: {format(pickupDate, 'EEEE, MMMM d, yyyy')} at {format(pickupDate, 'h:mm a')}
+            Pickup Time: {format(new Date(order.pickup_date.split('+')[0]), 'EEE, M/d/yy')} at {order.pickup_time}
             </Text>
             
             <Text style={sectionTitle}>Order Items:</Text>
@@ -64,27 +64,27 @@ export default function OrderConfirmationEmail({ order, customer }: OrderConfirm
               <div key={index}>
                 <Row style={itemRow}>
                   <Column>
-                    <Text style={itemText}>
+                    <Text>
                       {item.quantity} x {item.menu_item_name}
                     </Text>
                     {item.cart_item_modifiers?.map((modifier) => (
-                      <Text key={modifier.name} style={modifierText}>
+                      <Text key={modifier.name}>
                         {modifier.name}:
                         {modifier.cart_item_modifier_options?.map((option) => (
-                          <Text key={option.name} style={optionText}>
+                          <Text key={option.name}>
                             • {option.name} (+${option.price.toFixed(2)})
                           </Text>
                         ))}
                       </Text>
                     ))}
                     {item.special_instructions && (
-                      <Text style={specialInstructionsText}>
+                      <Text>
                         Special Instructions: {item.special_instructions}
                       </Text>
                     )}
                   </Column>
                   <Column align="right">
-                    <Text style={priceText}>${item.total_price.toFixed(2)}</Text>
+                    <Text>${item.total_price.toFixed(2)}</Text>
                   </Column>
                 </Row>
               </div>

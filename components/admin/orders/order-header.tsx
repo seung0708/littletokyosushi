@@ -2,10 +2,9 @@ import { CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import PrepTimeTimer from "./prep-time-timer";
 import { Button } from "@/components/ui/button";
 import { Copy } from "lucide-react";
-import { format } from "date-fns";
+import { format, parseISO } from "date-fns";
 
 export function OrderHeader({order}: {order: any}) {
-  console.log(order)
     return (
         <CardHeader className="flex flex-row items-start bg-muted/50">
             <div className="grid gap-0.5">
@@ -30,7 +29,7 @@ export function OrderHeader({order}: {order: any}) {
               <CardDescription>
                 {order.type === 'pickup' && (
                   <>
-                    {format(new Date(order.pickupDate), 'EEEE, MMMM d, yyyy')}{' '}
+                    {format(new Date(order.pickupDate.split('+')[0]), 'EEE, M/d/yy')}{' '}
                     {order.pickupTime && (
                       <>
                         {(() => {

@@ -83,6 +83,7 @@ export function findMatchingCartItem(cartItems: any[], newItem: any) {
 }
 
 export async function createNewCartItemWithModifiers(supabase: any, cartId: string, newItems: any) {
+    console.log('newItems', newItems);
     // Create cart item
     const { data: cartItem, error } = await supabase
         .from('cart_items')
@@ -95,8 +96,7 @@ export async function createNewCartItemWithModifiers(supabase: any, cartId: stri
             special_instructions: newItems.special_instructions || '',
         })
         .select();
-    console.log('createNewCartItemWithModifierscartItem:', cartItem);
-
+    
     if (error || !cartItem) {
         console.error('Error creating cart item:', error);
         return { error };
@@ -112,7 +112,7 @@ export async function createNewCartItemWithModifiers(supabase: any, cartId: stri
             }))
         )
         .select();
-    console.log('createNewCartItemWithModifierscartItemModifier:', cartItemModifier);
+    
     if (modifierError) {
         console.error('Error creating modifiers:', modifierError);
         return { error: modifierError };
@@ -123,7 +123,7 @@ export async function createNewCartItemWithModifiers(supabase: any, cartId: stri
         .from('cart_item_modifier_options')
         .insert(
             getModifiersArray(newItems).flatMap((modifier: any, index: number) => 
-                modifier.modifier_options.map((option: any) => ({
+                modifier.cart_item_modifier_options.map((option: any) => ({
                     cart_item_modifiers_id: cartItemModifier[index].id,
                     modifier_option_id: option.modifier_option_id,
                     modifier_option_price: option.price,
@@ -133,6 +133,6 @@ export async function createNewCartItemWithModifiers(supabase: any, cartId: stri
         )
         .select();
     
-    console.log('created new cart item with modifiers:', cartItem);
+    
     return { data: cartItem, error: optionError };
 }

@@ -26,7 +26,7 @@ export async function GET(req: Request, { params }: { params: { orderId: string 
     `)
     .eq('short_id', orderId)
     .single();  // Remove the archived filter to get both types
-
+    console.log(data);
     const order = {
       id: data?.id,
       short_id: data?.short_id,
@@ -59,6 +59,7 @@ export async function GET(req: Request, { params }: { params: { orderId: string 
         quantity: item.quantity,
         name: item.item_name,
         description: item.menu_items.description,
+        specialInstructions: item.menu_items.special_instructions,
         itemModifiers: item.order_item_modifiers.map((modifier: any) => ({
           id: modifier.id,
           name: modifier.modifier_name,

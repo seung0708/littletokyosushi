@@ -1,8 +1,7 @@
 'use client'
 import { useForm } from "react-hook-form"
-import { Copy, CreditCard, Printer } from "lucide-react"
-import { Separator } from "@/components/ui/separator"
-import {Card, CardContent, CardDescription, CardFooter, CardHeader,CardTitle} from "@/components/ui/card"
+
+import {Card} from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel } from "@/components/ui/form"
 import { Input } from "@/components/ui/input"
@@ -19,7 +18,18 @@ import OrderDetails from "./order-details"
 import OrderFooter from "./order-footer"
 
 export default function RecentOrder({order}: {order: any}) {
+  const [showPrintReceipt, setShowPrintReceipt] = useState(false);
   const [isConfirmed, setIsConfirmed] = useState(false);
+
+  const calculateItemTotal = (item: Order['order_items'][0]) => {
+    const modifierTotal = item.itemModifiers.reduce((total: number, modifier) => {
+        return total + modifier.options.reduce((optTotal, opt) => 
+            optTotal + opt.price, 0
+        );
+    }, 0);
+
+    return (item.price + modifierTotal) * item.quantity;
+};
   
   const prepTimeSchema = z.object({
     prepTime: z.number()
@@ -97,7 +107,7 @@ export default function RecentOrder({order}: {order: any}) {
 
       // Get the updated order data
       const updatedOrder = await response.json();
-      setOrder(updatedOrder); // Update the order state
+      
       setIsConfirmed(true);
     } catch (error) {
       console.error('Error updating prep time:', error);
@@ -121,22 +131,120 @@ export default function RecentOrder({order}: {order: any}) {
       }
 
       const updatedOrder = await response.json();
-      setOrder(updatedOrder); // Update the order state with complete data
+      
     } catch (error) {
       console.error('Error marking order as ready:', error);
     }
   };
+
   const onPrint = () => {
-    const originalBodyWidth = document.body.style.width;
-    document.body.style.width = '72mm';
-    document.body.style.margin = '0';
-    document.body.style.padding = '0';
-    
-    window.print();
-    
-    document.body.style.width = originalBodyWidth;
-    document.body.style.margin = '';
-    document.body.style.padding = '';
+    // Create print content
+    const iframe = document.createElement('iframe');
+    iframe.style.display = 'none';
+    document.body.appendChild(iframe);
+
+    iframe.contentWindow?.document.write(`
+        <html>
+        <head>
+            <title>Order Receipt #${order.short_id.toUpperCase()}</title>
+            <style>
+              @page {
+                margin: 8px;
+                padding: 8px;
+              }
+                * {
+                    font-size: 14px;
+                    margin: 0;
+                    padding: 0;
+                }
+                body {
+                    font-family: monospace;
+                    width: auto;
+                }
+                .header {
+                    text-align: center;
+                    margin-bottom: 8px;
+                }
+                .header h2 {
+                    font-size: 24px;
+                }
+                .header p {
+                    font-size: 18px;
+                }
+                .customer, .items, .item {
+                    margin-bottom: 8px;
+                }
+                .modifier {
+                    padding-left: 16px;
+                    font-size: 0.9em;
+                }
+                .total {
+                    margin-top: 16px;
+                    border-top: 1px dashed black;
+                    padding-top: 8px;
+                }
+                .footer {
+                    margin-top: 16px;
+                    text-align: center;
+                    font-size: 0.9em;
+                }
+            </style>
+        </head>
+        <body>
+            <div class="header">
+                <h2>Little Tokyo Sushi</h2>
+                <p>Order #${order.short_id.toUpperCase()}</p>
+                <p>
+                    ${format(new Date(order.pickupDate.split('+')[0]), 'EEE, M/d/yy')} 
+                    ${order.pickupTime && (
+                        `${(() => {
+                            const [hours, minutes] = order.pickupTime.split(':');
+                            const date = new Date();
+                            date.setHours(parseInt(hours, 10));
+                            date.setMinutes(parseInt(minutes, 10));
+                            return format(date, 'h:mm a');
+                          })()}`
+                      )}
+                </p>
+            </div>
+
+            <div class="customer">
+                <p>Customer: ${order.customerFirstName + ' ' + order.customerLastName || 'Guest'}</p>
+                ${order.customerPhone ? `<p>Phone: ${order.customerPhone}</p>` : ''}
+            </div>
+
+            <div class="items">
+                ${order.items.map(item => `
+                    <div class="item">
+                        <p>${item.quantity}x ${item.name} - $${calculateItemTotal(item).toFixed(2)}</p>
+                        ${item.itemModifiers.map(modifier => `
+                            <div class="modifier">
+                                ${modifier.options.map(option => 
+                                    `<p>• ${option.name}</p>`
+                                ).join('')}
+                            </div>
+                        `).join('')}
+                        ${item.notes ? `<div class="modifier">Note: ${item.notes}</div>` : ''}
+                    </div>
+                `).join('')}
+            </div>
+
+            <div class="total">
+                <p><strong>Total: $${order.total.toFixed(2)}</strong></p>
+            </div>
+
+            <div class="footer">
+                <p>Thank you for your order!</p>
+                <p>Visit us again at Little Tokyo Sushi</p>
+            </div>
+        </body>
+        </html>
+    `);
+
+    // Print and cleanup
+    iframe.contentWindow?.document.close();
+    iframe.contentWindow?.print();
+    document.body.removeChild(iframe);
   };
  
   return (
@@ -161,9 +269,11 @@ export default function RecentOrder({order}: {order: any}) {
           />
         </Card>
       </motion.div>
-      {ReactDOM.createPortal(
-        <PrintReceipt order={order} />,
-        document.body
+      {showPrintReceipt && (
+        <PrintReceipt 
+          order={order} 
+          onClose={() => setShowPrintReceipt(false)}
+        />
       )}
     </>
   );

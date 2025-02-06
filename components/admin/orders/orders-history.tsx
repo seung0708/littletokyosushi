@@ -130,9 +130,11 @@ export default function OrdersHistory() {
                 </TableRow>
               ) : (
                 filteredOrders.map((order) => (
-                  <TableRow key={order.id}>
-                    <TableCell className="font-medium">{order.id}</TableCell>
-                    <TableCell>{order.customer.name || 'Anonymous'}</TableCell>
+                  <TableRow key={order.short_id}>
+                    <TableCell className="font-medium">{order.short_id.toUpperCase()}</TableCell>
+                    <TableCell>
+                      {order.customers.first_name + ' ' + order.customers.last_name || 'Anonymous'}
+                    </TableCell>
                     <TableCell>
                       <Badge 
                         variant={

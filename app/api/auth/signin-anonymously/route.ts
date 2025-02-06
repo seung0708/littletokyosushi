@@ -7,7 +7,7 @@ export async function POST(req: Request) {
         process.env.NEXT_PUBLIC_SUPABASE_URL!,
         process.env.SUPABASE_SERVICE_ROLE_KEY!, 
     )
-    const serverSupabase = createServerClient(); 
+    const serverSupabase = await createServerClient(); 
     const { email, name } = await req.json()
     const first_name = name.split(' ')[0]
     const last_name = name.split(' ')[1]

@@ -14,8 +14,8 @@ interface OrderDetails {
   };
   delivery: {
     method: string;
-    pickupDate: string;
-    pickupTime: string;
+    pickup_date: string;
+    pickup_time: string;
   };
   items: Array<{
     id: string;
@@ -45,6 +45,7 @@ interface PageProps {
 }
 
 const Page: React.FC<PageProps> = ({params, searchParams: urlSearchParams }) => {
+  
   const searchParams = useSearchParams();
   const [order, setOrder] = useState<OrderDetails | null>(null);
   const [orderId, setOrderId] = useState<string | null>(null);
@@ -79,7 +80,7 @@ const Page: React.FC<PageProps> = ({params, searchParams: urlSearchParams }) => 
           const verifyData = await verifyResponse.json();
           
           setOrderId(verifyData.orderId);
-          console.log('Verify response:', verifyData);
+          
 
           if (verifyData.clearCart) {
             console.log('Clearing cart data...');
@@ -108,7 +109,6 @@ const Page: React.FC<PageProps> = ({params, searchParams: urlSearchParams }) => 
     try {
         const response = await fetch(`/api/orders/${orderId}`);
         const data = await response.json();
-        console.log('Order data:', data);
         setOrder(data.orderData);
       } catch (error) {
         console.error('Error fetching order:', error);
@@ -140,12 +140,24 @@ const Page: React.FC<PageProps> = ({params, searchParams: urlSearchParams }) => 
           <dl className="grid grid-cols-2 gap-x-6 text-sm">
             <div>
               <dt className="font-medium text-gray-900">Pickup Date</dt>
-              <dd className="mt-2 text-gray-700">
-                {order && format(new Date(order.pickup_date + 'T00:00:00'), 'LLL EEE d')}
+              <dd className="text-gray-700">
+                {order && format(new Date(order.pickup_date), 'EEE, M/d/yy')}
               </dd> 
-              <dt className="font-medium text-gray-900">Pickup Time</dt>
-              <dd className="mt-2 text-gray-700">
-                {order && format(new Date(`${order.pickup_date}T${order.pickup_time}`), 'h:mm a')}
+              <dt className="mt-2 font-medium text-gray-900">Pickup Time</dt>
+              <dd className="text-gray-700">
+              {order && (
+                    <>
+                        {order.pickup_time && (
+                            (() => {
+                                const [hours, minutes] = order.pickup_time.split(':');
+                                const date = new Date();
+                                date.setHours(parseInt(hours, 10));
+                                date.setMinutes(parseInt(minutes, 10));
+                                return format(date, 'h:mm a');
+                            })()
+                        )}
+                    </>
+                )}
               </dd>
               <dt className="mt-2 font-medium text-gray-900">Pick up Instructions</dt>
               <dd className="mt-2 text-gray-700">

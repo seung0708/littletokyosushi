@@ -25,26 +25,20 @@ interface OrderDetailsProps {
 }
 
 const OrderDetails: React.FC<OrderDetailsProps> = ({ order, onRefund }) => {
-    
     const calculateItemTotal = (item: Order['order_items'][0]) => {
-        console.log('item', item);
+        
         const modifierTotal = item.itemModifiers.reduce((total, modifier) => {
             return total + modifier.options.reduce((optTotal, opt) => 
                 optTotal + opt.price, 0
             );
         }, 0);
-        return (item.basePrice + modifierTotal) * item.quantity;
+        return (item.price + modifierTotal) * item.quantity;
     };
 
     return (
         <div className="p-6">
             <div className="flex justify-between items-start mb-6">
-                <div>
-                    <h2 className="text-2xl font-bold text-gray-900">Order #{order.short_id}</h2>
-                    <p className="text-sm text-gray-500 mt-1">
-                        Placed {order.created_at && formatDistanceToNow(new Date(order.created_at), { addSuffix: true })}
-                    </p>
-                </div>
+               
                 <Badge 
                     variant={
                         order.status === 'completed' ? 'default' :
@@ -53,7 +47,7 @@ const OrderDetails: React.FC<OrderDetailsProps> = ({ order, onRefund }) => {
                         'outline'
                     }
                 >
-                    {order.status}
+                    {order.status.split('_').join(' ').toUpperCase()}
                 </Badge>
             </div>
 
@@ -63,10 +57,6 @@ const OrderDetails: React.FC<OrderDetailsProps> = ({ order, onRefund }) => {
                     <div>
                         <p className="text-sm font-medium text-gray-500">Name</p>
                         <p className="mt-1">{order.customerFirstName + ' ' + order.customerLastName || 'Guest'}</p>
-                    </div>
-                    <div>
-                        <p className="text-sm font-medium text-gray-500">Email</p>
-                        <p className="mt-1">{order.customerEmail || 'N/A'}</p>
                     </div>
                     <div>
                         <p className="text-sm font-medium text-gray-500">Phone</p>
@@ -92,9 +82,12 @@ const OrderDetails: React.FC<OrderDetailsProps> = ({ order, onRefund }) => {
                                         ))}
                                     </div>
                                 ))}
-                                {item.notes && (
-                                    <p className="text-sm text-gray-500 ml-4">Note: {item.notes}</p>
+                                <div>
+                                <p className="text-sm text-gray-500">Special Instructions</p>
+                                {item.specialInstructions && (
+                                    <p className="text-sm text-gray-500 ml-4">Note: {item.specialInstructions}</p>
                                 )}
+                                </div>
                             </div>
                             <div className="text-right">
                                 <p>${calculateItemTotal(item).toFixed(2)}</p>

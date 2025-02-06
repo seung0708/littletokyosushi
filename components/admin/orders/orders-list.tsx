@@ -24,7 +24,7 @@ export default function OrdersList() {
     const fetchOrders = async () => {
       const response = await fetch('/api/admin/orders')
       const data = await response.json()
-      console.log(data)
+
       setOrders(data)
     }
     fetchOrders()

@@ -118,7 +118,6 @@ export const CartProvider = ({ children }: CartProviderProps) => {
     };
 
     const handleCartUpdate = async (item?: CartItem) => {
-        
         try {
             // Case 1: Guest adding item
             if (!userId && item) {
