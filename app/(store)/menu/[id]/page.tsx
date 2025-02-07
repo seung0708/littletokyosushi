@@ -2,7 +2,7 @@ import { MenuItem } from '@/types/item';
 import ItemDetailsForm from '@/components/store/menu/itemDetailsForm';
 
 async function getItem(id: string): Promise<MenuItem> {
-    const res = await fetch(`${process.env.NEXT_PUBLIC_MAIN_URL}/api/store/items/${id}`);
+    const res = await fetch(`/api/store/items/${id}`);
     if (!res.ok) {
         const errorText = await res.text();
         throw new Error(`Failed to fetch item: ${res.status} ${errorText}`);
