@@ -8,8 +8,8 @@ type ModifierWithOptions = Database['public']['Tables']['modifiers']['Row'] & {
     modifier_options: Database['public']['Tables']['modifier_options']['Row'][]
 };
 
-export async function GET(request: Request, { params }: { params: { id: string } }) {
-    const { id } = params;
+export async function GET(request: Request, { params }: { params: Promise<{ id: string }> }) {
+    const { id } = await params;
     const supabase = await createClient();
 
     try {
