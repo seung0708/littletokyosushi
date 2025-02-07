@@ -1,5 +1,5 @@
 'use client'
-import {useEffect, useState} from 'react';
+import {useEffect, useState, use} from 'react';
 import { CartItemModifier, CartItemModifierOption } from '@/types/cart';
 import { MenuItem, Modifier } from '@/types/item';
 import Image from 'next/image';
@@ -55,8 +55,8 @@ const formSchema = z.object({
 
 type FormData = z.infer<typeof formSchema>;
 
-export default function ItemDetailsPage({ params }: { params: { id: string } }) {
-    
+export default function ItemDetailsPage({ params }: { params: Promise<{ id: string }> }) {
+    const id = use(params)
     const [item, setItem] = useState<MenuItem | null>(null);
     const [loading, setLoading] = useState(true);
     const [loadingImage, setLoadingImage] = useState(true);
@@ -142,8 +142,6 @@ export default function ItemDetailsPage({ params }: { params: { id: string } }) 
     useEffect(() => {
      
         const fetchItem = async () => {
-            const id = params.id;
-            console.log(id);
             try {
                 setLoading(true);
                 console.log('Fetching item with ID:', id);
@@ -169,7 +167,7 @@ export default function ItemDetailsPage({ params }: { params: { id: string } }) 
             }
         };
         fetchItem();
-    }, [params.id, form]);
+    }, [id, form]);
 
    
     const onSubmit = async (data: FormData) => {

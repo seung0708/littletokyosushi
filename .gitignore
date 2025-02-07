@@ -45,4 +45,4 @@ next-env.d.ts
 next.config.js
 next.config.mjs
 
-eslint.config.mjs
+eslintrc.json
