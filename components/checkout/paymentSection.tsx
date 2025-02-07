@@ -4,12 +4,11 @@ import { useAuth } from '@/app/context/authContext';
 import PaymentForm from './paymentForm';
 import { UseFormReturn } from 'react-hook-form';
 import { CheckoutFormValues } from '@/types/checkout'; 
-import { useState } from 'react';
 import { Order } from '@/types/order';
-import {Customer} from '@/types/customer';
+import {CustomerAddress} from '@/types/customer';
 
 interface Props {
-    customerAddress: Customer;
+    customerAddress: CustomerAddress;
     onSubmit: (data: CheckoutFormValues) => Promise<Order>; 
     form: UseFormReturn<CheckoutFormValues>; 
 }

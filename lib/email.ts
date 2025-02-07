@@ -32,13 +32,22 @@ export async function sendOrderConfirmationEmail(order: Order, customer: Custome
 
 export async function sendPrepTimeNotificationEmail(order: Order, customer: Customer) {
     try {
+        if (!order.short_id || !order.prep_time_minutes || !customer.first_name) {
+            throw new Error('Missing required fields for prep time notification email');
+        }
+
         const { data, error } = await resend.emails.send({
             from: 'orders@resend.dev',
             to: customer.email as string,
             subject: `Order Update: Your order #${order.short_id} is being prepared`,
             react: PrepTimeNotificationEmail({
-                order,
-                customer,
+                order: {
+                    short_id: order.short_id,
+                    prep_time_minutes: order.prep_time_minutes
+                },
+                customer: {
+                    first_name: customer.first_name
+                }
             }),
         });
 

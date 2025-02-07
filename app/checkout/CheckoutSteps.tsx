@@ -17,18 +17,9 @@ import CheckoutCustomerSignIn from '@/components/checkout/checkoutCustomerSignIn
 import DeliveryPickupSelector from '@/components/checkout/deliverypickupselector';  
 import OrderSummary from '@/components/checkout/orderSummary';
 import PaymentSection from '@/components/checkout/paymentSection';
+import { CustomerAddress } from '@/types/customer';
 
 type CheckoutStep =  'signin' | 'delivery-pickup' | 'summary';
-
-interface CustomerAddress {
-    line1?: string;
-    line2?: string;
-    city?: string;
-    state?: string;
-    postal_code?: string;
-    country?: string;
-    phone?: string;
-}
 
 const stripePromise = loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY!);
 
@@ -309,11 +300,17 @@ const CheckoutSteps = () => {
                                         },
                                     }}
                                 >
-                                    <PaymentSection 
-                                        customerAddress={customerAddress}
-                                        onSubmit={onSubmit}
-                                        form={form}
-                                    />
+                                    {customerAddress ? (
+                                        <PaymentSection 
+                                            customerAddress={customerAddress}
+                                            onSubmit={onSubmit}
+                                            form={form}
+                                        />
+                                    ) : (
+                                        <div className="flex justify-center items-center p-4">
+                                            <p className="text-gray-600">Please provide delivery information first</p>
+                                        </div>
+                                    )}
                                 </Elements>
                             ) : (
                                 <div className="h-full flex items-center justify-center">

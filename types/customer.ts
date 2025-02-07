@@ -19,3 +19,12 @@ export interface Customer {
     updated_at?: string;
 }
 
+export interface CustomerAddress {
+    line1?: string;
+    line2?: string;
+    city?: string;
+    state?: string;
+    postal_code?: string;
+    country?: string;
+    phone?: string;
+}
