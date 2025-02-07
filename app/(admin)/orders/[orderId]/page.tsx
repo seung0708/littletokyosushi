@@ -1,13 +1,13 @@
 // app/(admin)/orders/[orderId]/page.tsx
 'use client'
-import { useState, useEffect } from 'react'
+import { useState, useEffect, use } from 'react'
 import AdminLoading from "@/app/(admin)/loading";
 import OrderView from "@/components/admin/orders/order-view";
 import RecentOrder from "@/components/admin/orders/recent-order";
 import { Order} from '@/types/order';
 
-const OrderPage = ({ params }: { params: { orderId: string } }) => {
-    const {orderId} = params
+const OrderPage = ({ params }: { params: Promise<{ id: string }> }) => {
+    const orderId = use(params)
     const [order, setOrder] = useState<Order>()
 
     useEffect(() => {
