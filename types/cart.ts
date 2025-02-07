@@ -10,19 +10,19 @@ export interface Cart {
 
 export interface CartItem  {
     id?: string;
-    cart_id: string;
-    menu_item: MenuItem;
+    cart_id?: string;
+    menu_item?: MenuItem;
     quantity: number;
     base_price: number;
     total_price: number;
     special_instructions?: string;
-    created_at: string;
-    updated_at: string;
+    created_at?: string;
+    updated_at?: string;
     cart_item_modifiers?: CartItemModifier[];
 };
 
 export interface CartItemModifier  {
-    id: string;
+    id?: string;
     cart_items_id?: string;
     modifier: Modifier;
     created_at: string;

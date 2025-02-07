@@ -7,12 +7,12 @@ import { AddButton } from '@/components/admin/actionbuttons'
 import ItemsTable from '@/components/admin/itemstable';
 import ItemsPagination from '@/components/admin/pagination';
 import SearchBar from '@/components/admin/searchbar';
-import { Product } from '@/types/definitions';
+import { MenuItem } from '@/types/item';
 import { useSearchParams } from 'next/navigation';
 
 export default function ItemsPage() {
   const searchParams = useSearchParams();
-  const [items, setItems] = useState<Product[]>([]);
+  const [items, setItems] = useState<MenuItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [totalPages, setTotalPages] = useState(0);

@@ -1,10 +1,10 @@
 import ItemRow from './itemsrow';
 
 import { Table, TableHeader, TableRow, TableHead, TableBody } from '@/components/ui/table'
-import { Item } from '@/types/definitions';
+import { MenuItem,  } from '@/types/item';
 
 interface ItemsTableProps {
-  items: Item[];
+  items: MenuItem[];
 }
 
 export default function ItemsTable({ items }: ItemsTableProps) {
@@ -18,12 +18,12 @@ export default function ItemsTable({ items }: ItemsTableProps) {
           <TableHead>Name</TableHead>
           <TableHead>Description</TableHead>
           <TableHead className="hidden md:table-cell">Price</TableHead>
-          <TableHead className="hidden md:table-cell">Quantity</TableHead>
+          {/* <TableHead className="hidden md:table-cell">Quantity</TableHead> */}
           <TableHead><span className="sr-only">Actions</span></TableHead>
         </TableRow>
       </TableHeader>
       <TableBody>
-        {items?.map((item: Item) => <ItemRow key={item.id} item={item} />)}
+        {items?.map((item: MenuItem) => <ItemRow key={item.id} item={item} />)}
       </TableBody>
     </Table>
   );

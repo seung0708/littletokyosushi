@@ -1,33 +1,18 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Database } from '@/types/database.types';
 import OrderDetails from './order-details';
 import OrderFooter from './order-footer';
 import RefundSection from './refund-section';
 import { createClient } from '@/lib/supabase/client';
-
-type Order = Database['public']['Tables']['orders']['Row'] & {
-    customer: Database['public']['Tables']['customers']['Row'];
-    order_items: Array<
-        Database['public']['Tables']['order_items']['Row'] & {
-            menu_item: Database['public']['Tables']['items']['Row'];
-            order_item_modifiers: Array<
-                Database['public']['Tables']['order_item_modifiers']['Row'] & {
-                    order_item_modifier_options: Array<
-                        Database['public']['Tables']['order_item_modifier_options']['Row']
-                    >;
-                }
-            >;
-        }
-    >;
-};
+import { Order } from '@/types/order';
 
 interface OrderViewProps {
-    orderId: string;
+    orderId: Order['id'];
+    onRefund: (values: any) => void;
 }
 
-const OrderView: React.FC<OrderViewProps> = ({ orderId }) => {
+const OrderView: React.FC<OrderViewProps> = ({ orderId, onRefund }) => {
     const [order, setOrder] = useState<Order | null>(null);
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
@@ -89,8 +74,8 @@ const OrderView: React.FC<OrderViewProps> = ({ orderId }) => {
     return (
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
             <div className="bg-white shadow-lg rounded-lg overflow-hidden">
-                <OrderDetails order={order} />
-                <RefundSection order={order} />
+                <OrderDetails order={order} onRefund={onRefund} />
+                <RefundSection order={order} onRefund={onRefund} />
                 <OrderFooter order={order} />
             </div>
         </div>

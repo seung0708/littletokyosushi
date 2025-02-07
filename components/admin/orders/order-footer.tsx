@@ -13,12 +13,12 @@ import { Order, OrderItem, OrderItemModifier, OrderItemModifierOption } from '@/
 
 interface OrderFooterProps {
     order: Order
-    onMarkReady: () => void
-    onPrint: () => void
-    isConfirmed: boolean
-    form: any
-    onSubmit: (values: any) => void
-    onComplete: () => void
+    onMarkReady?: () => void
+    onPrint?: () => void
+    isConfirmed?: boolean
+    form?: any
+    onSubmit?: (values: any) => void
+    onComplete?: () => void
   }
 
 export default function OrderFooter({order, onMarkReady, onPrint, isConfirmed, form, onSubmit, onComplete}: OrderFooterProps) {

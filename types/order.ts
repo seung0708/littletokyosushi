@@ -29,6 +29,9 @@ export interface Order {
     total: number;
     sub_total: number;
     service_fee: number;
+    ready_at?: string;
+    completed_at?: string;
+    archived?: boolean;
     items: OrderItem[];
     payments?: OrderPayment[];
     status_history?: OrderStatusHistory[];
@@ -46,7 +49,7 @@ export interface OrderItem {
 }
   
 export interface OrderItemModifier {
-    id: string;
+    id?: string;
     name: string;
     options: OrderItemModifierOption[];
 }

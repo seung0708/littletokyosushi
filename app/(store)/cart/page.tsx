@@ -2,9 +2,9 @@
 import { useCart } from "@/app/context/cartContext";
 import { Button } from "@/components/ui/button";
 import { MinusIcon, PlusIcon, TrashIcon } from "lucide-react";
-import { CartItem } from "@/types/cart";
+import { CartItem, CartItemModifier } from "@/types/cart";
 import {useRouter} from 'next/navigation';
-
+import { calculateTotalPrice } from '@/utils/item';
 
 const CartPage: React.FC = () => {
     const { cartItems, handleCartUpdate, removeItemFromCart} = useCart(); 
@@ -16,14 +16,7 @@ const CartPage: React.FC = () => {
         
     }
 
-    const calculateTotalPrice = (basePrice: number, quantity: number, modifiers: any) => {
-        const modifierPrice = modifiers.reduce((total: number, mod: any) => {
-            return total + mod.cart_item_modifier_options.reduce((optTotal: number, opt: any) => optTotal + opt.price, 0);
-        }, 0);
-
-        
-        return (basePrice + modifierPrice) * quantity;
-    };
+    
     
     const handleQuantityChange = async (cartItem: CartItem, increment: boolean) => {
         const newQuantity = increment ? cartItem.quantity + 1 : cartItem.quantity - 1;
@@ -32,10 +25,10 @@ const CartPage: React.FC = () => {
             cart_item_id: cartItem.id,
             quantity: newQuantity,
             base_price: cartItem.base_price,
-            total_price: calculateTotalPrice(cartItem.base_price, newQuantity, cartItem.cart_item_modifiers), 
+            total_price: calculateTotalPrice(cartItem.base_price, newQuantity, cartItem.cart_item_modifiers || []), 
             special_instructions: cartItem.special_instructions, 
-            menu_item_name: cartItem.menu_item_name,
-            menu_item_image: cartItem.menu_item_image, 
+            menu_item_name: cartItem.menu_item?.name,
+            menu_item_image: cartItem.menu_item?.image_urls?.[0], 
             cart_item_modifiers: cartItem.cart_item_modifiers
         };
         await handleCartUpdate(updatedItem);
@@ -79,18 +72,18 @@ const CartPage: React.FC = () => {
                                         <div className="flex p-6">
                                             <div className="relative h-24 w-24 sm:h-48 sm:w-48 flex-shrink-0 overflow-hidden rounded-lg">
                                                 <img 
-                                                    src={`${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/menu-items/${cartItem.menu_item_image}`} 
-                                                    alt={cartItem.menu_item_name} 
+                                                    src={`${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/menu-items/${cartItem.menu_item?.image_urls?.[0]}`} 
+                                                    alt={cartItem.menu_item?.name} 
                                                     className="h-full w-full object-cover object-center" 
                                                 />
                                             </div>
                                             <div className="ml-6 flex flex-1 flex-col">
                                                 <div className="flex justify-between">
                                                     <div className="space-y-1">
-                                                        <h3 className="text-xl font-bold">{cartItem.menu_item_name}</h3>
-                                                        {cartItem.cart_item_modifiers?.map(modifier => (
+                                                        <h3 className="text-xl font-bold">{cartItem.menu_item?.name}</h3>
+                                                        {cartItem.cart_item_modifiers?.map((modifier: CartItemModifier) => (
                                                             <div key={modifier.id} className="space-y-1">
-                                                                <h4 className="text-sm font-medium text-gray-300">{modifier.name}</h4>
+                                                                <h4 className="text-sm font-medium text-gray-300">{modifier.modifier.name}</h4>
                                                                 {modifier.cart_item_modifier_options && modifier.cart_item_modifier_options.length > 0 && (
                                                                     <ul className="space-y-1">
                                                                         {modifier.cart_item_modifier_options.map((option: any) => (

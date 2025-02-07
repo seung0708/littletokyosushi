@@ -7,7 +7,7 @@ import { Order} from '@/types/order';
 
 interface RefundSectionProps {
     order: Order;
-    onRefund: (values: { amount: number; reason: string }) => Promise<void>;
+    onRefund: (values: { amount: number; reason: string }) => void;
 }
 
 const RefundSection: React.FC<RefundSectionProps> = ({ order, onRefund }) => {

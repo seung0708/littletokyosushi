@@ -4,14 +4,15 @@ import Link from 'next/link';
 import {MoreHorizontal } from 'lucide-react';
 import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuLabel, DropdownMenuItem } from '@/components/ui/dropdown-menu';
 import { Button } from '@/components/ui/button';
+import {MenuItem} from '@/types/item';
 
 interface ActionMenuProps {
-  id: number
+  id: MenuItem['id']
 }
 
 const ActionsMenu: React.FC<ActionMenuProps> = ({id}) => {
 
-  const onDelete = async (id: number) => {
+  const onDelete = async (id: MenuItem['id']) => {
     const result = await fetch(`/api/items?id=${id}`, {
       method: 'DELETE',
       headers: {

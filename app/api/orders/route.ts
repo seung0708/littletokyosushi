@@ -1,23 +1,29 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { sendOrderConfirmationEmail } from "@/lib/email-smtp";
+import { Database } from "@/types/database.types";
+
+type OrderItemModifierInsert = Partial<Database['public']['Tables']['order_item_modifiers']['Insert']>;
+type OrderItemModifierOptionInsert = Partial<Database['public']['Tables']['order_item_modifier_options']['Insert']>;
 
 export async function POST(req: Request) {
     const { customer_id, customer, delivery, total, cartItems, fees } = await req.json();
-    
+    const supabase = await createClient();
+
     try {
-        const supabase = await createClient();
+        
+        const orderInsert: Partial<Database['public']['Tables']['orders']['Insert']> = {
+            customer_id: customer_id,
+            pickup_date: delivery.pickupDate,
+            pickup_time: delivery.pickupTime,
+            total: total,
+            service_fee: fees.serviceFee,
+            sub_total: fees.subTotal
+        };
 
         const { data: orderData, error: orderError } = await supabase
             .from('orders')
-            .insert({
-                customer_id: customer_id,
-                pickup_date: delivery.pickupDate,
-                pickup_time: delivery.pickupTime,
-                total: total,
-                service_fee: fees.serviceFee,
-                sub_total: fees.subTotal
-            })
+            .insert(orderInsert)
             .select()
             .single();
     
@@ -25,79 +31,59 @@ export async function POST(req: Request) {
             return NextResponse.json({ error: orderError.message }, { status: 400 });
         }
 
-        const { data: orderItemsData, error: orderItemsError } = await supabase
-            .from('order_items')
-            .insert(
-                cartItems.map((item: any) => ({
-                    order_id: orderData.id,
-                    item_id: item.menu_item_id,
-                    quantity: item.quantity,
-                    item_name: item.menu_item_name,
-                    price: item.menu_item_price
-                }))
-            )
-            .select();
-
-        if (orderItemsError) {
-            return NextResponse.json({ error: orderItemsError.message }, { status: 400 });
-        }
-
-        const modifiersExist = cartItems?.some((item: any) => item?.cart_item_modifiers?.length > 0);
-
-        if (modifiersExist) {
-            const { data: orderItemModifiersData, error: orderItemModifiersError } = await supabase
-                .from('order_item_modifiers')
-                .insert(
-                    cartItems.flatMap((item: any, index: number) => 
-                        (item?.cart_item_modifiers || []).map((modifier: any, modifierIndex: number) => ({
-                            order_item_id: orderItemsData[index].id,
-                            modifier_id: modifier.modifier_id,
-                            modifier_name: modifier.name,
-                        }))
-                    )
-                )
-                .select();
-
-            if (orderItemModifiersError) {
-                return NextResponse.json({ error: orderItemModifiersError.message }, { status: 400 });
+        for (const item of cartItems)  {
+            const orderItemInsert: Partial<Database['public']['Tables']['order_items']['Insert']> = {
+                order_id: orderData.id,
+                item_id: item.menu_item_id,
+                quantity: item.quantity,
+                item_name: item.menu_item_name,
+                price: item.menu_item_price
             }
 
-            const modifierOptionsExist = cartItems?.some((item: any) => item?.cart_item_modifiers?.some((modifier: any) => modifier?.cart_item_modifier_options?.length > 0));
+            const { data: orderItemData, error: orderItemError } = await supabase
+                .from('order_items')
+                .insert(orderItemInsert)
+                .select()
+                
 
-            if (!modifierOptionsExist) {
-                return NextResponse.json({ error: 'Modifier options do not exist' }, { status: 400 });
+            if (orderItemError) {
+                return NextResponse.json({ error: orderItemError.message }, { status: 400 });
             }
 
-            // Create a mapping using both order_item_id and modifier_id
-            const modifierMapping = {};
-            orderItemModifiersData.forEach((orderMod) => {
-                const key = `${orderMod.order_item_id}_${orderMod.modifier_id}`;
-                modifierMapping[key] = orderMod.id;
-            });
+            if(item?.cart_item_modifiers) {
+                for (const modifier of item?.cart_item_modifiers) {
+                    const orderItemModifierInsert: OrderItemModifierInsert[] = orderItemData.map((orderItem: any) => ({
+                        order_item_id: orderItem.id,
+                        modifier_id: modifier.modifier_id,
+                        modifier_name: modifier.name,
+                    }))
+                    const { data: orderItemModifierData, error: orderItemModifierError } = await supabase   
+                        .from('order_item_modifiers')
+                        .insert(orderItemModifierInsert)
+                        .select();
 
-            // Then use the mapping with order item ID
-            const { data: orderItemModifierOptionsData, error: orderItemModifierOptionsError } = await supabase
-                .from('order_item_modifier_options')
-                .insert(
-                    cartItems.flatMap((item: any, index: number) => 
-                        item?.cart_item_modifiers?.flatMap((modifier: any) => {
-                            // Get the corresponding order item ID for this cart item
-                            const orderItemId = orderItemsData[index].id;
-                            const key = `${orderItemId}_${modifier.modifier_id}`;
-                            
-                            return modifier?.cart_item_modifier_options?.map((option: any) => ({
-                                order_item_modifier_id: modifierMapping[key],
+                    if (orderItemModifierError) {
+                        return NextResponse.json({ error: orderItemModifierError.message }, { status: 400 });
+                    }
+
+                    if(modifier.cart_item_modifier_options) {
+                        for (const option of modifier.cart_item_modifier_options) {
+                            const orderItemModifierOptionInsert: OrderItemModifierOptionInsert[] = orderItemModifierData.map((orderItemModifier: any) => ({
+                                order_item_modifier_id: orderItemModifier.id,
                                 option_id: option.modifier_option_id,
                                 option_name: option.name,
                                 option_price: option.price
-                            }));
-                        })
-                    )
-                )
-                .select();
-
-            if (orderItemModifierOptionsError) {
-                return NextResponse.json({ error: orderItemModifierOptionsError.message }, { status: 400 });
+                            }))
+                            const { data: orderItemModifierOptionData, error: orderItemModifierOptionError } = await supabase
+                                .from('order_item_modifier_options')
+                                .insert(orderItemModifierOptionInsert)
+                            
+                            if (orderItemModifierOptionError) {
+                                return NextResponse.json({ error: orderItemModifierOptionError.message }, { status: 400 });
+                            }
+                        }
+                    }
+                }
             }
         }
 

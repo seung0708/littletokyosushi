@@ -1,10 +1,10 @@
 import { TableRow, TableCell } from "@/components/ui/table";
 import ActionsMenu from "./actionsmenu";
-import {Item} from '@/types/definitions';
+import {MenuItem} from '@/types/item';
 import Image from "next/image";
 
 type ItemRowProps = {
-  item: Item; 
+  item: MenuItem; 
 
 }
 
@@ -25,7 +25,7 @@ const ItemRow: React.FC<ItemRowProps> = ({item}) => {
         <TableCell className="font-medium">{item.name}</TableCell>
         <TableCell className="font-medium ">{item.description}</TableCell>
         <TableCell className="hidden md:table-cell">{item.price.toFixed(2)}</TableCell>
-        <TableCell className="hidden md:table-cell">{item?.quantity_in_stock}</TableCell>
+        {/* <TableCell className="hidden md:table-cell">{item?.quantity_in_stock}</TableCell> */}
         <TableCell>
           <ActionsMenu id={item.id} />
         </TableCell>

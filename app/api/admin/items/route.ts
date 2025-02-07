@@ -29,10 +29,7 @@ async function uploadImageToStorage(supabase: any, file: ArrayBuffer, filename: 
 }
 
 // GET handler for both list and single item
-export async function GET(
-    request: Request,
-    { params }: { params: { id: string } } = { params: { id: '' } }
-) {
+export async function GET(request: Request) {
     const supabase = await createClient();
     const { searchParams } = new URL(request.url);
     const id = searchParams.get('id');

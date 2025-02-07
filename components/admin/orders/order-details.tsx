@@ -5,7 +5,7 @@ import { calculateItemTotal } from '@/utils/item';
 
 interface OrderDetailsProps {
     order: Order;
-    onRefund: (values: any) => Promise<void>;
+    onRefund: (values: any) => void;
 }
 
 const OrderDetails: React.FC<OrderDetailsProps> = ({ order, onRefund }) => {

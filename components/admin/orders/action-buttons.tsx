@@ -7,9 +7,9 @@ import { Order } from '@/types/order';
 
 interface ActionButtonsProps {
     order: Order;
-    onMarkReady: () => void;
-    onPrint: () => void;
-    onComplete: () => void;
+    onMarkReady?: () => void;
+    onPrint?: () => void;
+    onComplete?: () => void;
 }
 
 const ActionButtons: React.FC<ActionButtonsProps> = ({

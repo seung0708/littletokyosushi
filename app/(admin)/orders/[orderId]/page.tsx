@@ -4,10 +4,11 @@ import { useState, useEffect, use } from 'react'
 import AdminLoading from "@/app/(admin)/loading";
 import OrderView from "@/components/admin/orders/order-view";
 import RecentOrder from "@/components/admin/orders/recent-order";
+import { Order} from '@/types/order';
 
 const OrderPage = ({ params }: { params: Promise<{ orderId: string }> }) => {
     const {orderId} = use(params)
-    const [order, setOrder] = useState()
+    const [order, setOrder] = useState<Order>()
 
     useEffect(() => {
         const fetchOrder = async () => {
@@ -48,7 +49,7 @@ const OrderPage = ({ params }: { params: Promise<{ orderId: string }> }) => {
     return (
         <div>
             {order.archived ? (
-                <OrderView order={order} onRefund={onRefund} />
+                <OrderView orderId={order.id} onRefund={onRefund} />
             ) : (
                 <RecentOrder order={order} />
             )}
