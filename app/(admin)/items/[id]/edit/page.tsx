@@ -45,7 +45,7 @@ export default function EditItemPage({ params }: { params: Promise<{ id: string 
     const fetchItem = async () => {
       try {
         console.log('Fetching item with ID:', typeof id);
-        const response = await fetch(`/api/items?id=${id}`, {
+        const response = await fetch(`/api/admin/items?id=${id}`, {
           headers: {
             'Content-Type': 'application/json',
           },
@@ -109,7 +109,7 @@ export default function EditItemPage({ params }: { params: Promise<{ id: string 
 
   if (loading) {
     return (
-      <div className="space-y-4">
+      <div className="space-y-4 md:pl-64">
         <Skeleton className="h-8 w-[200px]" />
         <Skeleton className="h-12 w-full" />
         <Skeleton className="h-12 w-full" />
@@ -123,7 +123,7 @@ export default function EditItemPage({ params }: { params: Promise<{ id: string 
   }
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+    <form onSubmit={handleSubmit(onSubmit)} className="space-y-4 md:pl-64">
       <div>
         <Label htmlFor="name">Name</Label>
         <Input id="name" {...register('name')} />

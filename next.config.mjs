@@ -12,7 +12,7 @@ const nextConfig = {
           },
           {
             source: '/:path*',
-            destination: '/store/:path*',
+            destination: '/:path*',
             has: [{ type: 'host', value: 'localhost' }]
           },
           // Admin site (admin.localhost)
@@ -33,7 +33,7 @@ const nextConfig = {
           },
           {
             source: '/:path*',
-            destination: '/admin/:path*',
+            destination: '/:path*',
             has: [{ type: 'host', value: 'admin.localhost' }]
           }
         ];

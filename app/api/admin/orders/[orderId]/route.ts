@@ -7,6 +7,18 @@ import {
 } from '@/lib/email-smtp';
 import { Database } from "@/types/database.types";
 
+type Order = Database["public"]["Tables"]["orders"]["Row"] & {
+  customers: Database["public"]["Tables"]["customers"]["Row"];
+  items: (Database["public"]["Tables"]["order_items"]["Row"] & {
+    order_item_modifiers: (Database["public"]["Tables"]["order_item_modifiers"]["Row"] & {
+      modifiers: Database["public"]["Tables"]["modifiers"]["Row"];
+      order_item_modifier_options: (Database["public"]["Tables"]["order_item_modifier_options"]["Row"] & {
+        modifier_options: Database["public"]["Tables"]["modifier_options"]["Row"];
+      })[];
+    })[];
+  })[];
+};
+
 type OrderItem = Database["public"]["Tables"]["order_items"]["Row"] & {
   order_item_modifiers: (Database["public"]["Tables"]["order_item_modifiers"]["Row"] & {
     modifiers: Database["public"]["Tables"]["modifiers"]["Row"];
@@ -14,6 +26,17 @@ type OrderItem = Database["public"]["Tables"]["order_items"]["Row"] & {
       modifier_options: Database["public"]["Tables"]["modifier_options"]["Row"];
     })[];
   })[];
+};
+
+type OrderItemModifier = Database["public"]["Tables"]["order_item_modifiers"]["Row"] & {
+  modifiers: Database["public"]["Tables"]["modifiers"]["Row"];
+  order_item_modifier_options: (Database["public"]["Tables"]["order_item_modifier_options"]["Row"] & {
+    modifier_options: Database["public"]["Tables"]["modifier_options"]["Row"];
+  })[];
+};
+
+type OrderItemModifierOption = Database["public"]["Tables"]["order_item_modifier_options"]["Row"] & {
+  modifier_options: Database["public"]["Tables"]["modifier_options"]["Row"];
 };
 
 export async function GET(req: Request, { params }: { params: Promise<{ orderId: string }> }) {
@@ -36,49 +59,41 @@ export async function GET(req: Request, { params }: { params: Promise<{ orderId:
     `)
     .eq('short_id', orderId)
     .single();  // Remove the archived filter to get both types
-    const order = {
-      id: data?.id,
-      short_id: data?.short_id,
-      status: data?.status,
-      type: data?.order_type,
-      total: data?.total,
-      pickupDate: data?.pickup_date,
-      pickupTime: data?.pickup_time, 
-      deliveryDate: data?.delivery_date,
-      deliveryTime: data?.delivery_time,
-      deliveryService: data?.delivery_service,
-      prepTime: data?.prep_time_minutes,
-      prepTimeConfirmedAt: data?.prep_time_confirmed_at,
-      staffNotes: data?.staff_notes,
-      subtotal: data?.sub_total,
-      serviceFee: data?.service_fee,
 
-      customerId: data?.customers.id,
-      customerEmail: data?.customers.email,
-      customerFirstName: data?.customers.first_name,
-      customerLastName: data?.customers.last_name,
-      customerPhone: data?.customers.phone,
-      customerAddress: data?.customers.address,
-      customerCity: data?.customers.city,
-      customerState: data?.customers.state, 
-      customerZip: data?.customers.postal_code,
-      items: data?.order_items.map((item: OrderItem) => ({
-        id: item.id,
-        price: item.price, 
-        quantity: item.quantity,
-        name: item.item_name,
-        specialInstructions: item.special_instructions,
-        itemModifiers: item.order_item_modifiers.map((modifier) => ({
-          id: modifier.id,
-          name: modifier.modifier_name,
-          options: modifier.order_item_modifier_options.map((option) => ({
-            id: option.id,
-            name: option.option_name,  
-            price: option.option_price
-          }))
+    const order: Order = {
+        id: data?.id,
+        customer_id: data?.customers_id,
+        status: data?.status,
+        order_type: data?.order_type,
+        delivery_service: data?.delivery_service,
+        delivery_date: data?.delivery_date,
+        delivery_time: data?.delivery_time,
+        pickup_date: data?.pickup_date,
+        pickup_time: data?.pickup_time, 
+        staff_notes: data?.staff_notes,
+        total: data?.total,
+        sub_total: data?.sub_total,
+        service_fee: data?.service_fee,
+        ready_at: data?.ready_at,
+        completed_at: data?.completed_at,
+        archived: data?.archived,
+        customers: data?.customers,
+        items: data?.order_items.map((item: OrderItem) => ({
+            id: item.id,
+            price: item.price,  
+            quantity: item.quantity, 
+            name: item.item_name, 
+            menu_items: item.special_instructions,
+            order_item_modifiers: item.order_item_modifiers.map((mod: OrderItemModifier) => ({
+                id: mod.id, 
+                name: mod.modifier_name,
+                options: mod.order_item_modifier_options.map((opt: OrderItemModifierOption) => ({
+                    id: opt.id,
+                    name: opt.option_name,
+                    price: opt.option_price
+                }))
+            }))
         }))
-      }))
-     
     }
 
     if (error) {
@@ -89,8 +104,8 @@ export async function GET(req: Request, { params }: { params: Promise<{ orderId:
     if (!data) {
         return NextResponse.json({ error: "Order not found" }, { status: 404 });
     }
-
-    return NextResponse.json(order);
+    console.log(data, error);
+    return NextResponse.json(data);
 }
 
 // app/api/admin/orders/[orderId]/route.ts

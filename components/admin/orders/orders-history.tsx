@@ -138,7 +138,7 @@ export default function OrdersHistory() {
                       {order.created_at && formatDistanceToNow(new Date(order.created_at), { addSuffix: true })}
                     </TableCell>
                     <TableCell>
-                      <Link href={`/orders/${order.id}`}>
+                      <Link href={`/orders/${order.short_id}`}>
                         <Button variant="outline" size="sm">
                           View Details
                         </Button>

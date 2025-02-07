@@ -1,6 +1,7 @@
 import { createClient } from "@/lib/supabase/server";
 import { NextResponse } from "next/server";
 
+
 // app/api/admin/orders/route.ts
 export async function GET(req: Request) { 
   const { searchParams } = new URL(req.url);

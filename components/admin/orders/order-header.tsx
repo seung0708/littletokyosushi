@@ -6,6 +6,7 @@ import { format } from "date-fns";
 import { Order } from '@/types/order';
 
 export function OrderHeader({order}: {order: Order}) {
+  
     return (
         <CardHeader className="flex flex-row items-start bg-muted/50">
             <div className="grid gap-0.5">

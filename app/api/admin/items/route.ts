@@ -34,7 +34,7 @@ export async function GET(request: Request) {
     const supabase = await createClient();
     const { searchParams } = new URL(request.url);
     const id = searchParams.get('id');
-
+    
     try {
         // Check admin authentication
         const authResult = await checkAdminAuth();

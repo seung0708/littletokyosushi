@@ -404,6 +404,8 @@ export interface Database {
           status: string
           order_type: string
           delivery_service?: string
+          delivery_date?: string
+          delivery_time?: string
           pickup_date: string
           pickup_time: string
           prep_time_minutes?: number

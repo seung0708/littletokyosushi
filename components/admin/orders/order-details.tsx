@@ -9,6 +9,7 @@ interface OrderDetailsProps {
 }
 
 const OrderDetails: React.FC<OrderDetailsProps> = ({ order, onRefund }) => {
+    console.log(order);
     return (
         <div className="p-6">
             <div className="flex justify-between items-start mb-6">

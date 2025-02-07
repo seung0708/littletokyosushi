@@ -16,6 +16,7 @@ const OrderPage = ({ params }: { params: Promise<{ orderId: string }> }) => {
                 const response = await fetch(`/api/admin/orders/${orderId}`)
                 if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`)
                 const order = await response.json()
+
                 setOrder(order)
             } catch (error) {
                 console.error('Error fetching order:', error)
@@ -51,7 +52,7 @@ const OrderPage = ({ params }: { params: Promise<{ orderId: string }> }) => {
     return (
         <div>
             {order.archived ? (
-                <OrderView orderId={order.id} onRefund={onRefund} />
+                <OrderView order={order} onRefund={onRefund} />
             ) : (
                 <RecentOrder order={order} />
             )}

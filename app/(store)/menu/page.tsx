@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import MenuItems from "@/components/store/menuItems";
+import MenuItems from "@/components/store/menu/menuItems";
 import { Loading } from '@/components/ui/loading';
 import { apiRequest } from "@/lib/utils/api-fetch";
 import { APIError } from "@/lib/utils/api-error";
