@@ -213,7 +213,8 @@ export default function ItemDetailsForm({item}: {item: MenuItem}) {
                                 <Image
                                     src={`${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/menu-items/${item.image_urls[selectedImage]}`}
                                     alt={item.name}
-                                    fill
+                                    width={0}
+                                    height={0}
                                     className="object-cover"
                                     onLoad={handleImageLoad}
                                     priority
