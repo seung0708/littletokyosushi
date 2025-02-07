@@ -1,11 +1,12 @@
 'use client'
+import { use } from 'react'
 import RecentOrder from "@/components/admin/orders/recent-order";
 
 import {useState, useEffect} from 'react'
 import AdminLoading from "../../../loading";
 
-const OrderPage = ({ params }: { params: { orderId: string } }) => {
-    const {orderId} = params
+const OrderPage = ({ params }: { params: Promise<{ id: string }> }) => {
+    const orderId = use(params)
     const [order, setOrder] = useState()
 
   useEffect(() => {

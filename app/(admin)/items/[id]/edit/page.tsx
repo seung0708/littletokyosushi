@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, use } from 'react';
 import { useRouter } from 'next/navigation';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -26,14 +26,8 @@ const formSchema = z.object({
 
 type FormData = z.infer<typeof formSchema>;
 
-type Props = {
-  params: {
-    id: string;
-  };
-  searchParams: { [key: string]: string | string[] | undefined };
-};
-
-export default function EditItemPage({ params }: Props) {
+export default function EditItemPage({ params }: { params: Promise<{ id: string }> }) {
+  const id = use(params)
   const router = useRouter();
   const [item, setItem] = useState<Item | null>(null);
   const [loading, setLoading] = useState(true);
@@ -50,8 +44,8 @@ export default function EditItemPage({ params }: Props) {
   useEffect(() => {
     const fetchItem = async () => {
       try {
-        console.log('Fetching item with ID:', typeof params.id);
-        const response = await fetch(`/api/items?id=${params.id}`, {
+        console.log('Fetching item with ID:', typeof id);
+        const response = await fetch(`/api/items?id=${id}`, {
           headers: {
             'Content-Type': 'application/json',
           },
@@ -81,11 +75,11 @@ export default function EditItemPage({ params }: Props) {
     };
 
     fetchItem();
-  }, [params.id, setValue]);
+  }, [id, setValue]);
 
   const onSubmit = async (data: FormData) => {
     try {
-      const response = await fetch(`/api/items?id=${params.id}`, {
+      const response = await fetch(`/api/items?id=${id}`, {
         method: 'PATCH',
         headers: {
           'Content-Type': 'application/json',

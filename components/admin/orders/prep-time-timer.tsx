@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 'use client'
 
 import { useEffect, useState } from 'react'
@@ -16,6 +17,7 @@ export default function PrepTimeTimer({ prepTimeMinutes, startTime, status }: Pr
   const [intervalId, setIntervalId] = useState<NodeJS.Timeout | null>(null)
 
   useEffect(() => {
+    // We intentionally exclude intervalId from deps as it's managed within the effect
     if (status !== 'preparing') {
       if (intervalId) {
         clearInterval(intervalId)
