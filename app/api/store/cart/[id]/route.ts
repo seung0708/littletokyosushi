@@ -42,10 +42,10 @@ export async function GET(request: Request, { params }: { params: Promise<{ id: 
         return NextResponse.json({ error: 'Cart not found' }, { status: 404 });
     }
 
-    const cart: Cart = {
+    const cart = {
         id: dbCart?.id,
         customer_id: dbCart?.customer_id,
-        cart_items: dbCart?.cart_items.map((cartItem) => ({
+        cart_items: dbCart?.cart_items.map((cartItem: any) => ({
             id: cartItem?.id,
             cart_id: dbCart?.id,
             base_price: cartItem?.base_price,
@@ -56,11 +56,11 @@ export async function GET(request: Request, { params }: { params: Promise<{ id: 
             menu_item_name: cartItem?.menu_items?.name,
             menu_item_price: cartItem?.menu_items?.price,
             menu_item_image: cartItem?.menu_items?.image_urls[0],
-            cart_item_modifiers: cartItem?.cart_item_modifiers?.map((cartItemModifier) => ({
+            cart_item_modifiers: cartItem?.cart_item_modifiers?.map((cartItemModifier: any) => ({
                 id: cartItemModifier?.id,
                 modifier_id: cartItemModifier?.modifiers?.id,
                 name: cartItemModifier?.modifiers?.name,
-                cart_item_modifier_options: cartItemModifier?.cart_item_modifier_options?.map((cartItemModifierOption) => ({
+                cart_item_modifier_options: cartItemModifier?.cart_item_modifier_options?.map((cartItemModifierOption: any) => ({
                     id: cartItemModifierOption?.id,
                     modifier_id: cartItemModifierOption?.modifier_id,
                     modifier_option_id: cartItemModifierOption?.modifier_options?.id,
