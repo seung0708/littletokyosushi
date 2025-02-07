@@ -6,8 +6,8 @@ import OrderView from "@/components/admin/orders/order-view";
 import RecentOrder from "@/components/admin/orders/recent-order";
 import { Order} from '@/types/order';
 
-const OrderPage = ({ params }: { params: Promise<{ id: string }> }) => {
-    const orderId = use(params)
+const OrderPage = ({ params }: { params: Promise<{ orderId: string }> }) => {
+    const { orderId } = use(params)
     const [order, setOrder] = useState<Order>()
 
     useEffect(() => {

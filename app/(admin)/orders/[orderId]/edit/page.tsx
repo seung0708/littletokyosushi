@@ -6,7 +6,7 @@ import {useState, useEffect} from 'react'
 import AdminLoading from "../../../loading";
 
 const OrderPage = ({ params }: { params: Promise<{ orderId: string }> }) => {
-    const orderId = use(params)
+    const { orderId } = use(params)
     const [order, setOrder] = useState()
 
   useEffect(() => {
