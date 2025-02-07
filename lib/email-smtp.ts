@@ -68,7 +68,20 @@ export async function sendPrepTimeNotificationEmail(order: Order, customer: Cust
 }
 
 export async function sendOrderReadyNotificationEmail(order: Order, customer: Customer) {
-  const emailHtml = await render(OrderReadyNotificationEmail({ order, customer }));
+  if (!order.short_id || !customer.first_name) {
+    throw new Error('Missing required fields for order ready notification email');
+  }
+
+  const emailHtml = await render(OrderReadyNotificationEmail({
+    order: {
+      short_id: order.short_id,
+      total: order.total || 0
+    },
+    customer: {
+      first_name: customer.first_name
+    }
+  }));
+
   return sendEmail(
     customer.email as string,
     `Order Ready: Your order #${order.short_id} is ready for pickup`,

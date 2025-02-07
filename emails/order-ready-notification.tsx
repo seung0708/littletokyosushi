@@ -12,8 +12,13 @@ import {
 import { Tailwind } from '@react-email/tailwind';
 
 interface OrderReadyEmailProps {
-  order: any;
-  customer: any;
+  order: {
+    short_id: string;
+    total: number;
+  };
+  customer: {
+    first_name: string;
+  };
 }
 
 export default function OrderReadyNotificationEmail({

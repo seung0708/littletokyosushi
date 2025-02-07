@@ -1,6 +1,7 @@
 import { Resend } from 'resend';
 import OrderConfirmationEmail from '@/emails/order-confirmation';
 import PrepTimeNotificationEmail from '@/emails/prep-time-notifications';
+import OrderReadyNotificationEmail from '@/emails/order-ready-notification';
 import { Order } from '@/types/order';
 import { Customer } from '@/types/customer';
 
@@ -59,6 +60,39 @@ export async function sendPrepTimeNotificationEmail(order: Order, customer: Cust
         return { success: true, data };
     } catch (error) {
         console.error('Error sending prep time notification:', error);
+        return { success: false, error };
+    }
+}
+
+export async function sendOrderReadyNotificationEmail(order: Order, customer: Customer) {
+    try {
+        if (!order.short_id || !customer.first_name) {
+            throw new Error('Missing required fields for order ready notification email');
+        }
+
+        const { data, error } = await resend.emails.send({
+            from: 'orders@resend.dev',
+            to: customer.email as string,
+            subject: `Order Ready: Your order #${order.short_id} is ready for pickup`,
+            react: OrderReadyNotificationEmail({
+                order: {
+                    short_id: order.short_id,
+                    total: order.total || 0
+                },
+                customer: {
+                    first_name: customer.first_name
+                }
+            }),
+        });
+
+        if (error) {
+            console.error('Failed to send order ready notification:', error);
+            return { success: false, error };
+        }
+
+        return { success: true, data };
+    } catch (error) {
+        console.error('Error sending order ready notification:', error);
         return { success: false, error };
     }
 }
