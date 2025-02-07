@@ -58,7 +58,7 @@ type FormData = z.infer<typeof formSchema>;
 export default function ItemDetailsPage({ params }: { params: Promise<{ id: string }> }) {
     const { id } = use(params);
     const [item, setItem] = useState<MenuItem | null>(null);
-    const [loading, setLoading] = useState(true);
+    const [loading, setLoading] = useState(false);
     const [loadingImage, setLoadingImage] = useState(true);
     const [selectedImage, setSelectedImage] = useState(0);
     // const [error, setError] = useState<string | null>(null);

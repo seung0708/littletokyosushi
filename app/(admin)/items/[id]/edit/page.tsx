@@ -26,8 +26,8 @@ const formSchema = z.object({
 
 type FormData = z.infer<typeof formSchema>;
 
-export default function EditItemPage({ params }: { params: Promise<{ id: string }> }) {
-  const { id } = use(params);
+export default function EditItemPage({ params }: { params: { id: string } }) {
+  const { id } = params;
   const router = useRouter();
   const [item, setItem] = useState<Item | null>(null);
   const [loading, setLoading] = useState(true);
