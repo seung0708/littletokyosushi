@@ -1,4 +1,4 @@
-// app/(admin)/orders/[orderId]/page.tsx
+
 'use client'
 import { useState, useEffect, use } from 'react'
 import AdminLoading from "@/app/(admin)/loading";
