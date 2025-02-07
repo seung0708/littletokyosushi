@@ -353,7 +353,7 @@ export interface Database {
       cart_item_modifiers: {
         Row: {
           id?: string
-          cart_item_id: string
+          cart_items_id: string
           modifier_id: string
           created_at?: string
         }

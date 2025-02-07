@@ -1,6 +1,4 @@
 'use client'
-import { AuthProvider } from "../context/authContext"
-import { CartProvider } from "../context/cartContext"
 
 export default function AuthLayout({
     children,

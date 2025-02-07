@@ -19,11 +19,20 @@ export async function POST(req: Request) {
             .select('*')
             .eq('email', email)
             .single()
-        console.log('customer',customer)
+        
+        if (customerError) {
+            console.error('Error fetching customer:', customerError);
+            return NextResponse.json({ error: customerError.message }, { status: 400 })
+        }
 
         if (customer) {
             const { data: {user: existingUser}, error: usersError} = await supabase.auth.admin.getUserById(customer.id);
-            console.log('existingUser',existingUser)
+            
+            if (usersError) {
+                console.error('Error fetching user:', usersError);
+                return NextResponse.json({ error: usersError.message }, { status: 400 })
+            }
+
             if(existingUser && !existingUser.is_anonymous) { 
                 return NextResponse.json(
                     { error: "An account with this email already exists. Please sign in instead." }, 
@@ -36,6 +45,11 @@ export async function POST(req: Request) {
                     password: process.env.GUEST_DEFAULT_PASSWORD!
                 }) 
 
+                if (signInError) {
+                    console.error('Error signing in:', signInError);
+                    return NextResponse.json({ error: signInError.message }, { status: 400 })
+                }
+
                 if (!data.user) {
                     const { error: updateError } = await supabase.auth.admin.updateUserById(
                             existingUser.id, {
@@ -43,6 +57,12 @@ export async function POST(req: Request) {
                             password: process.env.GUEST_DEFAULT_PASSWORD!,
                         }
                     );
+
+                    if (updateError) {
+                        console.error('Error updating user:', updateError);
+                        return NextResponse.json({ error: updateError.message }, { status: 400 })
+                    }
+
                     const { data: confirmData, error: confirmError } = await supabase
                         .rpc('confirm_email_on_update', {
                             user_id: existingUser.id
@@ -53,6 +73,11 @@ export async function POST(req: Request) {
                         email: email, 
                         password: process.env.GUEST_DEFAULT_PASSWORD!
                     })
+
+                    if (retrySignInError) {
+                        console.error('Error signing in:', retrySignInError);
+                        return NextResponse.json({ error: retrySignInError.message }, { status: 400 })
+                    }
 
                     return NextResponse.json(data, { status: 200 })
                 }
@@ -82,7 +107,7 @@ export async function POST(req: Request) {
                  return NextResponse.json({ error: 'No user created' }, { status: 400 })
              }
      
-             const { data: customerData, error: customerError } = await supabase
+             const { error: customerError } = await supabase
                  .from('customers')
                  .insert({
                      id: user.id,

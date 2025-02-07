@@ -1,10 +1,10 @@
 'use client'
-import {useEffect, useState, use} from 'react';
-import { CartItem, CartItemModifier, CartItemModifierOption } from '@/types/cart';
-import { MenuItem, Modifier, ModifierOption } from '@/types/item';
+import {useEffect, useState} from 'react';
+import { CartItemModifier, CartItemModifierOption } from '@/types/cart';
+import { MenuItem, Modifier } from '@/types/item';
 import Image from 'next/image';
 import { useForm } from 'react-hook-form';
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
+import { Form, FormControl, FormField, FormItem, FormLabel } from '@/components/ui/form';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
@@ -16,19 +16,19 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Loading } from '@/components/ui/loading';
 
-interface FormModifier {
-    id: number;
-    name: string;
-    min_selections: number;
-    max_selections: number;
-    is_required: boolean;
-    modifier_options: {
-        id: number;
-        modifier_id: number;
-        name: string;
-        price: number;
-    }[];
-}
+// interface FormModifier {
+//     id: number;
+//     name: string;
+//     min_selections: number;
+//     max_selections: number;
+//     is_required: boolean;
+//     modifier_options: {
+//         id: number;
+//         modifier_id: number;
+//         name: string;
+//         price: number;
+//     }[];
+// }
 
 const formSchema = z.object({
     quantity: z.number().min(1),
@@ -61,7 +61,7 @@ export default function ItemDetailsPage({ params }: { params: { id: string } }) 
     const [loading, setLoading] = useState(true);
     const [loadingImage, setLoadingImage] = useState(true);
     const [selectedImage, setSelectedImage] = useState(0);
-    const [error, setError] = useState<string | null>(null);
+    // const [error, setError] = useState<string | null>(null);
     const { handleCartUpdate } = useCart();
 
     const form = useForm<z.infer<typeof formSchema>>({
@@ -73,7 +73,7 @@ export default function ItemDetailsPage({ params }: { params: { id: string } }) 
         mode: "onChange"
     });
 
-    const handleModifierChange = (modifierId: number, option: any, isSelected: boolean) => {
+    const handleModifierChange = (modifierId: number, option: CartItemModifierOption, isSelected: boolean) => {
         const {modifiers} = item!;
         const currentModifiers = form.getValues('modifiers');
         const modifierIndex = currentModifiers.findIndex(m => m.id === modifierId);
@@ -137,7 +137,7 @@ export default function ItemDetailsPage({ params }: { params: { id: string } }) 
                 })) ?? []
             })));
         }
-    }, [item]);
+    }, [item, form]);
 
     useEffect(() => {
      
@@ -164,13 +164,12 @@ export default function ItemDetailsPage({ params }: { params: { id: string } }) 
                 }
             } catch (error) {
                 console.error('Error fetching item:', error);
-                setError(error instanceof Error ? error.message : 'Failed to fetch item');
             } finally {
                 setLoading(false);
             }
         };
         fetchItem();
-    }, [form]);
+    }, [params.id, form]);
 
    
     const onSubmit = async (data: FormData) => {

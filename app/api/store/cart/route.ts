@@ -1,5 +1,23 @@
 import { createClient } from "@/lib/supabase/server";
 import { NextResponse } from "next/server"; 
+import { Database } from "@/types/database.types";
+
+type CartItemModifierOption = Database['public']['Tables']['cart_item_modifier_options']['Insert'];
+
+
+type CartItem = Database["public"]["Tables"]["cart_items"]["Insert"] & {
+    cart_item_modifiers: (Database["public"]["Tables"]["cart_item_modifiers"]["Insert"] & {
+      modifiers: Database["public"]["Tables"]["modifiers"]["Row"];
+      cart_item_modifier_options: (Database["public"]["Tables"]["cart_item_modifier_options"]["Insert"] & {
+        modifier_options: Database["public"]["Tables"]["modifier_options"]["Insert"];
+      })[];
+    })[];
+  };
+
+type CartItemModifier = Database["public"]["Tables"]["cart_item_modifiers"]["Insert"] & {
+    cart_item_modifier_options: Database["public"]["Tables"]["cart_item_modifier_options"]["Insert"][];
+  };
+  
 
 export async function POST(request: Request) {
     const supabase = await createClient();
@@ -25,7 +43,7 @@ export async function POST(request: Request) {
         const { data: cartItems, error: createCartItemsError } = await supabase
             .from('cart_items')
             .insert(
-                items.map((item: any) => ({
+                items.map((item: CartItem) => ({
                     cart_id: cart.id,
                     menu_item_id: item.menu_item_id,
                     quantity: item.quantity,
@@ -48,7 +66,7 @@ export async function POST(request: Request) {
             const { data: createItemModifiers, error: createCartItemModifiersError } = await supabase
                 .from('cart_item_modifiers')
                 .insert(
-                    items[0].cart_item_modifiers.map((modifier: any) => ({
+                    items[0].cart_item_modifiers.map((modifier: CartItemModifier) => ({
                         cart_items_id: cartItems?.[0].id,
                         modifier_id: modifier.id,
                     }))
@@ -64,11 +82,11 @@ export async function POST(request: Request) {
             const {error: createCartItemModifierOptionsError} = await supabase
                 .from('cart_item_modifier_options')
                 .insert(
-                    items[0].cart_item_modifiers.flatMap((modifier: any, index: number) => 
-                        modifier.cart_item_modifier_options.map((option: any) => ({
+                    items[0].cart_item_modifiers.flatMap((modifier: CartItemModifier, index: number) => 
+                        modifier.cart_item_modifier_options.map((option: CartItemModifierOption) => ({
                             cart_item_modifiers_id: createItemModifiers?.[index]?.id, 
                             modifier_option_id: option.modifier_option_id,
-                            modifier_option_price: option.price,
+                            modifier_option_price: option.modifier_option_price,
                             modifier_id: modifier.id,
                         }))
                     )

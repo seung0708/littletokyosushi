@@ -16,7 +16,7 @@ export default function CallbackPage() {
             }
         }
         handleAuthCallback();
-    }, [router])
+    })
 
     return <div>Processing authentication...</div>
 

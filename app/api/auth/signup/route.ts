@@ -6,7 +6,7 @@ import { type NextRequest, NextResponse } from 'next/server'
 export async function POST(req: NextRequest) {
   const supabase = await createClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.SUPABASE_SERVICE_ROLE_KEY!!
+    process.env.SUPABASE_SERVICE_ROLE_KEY!
   )
   const serverSupabase = await createServerClient();
 
@@ -16,6 +16,12 @@ export async function POST(req: NextRequest) {
 
     // Check if this is an anonymous user trying to convert
     const { data: { users }, error: usersError } = await supabase.auth.admin.listUsers();
+
+    if (usersError) {
+      console.error('Error fetching users:', usersError);
+      return NextResponse.json({ error: usersError.message }, { status: 400 });
+    }
+
     const anonymousUser = users.find(user => user.is_anonymous === true && user.user_metadata.email === email);
     const existingUser = users.find(user => user.email === email && user.is_anonymous === false);
     console.log('existingUser',existingUser, 'anonymousUser',anonymousUser)
@@ -64,7 +70,7 @@ export async function POST(req: NextRequest) {
         return NextResponse.json({ error: 'Failed to create user' }, { status: 400 });
       }
   
-      const { data: customerData, error: customerError } = await supabase
+      await supabase
         .from('customers')
         .insert({
           id: user.id,
@@ -78,6 +84,11 @@ export async function POST(req: NextRequest) {
       email,
       password
     })
+
+    if (signInError) {
+      console.error('Sign-in error:', signInError);
+      return NextResponse.json({ error: signInError.message }, { status: 400 });
+    }
 
     return NextResponse.json(data);
    

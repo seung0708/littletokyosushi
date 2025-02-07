@@ -9,7 +9,7 @@ import { useEffect } from "react";
 export default function Confirm() {
     const searchParams = useSearchParams();
     const router = useRouter();
-    const verified = searchParams.get('verified');
+    // const verified = searchParams.get('verified');
     const tokenHash = searchParams.get('token_hash');
     const type = searchParams.get('type');
     const next = searchParams.get('next');

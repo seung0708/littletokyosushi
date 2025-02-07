@@ -9,7 +9,7 @@ const Page: React.FC = () => {
                         <h1 className="text-4xl font-bold text-white mb-4">Contact Us</h1>
                         <div className="w-24 h-1 bg-red-600 mx-auto mb-4"></div>
                         <p className="text-lg text-gray-300">
-                            We'd love to hear from you
+                            We&apos;d love to hear from you
                         </p>
                     </div>
                 </div>
@@ -25,7 +25,7 @@ const Page: React.FC = () => {
                                 <div className="flex-grow h-[1px] bg-gradient-to-r from-red-600/50 to-transparent"></div>
                             </div>
                             <p className="text-gray-300">
-                                Feel free to reach out to us with any questions or concerns. We'll get back to you as quickly as possible.
+                                Feel free to reach out to us with any questions or concerns. We&apos;ll get back to you as quickly as possible.
                             </p>
                         </div>
 
@@ -34,7 +34,7 @@ const Page: React.FC = () => {
                                 <h3 className="font-semibold text-red-400">Business Hours</h3>
                                 <p className="text-sm text-gray-300">
                                     Monday - Sunday<br />
-                                    11:00 AM - 8:00 PM
+                                    9:00 AM - 6:00 PM
                                 </p>
                             </div>
                             <div className="space-y-2 p-4 rounded-lg bg-black/20 border border-white/5">
@@ -42,7 +42,7 @@ const Page: React.FC = () => {
                                 <p className="text-sm text-gray-300">
                                     333 S Alameda St<br />
                                     Los Angeles, CA 90013<br />
-                                    (213) 625-0071
+                                    (213) 617-0343
                                 </p>
                             </div>
                         </div>

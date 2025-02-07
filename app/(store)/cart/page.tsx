@@ -2,16 +2,15 @@
 import { useCart } from "@/app/context/cartContext";
 import { Button } from "@/components/ui/button";
 import { MinusIcon, PlusIcon, TrashIcon } from "lucide-react";
-import { CartItem, CartItemModifier } from "@/types/cart";
+import { CartItem, CartItemModifier, CartItemModifierOption } from "@/types/cart";
 import {useRouter} from 'next/navigation';
 import { calculateTotalPrice } from '@/utils/item';
-import { useEffect, useState } from 'react';
-import { Loading } from '@/components/ui/loading';
+import Image from "next/image";
 
 const CartPage: React.FC = () => {
     const { cartItems, handleCartUpdate, removeItemFromCart } = useCart(); 
     const router = useRouter();
-    const [cartLoading, setCartLoading] = useState(false);
+    
 
     const onSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -38,8 +37,6 @@ const CartPage: React.FC = () => {
 
     };
 
-   
-
     return (
         <div className="min-h-screen bg-black text-white">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
@@ -64,10 +61,12 @@ const CartPage: React.FC = () => {
                                                   border border-white/10 rounded-xl overflow-hidden">
                                         <div className="flex p-6">
                                             <div className="relative h-24 w-24 sm:h-48 sm:w-48 flex-shrink-0 overflow-hidden rounded-lg">
-                                                <img 
+                                                <Image
                                                     src={`${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/menu-items/${cartItem.menu_item?.image_urls?.[0]}`} 
-                                                    alt={cartItem.menu_item?.name} 
+                                                    alt={cartItem?.menu_item?.name || 'Item image'} 
                                                     className="h-full w-full object-cover object-center" 
+                                                    height={24}
+                                                    width={24}
                                                 />
                                             </div>
                                             <div className="ml-6 flex flex-1 flex-col">
@@ -79,7 +78,7 @@ const CartPage: React.FC = () => {
                                                                 <h4 className="text-sm font-medium text-gray-300">{modifier?.modifier?.name}</h4>
                                                                 {modifier.cart_item_modifier_options && modifier.cart_item_modifier_options.length > 0 && (
                                                                     <ul className="space-y-1">
-                                                                        {modifier.cart_item_modifier_options.map((option: any) => (
+                                                                        {modifier.cart_item_modifier_options.map((option: CartItemModifierOption) => (
                                                                             <li key={option.id} 
                                                                                 className="text-xs text-gray-400 bg-black/20 px-2 py-1 rounded-full inline-block mr-2">
                                                                                 {option.name}

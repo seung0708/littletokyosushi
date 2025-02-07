@@ -28,12 +28,13 @@ export async function PATCH(request: Request, { params }: { params: { id: string
         .eq('customer_id', customerId)
         .single();
 
-    console.log('Cart state:', {
-        currentCartId: currentCart.id,
-        currentCartCustomerId: currentCart.customer_id,
-        existingCart: existingCart ? existingCart.id : null,
-        newCustomerId: customerId
-    });
+    if (existingCartError) {
+        console.error('Error fetching cart:', existingCartError);
+        return NextResponse.json(
+            { error: 'Failed to fetch cart' },
+            { status: 500 }
+        );
+    }
 
     // Case 1: Customer has no existing cart - just update the current cart
     if (!existingCart) {
@@ -67,7 +68,7 @@ export async function PATCH(request: Request, { params }: { params: { id: string
     }
 
     // Case 2: Customer has an existing cart - merge items and delete current cart
-    const { data: cartItems, error: cartItemsError } = await supabase
+    const { error: cartItemsError } = await supabase
         .from('cart_items')
         .select('*')
         .eq('cart_id', currentCart.id);

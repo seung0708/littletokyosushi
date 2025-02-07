@@ -3,6 +3,7 @@ import { createClient } from "@/lib/supabase/server";
 import { sendOrderConfirmationEmail } from "@/lib/email-smtp";
 import { Database } from "@/types/database.types";
 
+type OrderItemInsert = Partial<Database['public']['Tables']['order_items']['Insert']>;
 type OrderItemModifierInsert = Partial<Database['public']['Tables']['order_item_modifiers']['Insert']>;
 type OrderItemModifierOptionInsert = Partial<Database['public']['Tables']['order_item_modifier_options']['Insert']>;
 
@@ -52,7 +53,7 @@ export async function POST(req: Request) {
 
             if(item?.cart_item_modifiers) {
                 for (const modifier of item?.cart_item_modifiers) {
-                    const orderItemModifierInsert: OrderItemModifierInsert[] = orderItemData.map((orderItem: any) => ({
+                    const orderItemModifierInsert: OrderItemModifierInsert[] = orderItemData.map((orderItem: OrderItemInsert) => ({
                         order_item_id: orderItem.id,
                         modifier_id: modifier.modifier_id,
                         modifier_name: modifier.name,
@@ -68,13 +69,13 @@ export async function POST(req: Request) {
 
                     if(modifier.cart_item_modifier_options) {
                         for (const option of modifier.cart_item_modifier_options) {
-                            const orderItemModifierOptionInsert: OrderItemModifierOptionInsert[] = orderItemModifierData.map((orderItemModifier: any) => ({
+                            const orderItemModifierOptionInsert: OrderItemModifierOptionInsert[] = orderItemModifierData.map((orderItemModifier: OrderItemModifierInsert) => ({
                                 order_item_modifier_id: orderItemModifier.id,
                                 option_id: option.modifier_option_id,
                                 option_name: option.name,
                                 option_price: option.price
                             }))
-                            const { data: orderItemModifierOptionData, error: orderItemModifierOptionError } = await supabase
+                            const { error: orderItemModifierOptionError } = await supabase
                                 .from('order_item_modifier_options')
                                 .insert(orderItemModifierOptionInsert)
                             

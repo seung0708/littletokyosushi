@@ -2,7 +2,7 @@ import { createClient } from "@/lib/supabase/server";
 import { NextResponse } from "next/server";
 import { APIError } from "@/lib/utils/api-error";
 
-export async function GET(req: Request) {
+export async function GET() {
     const supabase = await createClient();
 
     try {

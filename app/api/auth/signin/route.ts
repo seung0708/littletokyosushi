@@ -21,6 +21,7 @@ export async function POST(req: Request) {
 
   try {
     const { data: {users}, error } = await supabase.auth.admin.listUsers();
+    if (error) throw error;
     const existingUser = users.find(user => user.email === email && !user.is_anonymous);
     
     if (!existingUser) {

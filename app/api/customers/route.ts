@@ -10,7 +10,7 @@ export async function GET(req: Request) {
 
     try {
         const supabase = await createClient();
-        const { data, error } = await supabase
+        await supabase
             .from('customers')
             .select('*')  // Change from 'address' to '*' to get all columns
             .eq('id', customer_id)
@@ -21,7 +21,7 @@ export async function GET(req: Request) {
             address: null  // Return null if address column doesn't exist yet
         });
         
-    } catch (error: any) {
+    } catch (error) {
         console.error('Error:', error);
         // Return empty data instead of error
         return NextResponse.json({ 
@@ -58,9 +58,10 @@ export async function PATCH(req: Request) {
         }
 
         return NextResponse.json(data);
-    } catch (error: any) {
+    } catch (error) {
+        console.error('Error updating customer address:', error);
         return NextResponse.json(
-            { error: error.message || 'Failed to update customer address' },
+            { error: 'Failed to update customer address' },
             { status: 500 }
         );
     }

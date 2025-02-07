@@ -32,7 +32,7 @@ export async function GET(request: Request) {
     }
     
     // Check for existing anonymous user with this email
-    const { data: { users }, error: usersError } = await supabase.auth.admin.listUsers();
+    const { data: { users } } = await supabase.auth.admin.listUsers();
     const anonymousUser = users.find(user => 
       user.is_anonymous === true && 
       (user.email === session.user.email || user.user_metadata.email === session.user.email)
@@ -64,7 +64,7 @@ export async function GET(request: Request) {
     if (anonymousUser) {
       console.log('anonymousUser', anonymousUser);
       const anonymousUserId = anonymousUser.id;
-      const { data: cart, error: cartError } = await supabase
+      const { data: cart } = await supabase
         .from('carts')
         .select('*')
         .eq('customer_id', anonymousUserId)
@@ -82,7 +82,8 @@ export async function GET(request: Request) {
           console.log('updatedCart', updatedCart);
         if (cartError) throw cartError;
       }
-      const {error: updateError } = await supabase.auth.admin.deleteUser(anonymousUserId);
+      const { error: deleteError } = await supabase.auth.admin.deleteUser(anonymousUserId);
+      if (deleteError) throw deleteError;
     } 
 
     const { data: customer, error: customerError } = await supabase
@@ -90,6 +91,8 @@ export async function GET(request: Request) {
       .select('*')
       .eq('id', session.user.id)
       .single();
+
+    if (customerError) throw customerError;
 
     if  (!customer) {
       const { error: customerError } = await supabase
@@ -100,6 +103,7 @@ export async function GET(request: Request) {
           last_name: session.user.user_metadata.full_name.split(' ')[1],
           email: session.user.email,
       })
+      if (customerError) throw customerError;
     }
     
     return NextResponse.redirect(new URL('/checkout', request.url));

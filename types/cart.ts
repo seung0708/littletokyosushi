@@ -30,9 +30,10 @@ export interface CartItemModifier  {
 };
 
 export interface CartItemModifierOption {
-    id: string;
+    id: number;
     cart_item_modifiers_id?: string;
     modifier_id: number;
+    modifier_option_id: number;
     modifier_options?: ModifierOption[] | null;
     name: string;
     price: number;

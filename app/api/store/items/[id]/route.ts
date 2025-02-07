@@ -3,7 +3,6 @@ import { NextResponse } from "next/server";
 import { APIError } from "@/lib/utils/api-error";
 import { Database } from "@/types/database.types";
 
-type Modifier = Database['public']['Tables']['modifiers']['Row'];
 type ModifierOption = Database['public']['Tables']['modifier_options']['Row'];
 type ModifierWithOptions = Database['public']['Tables']['modifiers']['Row'] & {
     modifier_options: Database['public']['Tables']['modifier_options']['Row'][]

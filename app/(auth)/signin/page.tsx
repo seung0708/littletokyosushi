@@ -1,10 +1,10 @@
 'use client';
 import AdminSignin from "@/components/auth/adminSignin";
-import CustomerSignin from "@/components/auth/customerSignin";
-import { useEffect, useState } from "react";
+// import CustomerSignin from "@/components/auth/customerSignin";
+//import { useState } from "react";
 
 export default function LoginPage() {
-    const [isAdmin, setIsAdmin] = useState(false);
+    // const [isAdmin, setIsAdmin] = useState(false);
 
     return (
         <div className="text-white flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">

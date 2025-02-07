@@ -1,3 +1,4 @@
+import { SupabaseClient } from '@supabase/supabase-js';
 import { createClient } from '@/lib/supabase/server';
 import { revalidatePath } from 'next/cache';
 import { NextResponse } from 'next/server';
@@ -6,7 +7,7 @@ import { checkAdminAuth, transformItem } from '../../../../utils/auth';
 const ITEMS_PER_PAGE = 8;
 
 // Helper functions
-async function fetchCategoryId(supabase: any, category: string) {
+async function fetchCategoryId(supabase: SupabaseClient, category: string) {
     const { data, error } = await supabase
         .from("categories")
         .select("id")
@@ -17,7 +18,7 @@ async function fetchCategoryId(supabase: any, category: string) {
     return data.id;
 }
 
-async function uploadImageToStorage(supabase: any, file: ArrayBuffer, filename: string, contentType: string) {
+async function uploadImageToStorage(supabase: SupabaseClient, file: ArrayBuffer, filename: string, contentType: string) {
     const { data, error } = await supabase.storage
         .from("menu-items")
         .upload(filename, file, {

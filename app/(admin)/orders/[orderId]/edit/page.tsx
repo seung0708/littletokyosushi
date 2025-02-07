@@ -21,7 +21,7 @@ const OrderPage = ({ params }: { params: { orderId: string } }) => {
   }
 
   fetchOrder()
-}, [])
+}, [orderId])
 
   if (!order) return <AdminLoading />
   

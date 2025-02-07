@@ -1,7 +1,19 @@
 import { NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
-import { Cart } from '@/types/cart';
-import { findMatchingCartItem, createNewCartItemWithModifiers, getModifiersArray, updateExistingCartItem } from '@/utils/cart';
+import { findMatchingCartItem, createNewCartItemWithModifiers,  updateExistingCartItem } from '@/utils/cart';
+import { Database } from "@/types/database.types";
+
+type Cart = Database['public']['Tables']['carts']['Row'] & {
+    cart_items: (Database["public"]["Tables"]["cart_items"]["Row"] & {
+        menu_items: Database["public"]["Tables"]["menu_items"]["Row"];
+        cart_item_modifiers: (Database["public"]["Tables"]["cart_item_modifiers"]["Row"] & {
+          modifiers: Database["public"]["Tables"]["modifiers"]["Row"];
+          cart_item_modifier_options: (Database["public"]["Tables"]["cart_item_modifier_options"]["Row"] & {
+            modifier_options: Database["public"]["Tables"]["modifier_options"]["Row"];
+          })[];
+        })[];
+    })[]; 
+};
 
 export async function GET(request: Request, { params }: { params: { id: string } }) {
     const { id: cartId } = await params;
@@ -33,29 +45,28 @@ export async function GET(request: Request, { params }: { params: { id: string }
     const cart: Cart = {
         id: dbCart?.id,
         customer_id: dbCart?.customer_id,
-        cart_items: dbCart?.cart_items.map((cartItem: any) => ({
-            id: cartItem?.id,
+        cart_items: dbCart?.cart_items.map((cartItem) => ({
+            id: cartItem.id,
             cart_id: dbCart?.id,
-            base_price: cartItem?.base_price,
-            special_instructions: cartItem?.special_instructions,
-            total_price: cartItem?.total_price,
-            quantity: cartItem?.quantity,
-            menu_item_id: cartItem?.menu_items?.id,
-            menu_item_name: cartItem?.menu_items?.name,
-            menu_item_price: cartItem?.menu_items?.price,
-            menu_item_image: cartItem?.menu_items?.image_urls[0],
-            cart_item_modifiers: cartItem?.cart_item_modifiers?.map((cartItemModifier: any) => ({
-                id: cartItemModifier?.id,
-                modifier_id: cartItemModifier?.modifiers?.id,
-                name: cartItemModifier?.modifiers?.name,
-                cart_item_modifier_options: cartItemModifier?.cart_item_modifier_options?.map((cartItemModifierOption: any) => ({
-                    id: cartItemModifierOption?.id,
-                    modifier_id: cartItemModifierOption?.modifier_id,
-                    modifier_option_id: cartItemModifierOption?.modifier_options?.id,
-                    name: cartItemModifierOption?.modifier_options?.name,
-                    price: cartItemModifierOption?.modifier_options?.price,
-                })) || [],
-            })) || [],
+            menu_item_id: cartItem.menu_items.id,
+            base_price: cartItem.base_price,
+            total_price: cartItem.total_price,
+            quantity: cartItem.quantity,
+            special_instructions: cartItem.special_instructions,
+            menu_items: cartItem.menu_items ? {
+                id: cartItem.menu_items.id,
+                name: cartItem.menu_items.name,
+                price: cartItem.menu_items.price,
+                image_urls: cartItem.menu_items.image_urls as string[]
+            } : undefined,
+            cart_item_modifiers: cartItem.cart_item_modifiers?.map((cartItemModifier) => ({
+                id: cartItemModifier.id,
+                cart_items_id: cartItem.id,
+                modifier_id: cartItemModifier.modifier_id,
+                created_at: cartItemModifier.created_at,
+                modifiers: cartItemModifier.modifiers,
+                cart_item_modifier_options: cartItemModifier.cart_item_modifier_options
+            })) || []
         })) || [],
     };
     

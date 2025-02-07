@@ -1,5 +1,4 @@
 import {createClient} from '@/lib/supabase/server';
-import { type BusinessHoursResponse, } from '@/types/businessHours';
 import { addDays, format } from 'date-fns';
 import { NextResponse } from 'next/server';
 

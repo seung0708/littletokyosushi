@@ -2,7 +2,7 @@
 
 import {useState, useEffect} from 'react'
 import Link from 'next/link'
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import { Tabs, TabsContent } from '@/components/ui/tabs'
 import { AddButton } from '@/components/admin/actionbuttons'
 import ItemsTable from '@/components/admin/itemstable';
 import ItemsPagination from '@/components/admin/pagination';

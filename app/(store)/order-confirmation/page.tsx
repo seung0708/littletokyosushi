@@ -1,26 +1,26 @@
 'use client';
-import { useEffect, useState, use } from 'react';
+import { useEffect, useState } from 'react';
 import {useSearchParams} from 'next/navigation'
 import { useCart } from '@/app/context/cartContext';
 import { format } from 'date-fns';
-import {Order, OrderStatus, OrderType} from '@/types/order';
+import {Order, OrderItem, OrderItemModifier, OrderItemModifierOption } from '@/types/order';
 
-interface PageProps {
-  params: {
-    orderId: string;
-  };
-  searchParams: {
-    [key: string]: string | string[] | undefined;
-  };
-}
+// interface PageProps {
+//   params: {
+//     orderId: string;
+//   };
+//   searchParams: {
+//     [key: string]: string | string[] | undefined;
+//   };
+// }
 
-const Page: React.FC<PageProps> = ({params, searchParams: urlSearchParams }) => {
+const Page: React.FC = () => {
   
   const searchParams = useSearchParams();
   const [order, setOrder] = useState<Order | null>(null);
   const [orderId, setOrderId] = useState<string | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+
+  // const [error, setError] = useState<string | null>(null);
   const [paymentVerified, setPaymentVerified] = useState(false);
   const { clearCart } = useCart();
 
@@ -60,7 +60,6 @@ const Page: React.FC<PageProps> = ({params, searchParams: urlSearchParams }) => 
           setPaymentVerified(true);
         } catch (error) {
           console.error('Error verifying payment:', error);
-          setError(error instanceof Error ? error.message : 'Payment verification failed');
         }
       } else {
         console.log('Skipping payment verification due to:', {
@@ -72,7 +71,7 @@ const Page: React.FC<PageProps> = ({params, searchParams: urlSearchParams }) => 
       }
     };
     verifyPayment();
-  },[paymentVerified]);
+  },[searchParams, paymentVerified ,clearCart]);
 
   useEffect(() => {
     const fetchOrder = async () => {
@@ -82,9 +81,6 @@ const Page: React.FC<PageProps> = ({params, searchParams: urlSearchParams }) => 
         setOrder(data.orderData);
       } catch (error) {
         console.error('Error fetching order:', error);
-        setError('Failed to fetch order. Please try again.');
-      } finally {
-        setLoading(false);
       }
     };
     fetchOrder();
@@ -174,23 +170,23 @@ const Page: React.FC<PageProps> = ({params, searchParams: urlSearchParams }) => 
           <h3 className="sr-only">Items</h3>
           
           <div className="divide-y divide-gray-200">
-          {order?.items.map((item: any) => (  
+          {order?.items.map((item: OrderItem) => (  
             <div key={item.id.substring(0, 8)} className="py-6">
               <div className="flex justify-between">
                 <h4 className="font-medium text-gray-900">{item.item_name}<span className="ml-2 text-gray-500">× {item.quantity}</span></h4>
                 <p className="text-gray-900">${(item.quantity * item.price).toFixed(2)}</p>
               </div>
-              {item.order_item_modifiers && item.order_item_modifiers.length > 0 && (
+              {item.modifiers && item.modifiers.length > 0 && (
                 <div className="mt-2 flex flex-wrap gap-x-4 text-sm text-gray-500">
-                  {item.order_item_modifiers.map((modifier: any) => (
-                  <div key={modifier.id.substring(0, 8)} className="">
-                    {modifier.modifier_name}:
-                    {modifier.order_item_modifier_options?.map((option: any, index: number) => (
+                  {item.modifiers.map((modifier: OrderItemModifier) => (
+                  <div key={modifier.id?.substring(0, 8)} className="">
+                    {modifier.name}:
+                    {modifier.options?.map((option: OrderItemModifierOption, index: number) => (
                     <div key={option.id} className="ml-4 mt-1">
                         {index > 0 && '•'}
-                        {option.option_name}
-                        {option.quantity > 1 && ` (${option.quantity})`}
-                        {`+$${(option.option_price).toFixed(2)}`}
+                        {option.name}
+                        {/* {option.quantity > 1 && ` (${option.quantity})`} */}
+                        {`+$${(option.price).toFixed(2)}`}
                     </div>
                   ))}
                   </div>

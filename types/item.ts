@@ -26,6 +26,7 @@ export interface Modifier {
 export interface ModifierOption {
     id: number
     modifier_id: number
+    modifier_option_id: number
     name: string
     price: number
     created_at?: string

@@ -1,5 +1,8 @@
 import {NextResponse} from 'next/server';
 import {createClient} from '@/lib/supabase/server';
+import { Database } from "@/types/database.types";
+
+type OrderUpdate = Partial<Database['public']['Tables']['orders']['Update']>;
 
 export async function GET(req: Request, { params }: { params: { orderId: string } }) {
     const { orderId } = await params;
@@ -36,7 +39,7 @@ export async function PATCH(req: Request, { params }: { params: { orderId: strin
       const body = await req.json();
       const supabase = await createClient();
       const {orderId} = await params;
-      const updateData: any = {};
+      const updateData: OrderUpdate = {};
       
       // Handle status updates first
       if (body.status) {
@@ -54,8 +57,8 @@ export async function PATCH(req: Request, { params }: { params: { orderId: strin
       
       // Handle prep time updates separately
       if (body.prepTime) {
-        updateData.prep_time = body.prepTime;
-        updateData.prep_start_time = new Date().toISOString();
+        updateData.prep_time_minutes = body.prepTime;
+        updateData.prep_time_confirmed_at = new Date().toISOString();
         // Only set status to preparing if it's a prep time update
         if (!body.status) {
           updateData.status = 'preparing';
@@ -72,7 +75,7 @@ export async function PATCH(req: Request, { params }: { params: { orderId: strin
       if (fetchError) throw fetchError;
 
       // Remove generated columns and merge data
-      const { short_id, created_at, ...cleanedOrder } = currentOrder;
+      const { ...cleanedOrder } = currentOrder;
       const mergedData = { 
         ...cleanedOrder,
         ...updateData,

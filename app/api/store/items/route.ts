@@ -1,8 +1,7 @@
 import { createClient } from "@/lib/supabase/server";
 import { NextResponse } from "next/server";
-import { Database } from "@/types/database.types";
 
-export async function GET(request: Request) {
+export async function GET() {
     const supabase = await createClient();
 
     try {
@@ -18,17 +17,17 @@ export async function GET(request: Request) {
             .order('category_id', { ascending: true });
         if (error) throw error;
         
-        // Group items by category
-        const groupedData = data.reduce((acc: Record<string, any[]>, item) => {
-            const categoryId = item.category_id;
-            const categoryName = item.categories?.name || 'Uncategorized';
+        // // Group items by category
+        // const groupedData = data.reduce((acc: Record<string, any[]>, item) => {
+        //     const categoryId = item.category_id;
+        //     const categoryName = item.categories?.name || 'Uncategorized';
             
-            if (!acc[categoryId]) {
-                acc[categoryId] = [];
-            }
-            acc[categoryId].push(item);
-            return acc;
-        }, {});
+        //     if (!acc[categoryId]) {
+        //         acc[categoryId] = [];
+        //     }
+        //     acc[categoryId].push(item);
+        //     return acc;
+        // }, {});
 
         return NextResponse.json(data);
 

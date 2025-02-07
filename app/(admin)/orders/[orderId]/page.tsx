@@ -25,7 +25,9 @@ const OrderPage = ({ params }: { params: { orderId: string } }) => {
         fetchOrder()
     }, [orderId])
 
-    const onRefund = async (values: any) => {
+    if (!order) return <AdminLoading />
+
+    const onRefund = async (values: { amount: number; reason: string }) => {
         try {
             const response = await fetch(`/api/admin/orders/${order?.short_id}/refunds`, {
                 method: 'POST',

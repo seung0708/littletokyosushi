@@ -5,6 +5,16 @@ import {
     sendPrepTimeNotificationEmail,
     sendOrderReadyNotificationEmail
 } from '@/lib/email-smtp';
+import { Database } from "@/types/database.types";
+
+type OrderItem = Database["public"]["Tables"]["order_items"]["Row"] & {
+  order_item_modifiers: (Database["public"]["Tables"]["order_item_modifiers"]["Row"] & {
+    modifiers: Database["public"]["Tables"]["modifiers"]["Row"];
+    order_item_modifier_options: (Database["public"]["Tables"]["order_item_modifier_options"]["Row"] & {
+      modifier_options: Database["public"]["Tables"]["modifier_options"]["Row"];
+    })[];
+  })[];
+};
 
 export async function GET(req: Request, { params }: { params: { orderId: string } }) {
     const { orderId } = await params;
@@ -26,7 +36,6 @@ export async function GET(req: Request, { params }: { params: { orderId: string 
     `)
     .eq('short_id', orderId)
     .single();  // Remove the archived filter to get both types
-    console.log(data);
     const order = {
       id: data?.id,
       short_id: data?.short_id,
@@ -53,20 +62,19 @@ export async function GET(req: Request, { params }: { params: { orderId: string 
       customerCity: data?.customers.city,
       customerState: data?.customers.state, 
       customerZip: data?.customers.postal_code,
-      items: data?.order_items.map((item: any) => ({
+      items: data?.order_items.map((item: OrderItem) => ({
         id: item.id,
         price: item.price, 
         quantity: item.quantity,
         name: item.item_name,
-        description: item.menu_items.description,
-        specialInstructions: item.menu_items.special_instructions,
-        itemModifiers: item.order_item_modifiers.map((modifier: any) => ({
+        specialInstructions: item.special_instructions,
+        itemModifiers: item.order_item_modifiers.map((modifier) => ({
           id: modifier.id,
           name: modifier.modifier_name,
-          options: modifier.order_item_modifier_options.map((option: any) => ({
+          options: modifier.order_item_modifier_options.map((option) => ({
             id: option.id,
-            name: option.modifier_options.name,
-            price: option.modifier_options.price
+            name: option.option_name,  
+            price: option.option_price
           }))
         }))
       }))

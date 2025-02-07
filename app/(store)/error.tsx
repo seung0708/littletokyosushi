@@ -18,7 +18,7 @@ export default function StoreError({
       <div className="p-8 bg-white rounded-lg shadow-md max-w-md w-full text-center">
         <h2 className="text-2xl font-bold text-red-600 mb-4">Oops! Something went wrong</h2>
         <p className="text-gray-600 mb-6">
-          We're sorry, but we encountered an error while processing your request. Please try again or contact support if the problem persists.
+          We&apos;re sorry, but we encountered an error while processing your request. Please try again or contact support if the problem persists.
         </p>
         <div className="flex justify-center space-x-4">
           <button
