@@ -1,4 +1,4 @@
-import { createClient } from "@/lib/supabase/server";
+import { createPublicClient } from "@/lib/supabase/public";
 import { NextResponse } from "next/server";
 import { APIError } from "@/lib/utils/api-error";
 import { Database } from "@/types/database.types";
@@ -10,7 +10,7 @@ type ModifierWithOptions = Database['public']['Tables']['modifiers']['Row'] & {
 
 export async function GET(request: Request, { params }: { params: Promise<{ id: string }> }) {
     const { id } = await params;
-    const supabase = await createClient();
+    const supabase = createPublicClient();
 
     try {
 
