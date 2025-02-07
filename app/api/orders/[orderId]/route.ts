@@ -4,7 +4,7 @@ import { Database } from "@/types/database.types";
 
 type OrderUpdate = Partial<Database['public']['Tables']['orders']['Update']>;
 
-export async function GET(req: Request, { params }: { params: { orderId: string } }) {
+export async function GET(req: Request, { params }: { params: Promise<{ orderId: string }> }) {
     const { orderId } = await params;
     const supabase = await createClient();
     
@@ -21,7 +21,7 @@ export async function GET(req: Request, { params }: { params: { orderId: string 
         }
 
         if (!orderData) {
-            console.error('No order data found for ID:', params.orderId);
+            console.error('No order data found for ID:', orderId);
             return NextResponse.json({ error: 'Order not found' }, { status: 404 });
         }
 
@@ -34,7 +34,7 @@ export async function GET(req: Request, { params }: { params: { orderId: string 
 }
 
 // app/api/orders/[orderId]/route.ts
-export async function PATCH(req: Request, { params }: { params: { orderId: string } }) {
+export async function PATCH(req: Request, { params }: { params: Promise<{ orderId: string }> }) {
     try {
       const body = await req.json();
       const supabase = await createClient();

@@ -15,7 +15,7 @@ type Cart = Database['public']['Tables']['carts']['Row'] & {
     })[]; 
 };
 
-export async function GET(request: Request, { params }: { params: { id: string } }) {
+export async function GET(request: Request, { params }: { params: Promise<{ id: string }> }) {
     const { id: cartId } = await params;
     const supabase = await createClient();
 
@@ -74,7 +74,7 @@ export async function GET(request: Request, { params }: { params: { id: string }
     return NextResponse.json(cart);
 }
 
-export async function PATCH(request: Request,  { params }: { params: { id: string } }) {
+export async function PATCH(request: Request,  { params }: { params: Promise<{ id: string }> }) {
     const {id} = await params;
     const supabase = await createClient();
     try {
@@ -126,7 +126,7 @@ export async function PATCH(request: Request,  { params }: { params: { id: strin
 }
 
 
-export async function DELETE(request: Request, { params }: { params: { id: string } }) {
+export async function DELETE(request: Request, { params }: { params: Promise<{ id: string }> }) {
     const { id } = await params;
     const { itemId } = await request.json();
     const supabase = await createClient();

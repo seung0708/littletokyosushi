@@ -2,7 +2,7 @@ import { createClient } from "@/lib/supabase/server"
 import { NextResponse } from "next/server"
 import {sendRefundNotificationEmail} from '@/lib/email-smtp';
 
-export async function GET(request: Request, { params }: { params: { orderId: string } }) {
+export async function GET(request: Request, { params }: { params: Promise<{ orderId: string }> }) {
     const { orderId } = await params;
     const supabase = await createClient();
 
@@ -19,7 +19,7 @@ export async function GET(request: Request, { params }: { params: { orderId: str
   return NextResponse.json(data);
 }   
 
-export async function POST(request: Request, { params }: { params: { orderId: string } }) {
+export async function POST(request: Request, { params }: { params: Promise<{ orderId: string }> }) {
     const { orderId } = await params;
     try {
         const { amount, reason } = await request.json();

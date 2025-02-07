@@ -16,7 +16,7 @@ type OrderItem = Database["public"]["Tables"]["order_items"]["Row"] & {
   })[];
 };
 
-export async function GET(req: Request, { params }: { params: { orderId: string } }) {
+export async function GET(req: Request, { params }: { params: Promise<{ orderId: string }> }) {
     const { orderId } = await params;
     const supabase = await createClient();
     
@@ -94,7 +94,7 @@ export async function GET(req: Request, { params }: { params: { orderId: string 
 }
 
 // app/api/admin/orders/[orderId]/route.ts
-export async function PATCH(req: Request, { params }: { params: { orderId: string } }) {
+export async function PATCH(req: Request, { params }: { params: Promise<{ orderId: string }> }) {
     const { orderId } = await params;
     const { prepTime, status } = await req.json();
     const supabase = await createClient();
