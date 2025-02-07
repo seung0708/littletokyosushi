@@ -1,5 +1,5 @@
 
-import { Card, CardHeader, CardTitle, CardContent, CardDescription } from '@/components/ui/card';
+import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { DollarSign } from 'lucide-react';
 
 export default function TotalRevenue() {

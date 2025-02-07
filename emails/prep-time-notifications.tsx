@@ -11,10 +11,10 @@ import {
   interface PrepTimeNotificationEmailProps {
     order: {
       short_id: string;
-      prepTime: number;
+      prep_time_minutes: number;
     };
     customer: {
-      name: string;
+      first_name: string;
     };
   }
   
@@ -27,12 +27,12 @@ import {
         <Body style={main}>
           <Container>
             <Heading>Order Status Update</Heading>
-            <Text>Hi {customer.name},</Text>
+            <Text>Hi {customer.first_name},</Text>
             <Text>
               Great news! Your order #{order.short_id} is now being prepared by our kitchen.
             </Text>
             <Text>
-              Estimated preparation time: {order.prepTime} minutes
+              Estimated preparation time: {order.prep_time_minutes} minutes
             </Text>
             <Text>
               We'll notify you when your order is ready for pickup.

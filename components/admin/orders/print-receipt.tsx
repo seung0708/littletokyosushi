@@ -1,6 +1,5 @@
-import { format, parseISO } from 'date-fns';
+import { format } from 'date-fns';
 import { Order, OrderItem, OrderItemModifier, OrderItemModifierOption } from '@/types/order';
-import { Customer } from '@/types/customer';
 import { calculateItemTotal } from '@/utils/item';
 
 interface PrintReceiptProps {

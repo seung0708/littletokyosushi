@@ -1,13 +1,13 @@
 'use client'
 
 import Link from "next/link"
-import { Home, ShoppingCart, SquareMenu, Users, LineChart, Settings } from "lucide-react"
+import { ShoppingCart, SquareMenu } from "lucide-react"
 import { usePathname } from "next/navigation"
 import clsx from "clsx"
 
 export default function Sidebar() {
   const pathname = usePathname()
-  const isMenuExpanded = pathname.startsWith('/items')
+  // const isMenuExpanded = pathname.startsWith('/items')
   const isOrdersExpanded = pathname.startsWith('/orders')
 
   return (

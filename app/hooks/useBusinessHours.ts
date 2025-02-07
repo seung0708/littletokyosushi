@@ -1,7 +1,7 @@
 'use client';
 import {useState, useEffect} from "react";
 import { type BusinessHoursResponse } from "@/types/businessHours";
-import {format, parse, addMinutes, isWithinInterval } from "date-fns";
+import {format, parse, addMinutes } from "date-fns";
 
 export const useBusinessHours = () => {
     const [businessHours, setBusinessHours] = useState<BusinessHoursResponse | null>(null);
@@ -53,7 +53,7 @@ export const useBusinessHours = () => {
         if (!regularHours?.isOpen) return [];
 
         let currentTime = parse(regularHours.pickupStart!.slice(0, 5), 'HH:mm', date);
-        let endTime = parse(regularHours.pickupEnd!.slice(0, 5), 'HH:mm', date);
+        const endTime = parse(regularHours.pickupEnd!.slice(0, 5), 'HH:mm', date);
 
         while (currentTime <= endTime) {
             times.push(format(currentTime, 'h:mm aaa'));

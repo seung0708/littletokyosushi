@@ -1,11 +1,11 @@
 import { Badge } from "@/components/ui/badge";
 import RefundSection from './refund-section';
-import { Order, OrderItem, OrderItemModifier, OrderItemModifierOption, OrderStatus } from '@/types/order';
+import { Order, OrderItemModifier, OrderStatus } from '@/types/order';
 import { calculateItemTotal } from '@/utils/item';
 
 interface OrderDetailsProps {
     order: Order;
-    onRefund: (values: any) => void;
+    onRefund: (values: { amount: number; reason: string }) => void;
 }
 
 const OrderDetails: React.FC<OrderDetailsProps> = ({ order, onRefund }) => {

@@ -6,9 +6,10 @@ import { UseFormReturn } from 'react-hook-form';
 import { CheckoutFormValues } from '@/types/checkout'; 
 import { useState } from 'react';
 import { Order } from '@/types/order';
+import {Customer} from '@/types/customer';
 
 interface Props {
-    customerAddress: any;
+    customerAddress: Customer;
     onSubmit: (data: CheckoutFormValues) => Promise<Order>; 
     form: UseFormReturn<CheckoutFormValues>; 
 }
@@ -17,8 +18,6 @@ const PaymentSection = ({ customerAddress, onSubmit, form }: Props) => {
     const stripe = useStripe();
     const elements = useElements();
     const { user } = useAuth();
-    const [error, setError] = useState<string | null>(null);
-    const [processing, setProcessing] = useState(false);
 
     const handleAddressSubmit = async () => {
         if (!elements) return;
@@ -64,9 +63,6 @@ const PaymentSection = ({ customerAddress, onSubmit, form }: Props) => {
         }
 
         try {
-            setProcessing(true);
-            setError(null);
-
             // Submit the form first to validate all fields
             const { error: submitError } = await elements.submit();
             if (submitError) {
@@ -114,9 +110,6 @@ const PaymentSection = ({ customerAddress, onSubmit, form }: Props) => {
             }
         } catch (error) {
             console.error('Payment error:', error);
-            setError(error instanceof Error ? error.message : 'An error occurred');
-        } finally {
-            setProcessing(false);
         }
     };
     return (

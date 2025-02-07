@@ -2,9 +2,10 @@ import { CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import PrepTimeTimer from "./prep-time-timer";
 import { Button } from "@/components/ui/button";
 import { Copy } from "lucide-react";
-import { format, parseISO } from "date-fns";
+import { format } from "date-fns";
+import { Order } from '@/types/order';
 
-export function OrderHeader({order}: {order: any}) {
+export function OrderHeader({order}: {order: Order}) {
     return (
         <CardHeader className="flex flex-row items-start bg-muted/50">
             <div className="grid gap-0.5">
@@ -12,8 +13,8 @@ export function OrderHeader({order}: {order: any}) {
                 Order {order.short_id}
                 {order.status === 'preparing' && (
                   <PrepTimeTimer 
-                    prepTimeMinutes={order.prepTime} 
-                    startTime={order.prepTimeConfirmedAt} 
+                    prepTimeMinutes={order.prep_time_minutes} 
+                    startTime={order.prep_time_confirmed_at} 
                     status={order.status}
                   />
                 )}
@@ -27,13 +28,13 @@ export function OrderHeader({order}: {order: any}) {
                 </Button>
               </CardTitle> 
               <CardDescription>
-                {order.type === 'pickup' && (
+                {order.order_type === 'pickup' && (
                   <>
-                    {format(new Date(order.pickupDate.split('+')[0]), 'EEE, M/d/yy')}{' '}
-                    {order.pickupTime && (
+                    {format(new Date(order.pickup_date.split('+')[0]), 'EEE, M/d/yy')}{' '}
+                    {order.pickup_time && (
                       <>
                         {(() => {
-                          const [hours, minutes] = order.pickupTime.split(':');
+                          const [hours, minutes] = order.pickup_time.split(':');
                           const date = new Date();
                           date.setHours(parseInt(hours, 10));
                           date.setMinutes(parseInt(minutes, 10));
@@ -43,13 +44,13 @@ export function OrderHeader({order}: {order: any}) {
                     )}
                   </>
                 )}
-                {order.type === 'delivery' && order.deliveryDate && (
-                  format(new Date(order.deliveryDate), 'EEEE, MMMM d, yyyy')
+                {order.order_type === 'delivery' && order.delivery_date && (
+                  format(new Date(order.delivery_date), 'EEEE, MMMM d, yyyy')
                 )}
               </CardDescription>
             </div>
             <div className="ml-auto flex items-center gap-1">
-              {order.type.toUpperCase()}
+              {order.order_type.toUpperCase()}
             </div>
           </CardHeader>
     )

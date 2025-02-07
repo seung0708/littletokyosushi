@@ -5,7 +5,7 @@ const Hero: React.FC = () => {
     return (
         <section className="relative h-[60vh] sm:h-[70vh] lg:h-[80vh] overflow-hidden">
             <div className="absolute inset-0">
-                <img 
+                <Image
                     className="h-full w-full object-cover object-center transform scale-[1.02] motion-safe:animate-subtle-zoom" 
                     src={'/assets/images/hero1.png'}
                     alt="Little Tokyo Sushi hero image"

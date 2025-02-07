@@ -1,7 +1,7 @@
 
 import Image from 'next/image';
 import Link from 'next/link';
-import { MenuItem } from '@/types/item';
+import { MenuItem, Modifier } from '@/types/item';
 
 type MenuItemsProps = {
     categories: { name: string; items: MenuItem[] }[];
@@ -19,9 +19,7 @@ const MenuItems: React.FC<MenuItemsProps> = ({ categories }) => {
                         <div className="flex-grow h-[1px] bg-gradient-to-r from-red-600/50 to-transparent"></div>
                     </div>
                     <div className="grid grid-cols-1 gap-4 sm:gap-6 md:gap-8 sm:grid-cols-2 lg:grid-cols-3">
-                        {category.items.map((item) => {
-                            console.log(item.id)
-                            return (
+                        {category.items.map((item) => ( 
                             <Link 
                                 key={item.id} 
                                 href={`/menu/${item.id}`}
@@ -61,7 +59,7 @@ const MenuItems: React.FC<MenuItemsProps> = ({ categories }) => {
                                     )}
                                     {item.modifiers && item.modifiers.length > 0 && (
                                         <div className="pt-2 flex flex-wrap gap-1.5 sm:gap-2">
-                                            {item.modifiers.map((modifier: any, index: number) => (
+                                            {item.modifiers.map((modifier: Modifier, index: number) => (
                                                 <span 
                                                     key={index} 
                                                     className="inline-flex items-center px-2 sm:px-3 py-0.5 sm:py-1 rounded-full text-[10px] sm:text-xs font-medium 
@@ -74,7 +72,7 @@ const MenuItems: React.FC<MenuItemsProps> = ({ categories }) => {
                                     )}
                                 </div>
                             </Link>
-                        )})}
+                        ))}
                     </div>
                 </div>
             ))}

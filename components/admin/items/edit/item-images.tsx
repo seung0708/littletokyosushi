@@ -1,6 +1,7 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Upload } from "lucide-react"
 import { MenuItem } from "@/types/item"
+import Image from "next/image"
 
 interface ItemImagesProps {
     item: MenuItem
@@ -17,12 +18,12 @@ export function ItemImages({ item }: ItemImagesProps) {
                     <>
                         {/* Main Image */}
                         <div className="mb-4">
-                            <img
+                            <Image
                                 alt={`${item.name} main image`}
                                 className="aspect-square w-full rounded-md object-cover"
-                                height="300"
+                                height={300}
                                 src={`${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/menu-items/${item.image_urls[0]}`}
-                                width="300"
+                                width={300}
                             />
                         </div>
 
@@ -34,7 +35,8 @@ export function ItemImages({ item }: ItemImagesProps) {
                                     type="button"
                                     className="relative group"
                                 >
-                                    <img
+                                    <Image
+
                                         alt={`${item.name} thumbnail ${index + 1}`}
                                         className="aspect-square w-full rounded-md object-cover"
                                         src={`${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/menu-items/${image}`}

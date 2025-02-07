@@ -1,10 +1,12 @@
 import { Resend } from 'resend';
 import OrderConfirmationEmail from '@/emails/order-confirmation';
 import PrepTimeNotificationEmail from '@/emails/prep-time-notifications';
+import { Order } from '@/types/order';
+import { Customer } from '@/types/customer';
 
 const resend = new Resend(process.env.RESEND_API_KEY);
 
-export async function sendOrderConfirmationEmail(order: any, customer: any) {
+export async function sendOrderConfirmationEmail(order: Order, customer: Customer) {
     try {
         const { data, error } = await resend.emails.send({
             from: 'orders@resend.dev',  // Temporary test domain
@@ -28,11 +30,11 @@ export async function sendOrderConfirmationEmail(order: any, customer: any) {
     }
 }
 
-export async function sendPrepTimeNotificationEmail(order: any, customer: any) {
+export async function sendPrepTimeNotificationEmail(order: Order, customer: Customer) {
     try {
         const { data, error } = await resend.emails.send({
             from: 'orders@resend.dev',
-            to: customer.email,
+            to: customer.email as string,
             subject: `Order Update: Your order #${order.short_id} is being prepared`,
             react: PrepTimeNotificationEmail({
                 order,

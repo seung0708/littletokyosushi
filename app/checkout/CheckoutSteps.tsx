@@ -37,9 +37,8 @@ const CheckoutSteps = () => {
     const { cartItems } = useCart()
     const [currentStep, setCurrentStep] = useState<CheckoutStep>(user ? 'delivery-pickup' : 'signin');
     const [clientSecret, setClientSecret] = useState<string>('');
-    const [orderData, setOrderData] = useState<any>(null);
     const [orderTotal, setOrderTotal] = useState<number>(0);
-    const [orderFees, setOrderFees] = useState<any>(null);
+    const [orderFees, setOrderFees] = useState({serviceFee: 0, subTotal: 0});
     const [customerAddress, setCustomerAddress] = useState<CustomerAddress | null>(null);
 
     useEffect(() => {
@@ -181,18 +180,18 @@ const CheckoutSteps = () => {
     }
 };
 
-    const handlePreviousStep = () => {
-        switch (currentStep) {
-            case 'delivery-pickup':
-                setCurrentStep('signin')
-                break;
-            case 'summary':
-                setCurrentStep('delivery-pickup')
-                break;
-            default:
-                break;
-        }
-    }
+    // const handlePreviousStep = () => {
+    //     switch (currentStep) {
+    //         case 'delivery-pickup':
+    //             setCurrentStep('signin')
+    //             break;
+    //         case 'summary':
+    //             setCurrentStep('delivery-pickup')
+    //             break;
+    //         default:
+    //             break;
+    //     }
+    // }
 
     const onSubmit = async (data: CheckoutFormValues) => {
         try {

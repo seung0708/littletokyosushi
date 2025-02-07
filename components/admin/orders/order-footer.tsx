@@ -1,14 +1,11 @@
 'use client';
-
-import { useState } from 'react';
-import { Database } from '@/types/database.types';
 import { Button } from "@/components/ui/button"
 import { CardFooter } from "@/components/ui/card"
 import { Form, FormControl, FormField, FormItem } from "@/components/ui/form"
 import { Input } from "@/components/ui/input"
 import { AnimatePresence, motion } from "framer-motion"
 import ActionButtons from "./action-buttons"
-import { Order, OrderItem, OrderItemModifier, OrderItemModifierOption } from '@/types/order';
+import { Order } from '@/types/order';
 
 
 interface OrderFooterProps {
@@ -17,7 +14,7 @@ interface OrderFooterProps {
     onPrint?: () => void
     isConfirmed?: boolean
     form?: any
-    onSubmit?: (values: any) => void
+    onSubmit?: (values: { prepTime: number }) => void
     onComplete?: () => void
   }
 

@@ -11,6 +11,7 @@ import { useState, useRef, useEffect } from "react";
 import { toast } from "sonner";
 import { Select, SelectItem } from "../ui/select";
 import { SelectContent, SelectTrigger, SelectValue } from "@radix-ui/react-select";
+import Image from "next/image";
 
 type Category = {
     id: number;
@@ -283,7 +284,9 @@ const AddNewItemForm: React.FC = () => {
                     <div className="flex flex-wrap gap-2 mt-4">
                       {imagePreviews.map((preview, index) => (
                         <div key={preview} className="relative group inline-block">
-                          <img 
+                          <Image
+                            height={32} 
+                            width={32}
                             src={preview} 
                             alt={`Preview ${index + 1}`}
                             className="h-32 object-contain rounded-lg"

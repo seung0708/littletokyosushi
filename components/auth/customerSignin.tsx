@@ -37,7 +37,7 @@ export default function CustomerSignin() {
             // Redirect to admin dashboard on successful login    
             router.push("/");
             router.refresh();
-        } catch (error: any) {
+        } catch (error) {
             console.error("Login error:", error);   
             setError(error instanceof Error ? error.message : "Failed to login");
         }   
@@ -47,7 +47,7 @@ export default function CustomerSignin() {
         try {
             await googleSignin();
             // Redirect to admin dashboard on successful login    
-        } catch (error: any) {
+        } catch (error) {
             console.error("Login error:", error);   
             setError(error instanceof Error ? error.message : "Failed to login");
         }   
@@ -95,7 +95,7 @@ export default function CustomerSignin() {
             </form>
             <div className="mt-4">
                 <Link href='/signup' className="text-xs text-blue-500 hover:underline">
-                    Don't have an account?
+                    Don&apos;t have an account?
                 </Link>
                 
                 <Link href='/forgot-password' className="text-xs text-blue-500 hover:underline ml-2">

@@ -38,7 +38,7 @@ export async function printOrder(order: Order) {
   });
 
   try {
-    let isConnected = await printer.isPrinterConnected();
+    const isConnected = await printer.isPrinterConnected();
     if (!isConnected) {
       throw new Error('Printer not connected');
     }

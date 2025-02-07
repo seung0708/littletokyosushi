@@ -46,27 +46,28 @@ export async function GET(request: Request, { params }: { params: { id: string }
         id: dbCart?.id,
         customer_id: dbCart?.customer_id,
         cart_items: dbCart?.cart_items.map((cartItem) => ({
-            id: cartItem.id,
+            id: cartItem?.id,
             cart_id: dbCart?.id,
-            menu_item_id: cartItem.menu_items.id,
-            base_price: cartItem.base_price,
-            total_price: cartItem.total_price,
-            quantity: cartItem.quantity,
-            special_instructions: cartItem.special_instructions,
-            menu_items: cartItem.menu_items ? {
-                id: cartItem.menu_items.id,
-                name: cartItem.menu_items.name,
-                price: cartItem.menu_items.price,
-                image_urls: cartItem.menu_items.image_urls as string[]
-            } : undefined,
-            cart_item_modifiers: cartItem.cart_item_modifiers?.map((cartItemModifier) => ({
-                id: cartItemModifier.id,
-                cart_items_id: cartItem.id,
-                modifier_id: cartItemModifier.modifier_id,
-                created_at: cartItemModifier.created_at,
-                modifiers: cartItemModifier.modifiers,
-                cart_item_modifier_options: cartItemModifier.cart_item_modifier_options
-            })) || []
+            base_price: cartItem?.base_price,
+            special_instructions: cartItem?.special_instructions,
+            total_price: cartItem?.total_price,
+            quantity: cartItem?.quantity,
+            menu_item_id: cartItem?.menu_items?.id,
+            menu_item_name: cartItem?.menu_items?.name,
+            menu_item_price: cartItem?.menu_items?.price,
+            menu_item_image: cartItem?.menu_items?.image_urls[0],
+            cart_item_modifiers: cartItem?.cart_item_modifiers?.map((cartItemModifier) => ({
+                id: cartItemModifier?.id,
+                modifier_id: cartItemModifier?.modifiers?.id,
+                name: cartItemModifier?.modifiers?.name,
+                cart_item_modifier_options: cartItemModifier?.cart_item_modifier_options?.map((cartItemModifierOption) => ({
+                    id: cartItemModifierOption?.id,
+                    modifier_id: cartItemModifierOption?.modifier_id,
+                    modifier_option_id: cartItemModifierOption?.modifier_options?.id,
+                    name: cartItemModifierOption?.modifier_options?.name,
+                    price: cartItemModifierOption?.modifier_options?.price,
+                })) || [],
+            })) || [],
         })) || [],
     };
     
@@ -82,19 +83,15 @@ export async function PATCH(request: Request,  { params }: { params: { id: strin
         if(!cartItems) return NextResponse.json({ message: 'Cart items not found' });
         const newItems = cartItems[cartItems.length - 1]
         
-        const { data: dbCart, error: cartError } = await supabase
+        const { data: dbCart } = await supabase
             .from('carts')
             .select(`id, customer_id, completed_at, 
                 cart_items(id, cart_id, menu_item_id, quantity, base_price, total_price, special_instructions,
                     cart_item_modifiers(id, cart_items_id, modifier_id,
                 cart_item_modifier_options(id, cart_item_modifiers_id, modifier_option_id, modifier_id, modifier_option_price))))`)
             .eq('id', id)
-            .single() as { data: Cart | null, error: any };
-            
-        if (cartError) {
-            return NextResponse.json({ error: 'Failed to fetch cart' }, { status: 500 });
-        }
-
+            .single() as { data: Cart | null };
+             
         if (!dbCart?.customer_id && customerId) {
             await supabase
                 .from('carts')
@@ -152,7 +149,7 @@ export async function DELETE(request: Request, { params }: { params: { id: strin
             );
         }
 
-        const cartItem = dbCart?.cart_items.find((cartItem: any) => cartItem.id === itemId);
+        const cartItem = dbCart?.cart_items.find((cartItem) => cartItem.id === itemId);
 
         if (!cartItem) {
             return NextResponse.json(

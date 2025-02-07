@@ -5,8 +5,8 @@ import { Badge } from "@/components/ui/badge"
 import { motion, AnimatePresence } from "framer-motion"
 
 interface PrepTimeTimerProps {
-  prepTimeMinutes: number
-  startTime: string // ISO string of when prep started
+  prepTimeMinutes: number | undefined
+  startTime: string | undefined
   status: string
 }
 
@@ -24,8 +24,8 @@ export default function PrepTimeTimer({ prepTimeMinutes, startTime, status }: Pr
       return
     }
 
-    const prepStartTime = new Date(startTime).getTime()
-    const prepEndTime = prepStartTime + (prepTimeMinutes * 60 * 1000)
+    const prepStartTime = new Date(startTime!).getTime()
+    const prepEndTime = prepStartTime + (prepTimeMinutes! * 60 * 1000)
     
     const updateTimer = () => {
       const now = new Date().getTime()

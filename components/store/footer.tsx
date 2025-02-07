@@ -1,5 +1,3 @@
-import Image from "next/image";
-import Link from "next/link";
 import Copyright from "./ui/footer/copyright";
 
 export default function Footer() {

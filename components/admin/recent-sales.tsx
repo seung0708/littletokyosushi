@@ -1,5 +1,5 @@
 import { Avatar, AvatarFallback, AvatarImage} from '@radix-ui/react-avatar'
-import { Card, CardHeader, CardTitle, CardContent, CardDescription } from '@/components/ui/card';
+import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 
 
 export default function RecentSales() {

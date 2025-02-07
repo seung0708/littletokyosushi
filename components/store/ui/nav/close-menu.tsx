@@ -4,7 +4,7 @@ interface CloseMenuProps {
     toggleMenu: () => void;   
 }
 
-const CloseMenu: React.FC<CloseMenuProps> = ({toggleMenu}) => {
+const CloseMenu: React.FC<CloseMenuProps> = () => {
     return (
         <>
             <span className="sr-only">Close menu</span>

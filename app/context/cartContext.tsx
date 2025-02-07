@@ -1,9 +1,7 @@
 'use client'
-import React, { createContext, useCallback, useContext, useEffect, useState } from "react";
+import React, { createContext,  useContext, useEffect, useState } from "react";
 import { useAuth } from "./authContext";
-import { CartItem, Cart, CartItemModifier, CartItemModifierOption } from "@/types/cart";
-
-import { useRouter } from "next/navigation";
+import { CartItem, } from "@/types/cart";
 
 interface CartContextType {
     cartItems: CartItem[];
@@ -31,15 +29,12 @@ interface CartProviderProps {
 }
 
 export const CartProvider = ({ children }: CartProviderProps) => {
-    const router = useRouter();
     const { user } = useAuth();
     const userId = user?.id;
     const [cartItems, setCartItems] = useState<CartItem[]>([]);
     const [cartId, setCartId] = useState<string>(""); 
     const [isCartLoading, setIsCartLoading] = useState(false);
     const [cartError, setCartError] = useState<string | null>(null);
-    const [cartSuccess, setCartSuccess] = useState<string | null>(null);
-    const [storageState, setStorageState] = useState('');
 
     useEffect(() => {
         const savedCartId = localStorage.getItem('cartId');
@@ -55,7 +50,7 @@ export const CartProvider = ({ children }: CartProviderProps) => {
         } else {
             setCartItems([]);  // Clear cart items if nothing in storage
         }
-    }, [cartId, userId, storageState]);
+    }, [cartId, userId]);
 
     const clearCart = () => {
         localStorage.removeItem('cartId');
@@ -220,7 +215,6 @@ export const CartProvider = ({ children }: CartProviderProps) => {
             }
             const data = await response.json();
             console.log('createNewCart data', data);
-            setCartSuccess(data.message);
             if(data.status === 200) {
                 setCartId(data.cartId ); 
                 localStorage.setItem('cartId', data.cartId);
@@ -250,7 +244,7 @@ export const CartProvider = ({ children }: CartProviderProps) => {
                 throw new Error(error.error || 'Failed to update existing cart');
             }
             const data = await response.json();
-            setCartSuccess(data.message);
+            
             if(data.status === 200) {
                 setCartId(data.cartId);
                 localStorage.setItem('cartId', data.cartId);
@@ -280,7 +274,7 @@ export const CartProvider = ({ children }: CartProviderProps) => {
         }
         const data = await response.json();
         console.log(data);
-        setCartSuccess(data.message);
+        
         if(data.status === 200) {
             await fetchCart();
         }

@@ -1,6 +1,6 @@
 
 import { Button } from "@/components/ui/button";
-import { File, ListFilter, PlusCircle } from "lucide-react";
+import { File, PlusCircle } from "lucide-react";
 
 interface ExportButtonProps {
   children?: React.ReactNode
@@ -23,7 +23,7 @@ interface AddButtonProps {
   onClick?: () => void;
 }
 
-export const AddButton: React.FC<AddButtonProps> = ({children, onClick}) => {
+export const AddButton: React.FC<AddButtonProps> = ({children }) => {
     return (
       <Button size="sm" className="h-8 gap-1">
         <PlusCircle className="h-3.5 w-3.5" />

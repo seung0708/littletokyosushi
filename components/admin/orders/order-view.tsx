@@ -9,7 +9,7 @@ import { Order } from '@/types/order';
 
 interface OrderViewProps {
     orderId: Order['id'];
-    onRefund: (values: any) => void;
+    onRefund: (values: { amount: number; reason: string }) => void;
 }
 
 const OrderView: React.FC<OrderViewProps> = ({ orderId, onRefund }) => {

@@ -64,16 +64,16 @@ export default function OrdersHistory() {
     )
   }) : []
 
-  const getStatusBadgeVariant = (status: string) => {
-    switch (status) {
-      case 'refunded':
-        return 'destructive'
-      case 'completed':
-        return 'success'
-      default:
-        return 'secondary'
-    }
-  }
+  // const getStatusBadgeVariant = (status: string) => {
+  //   switch (status) {
+  //     case 'refunded':
+  //       return 'destructive'
+  //     case 'completed':
+  //       return 'success'
+  //     default:
+  //       return 'secondary'
+  //   }
+  // }
 
   return (
     <div className="space-y-4 md:pl-64">

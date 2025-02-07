@@ -46,13 +46,14 @@ export default function RecentOrder({order}: {order: Order}) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
 
-      const updatedOrder = await response.json();
+      await response.json();
+
     } catch (error) {
       console.error('Error completing order:', error);
     }
   };
 
-  const onRefund = async (values: any) => {
+  const onRefund = async (values: { amount: number; reason: string }) => {
     try {
       const response = await fetch(`/api/admin/orders/${order.short_id}/refunds`, {
         method: 'POST',
@@ -76,7 +77,7 @@ export default function RecentOrder({order}: {order: Order}) {
 
   const onSubmit = async (values: z.infer<typeof prepTimeSchema>) => {
     try {
-      let response = await fetch(`/api/admin/orders/${order.short_id}`, {
+      const response = await fetch(`/api/admin/orders/${order.short_id}`, {
         method: "PATCH",
         headers: {
           'Content-Type': 'application/json',
@@ -89,7 +90,7 @@ export default function RecentOrder({order}: {order: Order}) {
       }
 
       // Get the updated order data
-      const updatedOrder = await response.json();
+      await response.json();
       
       setIsConfirmed(true);
     } catch (error) {
@@ -113,7 +114,7 @@ export default function RecentOrder({order}: {order: Order}) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
 
-      const updatedOrder = await response.json();
+      await response.json();
       
     } catch (error) {
       console.error('Error marking order as ready:', error);

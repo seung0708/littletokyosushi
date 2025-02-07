@@ -4,7 +4,7 @@ interface HamburgerMenuProps {
     toggleMenu: () => void;   
 }
 
-const HamburgerMenu: React.FC<HamburgerMenuProps> = ({toggleMenu}) => {
+const HamburgerMenu: React.FC<HamburgerMenuProps> = () => {
     return (
         <>
             <span className="sr-only">Open menu</span>

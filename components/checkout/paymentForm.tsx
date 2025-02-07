@@ -1,10 +1,11 @@
 import { useStripe, useElements, PaymentElement } from '@stripe/react-stripe-js';
 import { Button } from '../ui/button';
 import { useState } from 'react';
+import { StripeAddressElementChangeEvent } from '@stripe/stripe-js';
 
 interface Props {
-    onAddressSubmit: () => Promise<any>;
-    onPaymentSubmit: () => Promise<any>;
+    onAddressSubmit: () => Promise<Pick<StripeAddressElementChangeEvent, "value" | "complete" | "isNewAddress"> | null | undefined>;
+    onPaymentSubmit: () => Promise<void>;
 }
 
 const PaymentForm = ({ onAddressSubmit, onPaymentSubmit }: Props) => {

@@ -1,5 +1,4 @@
 'use client';
-import { useAuth } from "../../../../app/context/authContext";
 import Link from "next/link";
 import { ReactNode } from "react";
 

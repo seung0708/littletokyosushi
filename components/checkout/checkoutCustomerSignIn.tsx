@@ -136,7 +136,7 @@ const CheckoutCustomerSignIn: React.FC<CustomerSignInProps> = ({ form, onComplet
                                     Continue with Google
                                 </Button>
                                 <p className="text-sm text-center">
-                                    Don't have an account?{' '}
+                                    Don&apos;t have an account?{' '}
                                     <button
                                         type="button"
                                         onClick={() => setIsSignUp(true)}

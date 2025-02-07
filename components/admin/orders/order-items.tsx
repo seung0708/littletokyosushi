@@ -1,17 +1,19 @@
-export default function OrderItems({order}: {order: any}) {
+import {Order, OrderItem, OrderItemModifier} from '@/types/order';
+
+export default function OrderItems({order}: {order: Order}) {
     return (
        <>
-       {order.items.map((item: any) => (
-              <ul key={order.id.substring(0, 8)} className="grid gap-3">
+       {order.items.map((item: OrderItem) => (
+              <ul key={order?.short_id} className="grid gap-3">
                 <>
                   <li key={item.id.substring(0, 8)}>
                     <div className="flex items-center justify-between">
-                      <h3 className="text-muted-foreground">{item.name} x <span>{item.quantity}</span></h3>
+                      <h3 className="text-muted-foreground">{item.item_name} x <span>{item.quantity}</span></h3>
                       <span>${item.price.toFixed(2)}</span>
                     </div>
                     <div className="flex gap-2 mt-1">
-                      {item.itemModifiers.map((mod: any) => (
-                        <div key={mod.id.substring(0, 8)} className="text-sm">
+                      {item?.modifiers?.map((mod: OrderItemModifier) => (
+                        <div key={mod.id?.substring(0, 8)} className="text-sm">
                           <p className="text-muted-foreground font-medium">{mod.name}:</p>
                         <div className="">
                           {mod.options.map((opt: any) => (

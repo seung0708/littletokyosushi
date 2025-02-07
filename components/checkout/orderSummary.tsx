@@ -13,7 +13,7 @@ interface Props {
 
 
 const OrderSummary = ( {form, orderTotal, orderFees}: Props) => {
-    const {cartId, cartItems} = useCart();
+    const {cartItems} = useCart();
     const deliveryMethod = form.watch('delivery.method');
     const pickupDate = new Date(form.watch('delivery.pickupDate') as string);
     const pickupTime = form.watch('delivery.pickupTime');

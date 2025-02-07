@@ -2,7 +2,7 @@
 import { createContext, useContext, useEffect, useState } from 'react';
 import { User } from '@/types/user';
 import { createClient } from '@/lib/supabase/client';
-import { useRouter, redirect } from 'next/navigation';
+import { redirect } from 'next/navigation';
 
 interface AuthContextType {
     user: User | null; 
@@ -181,7 +181,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
                 },
                 body: JSON.stringify({ newPassword }),
             });
-            const {data: {user}, error} = await response.json();
+            const { error} = await response.json();
             if (!response.ok) {
                 throw new Error(error || 'Failed to update password');
             } 

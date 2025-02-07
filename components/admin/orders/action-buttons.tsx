@@ -1,6 +1,5 @@
 'use client';
 
-import { Database } from '@/types/database.types';
 import { Button } from "@/components/ui/button";
 import { Printer } from "lucide-react";
 import { Order } from '@/types/order';
