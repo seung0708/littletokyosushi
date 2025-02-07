@@ -1,9 +1,9 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Upload } from "lucide-react"
-import { Product } from "@/types/definitions"
+import { MenuItem } from "@/types/item"
 
 interface ItemImagesProps {
-    item: Product
+    item: MenuItem
 }
 
 export function ItemImages({ item }: ItemImagesProps) {

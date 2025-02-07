@@ -3,15 +3,30 @@ import Link from "next/link"
 
 const Hero: React.FC = () => {
     return (
-        <section id="hero" className="relative bg-black text-white">
-            <div aria-hidden='true' className="absolute inset-0 overflow-hidden">
-                <img className="h-full w-full object-cover object-center" src={'/assets/images/hero1.png'}/>
+        <section className="relative h-[60vh] sm:h-[70vh] lg:h-[80vh] overflow-hidden">
+            <div className="absolute inset-0">
+                <img 
+                    className="h-full w-full object-cover object-center transform scale-[1.02] motion-safe:animate-subtle-zoom" 
+                    src={'/assets/images/hero1.png'}
+                    alt="Little Tokyo Sushi hero image"
+                />
             </div>
-            <div className="absolute inset-0 bg-black opacity-50"></div>
-            <div className="relative mx-auto flex max-w-3xl flex-col items-center px-4 py-20 text-center sm:px-6 sm:py-32 md:py-48 lg:px-0">
-                <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl font-bold tracking-tight">LITTLE TOKYO SUSHI</h1>
-                <p className="w-full mt-3 sm:mt-4 text-sm sm:text-md md:text-lg lg:text-xl">The only sushi takeout restaurant serving a variety of sushi and rolls</p>
-                <a href='/menu' className="mt-6 sm:mt-8 inline-block rounded-md bg-red-500 px-6 sm:px-8 py-2.5 sm:py-3 text-sm sm:text-base md:text-lg font-bold hover:bg-red-300 transition-colors">Order Now</a>
+            <div className="absolute inset-0 bg-gradient-to-b from-black/60 to-black/40"></div>
+            <div className="relative h-full flex items-center">
+                <div className="mx-auto max-w-3xl flex flex-col items-center text-center px-4 sm:px-6 lg:px-8">
+                    <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold tracking-tight text-white drop-shadow-lg motion-safe:animate-fade-in">
+                        LITTLE TOKYO SUSHI
+                    </h1>
+                    <p className="mt-4 sm:mt-6 text-lg sm:text-xl md:text-2xl text-white/90 max-w-2xl motion-safe:animate-fade-in-delay">
+                        The only sushi takeout restaurant serving a variety of sushi and rolls
+                    </p>
+                    <a 
+                        href='/menu' 
+                        className="mt-8 sm:mt-10 inline-flex items-center px-8 py-3 text-base sm:text-lg font-semibold text-white bg-red-600 rounded-full hover:bg-red-500 transition-all duration-300 hover:scale-105 motion-safe:animate-fade-in-delay-2"
+                    >
+                        Order Now
+                    </a>
+                </div>
             </div>
             
             <div className="w-full max-w-4xl mx-auto px-4 sm:px-6 pb-6 sm:pb-8">

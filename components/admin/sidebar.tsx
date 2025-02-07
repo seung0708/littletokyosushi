@@ -1,130 +1,140 @@
 'use client'
-// /components/ui/Sidebar.tsx
+
 import Link from "next/link"
 import { Home, ShoppingCart, SquareMenu, Users, LineChart, Settings } from "lucide-react"
-import { Badge } from "@/components/ui/badge"
 import { usePathname } from "next/navigation"
 import clsx from "clsx"
-import { useState } from "react"
 
 export default function Sidebar() {
   const pathname = usePathname()
-
-  // Check if a section should be expanded based on the current path
   const isMenuExpanded = pathname.startsWith('/items')
   const isOrdersExpanded = pathname.startsWith('/orders')
 
   return (
-    <aside className="hidden border-2 w-60 bg-gray-100 p-4 border-r md:flex md:flex-col">
-      <Link href="/dashboard" className="flex items-center gap-3 text-lg font-bold text-gray-800 mb-4">
-        Little Tokyo Sushi
-      </Link>
+    <aside className="fixed left-0 top-0 z-40 h-screen w-64 -translate-x-full border-r border-gray-200 bg-white pt-14 transition-transform md:translate-x-0 md:pt-0">
+      <div className="flex h-full flex-col overflow-y-auto bg-white px-4 py-8">
+        <div className="mb-8">
+          <h2 className="text-lg font-semibold text-gray-800">Admin Panel</h2>
+          {/* <p className="text-sm text-gray-500">Manage your restaurant</p> */}
+        </div>
 
-      <nav className="flex-grow">
-        <ul className="space-y-3">
-          <li>
-            <Link 
-              href="/dashboard" 
-              className={clsx('flex items-center text-gray-700 rounded-lg px-2', 
-              {
-                'bg-gray-400 text-gray-800 p-2' : pathname === '/dashboard'
-              })}
-            >
-              <div className="flex items-center gap-2">
-                <Home className="h-5 w-5" />
-                Dashboard
-              </div>
-            </Link>
-          </li>
-          
-          {/* Orders Section */}
-          <li>
-            <div className="relative">
-              <Link 
-                href="/orders"
-                className={clsx(
-                  'flex items-center text-gray-700 rounded-lg px-2 w-full', 
-                  {
-                    'bg-gray-400 text-gray-800 p-2' : pathname === '/orders'
-                  }
-                )}
-              >
-                <div className="flex items-center justify-between w-full">
-                  <div className="flex items-center gap-2">
-                    <ShoppingCart className="h-5 w-5" />
-                    Orders
-                  </div>
-                </div>
-              </Link>
-              
-              {isOrdersExpanded && (
-                <div className="mt-1 ml-4 space-y-1">
+        <nav className="flex-grow space-y-6">
+          <div>
+            <h3 className="mb-2 text-xs font-semibold uppercase text-gray-500">Orders</h3>
+            <ul className="space-y-1">
+              <li>
+                <div className="relative">
                   <Link 
-                    href="/orders/history"
+                    href="/orders"
                     className={clsx(
-                      'flex items-center text-gray-700 rounded-lg px-4 py-2 w-full',
+                      'flex items-center text-gray-700 rounded-lg px-2 w-full', 
                       {
-                        'bg-gray-200 text-gray-800': pathname === '/orders/history'
+                        'bg-gray-400 text-gray-800 p-2' : pathname === '/orders'
                       }
                     )}
                   >
-                    Order History
+                    <div className="flex items-center justify-between w-full">
+                      <div className="flex items-center gap-2">
+                        <ShoppingCart className="h-5 w-5" />
+                        Orders
+                      </div>
+                    </div>
                   </Link>
+                  
+                  {isOrdersExpanded && (
+                    <div className="mt-1 ml-4 space-y-1">
+                      <Link 
+                        href="/orders/history"
+                        className={clsx(
+                          'flex items-center text-gray-700 rounded-lg px-4 py-2 w-full',
+                          {
+                            'bg-gray-200 text-gray-800': pathname === '/orders/history'
+                          }
+                        )}
+                      >
+                        Order History
+                      </Link>
+                    </div>
+                  )}
                 </div>
-              )}
-            </div>
-          </li>
+              </li>
+            </ul>
+          </div>
 
-          {/* Menu Section */}
-          <li>
-            <div className="relative">
-              <Link 
-                href="/items"
-                className={clsx(
-                  'flex items-center text-gray-700 rounded-lg px-2 w-full', 
-                  {
-                    'bg-gray-400 text-gray-800 p-2' : pathname === '/items'
-                  }
-                )}
-              >
-                <div className="flex items-center justify-between w-full">
-                  <div className="flex items-center gap-2">
-                    <SquareMenu className="h-5 w-5" />
-                    Menu
-                  </div>
-                </div>
-              </Link>
-              
-              {isMenuExpanded && (
-                <div className="mt-1 ml-4 space-y-1">
-                  <Link 
-                    href="/items/modifiers"
-                    className={clsx(
-                      'flex items-center text-gray-700 rounded-lg px-4 py-2 w-full',
-                      {
-                        'bg-gray-200 text-gray-800': pathname === '/items/modifiers'
-                      }
-                    )}
-                  >
-                    Modifiers
-                  </Link>
-                  <Link 
-                    href="/items/categories"
-                    className={clsx(
-                      'flex items-center text-gray-700 rounded-lg px-4 py-2 w-full',
-                      {
-                        'bg-gray-200 text-gray-800': pathname === '/items/categories'
-                      }
-                    )}
-                  >
-                    Categories
-                  </Link>
-                </div>
-              )}
-            </div>
-          </li>
-        </ul>
-      </nav>
+          <div>
+            <h3 className="mb-2 text-xs font-semibold uppercase text-gray-500">Menu</h3>
+            <ul className="space-y-1">
+              <li>
+                <Link 
+                  href="/items" 
+                  className={clsx('flex items-center rounded-lg px-3 py-2 text-sm font-medium transition-colors', 
+                    pathname === '/items' 
+                      ? 'bg-gray-100 text-gray-900' 
+                      : 'text-gray-700 hover:bg-gray-100 hover:text-gray-900'
+                  )}
+                >
+                  <SquareMenu className="mr-3 h-4 w-4" />
+                  <span>Menu Items</span>
+                </Link>
+                
+                {/* {isMenuExpanded && (
+                    <div className="mt-1 ml-4 space-y-1">
+                      <Link 
+                        href="/items/modifiers"
+                        className={clsx(
+                          'flex items-center text-gray-700 rounded-lg px-4 py-2 w-full',
+                          {
+                            'bg-gray-200 text-gray-800': pathname === '/items/modifiers'
+                          }
+                        )}
+                      >
+                        Modifiers
+                      </Link>
+                    </div>
+                  )} */}
+              </li>
+            </ul>
+          </div>
+
+          {/* <div>
+            <h3 className="mb-2 text-xs font-semibold uppercase text-gray-500">Analytics</h3>
+            <ul className="space-y-1">
+              <li>
+                <Link 
+                  href="/analytics" 
+                  className={clsx('flex items-center rounded-lg px-3 py-2 text-sm font-medium transition-colors', 
+                    pathname === '/analytics' 
+                      ? 'bg-gray-100 text-gray-900' 
+                      : 'text-gray-700 hover:bg-gray-100 hover:text-gray-900'
+                  )}
+                >
+                  <LineChart className="mr-3 h-4 w-4" />
+                  <span>Analytics</span>
+                </Link>
+              </li>
+            </ul>
+          </div> */}
+
+          {/* <div>
+            <h3 className="mb-2 text-xs font-semibold uppercase text-gray-500">Settings</h3>
+            <ul className="space-y-1">
+              <li>
+                <Link 
+                  href="/settings" 
+                  className={clsx('flex items-center rounded-lg px-3 py-2 text-sm font-medium transition-colors', 
+                    pathname === '/settings' 
+                      ? 'bg-gray-100 text-gray-900' 
+                      : 'text-gray-700 hover:bg-gray-100 hover:text-gray-900'
+                  )}
+                >
+                  <Settings className="mr-3 h-4 w-4" />
+                  <span>Settings</span>
+                </Link>
+              </li>
+            </ul>
+          </div> */}
+        </nav>
+      </div>
     </aside>
   )
 }

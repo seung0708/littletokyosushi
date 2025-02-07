@@ -1,21 +1,16 @@
 import { createClient } from "@/lib/supabase/server";
 import { NextResponse } from "next/server";
 import { APIError } from "@/lib/utils/api-error";
+import { Database } from "@/types/database.types";
 
-interface ModifierOption {
-    id: string;
-    name: string;
-    price: string;
-}
-
-interface Modifier {
-    id: string;
-    name: string;
-    modifier_options?: ModifierOption[];
-}
+type Modifier = Database['public']['Tables']['modifiers']['Row'];
+type ModifierOption = Database['public']['Tables']['modifier_options']['Row'];
+type ModifierWithOptions = Database['public']['Tables']['modifiers']['Row'] & {
+    modifier_options: Database['public']['Tables']['modifier_options']['Row'][]
+};
 
 export async function GET(request: Request, { params }: { params: { id: string } }) {
-    const { id } = await params;
+    const { id } = params;
     const supabase = await createClient();
 
     try {
@@ -47,13 +42,13 @@ export async function GET(request: Request, { params }: { params: { id: string }
         const formattedItem = {
             ...itemWithModifiers,
             price: parseFloat(itemWithModifiers.price),
-            modifiers: itemWithModifiers.modifiers?.map((modifier: Modifier) => ({
+            modifiers: itemWithModifiers.modifiers?.map((modifier: ModifierWithOptions) => ({
                 ...modifier,
-                modifier_options: modifier.modifier_options?.map((option: ModifierOption) => ({
+                modifier_options: (modifier.modifier_options ?? []).map((option: ModifierOption) => ({
                     ...option,
-                    price: parseFloat(option.price)
+                    price: option.price
                 }))
-            }))
+            })) ?? []
         };
 
         return NextResponse.json(formattedItem);

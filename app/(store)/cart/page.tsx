@@ -5,10 +5,13 @@ import { MinusIcon, PlusIcon, TrashIcon } from "lucide-react";
 import { CartItem, CartItemModifier } from "@/types/cart";
 import {useRouter} from 'next/navigation';
 import { calculateTotalPrice } from '@/utils/item';
+import { useEffect, useState } from 'react';
+import { Loading } from '@/components/ui/loading';
 
 const CartPage: React.FC = () => {
-    const { cartItems, handleCartUpdate, removeItemFromCart} = useCart(); 
+    const { cartItems, handleCartUpdate, removeItemFromCart } = useCart(); 
     const router = useRouter();
+    const [cartLoading, setCartLoading] = useState(false);
 
     const onSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -35,20 +38,10 @@ const CartPage: React.FC = () => {
 
     };
 
+   
+
     return (
         <div className="min-h-screen bg-black text-white">
-            <div className="w-full bg-black pt-28">
-                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                    <div className="text-center">
-                        <h1 className="text-4xl font-bold text-white mb-4">Your Cart</h1>
-                        <div className="w-24 h-1 bg-red-600 mx-auto mb-4"></div>
-                        <p className="text-lg text-gray-300">
-                            Review your selected items
-                        </p>
-                    </div>
-                </div>
-            </div>
-
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
                 {!cartItems || cartItems.length === 0 ? (
                     <div className="text-center py-16">
@@ -83,7 +76,7 @@ const CartPage: React.FC = () => {
                                                         <h3 className="text-xl font-bold">{cartItem.menu_item?.name}</h3>
                                                         {cartItem.cart_item_modifiers?.map((modifier: CartItemModifier) => (
                                                             <div key={modifier.id} className="space-y-1">
-                                                                <h4 className="text-sm font-medium text-gray-300">{modifier.modifier.name}</h4>
+                                                                <h4 className="text-sm font-medium text-gray-300">{modifier?.modifier?.name}</h4>
                                                                 {modifier.cart_item_modifier_options && modifier.cart_item_modifier_options.length > 0 && (
                                                                     <ul className="space-y-1">
                                                                         {modifier.cart_item_modifier_options.map((option: any) => (

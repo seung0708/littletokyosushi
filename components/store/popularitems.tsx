@@ -13,14 +13,7 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { Card, CardContent } from "@/components/ui/card";
 import { apiRequest } from "@/lib/utils/api-fetch";
-import { Database } from '@/types/database.types';
-
-type MenuItem = Database['public']['Tables']['menu_items']['Row'] & {
-    categories: {
-        id: string;
-        name: string;
-    };
-};
+import { MenuItem } from '@/types/item';
 
 const PopularItems: React.FC = () => {
     const [items, setItems] = useState<MenuItem[]>([]);
@@ -70,7 +63,7 @@ const PopularItems: React.FC = () => {
         return () => clearInterval(intervalId);
     }, [api]);
 
-    const popularItems = items.filter(item => popularItemIds.includes(item.id));
+    const popularItems = items.filter(item => popularItemIds.includes(item.id || 0));
     const shuffledItems = [...popularItems].sort(() => Math.random() - 0.5);
 
     if (isLoading) {
@@ -98,8 +91,8 @@ const PopularItems: React.FC = () => {
     }
 
     return (
-        <section aria-labelledby="popular-items" className="bg-black text-white sm:py-32">
-            <div className="px-20 md:flex md:items-center md:justify-between mb-8">
+        <section aria-labelledby="popular-items" className="bg-black text-white py-16">
+            <div className=" text-center px-20 md:flex md:items-center md:justify-between mb-8">
                 <h2 id='favorites-heading' className="text-3xl md:4xl md:text-left tracking-tight">
                     Popular Items
                 </h2>

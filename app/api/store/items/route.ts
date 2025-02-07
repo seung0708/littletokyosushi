@@ -3,14 +3,6 @@ import { NextResponse } from "next/server";
 import { Database } from "@/types/database.types";
 
 export async function GET(request: Request) {
-    const { searchParams } = new URL(request.url);
-    const id = searchParams.get('id');
-    
-    // If an ID is provided, redirect to the [id] route
-    if (id) {
-        return NextResponse.redirect(new URL(`/api/store/items/${id}`, request.url));
-    }
-
     const supabase = await createClient();
 
     try {
@@ -24,7 +16,6 @@ export async function GET(request: Request) {
                 )
             `)
             .order('category_id', { ascending: true });
-            
         if (error) throw error;
         
         // Group items by category
@@ -38,7 +29,7 @@ export async function GET(request: Request) {
             acc[categoryId].push(item);
             return acc;
         }, {});
-        
+
         return NextResponse.json(data);
 
     } catch (error) {

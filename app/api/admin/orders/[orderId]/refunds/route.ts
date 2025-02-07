@@ -51,7 +51,7 @@ export async function POST(request: Request, { params }: { params: { orderId: st
         }
 
         // Calculate total refunded amount
-        const totalRefunded = order.order_refunds?.reduce((sum, refund) => sum + refund.amount, 0) || 0;
+        const totalRefunded = order.order_refunds?.reduce((sum: number, refund: { amount: number; }) => sum + refund.amount, 0) || 0;
         const remainingAmount = order.total - totalRefunded;
 
         if (amount > remainingAmount) {

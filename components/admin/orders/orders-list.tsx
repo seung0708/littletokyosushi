@@ -3,20 +3,17 @@
 import Link from 'next/link'
 
 import { Badge } from "@/components/ui/badge"
-import { Button } from "@/components/ui/button"
-import { ListFilter, File } from "lucide-react"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import {Card, CardContent, CardDescription, CardHeader,CardTitle} from "@/components/ui/card"
-import { DropdownMenu, DropdownMenuCheckboxItem, DropdownMenuContent,   DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
+import { Tabs, TabsContent } from "@/components/ui/tabs"
+import {Card, CardContent, CardHeader,CardTitle} from "@/components/ui/card"
 import { useState, useEffect, useRef } from "react"
 import { format } from 'date-fns'
 import { createClient } from '@/lib/supabase/client'
-
+import { Order } from '@/types/order';
 
 export default function OrdersList() {
   const supabase = createClient()
-  const [orders, setOrders] = useState([])
+  const [orders, setOrders] = useState<Order[]>([])
   const audioRef = useRef<HTMLAudioElement | null>(null);
   
   useEffect(() => {
@@ -175,7 +172,7 @@ export default function OrdersList() {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {orders.map((order: any) => (
+                  {orders.map((order: Order) => (
                     <TableRow key={order.id} className="bg-accent">
                       {/* Each cell becomes a link */}
                       <TableCell>
@@ -187,7 +184,7 @@ export default function OrdersList() {
                             {order.customers.email}
                           </div>
                         </Link>
-                      </TableCell>
+                      </TableCell>  
                       <TableCell className="hidden sm:table-cell">
                         <Link href={`/orders/${order.short_id}/edit`} className="block hover:opacity-80">
                           {order.order_type.toUpperCase()}

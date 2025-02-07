@@ -12,14 +12,14 @@ export default function ItemsTable({ items }: ItemsTableProps) {
     <Table>
       <TableHeader>
         <TableRow>
-          <TableHead className="hidden w-[100px] sm:table-cell">
+          <TableHead className="hidden sm:table-cell">
             <span>Image</span>
           </TableHead>
-          <TableHead>Name</TableHead>
-          <TableHead>Description</TableHead>
-          <TableHead className="hidden md:table-cell">Price</TableHead>
+          <TableHead className="w-[150px]">Name</TableHead>
+          <TableHead className="max-w-[200px]">Description</TableHead>
+          <TableHead className="hidden md:table-cell w-[100px]">Price</TableHead>
           {/* <TableHead className="hidden md:table-cell">Quantity</TableHead> */}
-          <TableHead><span className="sr-only">Actions</span></TableHead>
+          <TableHead className="w-[100px]"><span className="sr-only">Actions</span></TableHead>
         </TableRow>
       </TableHeader>
       <TableBody>

@@ -3,7 +3,6 @@ import { UseFormReturn } from "react-hook-form";
 import { type CheckoutFormValues } from "@/types/checkout";
 import { useCart } from "@/app/context/cartContext"; 
 import {format} from 'date-fns';
-import { useEffect, useMemo } from 'react';
 
 interface Props {
   form: UseFormReturn<CheckoutFormValues>;
@@ -16,7 +15,7 @@ interface Props {
 const OrderSummary = ( {form, orderTotal, orderFees}: Props) => {
     const {cartId, cartItems} = useCart();
     const deliveryMethod = form.watch('delivery.method');
-    const pickupDate = new Date(form.watch('delivery.pickupDate'));
+    const pickupDate = new Date(form.watch('delivery.pickupDate') as string);
     const pickupTime = form.watch('delivery.pickupTime');
     const customer = form.watch('customer');
    
@@ -28,8 +27,8 @@ const OrderSummary = ( {form, orderTotal, orderFees}: Props) => {
             <div key={item?.id?.substring(0, 8)} className="mx-auto max-w-2xl px-4 lg:max-w-none lg:px-0">
               <h2 id="summary-heading" className="text-red-500 text-3xl pb-6">Order summary</h2>
               <div>
-                <h4>{customer?.name}</h4>
-                <p>{customer?.email}</p>
+                <h4>{customer?.guestName}</h4>
+                <p>{customer?.guestEmail || customer?.signinEmail}</p>
                 <p>{deliveryMethod}</p>
                 <p>{format(pickupDate, 'EEE MMM dd yyyy')}</p>
                 <p>{pickupTime}</p>
@@ -37,11 +36,11 @@ const OrderSummary = ( {form, orderTotal, orderFees}: Props) => {
               <ul role="list" className="divide-y divide-white divide-opacity-10 text-sm font-medium">                
                     <li key={item?.id?.substring(0, 8)} className="flex items-start space-x-4 py-6">  
                             <div className="flex-auto space-y-1">
-                                <h3><span>{item?.quantity} x </span>{item?.menu_item_name}</h3>
+                                <h3><span>{item?.quantity} x </span>{item?.menu_item?.name}</h3>
                                 
                                 {item?.cart_item_modifiers?.map(modifier => (
                                     <div key={modifier?.id}>
-                                    <p className="font-bold">{modifier?.name}</p>
+                                    <p className="font-bold">{modifier.modifier?.name}</p>
                                     {modifier?.cart_item_modifier_options?.map(option => (
                                         <>
                                         <p>{option?.name} +<span>${option?.price.toFixed(2)}</span></p>
@@ -54,7 +53,7 @@ const OrderSummary = ( {form, orderTotal, orderFees}: Props) => {
                                 <h3>Special Instructions</h3>
                                 <p>{item.special_instructions}</p>
                             </div>
-                        <p className="flex-none text-base font-medium">${(item?.quantity * item?.menu_item_price).toFixed(2)}</p>
+                        <p className="flex-none text-base font-medium">${(item?.quantity * item?.base_price).toFixed(2)}</p>
                     </li>
                 
               </ul>

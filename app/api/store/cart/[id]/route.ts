@@ -9,7 +9,7 @@ export async function GET(request: Request, { params }: { params: { id: string }
 
     const {data: dbCart, error} = await supabase
     .from('carts')
-    .select(`id, customer_id, completed_at, 
+    .select(`id, customer_id, 
         cart_items(id, base_price, total_price, quantity, special_instructions, menu_items(id, name, price, image_urls), 
         cart_item_modifiers(id, modifiers(id, name), 
             cart_item_modifier_options(id, modifier_id, modifier_options(id, name, price))))`)
@@ -33,7 +33,6 @@ export async function GET(request: Request, { params }: { params: { id: string }
     const cart: Cart = {
         id: dbCart?.id,
         customer_id: dbCart?.customer_id,
-        completed_at: dbCart?.completed_at,
         cart_items: dbCart?.cart_items.map((cartItem: any) => ({
             id: cartItem?.id,
             cart_id: dbCart?.id,

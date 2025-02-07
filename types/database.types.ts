@@ -275,7 +275,7 @@ export interface Database {
           id?: number
         }
       }
-      modifiers_options: {
+      modifier_options: {
         Row: {
           id?: number
           modifier_id: number

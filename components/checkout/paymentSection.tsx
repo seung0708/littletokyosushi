@@ -5,11 +5,11 @@ import PaymentForm from './paymentForm';
 import { UseFormReturn } from 'react-hook-form';
 import { CheckoutFormValues } from '@/types/checkout'; 
 import { useState } from 'react';
-
+import { Order } from '@/types/order';
 
 interface Props {
     customerAddress: any;
-    onSubmit: (data: CheckoutFormValues) => Promise<void>; 
+    onSubmit: (data: CheckoutFormValues) => Promise<Order>; 
     form: UseFormReturn<CheckoutFormValues>; 
 }
 
@@ -75,7 +75,7 @@ const PaymentSection = ({ customerAddress, onSubmit, form }: Props) => {
             }
 
             
-            const order = await onSubmit(form.getValues());
+            const order: Order = await onSubmit(form.getValues());
 
              // Wait for order data to be available
             if (!order?.short_id || !order?.total) {

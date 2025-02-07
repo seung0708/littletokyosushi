@@ -11,7 +11,7 @@ type ItemRowProps = {
 const ItemRow: React.FC<ItemRowProps> = ({item}) => {
   return (
     <TableRow>
-        <TableCell className="hidden table-cell w-48 h-48">
+        <TableCell className="hidden sm:table-cell w-48 h-48">
           <div className="w-full h-full">
             <Image
               alt="item image"
@@ -23,7 +23,7 @@ const ItemRow: React.FC<ItemRowProps> = ({item}) => {
           </div>
         </TableCell>
         <TableCell className="font-medium">{item.name}</TableCell>
-        <TableCell className="font-medium ">{item.description}</TableCell>
+        <TableCell className="font-medium max-w-[200px] truncate">{item.description}</TableCell>
         <TableCell className="hidden md:table-cell">{item.price.toFixed(2)}</TableCell>
         {/* <TableCell className="hidden md:table-cell">{item?.quantity_in_stock}</TableCell> */}
         <TableCell>

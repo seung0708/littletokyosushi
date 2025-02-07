@@ -6,28 +6,19 @@ export async function middleware(request: NextRequest) {
   const hostname = request.headers.get('host')
   const path = request.nextUrl.pathname
   const response = NextResponse.next()
-  console.log('Middleware for: ', hostname, path);
-  console.log('Before supabase client');
+
   try {
     const supabase = await createClient()
-    console.log('After supabase client');
-    console.log('Final response:', response.status, response.headers.get('location'));
 
     // Only apply admin auth protection to admin subdomain
     if (hostname?.startsWith('admin.')) {
-      console.log('Admin subdomain detected');
-      
+
       // Check authentication first for root path
       if (path === '/') {
-        console.log('Root path detected, checking auth');
         const { data: { user } } = await supabase.auth.getUser()
-        console.log('Root path auth check:', user ? 'Authenticated' : 'Not authenticated');
-        
         if (user) {
-          console.log('User authenticated, redirecting to dashboard');
-          return NextResponse.redirect(new URL('/dashboard', request.url))
+          return NextResponse.redirect(new URL('/orders', request.url))
         } else {
-          console.log('User not authenticated, redirecting to signin');
           return NextResponse.redirect(new URL('/signin', request.url))
         }
       }
@@ -39,10 +30,8 @@ export async function middleware(request: NextRequest) {
       }
       // Check authentication for protected routes
       const { data: { user } } = await supabase.auth.getUser()
-      console.log('Auth check - User:', user ? 'Authenticated' : 'Not authenticated');
       
       if (!user) {
-        console.log('No user found, redirecting to signin');
         return NextResponse.redirect(new URL('/signin', request.url))
       }
 
@@ -75,11 +64,8 @@ export async function middleware(request: NextRequest) {
       );
 
       if (roleError || !hasAdminRole) {
-        console.log('User is not admin, redirecting to login');
         return NextResponse.redirect(new URL('/signin', request.url))
       }
-
-      //console.log('Admin access granted');
     }
 
     if (!hostname?.startsWith('admin.') && path === '/signin') {

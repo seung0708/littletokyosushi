@@ -22,6 +22,7 @@ interface AddButtonProps {
   children?: React.ReactNode;
   onClick?: () => void;
 }
+
 export const AddButton: React.FC<AddButtonProps> = ({children, onClick}) => {
     return (
       <Button size="sm" className="h-8 gap-1">

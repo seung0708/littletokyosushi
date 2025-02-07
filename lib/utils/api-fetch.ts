@@ -17,7 +17,7 @@ export async function fetchWithTimeout(
     ...fetchOptions
   } = options;
 
-  let lastError: Error;
+  let lastError: Error | undefined;
   
   for (let attempt = 0; attempt < retries; attempt++) {
     try {
@@ -51,8 +51,9 @@ export async function fetchWithTimeout(
       await new Promise(resolve => setTimeout(resolve, retryDelay));
     }
   }
+  if (lastError) throw lastError;
 
-  throw lastError;
+  throw new Error("Unexpected error in fetchWithTimeout"); 
 }
 
 export async function apiRequest<T>(

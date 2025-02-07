@@ -31,11 +31,11 @@ const OrderDetails: React.FC<OrderDetailsProps> = ({ order, onRefund }) => {
                 <div className="grid grid-cols-2 gap-4">
                     <div>
                         <p className="text-sm font-medium text-gray-500">Name</p>
-                        <p className="mt-1">{order.customer.first_name + ' ' + order.customer.last_name || 'Guest'}</p>
+                        <p className="mt-1">{order.customers.first_name + ' ' + order.customers.last_name || 'Guest'}</p>
                     </div>
                     <div>
                         <p className="text-sm font-medium text-gray-500">Phone</p>
-                        <p className="mt-1">{order.customer.phone || 'N/A'}</p>
+                        <p className="mt-1">{order.customers.phone || 'N/A'}</p>
                     </div>
                 </div>
             </div>

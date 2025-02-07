@@ -2,13 +2,14 @@
 
 import {useState, useEffect} from 'react'
 import Link from 'next/link'
-import { Tabs, TabsContent} from '@/components/ui/tabs'
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { AddButton } from '@/components/admin/actionbuttons'
 import ItemsTable from '@/components/admin/itemstable';
 import ItemsPagination from '@/components/admin/pagination';
 import SearchBar from '@/components/admin/searchbar';
 import { MenuItem } from '@/types/item';
 import { useSearchParams } from 'next/navigation';
+import { Loading } from '@/components/ui/loading'
 
 export default function ItemsPage() {
   const searchParams = useSearchParams();
@@ -46,7 +47,11 @@ export default function ItemsPage() {
   }, [searchParams]); // Only depend on searchParams
 
   if (loading) {
-    return <div>Loading...</div>;
+    return (
+      <div className="flex justify-center items-center h-[calc(100vh-4rem)]">
+        <Loading variant="admin" size="lg" />
+      </div>
+    )
   }
 
   if (error) {
@@ -54,7 +59,7 @@ export default function ItemsPage() {
   }
 
   return (
-    <section className='grid flex-1 items-start gap-4 p-4 sm:px-6 sm:py-0 md:gap-8'>
+    <section className='grid md:pl-64 flex-1 items-start gap-4 p-4 sm:px-6 sm:py-0 md:gap-8'>
       <Tabs defaultValue="all">
         <div className='flex items-center justify-end gap-4'>
           <SearchBar />

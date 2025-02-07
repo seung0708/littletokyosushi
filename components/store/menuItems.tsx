@@ -1,8 +1,7 @@
-import { Database } from '@/types/database.types';
+
 import Image from 'next/image';
 import Link from 'next/link';
-
-type MenuItem = Database['public']['Tables']['menu_items']['Row'];
+import { MenuItem } from '@/types/item';
 
 type MenuItemsProps = {
     categories: { name: string; items: MenuItem[] }[];
@@ -20,7 +19,9 @@ const MenuItems: React.FC<MenuItemsProps> = ({ categories }) => {
                         <div className="flex-grow h-[1px] bg-gradient-to-r from-red-600/50 to-transparent"></div>
                     </div>
                     <div className="grid grid-cols-1 gap-4 sm:gap-6 md:gap-8 sm:grid-cols-2 lg:grid-cols-3">
-                        {category.items.map((item) => (
+                        {category.items.map((item) => {
+                            console.log(item.id)
+                            return (
                             <Link 
                                 key={item.id} 
                                 href={`/menu/${item.id}`}
@@ -73,7 +74,7 @@ const MenuItems: React.FC<MenuItemsProps> = ({ categories }) => {
                                     )}
                                 </div>
                             </Link>
-                        ))}
+                        )})}
                     </div>
                 </div>
             ))}

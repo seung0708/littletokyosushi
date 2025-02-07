@@ -15,7 +15,7 @@ const MobileNav: React.FC<MobileNavProps> = ({toggleMenu, isOpen}) => {
                     animate={{ opacity: 1, y: 0 }}
                     exit={{ opacity: 0, y: -20 }}
                     transition={{ duration: 0.2 }}
-                    className="fixed inset-x-0 top-[52px] sm:top-[60px] z-40 bg-black/95 backdrop-blur-sm text-white border-t border-white/10" 
+                    className="fixed inset-x-0 top-[52px] sm:top-[60px] z-40 bg-black/95 text-white border-t border-white/10" 
                     role="dialog" 
                     aria-modal="true"
                 >

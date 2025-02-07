@@ -1,51 +1,66 @@
-'use client'
-import {DropdownMenu, DropdownMenuContent, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger, DropdownMenuItem} from "@/components/ui/dropdown-menu"
-import { User } from "lucide-react"
-import { Button } from "@/components/ui/button"
-import { useRouter } from "next/navigation"
-import { useEffect, useState } from "react"
+'use client';
 
+import { createClient } from "@/lib/supabase/client";
+import { useRouter } from "next/navigation";
+import { Button } from "@/components/ui/button";
+import { User } from "lucide-react";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 export default function DropDownMenuComponent() {
-    const [isLoggedOut, setIsLoggedOut] = useState(false)
-    const router = useRouter()
+  const router = useRouter();
+  const supabase = createClient();
 
-    useEffect(() => {
-      if (isLoggedOut) router.push('/login')
-    }, [isLoggedOut])
-    
-    const handleSignout = async() => {
-      const response = await fetch('http://admin.localhost:3000/api/auth/signout', {
-        method: 'POST', 
-        credentials: 'include'
-      })
-
-      const responseData = await response.json(); 
-      console.log(responseData)
-      if(responseData) {
-        setIsLoggedOut(true)
-      }
+  const handleSignout = async () => {
+    try {
+      const { error } = await supabase.auth.signOut();
+      if (error) throw error;
+      router.push('/signin');
+    } catch (error) {
+      console.error('Error signing out:', error);
     }
+  };
 
-
-    return (
-        <DropdownMenu>
-      <DropdownMenuTrigger asChild>
-        <Button
-          variant="outline"
-          size="icon"
-          className="overflow-hidden rounded-full"
+  return (
+    <div className="relative">
+      <DropdownMenu>
+        <DropdownMenuTrigger asChild>
+          <Button
+            variant="ghost"
+            size="icon"
+            className="h-9 w-9 rounded-full border border-gray-200 hover:bg-gray-100 transition-colors"
+          >
+            <User className="h-5 w-5" />
+            <span className="sr-only">Open user menu</span>
+          </Button>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent 
+          align="end" 
+          className="w-56 mr-2"
+          sideOffset={8}
+          alignOffset={-5}
         >
-        <User />
-        </Button>
-      </DropdownMenuTrigger>
-      <DropdownMenuContent align="end">
-        <DropdownMenuLabel>My Account</DropdownMenuLabel>
-        <DropdownMenuSeparator />
-        <DropdownMenuItem>
-          <Button onClick={handleSignout}>Logout</Button>
-        </DropdownMenuItem>
-      </DropdownMenuContent>
-    </DropdownMenu>
-    )
+          <DropdownMenuLabel className="font-normal">
+            <div className="flex flex-col space-y-1">
+              <p className="text-sm font-medium leading-none">Admin</p>
+              <p className="text-xs leading-none text-gray-500">admin@littletokyosushi.com</p>
+            </div>
+          </DropdownMenuLabel>
+          <DropdownMenuSeparator />
+          <DropdownMenuItem
+            onClick={handleSignout}
+            className="text-red-600 hover:text-red-700 hover:bg-red-50 cursor-pointer"
+          >
+            Sign out
+          </DropdownMenuItem>
+        </DropdownMenuContent>
+      </DropdownMenu>
+    </div>
+  );
 }

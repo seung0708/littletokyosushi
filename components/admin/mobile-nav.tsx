@@ -1,59 +1,103 @@
+'use client';
 
+import { useState } from 'react';
+import { Menu, X } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import Link from 'next/link';
+import { usePathname } from 'next/navigation';
+import { cn } from '@/utils/utils';
 
-import Link from "next/link";
-
-import { Button } from "@/components/ui/button"
-import { PanelLeft, ShoppingCart, Home, Package, Users2, User, LineChart} from "lucide-react"
-import { Sheet, SheetTrigger, SheetContent } from "@/components/ui/sheet"
 export default function MobileNav() {
+    const [isOpen, setIsOpen] = useState(false);
+    const pathname = usePathname();
+
+    const toggleMenu = () => {
+        setIsOpen(!isOpen);
+        // Prevent body scroll when menu is open
+        document.body.style.overflow = !isOpen ? 'hidden' : 'auto';
+    };
+
+    const closeMenu = () => {
+        setIsOpen(false);
+        document.body.style.overflow = 'auto';
+    };
+
+    const navItems = [
+        { href: '/orders', label: 'Orders' },
+        { href: '/items', label: 'Menu Items' },
+        { href: '/analytics', label: 'Analytics' },
+        { href: '/settings', label: 'Settings' },
+    ];
+
     return (
-        <Sheet>
-        <SheetTrigger asChild>
-          <Button size="icon" variant="outline" className="inline border-none md:hidden">
-            <PanelLeft className="h-5 w-5" />
-            <span className="sr-only">Toggle Menu</span>
-          </Button>
-        </SheetTrigger>
-        <SheetContent side="left" className="sm:max-w-xs">
-          <nav className="grid gap-6 text-lg font-medium">
-            <Link
-              href="/"
-              className="flex items-center gap-4 px-2.5 text-muted-foreground hover:text-foreground"
+        <>
+            <Button
+                variant="ghost"
+                size="icon"
+                className="md:hidden"
+                onClick={toggleMenu}
+                aria-label={isOpen ? 'Close menu' : 'Open menu'}
+                aria-expanded={isOpen}
             >
-              <Home className="h-5 w-5" />
-              Dashboard
-            </Link>
-            <Link
-              href="/orders"
-              className="flex items-center gap-4 px-2.5 text-muted-foreground hover:text-foreground"
+                {isOpen ? (
+                    <X className="h-5 w-5" />
+                ) : (
+                    <Menu className="h-5 w-5" />
+                )}
+            </Button>
+
+            {/* Mobile menu overlay */}
+            {isOpen && (
+                <div 
+                    className="fixed inset-0 bg-black/50 backdrop-blur-sm z-40 md:hidden"
+                    onClick={closeMenu}
+                    aria-hidden="true"
+                />
+            )}
+
+            {/* Mobile menu panel */}
+            <div
+                className={cn(
+                    'fixed top-0 left-0 bottom-0 w-full max-w-xs bg-white shadow-lg z-50 transform transition-transform duration-300 ease-in-out md:hidden',
+                    isOpen ? 'translate-x-0' : '-translate-x-full'
+                )}
             >
-              <ShoppingCart className="h-5 w-5" />
-              Orders
-            </Link>
-            <Link
-              href="/products"
-              className="flex items-center gap-4 px-2.5 text-foreground"
-            >
-              <Package className="h-5 w-5" />
-              Products
-            </Link>
-            <Link
-              href="/customers"
-              className="flex items-center gap-4 px-2.5 text-muted-foreground hover:text-foreground"
-            >
-              <Users2 className="h-5 w-5" />
-              Customers
-            </Link>
-            <Link
-              href="/settings"
-              className="flex items-center gap-4 px-2.5 text-muted-foreground hover:text-foreground"
-            >
-              <LineChart className="h-5 w-5" />
-              Settings
-            </Link>
-          </nav>
-        </SheetContent>
-      </Sheet>
-      
-    )
+                <nav className="h-full overflow-y-auto">
+                    <div className="flex flex-col p-4">
+                        <div className="mb-4">
+                            <h2 className="text-lg font-semibold text-gray-900">Menu</h2>
+                            <p className="text-sm text-gray-500">Navigate the admin panel</p>
+                        </div>
+
+                        <ul className="space-y-3">
+                            {navItems.map((item) => (
+                                <li key={item.href}>
+                                    <Link
+                                        href={item.href}
+                                        onClick={closeMenu}
+                                        className={cn(
+                                            'block px-4 py-2 text-sm rounded-lg transition-colors',
+                                            pathname === item.href
+                                                ? 'bg-gray-100 text-gray-900 font-medium'
+                                                : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
+                                        )}
+                                    >
+                                        {item.label}
+                                    </Link>
+                                </li>
+                            ))}
+                        </ul>
+
+                        <div className="mt-auto pt-6 border-t">
+                            <div className="px-4 py-3 bg-gray-50 rounded-lg">
+                                <p className="text-sm text-gray-600">
+                                    Need help? Check our documentation
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </nav>
+            </div>
+        </>
+    );
 }

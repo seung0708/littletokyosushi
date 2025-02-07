@@ -1,12 +1,13 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { createClient } from '@/lib/supabase/client';
 import MenuItems from "@/components/store/menuItems";
+import { Loading } from '@/components/ui/loading';
 import { apiRequest } from "@/lib/utils/api-fetch";
 import { APIError } from "@/lib/utils/api-error";
-import { Database } from '@/types/database.types';
 
-type MenuItem = Database['public']['Tables']['menu_items']['Row'];
+import { MenuItem, Category } from '@/types/item';
 
 const MenuPage: React.FC = () => {
     const [items, setItems] = useState<MenuItem[]>([]);
@@ -32,18 +33,18 @@ const MenuPage: React.FC = () => {
         };
         fetchData();
     }, []);
-
+    
     if (isLoading) {
         return (
-            <div className="flex justify-center items-center min-h-[200px] py-12">
-                <div className="text-center">Loading menu items...</div>
+            <div className="bg-black flex justify-center items-center min-h-screen py-12">
+                <Loading variant="store" size="lg" />
             </div>
         );
     }
 
     if (error) {
         return (
-            <div className="flex justify-center items-center min-h-[200px] py-12">
+            <div className="flex justify-center items-center min-h-screen py-12">
                 <div className="text-center text-red-500">
                     {error}
                 </div>
@@ -65,6 +66,7 @@ const MenuPage: React.FC = () => {
         }
         category.items.push(item);
         return acc;
+        
     }, []);
 
     return (

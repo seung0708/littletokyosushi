@@ -8,7 +8,8 @@ const WINDOW_MS = 15 * 60 * 1000; // 15 minutes
 const MAX_REQUESTS = 100; // limit each IP to 100 requests per windowMs
 
 export function rateLimiter(request: NextRequest) {
-  const ip = request.ip ?? '127.0.0.1';
+  const forwardedFor = request.headers.get('x-forwarded-for');
+  const ip = forwardedFor ? forwardedFor.split(',')[0] : '127.0.0.1'; 
   const now = Date.now();
   const windowStart = now - WINDOW_MS;
 

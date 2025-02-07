@@ -10,23 +10,8 @@ import { Button } from "@/components/ui/button"
 import { createClient } from '@/lib/supabase/client'
 import { Input } from "@/components/ui/input"
 import { Search } from "lucide-react"
-import { Database } from '@/types/database.types';
-
-type Order = Database['public']['Tables']['orders']['Row'] & {
-    customer: Database['public']['Tables']['customers']['Row'];
-    order_items: Array<
-        Database['public']['Tables']['order_items']['Row'] & {
-            menu_item: Database['public']['Tables']['items']['Row'];
-            order_item_modifiers: Array<
-                Database['public']['Tables']['order_item_modifiers']['Row'] & {
-                    order_item_modifier_options: Array<
-                        Database['public']['Tables']['order_item_modifier_options']['Row']
-                    >;
-                }
-            >;
-        }
-    >;
-};
+import { Order } from '@/types/order';
+import { Loading } from '@/components/ui/loading';
 
 export default function OrdersHistory() {
   const [orders, setOrders] = useState<Order[]>([]) 
@@ -72,9 +57,10 @@ export default function OrdersHistory() {
   const filteredOrders = Array.isArray(orders) ? orders.filter(order => {
     const searchLower = searchQuery.toLowerCase()
     return (
-      order.id.toLowerCase().includes(searchLower) ||
-      (order.customer?.name || '').toLowerCase().includes(searchLower) ||
-      order.status.toLowerCase().includes(searchLower)
+      order?.id?.toLowerCase().includes(searchLower) ||
+      (order?.customers?.first_name || '').toLowerCase().includes(searchLower) ||
+      (order?.customers?.last_name || '').toLowerCase().includes(searchLower) ||
+      order?.status?.toLowerCase().includes(searchLower)
     )
   }) : []
 
@@ -90,7 +76,7 @@ export default function OrdersHistory() {
   }
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-4 md:pl-64">
       <div className="flex justify-between items-center">
         <h2 className="text-2xl font-bold">Order History</h2>
         <div className="relative w-64">
@@ -106,19 +92,19 @@ export default function OrdersHistory() {
 
       {loading ? (
         <div className="flex justify-center items-center h-32">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900"></div>
+          <Loading variant="admin" size="md" />
         </div>
       ) : (
-        <div className="rounded-md border">
+        <div className="rounded-md border overflow-x-auto">
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>Order ID</TableHead>
-                <TableHead>Customer</TableHead>
-                <TableHead>Status</TableHead>
-                <TableHead>Total</TableHead>
-                <TableHead>Created</TableHead>
-                <TableHead>Actions</TableHead>
+                <TableHead className="w-[100px]">Order ID</TableHead>
+                <TableHead className="min-w-[150px]">Customer</TableHead>
+                <TableHead className="w-[100px]">Status</TableHead>
+                <TableHead className="w-[100px]">Total</TableHead>
+                <TableHead className="min-w-[150px]">Created</TableHead>
+                <TableHead className="w-[100px]">Actions</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -131,28 +117,28 @@ export default function OrdersHistory() {
               ) : (
                 filteredOrders.map((order) => (
                   <TableRow key={order.short_id}>
-                    <TableCell className="font-medium">{order.short_id.toUpperCase()}</TableCell>
-                    <TableCell>
-                      {order.customers.first_name + ' ' + order.customers.last_name || 'Anonymous'}
+                    <TableCell className="font-medium whitespace-nowrap">{order?.short_id?.toUpperCase()}</TableCell>
+                    <TableCell className="whitespace-nowrap">
+                      {order?.customers?.first_name + ' ' + order?.customers?.last_name || 'Anonymous'}
                     </TableCell>
                     <TableCell>
                       <Badge 
                         variant={
-                          order.status === 'completed' ? 'default' :
-                          order.status === 'pending' ? 'secondary' :
-                          order.status === 'processing' ? 'destructive' :
+                          order?.status === 'completed' ? 'default' :
+                          order?.status === 'pending' ? 'secondary' :
+                          order?.status === 'processing' ? 'destructive' :
                           'outline'
                         }
                       >
-                        {order.status}
+                        {order?.status}
                       </Badge>
                     </TableCell>
-                    <TableCell>${order.total.toFixed(2)}</TableCell>
-                    <TableCell>
+                    <TableCell className="whitespace-nowrap">${order.total.toFixed(2)}</TableCell>
+                    <TableCell className="whitespace-nowrap">
                       {order.created_at && formatDistanceToNow(new Date(order.created_at), { addSuffix: true })}
                     </TableCell>
                     <TableCell>
-                      <Link  href={`/orders/${order.id}`}>
+                      <Link href={`/orders/${order.id}`}>
                         <Button variant="outline" size="sm">
                           View Details
                         </Button>

@@ -1,20 +1,20 @@
 'use client'
 import {useEffect, useState, use} from 'react';
-import { Item, Modifier } from '@/types/definitions';
 import { CartItem, CartItemModifier, CartItemModifierOption } from '@/types/cart';
+import { MenuItem, Modifier, ModifierOption } from '@/types/item';
 import Image from 'next/image';
 import { useForm } from 'react-hook-form';
-import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
-import { Separator } from '@/components/ui/separator';
 import { MinusIcon, PlusIcon } from "lucide-react";
 import { useCart } from '@/app/context/cartContext';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
+import { Loading } from '@/components/ui/loading';
 
 interface FormModifier {
     id: number;
@@ -55,12 +55,13 @@ const formSchema = z.object({
 
 type FormData = z.infer<typeof formSchema>;
 
-export default function ItemDetailsPage({ params }: { params: Promise<{ id: string }> }) {
-    const {id} = use(params);
-    const [item, setItem] = useState<Item | null>(null);
+export default function ItemDetailsPage({ params }: { params: { id: string } }) {
+    
+    const [item, setItem] = useState<MenuItem | null>(null);
     const [loading, setLoading] = useState(true);
     const [loadingImage, setLoadingImage] = useState(true);
     const [selectedImage, setSelectedImage] = useState(0);
+    const [error, setError] = useState<string | null>(null);
     const { handleCartUpdate } = useCart();
 
     const form = useForm<z.infer<typeof formSchema>>({
@@ -79,17 +80,17 @@ export default function ItemDetailsPage({ params }: { params: Promise<{ id: stri
         
         if (modifierIndex === -1) return;
         
-        const modifier = modifiers[modifierIndex];
+        const modifier = modifiers?.[modifierIndex];
         const currentOptions = currentModifiers[modifierIndex].modifier_options || [];
         
         let newOptions;
-        if (modifier.max_selections === 1) {
+        if (modifier?.max_selections === 1) {
             // Radio button behavior
             newOptions = isSelected ? [option] : [];
         } else {
             // Checkbox behavior
             if (isSelected) {
-                if (currentOptions.length < modifier.max_selections) {
+                if (currentOptions.length < (modifier?.max_selections || 1)) {
                     newOptions = [...currentOptions, option];
                 } else {
                     return; // Max selections reached
@@ -120,15 +121,20 @@ export default function ItemDetailsPage({ params }: { params: Promise<{ id: stri
 
     useEffect(() => {
         if (item?.modifiers) {
-            form.setValue('modifiers', item?.modifiers.map(mod => ({
-                ...mod,
-                modifier_options: [] as {
-                    id: number;
-                    name: string;
-                    modifier_id: number;
-                    modifier_option_id: number;
-                    price: number;
-                }[]
+            form.setValue('modifiers', item.modifiers.map((mod: Modifier) => ({
+                id: mod.id ?? 0,
+                menu_item_id: mod.menu_item_id,
+                name: mod.name,
+                min_selections: mod.min_selections ?? 0,
+                max_selections: mod.max_selections ?? 1,
+                is_required: mod.is_required ?? false,
+                modifier_options: mod.modifier_options?.map(opt => ({
+                    id: opt.id ?? 0,
+                    name: opt.name,
+                    modifier_id: opt.modifier_id,
+                    modifier_option_id: opt.id ?? 0,
+                    price: opt.price
+                })) ?? []
             })));
         }
     }, [item]);
@@ -136,32 +142,35 @@ export default function ItemDetailsPage({ params }: { params: Promise<{ id: stri
     useEffect(() => {
      
         const fetchItem = async () => {
-            
+            const id = params.id;
+            console.log(id);
             try {
                 setLoading(true);
+                console.log('Fetching item with ID:', id);
                 const response = await fetch(`/api/store/items/${id}`);
-                if (!response.ok) throw new Error('Failed to fetch item');
-                const data = await response.json();
+                console.log('Response status:', response.status);
                 
+                if (!response.ok) {
+                    const errorText = await response.text();
+                    console.error('Response error:', errorText);
+                    throw new Error(`Failed to fetch item: ${response.status} ${errorText}`);
+                }
+                
+                const data = await response.json();
+                console.log('Received data:', data);
                 setItem(data);
                 if (!data) {
                     throw new Error('No item data in response');
                 }
             } catch (error) {
                 console.error('Error fetching item:', error);
+                setError(error instanceof Error ? error.message : 'Failed to fetch item');
             } finally {
                 setLoading(false);
             }
         };
         fetchItem();
-    }, [id, form]);
-
-    const calculateTotalPrice = (basePrice: number, quantity: number, modifiers: FormModifier[]) => {
-        const modifierPrice = modifiers.reduce((total, mod) => {
-            return total + mod.modifier_options.reduce((optTotal, opt) => optTotal + opt.price, 0);
-        }, 0);
-        return (basePrice + modifierPrice) * quantity;
-    };
+    }, [form]);
 
    
     const onSubmit = async (data: FormData) => {
@@ -176,7 +185,7 @@ export default function ItemDetailsPage({ params }: { params: Promise<{ id: stri
         }
 
         const cartModifiers: CartItemModifier[] = data.modifiers.map(formMod => {
-            const modifier = item?.modifiers.find(m => m.id === formMod.id);
+            const modifier = item?.modifiers?.find(m => m.id === formMod.id);
             if (!modifier) return [];
             return {
                 id: modifier.id,
@@ -190,7 +199,7 @@ export default function ItemDetailsPage({ params }: { params: Promise<{ id: stri
             }
         }).filter(Boolean) as CartItemModifier[];
 
-        const cartItem: CartItem = {
+        const cartItem = {
             menu_item_id: item?.id || 0,
             menu_item_name: item?.name || '',
             menu_item_image: item?.image_urls[0] || '',
@@ -206,8 +215,11 @@ export default function ItemDetailsPage({ params }: { params: Promise<{ id: stri
             await handleCartUpdate(cartItem);
             form.reset();
             if (item?.modifiers) {
-                form.setValue('modifiers', item.modifiers.map(mod => ({
+                form.setValue('modifiers', item.modifiers.map((mod: Modifier) => ({
                     ...mod,
+                    min_selections: mod.min_selections || 1,
+                    max_selections: mod.max_selections || 1,
+                    is_required: mod.is_required || true,
                     modifier_options: [] as {
                         id: number;
                         name: string;
@@ -226,7 +238,15 @@ export default function ItemDetailsPage({ params }: { params: Promise<{ id: stri
         setLoadingImage(false);
     };
 
-    if (loading || !item) {
+    if (loading) {
+        return (
+            <div className="flex justify-center items-center min-h-[200px] py-12">
+                <Loading variant="store" size="lg" />
+            </div>
+        );
+    }
+
+    if (!item) {
         return (
             <div className="min-h-screen bg-black text-white">
                 <div className="w-full bg-black pt-28">
@@ -369,7 +389,7 @@ export default function ItemDetailsPage({ params }: { params: Promise<{ id: stri
                                                                     <RadioGroup
                                                                         value={field.value?.[0]?.id?.toString() || ''}
                                                                         onValueChange={(value) => {
-                                                                            const selectedOption = modifier.modifier_options.find(
+                                                                            const selectedOption = modifier?.modifier_options?.find(
                                                                                 opt => opt.id.toString() === value
                                                                             );
                                                                             if (selectedOption) {
@@ -382,7 +402,7 @@ export default function ItemDetailsPage({ params }: { params: Promise<{ id: stri
                                                                         }}
                                                                         className="space-y-3"
                                                                     >
-                                                                        {modifier.modifier_options.map((option) => (
+                                                                        {modifier?.modifier_options?.map((option) => (
                                                                             <div key={option.id} 
                                                                                  className="flex items-center space-x-3 bg-black/20 rounded-lg p-3 
                                                                                           hover:bg-black/30 transition-colors">
@@ -403,9 +423,9 @@ export default function ItemDetailsPage({ params }: { params: Promise<{ id: stri
                                                                     </RadioGroup>
                                                                 ) : (
                                                                     <div className="space-y-3">
-                                                                        {modifier.modifier_options.map((option) => {
+                                                                        {modifier?.modifier_options?.map((option) => {
                                                                             const isSelected = (field.value || []).some(opt => opt.id === option.id);
-                                                                            const atMaxSelections = (field.value || []).length >= modifier.max_selections;
+                                                                            const atMaxSelections = (field.value || []).length >= (modifier?.max_selections || 1);
                                                                             const isDisabled = !isSelected && atMaxSelections;
                                                                             
                                                                             return (

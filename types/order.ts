@@ -13,22 +13,27 @@ export enum OrderStatus {
     COMPLETED = 'completed',
     CANCELLED = 'cancelled',
     NOT_STARTED = 'not_started',
+    PROCESSING = 'processing',
+    REFUNDED = 'refunded'
   }
 
 export interface Order {
     id?: string;
     short_id?: string;
-    customer: Customer;
+    customers: Customer;
     status: OrderStatus;
     order_type: OrderType;
     delivery_service?: string;
     pickup_date: string;
     pickup_time: string;
+    delivery_date?: string;
+    delivery_time?: string;
     prep_time_minutes?: number;
     staff_notes?: string;
     total: number;
     sub_total: number;
     service_fee: number;
+    created_at?: string;
     ready_at?: string;
     completed_at?: string;
     archived?: boolean;

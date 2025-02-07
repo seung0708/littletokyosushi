@@ -74,8 +74,8 @@ const PrintReceipt = ({ order, onClose }: PrintReceiptProps) => {
             </div>
 
             <div class="customer">
-                <p>Customer: ${order.customer.first_name + ' ' + order.customer.last_name || 'Guest'}</p>
-                ${order.customer.phone ? `<p>Phone: ${order.customer.phone}</p>` : ''}
+                <p>Customer: ${order.customers.first_name + ' ' + order.customers.last_name || 'Guest'}</p>
+                ${order.customers.phone ? `<p>Phone: ${order.customers.phone}</p>` : ''}
             </div>
 
             <div class="items">

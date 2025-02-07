@@ -6,9 +6,9 @@ const Services: React.FC = () => {
         <section aria-labelledby="services-heading" className="w-full">
             <div className="bg-gray-900 text-white py-12 sm:py-24">
                 <div className="px-4 sm:px-6 md:px-8 w-full max-w-7xl mx-auto">
-                    <div className="grid grid-cols-1 gap-y-8 sm:gap-y-12 md:grid-cols-2 lg:grid-cols-3 gap-x-6 lg:gap-x-8">
-                        <div className="text-center sm:text-left lg:text-center">
-                            <div className="flex justify-center sm:justify-start lg:justify-center">
+                    <div className="grid grid-cols-1 place-items-center gap-y-8 sm:gap-y-12 md:grid-cols-1 lg:grid-cols-3 gap-x-6 lg:gap-x-8">
+                        <div className="text-center lg:text-center">
+                            <div className="flex justify-center">
                                 <div className="flow-root">
                                     <div className="flex items-center justify-center">
                                     <Image 
@@ -28,8 +28,8 @@ const Services: React.FC = () => {
                             </div>
                         </div>
 
-                        <div className="text-center sm:text-left lg:text-center">
-                            <div className="flex justify-center sm:justify-start lg:justify-center">
+                        <div className="text-center lg:text-center">
+                            <div className="flex justify-center ">
                                 <div className="flow-root">
                                     <div className="flex items-center justify-center">
                                     <Image 
@@ -49,8 +49,8 @@ const Services: React.FC = () => {
                             </div>
                         </div>
 
-                        <div className="text-center sm:text-left lg:text-center">
-                            <div className="flex justify-center sm:justify-start lg:justify-center">
+                        <div className="text-center lg:text-center">
+                            <div className="flex justify-center ">
                                 <div className="flow-root">
                                     <div className="flex items-center justify-center">
                                     <Image 

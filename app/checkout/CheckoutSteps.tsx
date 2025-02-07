@@ -1,11 +1,13 @@
 'use client'
 
+import Link from 'next/link'
+
 import {Elements} from '@stripe/react-stripe-js';
 import {loadStripe} from '@stripe/stripe-js';
 import { useCallback, useEffect, useState } from 'react'
 import {useForm} from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
-import Link from 'next/link'
+
 import { checkoutSchema, type CheckoutFormValues } from '@/types/checkout'
 import { Form } from '@/components/ui/form'
 import { Button } from '@/components/ui/button'
@@ -48,8 +50,8 @@ const CheckoutSteps = () => {
 
     useEffect(() => {
         if (user) {
-            form.setValue('customer.email', user.user_metadata?.email || user.email || '');
-            form.setValue('customer.name', 
+            form.setValue('customer.signinEmail', user.user_metadata?.email || user.email || '');
+            form.setValue('customer.guestName', 
                 `${user.user_metadata?.first_name || ''} ${user.user_metadata?.last_name || ''}`.trim()
             );
             form.setValue('customer.phone', user.user_metadata?.phone || '');
@@ -144,9 +146,9 @@ const CheckoutSteps = () => {
         defaultValues: {
             customer: {
                 signinEmail: user?.email ?? '',
-                guestEmail: user?.email ?? '',
-                guestName: user?.name ?? '',
-                phone: user?.phone ?? '',
+                guestEmail: user?.email || '',
+                guestName: `${user?.user_metadata?.first_name || ''} ${user?.user_metadata?.last_name || ''}`.trim(),
+                phone: user?.user_metadata?.phone || '',
             },
             delivery: {
                 method: 'pickup',
