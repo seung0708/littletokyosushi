@@ -56,6 +56,7 @@ const formSchema = z.object({
 type FormData = z.infer<typeof formSchema>;
 
 export default function ItemDetailsPage({ params }: { params: Promise<{ id: string }> }) {
+    console.log(params);
     const { id } = use(params);
     const [item, setItem] = useState<MenuItem | null>(null);
     const [loading, setLoading] = useState(false);
