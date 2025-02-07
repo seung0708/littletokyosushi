@@ -5,7 +5,7 @@ import { revalidatePath } from 'next/cache';
 
 export async function GET(
     request: Request,
-    { params }: { params: { id: string } }
+    { params }: { params: Promise<{ id: string }> }
 ) {
     const supabase = await createClient();
     const { pathname } = new URL(request.url);
@@ -20,7 +20,7 @@ export async function GET(
         }
 
         // Fetch the menu item
-        const id = parseInt(params.id);
+        const { id } = await params;
         const { data: item, error: itemError } = await supabase
             .from('menu_items')
             .select(`
@@ -35,7 +35,7 @@ export async function GET(
                     sync_status
                 )` : ''}
             `)
-            .eq('id', id)
+            .eq('id', parseInt(id))
             .single();
 
         if (itemError) {
@@ -66,7 +66,7 @@ export async function GET(
 
 export async function PATCH(
     request: Request,
-    { params }: { params: { id: string } }
+    { params }: { params: Promise<{ id: string }> }
 ) {
     const supabase = await createClient();
 
@@ -77,12 +77,12 @@ export async function PATCH(
         }
 
         const body = await request.json();
-        const id = parseInt(params.id);
+        const { id } = await params;
 
         const { error: updateError } = await supabase
             .from('menu_items')
             .update(body)
-            .eq('id', id);
+            .eq('id', parseInt(id));
 
         if (updateError) {
             console.error('Failed to update item:', updateError);
