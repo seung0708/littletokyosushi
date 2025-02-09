@@ -7,7 +7,7 @@ type MenuItemsProps = {
 };
 
 const MenuItems: React.FC<MenuItemsProps> = ({ categories }) => {
-    console.log(categories);
+    
     return (
         <div className="space-y-12 sm:space-y-20">
             {categories.map((category) => (
@@ -49,7 +49,7 @@ const MenuItems: React.FC<MenuItemsProps> = ({ categories }) => {
                                             {item.name}
                                         </h3>
                                         <span className="text-base sm:text-lg md:text-xl font-bold text-red-400 whitespace-nowrap bg-black/30 px-2 sm:px-3 py-1 rounded-full">
-                                            ${item.price.toFixed(2)}
+                                            ${item?.price?.toFixed(2)}
                                         </span>
                                     </div>
                                     {item.description && (

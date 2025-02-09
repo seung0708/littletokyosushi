@@ -8,4 +8,5 @@ export interface User {
         last_name?: string
         phone?: string
     }
+    is_anonymous?: boolean
 }

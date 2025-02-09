@@ -14,6 +14,7 @@ interface Props {
 }
 
 const PaymentSection = ({ customerAddress, onSubmit, form }: Props) => {
+    console.log(customerAddress);
     const stripe = useStripe();
     const elements = useElements();
     const { user } = useAuth();
@@ -120,7 +121,8 @@ const PaymentSection = ({ customerAddress, onSubmit, form }: Props) => {
                     allowedCountries: ['US'],
                     autocomplete: { mode: 'automatic' },
                     defaultValues: {
-                        address: {
+                        name: `${user?.user_metadata?.first_name || ''} ${user?.user_metadata?.last_name || ''}`,
+                        address: {                            
                             line1: customerAddress?.line1 || '',
                             line2: customerAddress?.line2 || '',
                             city: customerAddress?.city || '',

@@ -4,8 +4,8 @@ import { useCart } from '@/app/context/cartContext';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useEffect, useState } from 'react';
-import { MenuItem, Modifier } from '@/types/item';
-import { CartItemModifier, CartItemModifierOption } from '@/types/cart';
+import { MenuItem, Modifier, ModifierOption } from '@/types/item';
+import { CartItemModifier } from '@/types/cart';
 import { Loading } from '@/components/ui/loading';
 import { Form, FormControl, FormField, FormItem, FormLabel } from '@/components/ui/form';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
@@ -56,11 +56,11 @@ export default function ItemDetailsForm({item}: {item: MenuItem}) {
         mode: "onChange"
     });
 
-    const handleModifierChange = (modifierId: number, option: CartItemModifierOption, isSelected: boolean) => {
+    const handleModifierChange = (modifierId: number, option: ModifierOption, isSelected: boolean) => {
         const {modifiers} = item!;
         const currentModifiers = form.getValues('modifiers');
         const modifierIndex = currentModifiers.findIndex(m => m.id === modifierId);
-        
+        console.log(modifiers);
         if (modifierIndex === -1) return;
         
         const modifier = modifiers?.[modifierIndex];
@@ -123,7 +123,7 @@ export default function ItemDetailsForm({item}: {item: MenuItem}) {
     }, [item, form]);
 
     const onSubmit = async (data: FormData) => {
-        console.log(data);
+        
         // Validate required selections
         const invalidModifier = data.modifiers.find(mod => 
             mod.is_required && mod.modifier_options.length !== mod.max_selections
@@ -162,8 +162,8 @@ export default function ItemDetailsForm({item}: {item: MenuItem}) {
             special_instructions: data.special_instructions,
             cart_item_modifiers: cartModifiers
         };
-
-        try {
+        
+        try {  
             await handleCartUpdate(cartItem);
             form.reset();
             if (item?.modifiers) {

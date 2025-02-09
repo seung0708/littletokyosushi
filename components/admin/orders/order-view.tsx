@@ -28,7 +28,7 @@ const OrderView: React.FC<OrderViewProps> = ({ order, onRefund }) => {
             <div className="bg-white shadow-lg rounded-lg overflow-hidden">
                 <OrderDetails order={order} onRefund={onRefund} />
                 <RefundSection order={order} onRefund={onRefund} />
-                <OrderFooter order={order} />
+                <OrderFooter order={order}  />
             </div>
         </div>
     );

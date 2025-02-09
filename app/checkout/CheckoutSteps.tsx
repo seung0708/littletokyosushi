@@ -5,9 +5,8 @@ import Link from 'next/link'
 import {Elements} from '@stripe/react-stripe-js';
 import {loadStripe} from '@stripe/stripe-js';
 import { useCallback, useEffect, useState } from 'react'
-import {useForm} from 'react-hook-form'
+import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
-
 import { checkoutSchema, type CheckoutFormValues } from '@/types/checkout'
 import { Form } from '@/components/ui/form'
 import { Button } from '@/components/ui/button'
@@ -40,7 +39,8 @@ const CheckoutSteps = () => {
 
     useEffect(() => {
         if (user) {
-            form.setValue('customer.signinEmail', user.user_metadata?.email || user.email || '');
+            form.setValue('customer.signinEmail', user.email || '');
+            form.setValue('customer.guestEmail', user.user_metadata?.email || '');
             form.setValue('customer.guestName', 
                 `${user.user_metadata?.first_name || ''} ${user.user_metadata?.last_name || ''}`.trim()
             );
@@ -114,7 +114,7 @@ const CheckoutSteps = () => {
             const itemTotal = item.base_price * item.quantity;
             const modifiersTotal = item.cart_item_modifiers?.reduce((modTotal, mod) => {
                 const optionsTotal = mod.cart_item_modifier_options?.reduce((optTotal, opt) => 
-                    optTotal + opt.price, 0) || 0;
+                    optTotal + (opt?.modifier_options?.price ?? 0), 0) || 0;
                 return modTotal + optionsTotal;
             }, 0) || 0;
             return acc + itemTotal + modifiersTotal;
@@ -136,7 +136,7 @@ const CheckoutSteps = () => {
         defaultValues: {
             customer: {
                 signinEmail: user?.email ?? '',
-                guestEmail: user?.email || '',
+                guestEmail: user?.user_metadata?.email || '',
                 guestName: `${user?.user_metadata?.first_name || ''} ${user?.user_metadata?.last_name || ''}`.trim(),
                 phone: user?.user_metadata?.phone || '',
             },
@@ -186,22 +186,26 @@ const CheckoutSteps = () => {
 
     const onSubmit = async (data: CheckoutFormValues) => {
         try {
-            // Create order
+            
+            // Create order payload
+            const orderPayload = {
+                customer_id: user?.id || null,
+                customer: {
+                    ...data.customer,
+                },
+                delivery: data.delivery,
+                fees: orderFees,
+                total: orderTotal,
+                cartItems
+            };
 
+            // Create order
             const orderResponse = await fetch('/api/orders', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    customer_id: user?.id,
-                    customer: data.customer,
-                    delivery: data.delivery,
-                    fees: orderFees,
-                    total: orderTotal,
-                    cartItems,
-                    status: 'pending',
-                })
+                body: JSON.stringify(orderPayload)
             });
-
+            
             if (!orderResponse.ok) {
                 throw new Error('Failed to create order');
             }

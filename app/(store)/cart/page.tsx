@@ -31,7 +31,7 @@ const CartPage: React.FC = () => {
             special_instructions: cartItem.special_instructions, 
             menu_items: {
                 name: cartItem.menu_items?.name || '',
-                image_url: cartItem.menu_items?.image_urls || []
+                image_url: cartItem.menu_items?.image_urls
             },
             cart_item_modifiers: cartItem.cart_item_modifiers
         };
@@ -40,7 +40,7 @@ const CartPage: React.FC = () => {
     };
 
     return (
-        <div className="min-h-screen bg-black text-white">
+        <div className="min-h-screen bg-black text-white pt-24">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
                 {!cartItems || cartItems.length === 0 ? (
                     <div className="text-center py-16">
@@ -63,13 +63,12 @@ const CartPage: React.FC = () => {
                                                   border border-white/10 rounded-xl overflow-hidden">
                                         <div className="flex p-6">
                                             <div className="relative h-24 w-24 sm:h-48 sm:w-48 flex-shrink-0 overflow-hidden rounded-lg">
-                                                {/* <Image
-                                                    src={`${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/menu-items/${cartItem.menu_items.im}`} 
+                                                <Image
+                                                    src={`${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/menu-items/${cartItem?.menu_items?.image_urls?.[0]}`} 
                                                     alt={cartItem?.menu_items?.name || 'Item image'} 
                                                     className="h-full w-full object-cover object-center" 
-                                                    height={24}
-                                                    width={24}
-                                                /> */}
+                                                    fill
+                                                />
                                             </div>
                                             <div className="ml-6 flex flex-1 flex-col">
                                                 <div className="flex justify-between">
@@ -83,7 +82,7 @@ const CartPage: React.FC = () => {
                                                                         {modifier.cart_item_modifier_options.map((option: CartItemModifierOption) => (
                                                                             <li key={option.id} 
                                                                                 className="text-xs text-gray-400 bg-black/20 px-2 py-1 rounded-full inline-block mr-2">
-                                                                                {option.name}
+                                                                                {option.modifier_options?.name}
                                                                             </li>
                                                                         ))}
                                                                     </ul>

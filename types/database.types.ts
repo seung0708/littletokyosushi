@@ -325,7 +325,6 @@ export interface Database {
         Row: {
           id?: string
           cart_id: string
-          menu_item_id: string
           quantity: number
           base_price: number
           total_price: number

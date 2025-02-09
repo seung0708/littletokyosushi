@@ -1,6 +1,6 @@
 'use client';
 import { useEffect, useState } from 'react';
-import {useSearchParams} from 'next/navigation'
+import {useSearchParams, useRouter} from 'next/navigation'
 import { useCart } from '@/app/context/cartContext';
 import { format } from 'date-fns';
 import {Order, OrderItem, OrderItemModifier, OrderItemModifierOption } from '@/types/order';
@@ -17,9 +17,10 @@ import {Order, OrderItem, OrderItemModifier, OrderItemModifierOption } from '@/t
 const Page: React.FC = () => {
   
   const searchParams = useSearchParams();
+  const router = useRouter();
   const [order, setOrder] = useState<Order | null>(null);
   const [orderId, setOrderId] = useState<string | null>(null);
-
+  console.log(order)
   // const [error, setError] = useState<string | null>(null);
   const [paymentVerified, setPaymentVerified] = useState(false);
   const { clearCart } = useCart();
@@ -58,6 +59,8 @@ const Page: React.FC = () => {
           }
           
           setPaymentVerified(true);
+          // Clean up URL after successful verification
+          router.replace('/order-confirmation', undefined);
         } catch (error) {
           console.error('Error verifying payment:', error);
         }
@@ -92,7 +95,7 @@ const Page: React.FC = () => {
       <div className="mx-auto max-w-3xl px-4 py-16 sm:px-6 sm:py-24 lg:px-8">
         <div className="max-w-xl">
           <h1 className="mt-2 text-4xl font-bold tracking-tight sm:text-5xl">Thanks for your Order!</h1>
-          <p className="mt-2 text-base text-gray-500">Your order #{order?.short_id} has been successfully placed.</p>
+          <p className="mt-2 text-base text-gray-500">Your order #{order?.short_id?.toUpperCase()} has been successfully placed.</p>
 
           {/*<dl className="mt-12 text-sm font-medium">
             <dt className="text-gray-900">Tracking number</dt>
@@ -170,18 +173,18 @@ const Page: React.FC = () => {
           <h3 className="sr-only">Items</h3>
           
           <div className="divide-y divide-gray-200">
-          {order?.items.map((item: OrderItem) => (  
+          {order?.order_items.map((item: OrderItem) => (  
             <div key={item.id.substring(0, 8)} className="py-6">
               <div className="flex justify-between">
                 <h4 className="font-medium text-gray-900">{item.item_name}<span className="ml-2 text-gray-500">× {item.quantity}</span></h4>
                 <p className="text-gray-900">${(item.quantity * item.price).toFixed(2)}</p>
               </div>
-              {item.modifiers && item.modifiers.length > 0 && (
+              {item.order_item_modifiers && item.order_item_modifiers.length > 0 && (
                 <div className="mt-2 flex flex-wrap gap-x-4 text-sm text-gray-500">
-                  {item.modifiers.map((modifier: OrderItemModifier) => (
+                  {item.order_item_modifiers.map((modifier: OrderItemModifier) => (
                   <div key={modifier.id?.substring(0, 8)} className="">
                     {modifier.name}:
-                    {modifier.options?.map((option: OrderItemModifierOption, index: number) => (
+                    {modifier.order_item_modifier_options?.map((option: OrderItemModifierOption, index: number) => (
                     <div key={option.id} className="ml-4 mt-1">
                         {index > 0 && '•'}
                         {option.name}

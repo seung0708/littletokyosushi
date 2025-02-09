@@ -13,7 +13,7 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
         .eq('id', id)
         .single();
 
-    console.log('Current cart:', currentCart, cartError);
+    //console.log('Current cart:', currentCart, cartError);
     if (cartError) {
         console.error('Error fetching cart:', cartError);
         return NextResponse.json(

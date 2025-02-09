@@ -19,9 +19,9 @@ interface OrderFooterProps {
   }
 
 export default function OrderFooter({order, onMarkReady, onPrint, isConfirmed, form, onSubmit, onComplete}: OrderFooterProps) {
-
+    
     return (
-        <CardFooter className="flex flex-row items-center border-t bg-muted/50 px-6 py-3">
+        <CardFooter className="flex flex-row items-center border-t bg-muted/50 px-6 py-3 md:pl-64">
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="w-full space-y-4">
             <div className="w-full">
@@ -81,7 +81,7 @@ export default function OrderFooter({order, onMarkReady, onPrint, isConfirmed, f
                     exit={{ opacity: 0, height: 0 }}
                     className="w-full"
                   >
-                    <Button type="submit" className="w-full">
+                    <Button type="submit" className="mt-2">
                       Confirm Prep Time
                     </Button>
                   </motion.div>

@@ -38,7 +38,7 @@ export interface Order {
     ready_at?: string;
     completed_at?: string;
     archived?: boolean;
-    items: OrderItem[];
+    order_items: OrderItem[];
     payments?: OrderPayment[];
     status_history?: OrderStatusHistory[];
 }
@@ -51,13 +51,13 @@ export interface OrderItem {
     item_id: number;
     item_name: string;
     special_instructions?: string;
-    modifiers?: OrderItemModifier[];
+    order_item_modifiers?: OrderItemModifier[];
 }
   
 export interface OrderItemModifier {
     id?: string;
     name: string;
-    options: OrderItemModifierOption[];
+    order_item_modifier_options: OrderItemModifierOption[];
 }
 
 export interface OrderItemModifierOption {

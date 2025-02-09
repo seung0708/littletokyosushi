@@ -10,16 +10,30 @@ export async function GET(req: Request) {
 
     try {
         const supabase = await createClient();
-        await supabase
+        const { data, error } = await supabase
             .from('customers')
-            .select('*')  // Change from 'address' to '*' to get all columns
+            .select('*')
             .eq('id', customer_id)
             .single();
 
-        // Even if there's an error about missing column, return empty data
-        return NextResponse.json({ 
-            address: null  // Return null if address column doesn't exist yet
-        });
+        console.log('customer data:', data);
+        if (error && error.code !== 'PGRST116') {
+            console.error('Error fetching customer:', error);
+            return NextResponse.json({ address: null }, { status: 200 });
+        }
+
+        // Construct the address object from the customer data
+        const address = {
+            line1: data.line1 || '',
+            line2: data.line2 || '',
+            city: data.city || '',
+            state: data.state || '',
+            postal_code: data.postal_code || '',
+            country: data.country || 'US',
+            phone: data.phone || ''
+        };
+
+        return NextResponse.json({ address: JSON.stringify(address) });
         
     } catch (error) {
         console.error('Error:', error);

@@ -37,7 +37,7 @@ export const CartProvider = ({ children }: CartProviderProps) => {
     const [cartError, setCartError] = useState<string | null>(null);
     
     useEffect(() => {
-        console.log('useEffect cartId', cartId);
+        
         const savedCartId = localStorage.getItem('cartId');
         if (savedCartId && userId) {
             updateCartCustomerId(userId);
@@ -61,7 +61,7 @@ export const CartProvider = ({ children }: CartProviderProps) => {
     };
 
     const fetchCart = async () => {
-        console.log('fetchCart');
+        
         if (!cartId) return;
         setIsCartLoading(true);
         setCartError(null);
@@ -125,16 +125,16 @@ export const CartProvider = ({ children }: CartProviderProps) => {
     };
 
     const handleCartUpdate = async (item?: CartItem) => {
-        
+        console.log(item);
         try {
             // Case 1: Guest adding item
             if (!userId && item) {
                 if (!cartId || cartId === '') {
                     console.log('Guest user - create new cart');
-                    //await createNewCart(item);
+                    await createNewCart(item);
                 } else {
                     console.log('Guest user - update existing cart');
-                    //await updateExistingCart(item);
+                    await updateExistingCart(item);
                 }
             }
             // Case 2: User just signed in
@@ -211,7 +211,7 @@ export const CartProvider = ({ children }: CartProviderProps) => {
     };
 
     const createNewCart = async (item: CartItem) => {
-        console.log('createNewCart', { item });
+        //console.log('Creating new cart', item);
         try {
             const response = await fetch('/api/store/cart', {
                 method: 'POST',
@@ -229,7 +229,7 @@ export const CartProvider = ({ children }: CartProviderProps) => {
                 throw new Error(error.error || 'Failed to create new cart');
             }
             const data = await response.json();
-            console.log('createNewCart data', data);
+            
             if(data.status === 200) {
                 setCartId(data.cartId ); 
                 localStorage.setItem('cartId', data.cartId);
@@ -242,6 +242,7 @@ export const CartProvider = ({ children }: CartProviderProps) => {
     }
 
     const updateExistingCart = async (item: CartItem) => {
+        
         try {
             const response = await fetch(`/api/store/cart/${cartId}`, {
                 method: 'PATCH',

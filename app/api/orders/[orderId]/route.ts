@@ -7,7 +7,7 @@ type OrderUpdate = Partial<Database['public']['Tables']['orders']['Update']>;
 export async function GET(req: Request, { params }: { params: Promise<{ orderId: string }> }) {
     const { orderId } = await params;
     const supabase = await createClient();
-    
+    console.log(orderId)
     try {
         const {data: orderData, error: orderError} = await supabase
             .from('orders')
@@ -39,6 +39,7 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ orderI
       const body = await req.json();
       const supabase = await createClient();
       const {orderId} = await params;
+      console.log(orderId);
       const updateData: OrderUpdate = {};
       
       // Handle status updates first
@@ -74,7 +75,7 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ orderI
       if (fetchError) throw fetchError;
 
       // Remove generated columns and merge data
-      const { ...cleanedOrder } = currentOrder;
+      const { short_id, ...cleanedOrder } = currentOrder;
       const mergedData = { 
         ...cleanedOrder,
         ...updateData,

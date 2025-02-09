@@ -6,6 +6,7 @@ type CartItemModifierOption = Database['public']['Tables']['cart_item_modifier_o
 
 
 type CartItem = Database["public"]["Tables"]["cart_items"]["Insert"] & {
+    menu_items: Database["public"]["Tables"]["menu_items"]["Row"];
     cart_item_modifiers: (Database["public"]["Tables"]["cart_item_modifiers"]["Insert"] & {
       modifiers: Database["public"]["Tables"]["modifiers"]["Row"];
       cart_item_modifier_options: (Database["public"]["Tables"]["cart_item_modifier_options"]["Insert"] & {
@@ -22,7 +23,7 @@ type CartItemModifier = Database["public"]["Tables"]["cart_item_modifiers"]["Ins
 export async function POST(request: Request) {
     const supabase = await createClient();
     const { customer_id, items } = await request.json();
-    
+    console.log('Creating new cart', { customer_id, items });
     try {
     
         const { data: cart, error: createCartError } = await supabase
@@ -45,7 +46,7 @@ export async function POST(request: Request) {
             .insert(
                 items.map((item: CartItem) => ({
                     cart_id: cart.id,
-                    menu_item_id: item.menu_item_id,
+                    menu_item_id: item.menu_items.id,
                     quantity: item.quantity,
                     base_price: item.base_price,
                     total_price: item.total_price,

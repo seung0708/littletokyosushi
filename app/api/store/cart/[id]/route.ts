@@ -16,7 +16,7 @@ type Cart = Database['public']['Tables']['carts']['Row'] & {
 };
 
 export async function GET(request: Request, { params }: { params: Promise<{ id: string }> }) {
-    console.log(id)
+    
     const { id: cartId } = await params;
     const supabase = await createClient();
 
@@ -24,13 +24,11 @@ export async function GET(request: Request, { params }: { params: Promise<{ id: 
     .from('carts')
     .select(`id, customer_id, 
         cart_items(id, base_price, total_price, quantity, special_instructions, menu_items(id, name, price, image_urls), 
-        cart_item_modifiers(id, modifiers(id, name), 
-            cart_item_modifier_options(id, modifier_id, modifier_options(id, name, price))))`)
+        cart_item_modifiers(id, modifiers(*), 
+            cart_item_modifier_options(id, modifier_id, modifier_options(*))))`)
     .eq('id', cartId)
     .order('created_at', { referencedTable: 'cart_items' })
     .single();
-
-    console.log(dbCart)
 
     if (error) {
         console.error('Error fetching cart items:', error);
@@ -52,7 +50,7 @@ export async function PATCH(request: Request,  { params }: { params: Promise<{ i
     const supabase = await createClient();
     try {
         const { customerId, cartItems } = await request.json()
-
+        
         if(!cartItems) return NextResponse.json({ message: 'Cart items not found' });
         const newItems = cartItems[cartItems.length - 1]
         
@@ -64,7 +62,7 @@ export async function PATCH(request: Request,  { params }: { params: Promise<{ i
                 cart_item_modifier_options(id, cart_item_modifiers_id, modifier_option_id, modifier_id, modifier_option_price))))`)
             .eq('id', id)
             .single() as { data: Cart | null };
-             
+        console.log(dbCart)
         if (!dbCart?.customer_id && customerId) {
             await supabase
                 .from('carts')
@@ -73,6 +71,7 @@ export async function PATCH(request: Request,  { params }: { params: Promise<{ i
         }
 
         const existingCartItem = findMatchingCartItem(dbCart?.cart_items || [], newItems);
+        
         if (existingCartItem) {
             // If we found an exact match (same item and same modifiers), update quantity
             await updateExistingCartItem(supabase, existingCartItem, newItems);

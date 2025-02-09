@@ -1,3 +1,5 @@
+'use client';
+
 import OrderDetails from "./order-details";
 import OrderFooter from "./order-footer";
 
@@ -7,12 +9,14 @@ import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { format } from "date-fns";
 import { motion} from "framer-motion";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { OrderHeader } from "./order-header";
 import {Order, OrderItemModifier, OrderItemModifierOption} from "@/types/order";
 import { calculateItemTotal } from "@/utils/item";
+import { createClient } from "@/lib/supabase/client";
 
 export default function RecentOrder({order}: {order: Order}) {
+  const [currentOrder, setCurrentOrder] = useState(order);
   const [isConfirmed, setIsConfirmed] = useState(false);
   
   const prepTimeSchema = z.object({
@@ -27,6 +31,39 @@ export default function RecentOrder({order}: {order: Order}) {
       prepTime: order.prep_time_minutes || 10
     },
   })
+
+  useEffect(() => {
+    const supabase = createClient();
+    
+    // Subscribe to changes on this specific order
+    const channel = supabase
+      .channel(`order-${order.short_id}`)
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'orders',
+          filter: `short_id=eq.${order.short_id}`
+        },
+        (payload) => {
+          const newOrder = payload.new as Order;
+          // Update local state with the new order data
+          setCurrentOrder(newOrder);
+          
+          // Update isConfirmed state based on prep time confirmation
+          if (newOrder.prep_time_confirmed_at) {
+            setIsConfirmed(true);
+          }
+        }
+      )
+      .subscribe();
+
+    // Cleanup subscription on unmount
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [order.short_id]);
 
   const onComplete = async () => {
     try {
@@ -55,7 +92,7 @@ export default function RecentOrder({order}: {order: Order}) {
 
   const onRefund = async (values: { amount: number; reason: string }) => {
     try {
-      const response = await fetch(`/api/admin/orders/${order.short_id}/refunds`, {
+      const response = await fetch(`/api/orders/${order.short_id}/refunds`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
@@ -133,11 +170,11 @@ export default function RecentOrder({order}: {order: Order}) {
             <title>Order Receipt #${order?.short_id?.toUpperCase()}</title>
             <style>
               @page {
-                margin: 8px;
-                padding: 8px;
+                margin: 4px;
+                padding: 4px;
               }
                 * {
-                    font-size: 14px;
+                    font-size: 16px;
                     margin: 0;
                     padding: 0;
                 }
@@ -157,6 +194,9 @@ export default function RecentOrder({order}: {order: Order}) {
                 }
                 .customer, .items, .item {
                     margin-bottom: 8px;
+                }
+                .customer {
+                  text-align: center;
                 }
                 .modifier {
                     padding-left: 16px;
@@ -193,17 +233,17 @@ export default function RecentOrder({order}: {order: Order}) {
             </div>
 
             <div class="customer">
-                <p>Customer: ${order.customers?.first_name + ' ' + order.customers?.last_name || 'Guest'}</p>
-                ${order.customers?.phone ? `<p>Phone: ${order.customers?.phone}</p>` : ''}
+                <p>${order.customers?.first_name + ' ' + order.customers?.last_name || 'Guest'}</p>
+                ${order.customers?.phone ? `<p>${order.customers?.phone}</p>` : ''}
             </div>
 
             <div class="items">
-                ${order.items.map(item => `
+                ${order.order_items.map(item => `
                     <div class="item">
                         <p>${item.quantity}x ${item.item_name} - $${calculateItemTotal(item).toFixed(2)}</p>
-                        ${item?.modifiers?.map((modifier: OrderItemModifier) => `
+                        ${item?.order_item_modifiers?.map((modifier: OrderItemModifier) => `
                             <div class="modifier">
-                                ${modifier.options?.map((option: OrderItemModifierOption) => 
+                                ${modifier.order_item_modifier_options?.map((option: OrderItemModifierOption) => 
                                     `<p>• ${option.name}</p>`
                                 ).join('')}
                             </div>
@@ -240,10 +280,10 @@ export default function RecentOrder({order}: {order: Order}) {
         transition={{ duration: 0.2 }}
       >
         <Card className="overflow-hidden" x-chunk="dashboard-05-chunk-4">
-          <OrderHeader order={order} />
-          <OrderDetails order={order} onRefund={onRefund} />
+          <OrderHeader order={currentOrder} />
+          <OrderDetails order={currentOrder} onRefund={onRefund} />
           <OrderFooter 
-            order={order} 
+            order={currentOrder} 
             onMarkReady={onMarkReady} 
             onPrint={onPrint} 
             isConfirmed={isConfirmed} 

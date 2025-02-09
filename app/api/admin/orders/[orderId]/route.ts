@@ -111,6 +111,7 @@ export async function GET(req: Request, { params }: { params: Promise<{ orderId:
 // app/api/admin/orders/[orderId]/route.ts
 export async function PATCH(req: Request, { params }: { params: Promise<{ orderId: string }> }) {
     const { orderId } = await params;
+    console.log(orderId);
     const { prepTime, status } = await req.json();
     const supabase = await createClient();
 

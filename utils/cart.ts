@@ -35,6 +35,7 @@ export async function updateExistingCartItem(supabase: any, existingCartItem: an
 }
 
 export function findMatchingCartItem(cartItems: any[], newItem: any) {
+
     return cartItems.find((cartItem: any) => {
         // If updating from cart page (has cart_item_id)
         if ('cart_item_id' in newItem) {
@@ -43,8 +44,7 @@ export function findMatchingCartItem(cartItems: any[], newItem: any) {
 
         // If adding from menu page (has menu_item_id)
         // First check if it's the same menu item
-        const isSameMenuItem = cartItem.menu_item_id === newItem.menu_item_id;
-        
+        const isSameMenuItem = cartItem.menu_item_id === newItem.menu_items.id;
         if (!isSameMenuItem) return false;
 
         // If there are no modifiers on either item, it's a match
@@ -83,7 +83,6 @@ export function findMatchingCartItem(cartItems: any[], newItem: any) {
 }
 
 export async function createNewCartItemWithModifiers(supabase: any, cartId: string, newItems: any) {
-    //console.log('newItems', newItems);
     // Create cart item
     const { data: cartItem, error } = await supabase
         .from('cart_items')
@@ -92,7 +91,7 @@ export async function createNewCartItemWithModifiers(supabase: any, cartId: stri
             base_price: newItems.base_price,
             total_price: newItems.total_price,
             quantity: newItems.quantity,
-            menu_item_id: newItems.menu_item_id,
+            menu_item_id: newItems.menu_items.id,
             special_instructions: newItems.special_instructions || '',
         })
         .select();

@@ -9,9 +9,9 @@ interface OrderDetailsProps {
 }
 
 const OrderDetails: React.FC<OrderDetailsProps> = ({ order, onRefund }) => {
-    console.log(order);
+    console.log(order)
     return (
-        <div className="p-6">
+        <div className="p-6 md:pl-64">
             <div className="flex justify-between items-start mb-6">
                 <Badge 
                    variant={
@@ -32,42 +32,45 @@ const OrderDetails: React.FC<OrderDetailsProps> = ({ order, onRefund }) => {
                 <div className="grid grid-cols-2 gap-4">
                     <div>
                         <p className="text-sm font-medium text-gray-500">Name</p>
-                        <p className="mt-1">{order.customers.first_name + ' ' + order.customers.last_name || 'Guest'}</p>
+                        <p className="mt-1">{order?.customers?.first_name + ' ' + order?.customers?.last_name || 'Guest'}</p>
                     </div>
                     <div>
                         <p className="text-sm font-medium text-gray-500">Phone</p>
-                        <p className="mt-1">{order.customers.phone || 'N/A'}</p>
-                    </div>
+                        <p className="mt-1">{order?.customers?.phone || 'N/A'}</p>
+                    </div>  
                 </div>
             </div>
 
             <div className="border-t border-gray-200 pt-6 mt-6">
                 <h3 className="text-lg font-medium text-gray-900 mb-4">Order Items</h3>
                 <div className="space-y-4">
-                    {order.items.map((item) => (
-                        <div key={item.id} className="flex justify-between">
+                    {order?.order_items?.map((item) => (
+                        <div key={item?.id} className="flex justify-between">
                             <div>
-                                <p className="font-medium">{item.item_name}</p>
-                                {item?.modifiers?.map((modifier: OrderItemModifier) => (
-                                    <div key={modifier.id} className="ml-4 text-sm text-gray-500">
-                                        {modifier.name}:
-                                        {modifier.options.map((option) => (
-                                            <span key={option.id} className="ml-2">
-                                                {option.name} (+${option.price.toFixed(2)})
+                                <p className="font-medium">{item?.item_name}</p>
+                                {item?.order_item_modifiers?.map((modifier: OrderItemModifier) => (
+                                    <div key={modifier?.id} className="ml-4 text-sm text-gray-500">
+                                        {modifier?.name}:
+                                        {modifier?.order_item_modifier_options?.map((option) => (
+                                            <span key={option?.id} className="ml-2">
+                                                {option?.name} (+${option?.price?.toFixed(2)})
                                             </span>
                                         ))}
                                     </div>
                                 ))}
                                 <div>
-                                <p className="text-sm text-gray-500">Special Instructions</p>
-                                {item.special_instructions && (
-                                    <p className="text-sm text-gray-500 ml-4">Note: {item.special_instructions}</p>
+                                
+                                {item?.special_instructions && (
+                                    <>
+                                    <p className="text-sm text-gray-500">Special Instructions</p>
+                                    <p className="text-sm text-gray-500 ml-4">Note: {item?.special_instructions}</p>
+                                    </>
                                 )}
                                 </div>
                             </div>
                             <div className="text-right">
                                 <p>${calculateItemTotal(item).toFixed(2)}</p>
-                                <p className="text-sm text-gray-500">Qty: {item.quantity}</p>
+                                <p className="text-sm text-gray-500">Qty: {item?.quantity}</p>
                             </div>
                         </div>
                     ))}

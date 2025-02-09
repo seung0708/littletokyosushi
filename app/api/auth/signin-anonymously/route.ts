@@ -11,23 +11,23 @@ export async function POST(req: Request) {
     const { email, name } = await req.json()
     const first_name = name.split(' ')[0]
     const last_name = name.split(' ')[1]
-
+    console.log(first_name, last_name, email);
     try {
-
+   
         const {data: customer, error: customerError} = await supabase
             .from('customers')
             .select('*')
             .eq('email', email)
             .single()
-        
-        if (customerError) {
+        console.log(customer, customerError);
+        if (customerError && customerError.code !== 'PGRST116') {
             console.error('Error fetching customer:', customerError);
             return NextResponse.json({ error: customerError.message }, { status: 400 })
         }
 
         if (customer) {
             const { data: {user: existingUser}, error: usersError} = await supabase.auth.admin.getUserById(customer.id);
-            
+            console.log('existingUser',existingUser);
             if (usersError) {
                 console.error('Error fetching user:', usersError);
                 return NextResponse.json({ error: usersError.message }, { status: 400 })
