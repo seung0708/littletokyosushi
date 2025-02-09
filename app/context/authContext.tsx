@@ -1,7 +1,6 @@
 'use client';
 import { createContext, useContext, useEffect, useState } from 'react';
 import { User } from '@/types/user';
-import { createClient } from '@/lib/supabase/client';
 import { redirect } from 'next/navigation';
 
 interface AuthContextType {
@@ -29,41 +28,23 @@ export const useAuth = () => {
 export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     const [user, setUser] = useState<User | null>(null);
     const [isLoading, setIsLoading] = useState(true);
-    const supabase = createClient();
-
+    
     useEffect(() => {
         const fetchUser = async () => {
-          try {
-            const { data: { user }, error }  = await supabase.auth.getUser();
-            if (error) {
-                console.log('Error getting user:', error);
+            try {
+                const response = await fetch('/api/auth/user');
+                const data = await response.json();
+                setUser(data.user);
+            } catch (error) {
+                console.error('Error fetching user:', error);
                 setUser(null);
-                return;
+            } finally {
+                setIsLoading(false);
             }
-            setUser(user as User);
-          } catch (error) {
-            console.log('Error getting user:', error);
-            setUser(null);
-          } finally {
-            setIsLoading(false);
-          }
-        }
+        };
 
         fetchUser();
-
-        const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
-            if (session) {
-                setUser(session.user as User);
-            } else {
-                setUser(null);
-            }
-        });
-
-        return () => {
-            subscription?.unsubscribe();
-        }
-
-    }, []); 
+    }, []);
 
     const signup = async (email: string, password: string) => {
         try {

@@ -123,6 +123,7 @@ export default function ItemDetailsForm({item}: {item: MenuItem}) {
     }, [item, form]);
 
     const onSubmit = async (data: FormData) => {
+        console.log(data);
         // Validate required selections
         const invalidModifier = data.modifiers.find(mod => 
             mod.is_required && mod.modifier_options.length !== mod.max_selections
@@ -149,10 +150,12 @@ export default function ItemDetailsForm({item}: {item: MenuItem}) {
         }).filter(Boolean) as CartItemModifier[];
 
         const cartItem = {
-            menu_item_id: item?.id || 0,
-            menu_item_name: item?.name || '',
-            menu_item_image: item?.image_urls[0] || '',
-            menu_item_price: item?.price || 0,
+            menu_items: {
+                id: item?.id || 0,
+                name: item?.name || '',
+                image_urls: item?.image_urls || [],
+                price: item?.price || 0
+            },
             base_price: item?.price || 0,
             total_price: (item?.price || 0) * data.quantity,
             quantity: data.quantity,
@@ -211,19 +214,18 @@ export default function ItemDetailsForm({item}: {item: MenuItem}) {
                                     </div>
                                 )}
                                 <Image
-                                    src={`${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/menu-items/${item.image_urls[selectedImage]}`}
+                                    src={`${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/menu-items/${item.image_urls?.[selectedImage]}`}
                                     alt={item.name}
-                                    width={0}
-                                    height={0}
+                                    fill
                                     className="object-cover"
                                     onLoad={handleImageLoad}
                                     priority
                                     sizes="(min-width: 1024px) 50vw, 100vw"
                                 />
                             </div>
-                            {item.image_urls.length > 1 && (
+                            {item?.image_urls && item?.image_urls?.length > 1 && (
                                 <div className="flex justify-center space-x-3">
-                                    {item.image_urls.map((_, index) => (
+                                    {item?.image_urls?.map((_, index) => (
                                         <button
                                             key={index}
                                             onClick={() => setSelectedImage(index)}
@@ -248,7 +250,7 @@ export default function ItemDetailsForm({item}: {item: MenuItem}) {
 
                                 <div className="flex items-center justify-between">
                                     <div className="text-xl sm:text-2xl font-bold text-red-400">
-                                        ${item.price.toFixed(2)}
+                                        ${item?.price?.toFixed(2)}
                                     </div>
                                 </div>
 

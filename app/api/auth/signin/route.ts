@@ -1,6 +1,5 @@
 import { signinFormSchema } from '@/schema-validations/auth';
-import { createClient } from '@supabase/supabase-js';
-import { createClient as createServerClient } from '@/lib/supabase/server';
+import { createClient } from '@/lib/supabase/server';
 import { NextResponse } from 'next/server';
 
 export async function POST(req: Request) { 
@@ -13,23 +12,11 @@ export async function POST(req: Request) {
   }
 
   const {email, password} = result.data; 
-  const supabase = await createClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.SUPABASE_SERVICE_ROLE_KEY!, 
-  )
-  const serverSupabase = await createServerClient();
+  const supabase = await createClient();
 
   try {
-    const { data: {users}, error } = await supabase.auth.admin.listUsers();
-    if (error) throw error;
-    const existingUser = users.find(user => user.email === email && !user.is_anonymous);
-    
-    if (!existingUser) {
-      console.log('existingUser', existingUser);
-      return NextResponse.json({error: 'No account found with this email. Please sign up first.'})
-    }
-
-    const { data, error: signInError } = await serverSupabase.auth.signInWithPassword({
+    // First try to sign in
+    const { data, error: signInError } = await supabase.auth.signInWithPassword({
       email,
       password,
     });
@@ -38,8 +25,14 @@ export async function POST(req: Request) {
       console.error('Login error:', signInError);
       return NextResponse.json({error: signInError.message}, {status: 400})
     }
-    
-    return NextResponse.json(data);
+
+    // After successful sign in, check if user exists
+    const { data: { user }, error: userError } = await supabase.auth.getUser();
+    if (userError || !user) {
+      return NextResponse.json({error: 'Authentication failed'}, {status: 401})
+    }
+
+    return NextResponse.json({ user });
   } catch (error) {
     console.error('Unexpected error during login:', error);
     return NextResponse.json({error: 'An unexpected error occurred'}, {status: 500})

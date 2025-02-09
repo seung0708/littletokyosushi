@@ -1,13 +1,13 @@
 export interface MenuItem {
     id?: number
     name: string
-    description: string
-    categories: Category
-    price: number
-    is_available: boolean
-    image_urls: string[]
-    created_at: string
-    updated_at: string
+    description?: string
+    categories?: Category
+    price?: number
+    is_available?: boolean
+    image_urls?: string[]
+    created_at?: string
+    updated_at?: string
     modifiers?: Modifier[]
 }
 

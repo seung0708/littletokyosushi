@@ -7,6 +7,7 @@ type MenuItemsProps = {
 };
 
 const MenuItems: React.FC<MenuItemsProps> = ({ categories }) => {
+    console.log(categories);
     return (
         <div className="space-y-12 sm:space-y-20">
             {categories.map((category) => (

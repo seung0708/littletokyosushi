@@ -1,6 +1,5 @@
 'use client';
 
-import { createClient } from "@/lib/supabase/client";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { User } from "lucide-react";
@@ -15,12 +14,13 @@ import {
 
 export default function DropDownMenuComponent() {
   const router = useRouter();
-  const supabase = createClient();
-
+  
   const handleSignout = async () => {
     try {
-      const { error } = await supabase.auth.signOut();
-      if (error) throw error;
+      const response = await fetch('/api/auth/signout', {
+        method: 'POST'
+      });
+      if (!response.ok) throw new Error('Failed to sign out');
       router.push('/signin');
     } catch (error) {
       console.error('Error signing out:', error);

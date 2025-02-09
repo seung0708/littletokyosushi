@@ -12,7 +12,8 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
         .select('*')
         .eq('id', id)
         .single();
-    
+
+    console.log('Current cart:', currentCart, cartError);
     if (cartError) {
         console.error('Error fetching cart:', cartError);
         return NextResponse.json(
@@ -20,7 +21,7 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
             { status: 500 }
         );
     }
-
+    
     // Check if customer has any existing cart
     const { data: existingCart, error: existingCartError } = await supabase
         .from('carts')
@@ -28,7 +29,7 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
         .eq('customer_id', customerId)
         .single();
 
-    if (existingCartError) {
+    if (existingCartError && existingCartError.code !== 'PGRST116') {
         console.error('Error fetching cart:', existingCartError);
         return NextResponse.json(
             { error: 'Failed to fetch cart' },

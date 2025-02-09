@@ -35,8 +35,9 @@ export const CartProvider = ({ children }: CartProviderProps) => {
     const [cartId, setCartId] = useState<string>(""); 
     const [isCartLoading, setIsCartLoading] = useState(false);
     const [cartError, setCartError] = useState<string | null>(null);
-
+    
     useEffect(() => {
+        console.log('useEffect cartId', cartId);
         const savedCartId = localStorage.getItem('cartId');
         if (savedCartId && userId) {
             updateCartCustomerId(userId);
@@ -50,7 +51,7 @@ export const CartProvider = ({ children }: CartProviderProps) => {
         } else {
             setCartItems([]);  // Clear cart items if nothing in storage
         }
-    }, [cartId, userId]);
+    }, [cartId,userId]);
 
     const clearCart = () => {
         localStorage.removeItem('cartId');
@@ -60,6 +61,7 @@ export const CartProvider = ({ children }: CartProviderProps) => {
     };
 
     const fetchCart = async () => {
+        console.log('fetchCart');
         if (!cartId) return;
         setIsCartLoading(true);
         setCartError(null);
@@ -72,6 +74,16 @@ export const CartProvider = ({ children }: CartProviderProps) => {
                 credentials: 'include',
             });
            
+            if (response.status === 404) {
+                // Cart not found in database, clear local storage
+                console.log('Cart not found in database, clearing local storage');
+                localStorage.removeItem('cartId');
+                localStorage.removeItem('cartItems');
+                setCartId('');
+                setCartItems([]);
+                return;
+            }
+
             if (!response.ok) {
                const errorData = await response.json();
                console.error('Cart fetch failed:', errorData);
@@ -113,20 +125,22 @@ export const CartProvider = ({ children }: CartProviderProps) => {
     };
 
     const handleCartUpdate = async (item?: CartItem) => {
+        
         try {
             // Case 1: Guest adding item
             if (!userId && item) {
                 if (!cartId || cartId === '') {
                     console.log('Guest user - create new cart');
-                    await createNewCart(item);
+                    //await createNewCart(item);
                 } else {
                     console.log('Guest user - update existing cart');
-                    await updateExistingCart(item);
+                    //await updateExistingCart(item);
                 }
             }
             // Case 2: User just signed in
             else if (userId && user) {
                 // Check if user has an existing cart
+                console.log('Checking for existing user cart:', userId);
                 const response = await fetch('/api/store/cart/user', {
                     headers: {
                         'user-id': userId
@@ -134,6 +148,7 @@ export const CartProvider = ({ children }: CartProviderProps) => {
                     credentials: 'include'
                 });
                 const data = await response.json();
+                console.log('Cart check response:', data);
                     
                 if (data.status === 200) {
                     // User has existing cart - merge if anonymous cart exists
@@ -167,7 +182,7 @@ export const CartProvider = ({ children }: CartProviderProps) => {
                     await fetchCart();
                 } else if (cartId) {
                     // No existing user cart - associate anonymous cart
-                    console.log('Associate anonymous cart with user');
+                    console.log('Associate anonymous cart with user', cartId);
                     const response = await fetch(`/api/store/cart/merge/${cartId}`, {
                         method: 'PATCH',
                         headers: {

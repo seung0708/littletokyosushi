@@ -48,7 +48,6 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ orderI
         // Add additional fields based on status
         if (body.status === 'completed') {
           updateData.archived = true;
-          updateData.completed_at = new Date().toISOString();
         } else if (body.status === 'ready') {
           // Only update status for ready
           updateData.status = 'ready';

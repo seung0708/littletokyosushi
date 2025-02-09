@@ -83,7 +83,7 @@ export function findMatchingCartItem(cartItems: any[], newItem: any) {
 }
 
 export async function createNewCartItemWithModifiers(supabase: any, cartId: string, newItems: any) {
-    console.log('newItems', newItems);
+    //console.log('newItems', newItems);
     // Create cart item
     const { data: cartItem, error } = await supabase
         .from('cart_items')
@@ -96,6 +96,7 @@ export async function createNewCartItemWithModifiers(supabase: any, cartId: stri
             special_instructions: newItems.special_instructions || '',
         })
         .select();
+    console.log('Created cart item:', cartItem);
     
     if (error || !cartItem) {
         console.error('Error creating cart item:', error);

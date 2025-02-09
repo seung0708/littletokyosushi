@@ -4,7 +4,6 @@ import { useState, useEffect } from 'react';
 import OrderDetails from './order-details';
 import OrderFooter from './order-footer';
 import RefundSection from './refund-section';
-import { createClient } from '@/lib/supabase/client';
 import { Order } from '@/types/order';
 
 interface OrderViewProps {

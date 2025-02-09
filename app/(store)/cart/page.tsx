@@ -29,8 +29,10 @@ const CartPage: React.FC = () => {
             base_price: cartItem.base_price,
             total_price: calculateTotalPrice(cartItem.base_price, newQuantity, cartItem.cart_item_modifiers || []), 
             special_instructions: cartItem.special_instructions, 
-            menu_item_name: cartItem.menu_item?.name,
-            menu_item_image: cartItem.menu_item?.image_urls?.[0], 
+            menu_items: {
+                name: cartItem.menu_items?.name || '',
+                image_url: cartItem.menu_items?.image_urls || []
+            },
             cart_item_modifiers: cartItem.cart_item_modifiers
         };
         await handleCartUpdate(updatedItem);
@@ -61,18 +63,18 @@ const CartPage: React.FC = () => {
                                                   border border-white/10 rounded-xl overflow-hidden">
                                         <div className="flex p-6">
                                             <div className="relative h-24 w-24 sm:h-48 sm:w-48 flex-shrink-0 overflow-hidden rounded-lg">
-                                                <Image
-                                                    src={`${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/menu-items/${cartItem.menu_item?.image_urls?.[0]}`} 
-                                                    alt={cartItem?.menu_item?.name || 'Item image'} 
+                                                {/* <Image
+                                                    src={`${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/menu-items/${cartItem.menu_items.im}`} 
+                                                    alt={cartItem?.menu_items?.name || 'Item image'} 
                                                     className="h-full w-full object-cover object-center" 
                                                     height={24}
                                                     width={24}
-                                                />
+                                                /> */}
                                             </div>
                                             <div className="ml-6 flex flex-1 flex-col">
                                                 <div className="flex justify-between">
                                                     <div className="space-y-1">
-                                                        <h3 className="text-xl font-bold">{cartItem.menu_item?.name}</h3>
+                                                        <h3 className="text-xl font-bold">{cartItem.menu_items?.name}</h3>
                                                         {cartItem.cart_item_modifiers?.map((modifier: CartItemModifier) => (
                                                             <div key={modifier.id} className="space-y-1">
                                                                 <h4 className="text-sm font-medium text-gray-300">{modifier?.modifier?.name}</h4>

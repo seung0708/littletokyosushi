@@ -16,6 +16,7 @@ type Cart = Database['public']['Tables']['carts']['Row'] & {
 };
 
 export async function GET(request: Request, { params }: { params: Promise<{ id: string }> }) {
+    console.log(id)
     const { id: cartId } = await params;
     const supabase = await createClient();
 
@@ -29,6 +30,7 @@ export async function GET(request: Request, { params }: { params: Promise<{ id: 
     .order('created_at', { referencedTable: 'cart_items' })
     .single();
 
+    console.log(dbCart)
 
     if (error) {
         console.error('Error fetching cart items:', error);
@@ -41,37 +43,8 @@ export async function GET(request: Request, { params }: { params: Promise<{ id: 
     if (!dbCart) {
         return NextResponse.json({ error: 'Cart not found' }, { status: 404 });
     }
-
-    const cart = {
-        id: dbCart?.id,
-        customer_id: dbCart?.customer_id,
-        cart_items: dbCart?.cart_items.map((cartItem: any) => ({
-            id: cartItem?.id,
-            cart_id: dbCart?.id,
-            base_price: cartItem?.base_price,
-            special_instructions: cartItem?.special_instructions,
-            total_price: cartItem?.total_price,
-            quantity: cartItem?.quantity,
-            menu_item_id: cartItem?.menu_items?.id,
-            menu_item_name: cartItem?.menu_items?.name,
-            menu_item_price: cartItem?.menu_items?.price,
-            menu_item_image: cartItem?.menu_items?.image_urls[0],
-            cart_item_modifiers: cartItem?.cart_item_modifiers?.map((cartItemModifier: any) => ({
-                id: cartItemModifier?.id,
-                modifier_id: cartItemModifier?.modifiers?.id,
-                name: cartItemModifier?.modifiers?.name,
-                cart_item_modifier_options: cartItemModifier?.cart_item_modifier_options?.map((cartItemModifierOption: any) => ({
-                    id: cartItemModifierOption?.id,
-                    modifier_id: cartItemModifierOption?.modifier_id,
-                    modifier_option_id: cartItemModifierOption?.modifier_options?.id,
-                    name: cartItemModifierOption?.modifier_options?.name,
-                    price: cartItemModifierOption?.modifier_options?.price,
-                })) || [],
-            })) || [],
-        })) || [],
-    };
-    
-    return NextResponse.json(cart);
+ 
+    return NextResponse.json(dbCart);
 }
 
 export async function PATCH(request: Request,  { params }: { params: Promise<{ id: string }> }) {
@@ -85,7 +58,7 @@ export async function PATCH(request: Request,  { params }: { params: Promise<{ i
         
         const { data: dbCart } = await supabase
             .from('carts')
-            .select(`id, customer_id, completed_at, 
+            .select(`id, customer_id, 
                 cart_items(id, cart_id, menu_item_id, quantity, base_price, total_price, special_instructions,
                     cart_item_modifiers(id, cart_items_id, modifier_id,
                 cart_item_modifier_options(id, cart_item_modifiers_id, modifier_option_id, modifier_id, modifier_option_price))))`)
@@ -133,7 +106,7 @@ export async function DELETE(request: Request, { params }: { params: Promise<{ i
     try {
         const { data: dbCart, error: cartError } = await supabase
             .from('carts')
-            .select(`id, customer_id, completed_at, 
+            .select(`id, customer_id, 
                 cart_items(id, base_price, total_price, quantity, special_instructions, menu_items(id, name, price, image_urls), 
                 cart_item_modifiers(id, modifiers(id, name), 
                     cart_item_modifier_options(id, modifier_id, modifier_options(id, name, price))))`)

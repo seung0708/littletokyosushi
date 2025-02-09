@@ -11,7 +11,7 @@ export interface Cart {
 export interface CartItem  {
     id?: string;
     cart_id?: string;
-    menu_item?: MenuItem | null;
+    menu_items?: MenuItem | null;
     quantity: number;
     base_price: number;
     total_price: number;
