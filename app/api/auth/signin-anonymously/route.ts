@@ -11,7 +11,7 @@ export async function POST(req: Request) {
     const { email, name } = await req.json()
     const first_name = name.split(' ')[0]
     const last_name = name.split(' ')[1]
-    console.log(first_name, last_name, email);
+
     try {
    
         const {data: customer, error: customerError} = await supabase
@@ -27,7 +27,7 @@ export async function POST(req: Request) {
 
         if (customer) {
             const { data: {user: existingUser}, error: usersError} = await supabase.auth.admin.getUserById(customer.id);
-            console.log('existingUser',existingUser);
+            
             if (usersError) {
                 console.error('Error fetching user:', usersError);
                 return NextResponse.json({ error: usersError.message }, { status: 400 })

@@ -14,14 +14,14 @@ export default function OrderItems({order}: {order: Order}) {
                     <div className="flex gap-2 mt-1">
                       {item?.order_item_modifiers?.map((mod: OrderItemModifier) => (
                         <div key={mod.id?.substring(0, 8)} className="text-sm">
-                          <p className="text-muted-foreground font-medium">{mod.name}:</p>
+                          <p className="text-muted-foreground font-medium">{mod.modifier_name}:</p>
                         <div className="">
                           {mod.order_item_modifier_options.map((opt: any) => (
                           <p
                             key={opt.id.substring(0, 8)} 
                             className="text-muted-foreground bg-muted px-2 py-1 rounded-md"
                           >
-                            {opt.name}
+                            {opt.option_name}
                           </p>
                           ))}
                         </div>

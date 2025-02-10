@@ -20,7 +20,7 @@ const Page: React.FC = () => {
   const router = useRouter();
   const [order, setOrder] = useState<Order | null>(null);
   const [orderId, setOrderId] = useState<string | null>(null);
-  console.log(order)
+  console.log(order);
   // const [error, setError] = useState<string | null>(null);
   const [paymentVerified, setPaymentVerified] = useState(false);
   const { clearCart } = useCart();
@@ -51,7 +51,7 @@ const Page: React.FC = () => {
           const verifyData = await verifyResponse.json();
           
           setOrderId(verifyData.orderId);
-          
+          localStorage.setItem('orderId', verifyData.orderId);
 
           if (verifyData.clearCart) {
             console.log('Clearing cart data...');
@@ -64,20 +64,12 @@ const Page: React.FC = () => {
         } catch (error) {
           console.error('Error verifying payment:', error);
         }
-      } else {
-        console.log('Skipping payment verification due to:', {
-          missingPaymentId: !paymentId,
-          missingSecret: !paymentIntentSecret,
-          incorrectStatus: redirectStatus !== 'succeeded',
-          alreadyVerified: paymentVerified
-        });
       }
     };
     verifyPayment();
   },[searchParams, paymentVerified ,clearCart]);
 
-  useEffect(() => {
-    const fetchOrder = async () => {
+  const fetchOrder = async () => {
     try {
         const response = await fetch(`/api/orders/${orderId}`);
         const data = await response.json();
@@ -86,12 +78,33 @@ const Page: React.FC = () => {
         console.error('Error fetching order:', error);
       }
     };
-    fetchOrder();
-  },[orderId]);
 
+
+  useEffect(() => {
+    const storedOrderId = localStorage.getItem('orderId');
+    if (storedOrderId) {
+      setOrderId(storedOrderId);
+      return;
+    }
+
+    if (orderId) {
+      fetchOrder();
+    }
+  }, [orderId]);
+
+  useEffect(() => {
+    return () => {
+      if (window.location.pathname !== '/order-confirmation') {
+        setOrderId(null);
+        localStorage.removeItem('orderId');
+      }
+    }
+  },[]);
+
+  
 
   return (
-    <div className="bg-white">
+    <div className="min-h-screen bg-black text-white pt-24">
       <div className="mx-auto max-w-3xl px-4 py-16 sm:px-6 sm:py-24 lg:px-8">
         <div className="max-w-xl">
           <h1 className="mt-2 text-4xl font-bold tracking-tight sm:text-5xl">Thanks for your Order!</h1>
@@ -108,7 +121,7 @@ const Page: React.FC = () => {
 
           <dl className="grid grid-cols-2 gap-x-6 text-sm">
             <div>
-              <dt className="font-medium text-gray-900">Pickup Date</dt>
+              <dt className="font-medium">Pickup Date</dt>
               <dd className="text-gray-700">
                 {order && format(new Date(order.pickup_date), 'EEE, M/d/yy')}
               </dd> 
@@ -183,13 +196,13 @@ const Page: React.FC = () => {
                 <div className="mt-2 flex flex-wrap gap-x-4 text-sm text-gray-500">
                   {item.order_item_modifiers.map((modifier: OrderItemModifier) => (
                   <div key={modifier.id?.substring(0, 8)} className="">
-                    {modifier.name}:
+                    {modifier.modifier_name}:
                     {modifier.order_item_modifier_options?.map((option: OrderItemModifierOption, index: number) => (
                     <div key={option.id} className="ml-4 mt-1">
                         {index > 0 && '•'}
-                        {option.name}
+                        {option.option_name}
                         {/* {option.quantity > 1 && ` (${option.quantity})`} */}
-                        {`+$${(option.price).toFixed(2)}`}
+                        {`+$${(option.option_price).toFixed(2)}`}
                     </div>
                   ))}
                   </div>

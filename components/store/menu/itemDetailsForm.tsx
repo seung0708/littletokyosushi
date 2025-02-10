@@ -60,7 +60,7 @@ export default function ItemDetailsForm({item}: {item: MenuItem}) {
         const {modifiers} = item!;
         const currentModifiers = form.getValues('modifiers');
         const modifierIndex = currentModifiers.findIndex(m => m.id === modifierId);
-        console.log(modifiers);
+    
         if (modifierIndex === -1) return;
         
         const modifier = modifiers?.[modifierIndex];
@@ -111,19 +111,12 @@ export default function ItemDetailsForm({item}: {item: MenuItem}) {
                 min_selections: mod.min_selections ?? 0,
                 max_selections: mod.max_selections ?? 1,
                 is_required: mod.is_required ?? false,
-                modifier_options: mod.modifier_options?.map(opt => ({
-                    id: opt.id ?? 0,
-                    name: opt.name,
-                    modifier_id: opt.modifier_id,
-                    modifier_option_id: opt.id ?? 0,
-                    price: opt.price
-                })) ?? []
+                modifier_options: []  // Initialize with empty options
             })));
         }
     }, [item, form]);
-
+    
     const onSubmit = async (data: FormData) => {
-        
         // Validate required selections
         const invalidModifier = data.modifiers.find(mod => 
             mod.is_required && mod.modifier_options.length !== mod.max_selections

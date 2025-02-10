@@ -56,14 +56,14 @@ export interface OrderItem {
   
 export interface OrderItemModifier {
     id?: string;
-    name: string;
+    modifier_name: string;
     order_item_modifier_options: OrderItemModifierOption[];
 }
 
 export interface OrderItemModifierOption {
     id: string;
-    name: string;
-    price: number;
+    option_name: string;
+    option_price: number;
   }
   
   interface OrderPayment {

@@ -50,10 +50,10 @@ const OrderDetails: React.FC<OrderDetailsProps> = ({ order, onRefund }) => {
                                 <p className="font-medium">{item?.item_name}</p>
                                 {item?.order_item_modifiers?.map((modifier: OrderItemModifier) => (
                                     <div key={modifier?.id} className="ml-4 text-sm text-gray-500">
-                                        {modifier?.name}:
+                                        {modifier?.modifier_name}:
                                         {modifier?.order_item_modifier_options?.map((option) => (
                                             <span key={option?.id} className="ml-2">
-                                                {option?.name} (+${option?.price?.toFixed(2)})
+                                                {option?.option_name} (+${option?.option_price?.toFixed(2)})
                                             </span>
                                         ))}
                                     </div>

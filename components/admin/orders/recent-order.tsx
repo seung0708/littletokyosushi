@@ -170,8 +170,8 @@ export default function RecentOrder({order}: {order: Order}) {
             <title>Order Receipt #${order?.short_id?.toUpperCase()}</title>
             <style>
               @page {
-                margin: 4px;
-                padding: 4px;
+                margin: 3px;
+                padding: 3px;
               }
                 * {
                     font-size: 16px;
@@ -244,7 +244,7 @@ export default function RecentOrder({order}: {order: Order}) {
                         ${item?.order_item_modifiers?.map((modifier: OrderItemModifier) => `
                             <div class="modifier">
                                 ${modifier.order_item_modifier_options?.map((option: OrderItemModifierOption) => 
-                                    `<p>• ${option.name}</p>`
+                                    `<p>• ${option.option_name}</p>`
                                 ).join('')}
                             </div>
                         `).join('')}

@@ -144,7 +144,7 @@ export async function POST(req: Request) {
         return NextResponse.json({ 
             message: 'Payment verified successfully', 
             status: 200, 
-            orderId: orderData.id,
+            orderId: orderData.short_id,
             clearCart: true // Signal to client to clear localStorage
         });
         

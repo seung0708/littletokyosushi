@@ -37,7 +37,6 @@ export const CartProvider = ({ children }: CartProviderProps) => {
     const [cartError, setCartError] = useState<string | null>(null);
     
     useEffect(() => {
-        
         const savedCartId = localStorage.getItem('cartId');
         if (savedCartId && userId) {
             updateCartCustomerId(userId);
@@ -47,9 +46,9 @@ export const CartProvider = ({ children }: CartProviderProps) => {
         }
         const savedCartItems = localStorage.getItem('cartItems');
         if (savedCartItems) {
-            setCartItems(JSON.parse(savedCartItems));
+            setCartItems(JSON.parse(savedCartItems));  
         } else {
-            setCartItems([]);  // Clear cart items if nothing in storage
+            setCartItems([]);  
         }
     }, [cartId,userId]);
 
@@ -211,7 +210,6 @@ export const CartProvider = ({ children }: CartProviderProps) => {
     };
 
     const createNewCart = async (item: CartItem) => {
-        //console.log('Creating new cart', item);
         try {
             const response = await fetch('/api/store/cart', {
                 method: 'POST',
@@ -231,8 +229,16 @@ export const CartProvider = ({ children }: CartProviderProps) => {
             const data = await response.json();
             
             if(data.status === 200) {
-                setCartId(data.cartId ); 
+                // Update cart ID
+                setCartId(data.cartId); 
                 localStorage.setItem('cartId', data.cartId);
+                
+                // Update cart items immediately
+                const newCartItems = [...cartItems, item];
+                setCartItems(newCartItems);
+                localStorage.setItem('cartItems', JSON.stringify(newCartItems));
+                
+                // Then fetch full cart data
                 await fetchCart();
             };
         }
@@ -242,7 +248,6 @@ export const CartProvider = ({ children }: CartProviderProps) => {
     }
 
     const updateExistingCart = async (item: CartItem) => {
-        
         try {
             const response = await fetch(`/api/store/cart/${cartId}`, {
                 method: 'PATCH',
@@ -262,8 +267,16 @@ export const CartProvider = ({ children }: CartProviderProps) => {
             const data = await response.json();
             
             if(data.status === 200) {
+                // Update cart ID
                 setCartId(data.cartId);
                 localStorage.setItem('cartId', data.cartId);
+                
+                // Update cart items immediately
+                const newCartItems = [...cartItems, item];
+                setCartItems(newCartItems);
+                localStorage.setItem('cartItems', JSON.stringify(newCartItems));
+                
+                // Then fetch full cart data
                 await fetchCart();
             };
         }
