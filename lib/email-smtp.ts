@@ -1,4 +1,3 @@
-// lib/email-smtp.ts
 import OrderConfirmationEmail from '@/emails/order-confirmation';
 import PrepTimeNotificationEmail from '@/emails/prep-time-notifications';
 import OrderReadyNotificationEmail from '@/emails/order-ready-notification';
@@ -50,7 +49,7 @@ export async function sendPrepTimeNotificationEmail(order: Order, customer: Cust
     throw new Error('Missing required fields for prep time notification email');
   }
 
-  const emailHtml = await render(PrepTimeNotificationEmail({ 
+  const emailHtml = await render(PrepTimeNotificationEmail({
     order: {
       short_id: order.short_id,
       prep_time_minutes: order.prep_time_minutes

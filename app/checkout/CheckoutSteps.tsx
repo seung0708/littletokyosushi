@@ -30,7 +30,7 @@ const CheckoutSteps = () => {
     const [orderTotal, setOrderTotal] = useState<number>(0);
     const [orderFees, setOrderFees] = useState({serviceFee: 0, subTotal: 0});
     const [customerAddress, setCustomerAddress] = useState<CustomerAddress | null>(null);
-
+    
     useEffect(() => {
         if(user && currentStep === 'signin') {
             handleNextStep();
@@ -164,9 +164,7 @@ const CheckoutSteps = () => {
             }
             console.log('Moving to summary with total:', orderTotal);
             setCurrentStep('summary');
-            setTimeout(() => {
-                createPaymentIntent();
-            }, 0);
+            createPaymentIntent();
             break;
     }
 };
@@ -304,17 +302,11 @@ const CheckoutSteps = () => {
                                         },
                                     }}
                                 >
-                                    {customerAddress ? (
-                                        <PaymentSection 
+                                    <PaymentSection 
                                             customerAddress={customerAddress}
                                             onSubmit={onSubmit}
                                             form={form}
-                                        />
-                                    ) : (
-                                        <div className="flex justify-center items-center p-4">
-                                            <p className="text-gray-600">Please provide delivery information first</p>
-                                        </div>
-                                    )}
+                                    />
                                 </Elements>
                             ) : (
                                 <div className="h-full flex items-center justify-center">

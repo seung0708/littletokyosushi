@@ -10,59 +10,14 @@ type OrderItemModifierOptionInsert = Partial<Database['public']['Tables']['order
 export async function POST(req: Request) {
     const { customer_id, customer, delivery, total, cartItems, fees } = await req.json();
     const supabase = await createClient();
-    console.log('POST /api/orders', { customer_id, customer, delivery, total, cartItems, fees });
     
     try {
-        // Validate customer data
-        if (!customer.signinEmail && !customer.guestEmail) {
+        if (!customer.signinEmail || !customer.guestEmail) {
             return NextResponse.json({ error: 'Customer email is required' }, { status: 400 });
         }
-
-        // Handle different customer types
-        let finalCustomerId = customer_id;
-        console.log('finalCustomerId:', finalCustomerId);
-        if (!customer_id) {
-            // Guest customer - Check if they already exist
-            const { data: existingCustomer, error: customerError } = await supabase
-                .from('customers')
-                .select('id')
-                .eq('email', customer.guestEmail)
-                .single();
-
-            if (customerError && customerError.code !== 'PGRST116') {
-                console.error('Error checking existing customer:', customerError);
-                return NextResponse.json({ error: customerError.message }, { status: 400 });
-            }
-
-            if (existingCustomer) {
-                // Use existing customer ID
-                finalCustomerId = existingCustomer.id;
-            } else {
-                // Create new guest customer record
-                const { data: newCustomer, error: createError } = await supabase
-                    .from('customers')
-                    .insert({
-                        email: customer.guestEmail,
-                        first_name: customer.guestName.split(' ')[0],
-                        last_name: customer.guestName.split(' ')[1] || '',
-                        phone: customer.phone,
-                        is_guest: true
-                    })
-                    .select()
-                    .single();
-
-                if (createError) {
-                    console.error('Error creating guest customer:', createError);
-                    return NextResponse.json({ error: createError.message }, { status: 400 });
-                }
-
-                finalCustomerId = newCustomer.id;
-            }
-        }
-
-        // Create the order
+        
         const orderInsert: Partial<Database['public']['Tables']['orders']['Insert']> = {
-            customer_id: finalCustomerId,
+            customer_id,
             pickup_date: delivery.pickupDate,
             pickup_time: delivery.pickupTime,
             total: total,
@@ -81,7 +36,6 @@ export async function POST(req: Request) {
             return NextResponse.json({ error: orderError.message }, { status: 400 });
         }
 
-        // Process order items
         for (const item of cartItems)  {
             const orderItemInsert: Partial<Database['public']['Tables']['order_items']['Insert']> = {
                 order_id: orderData.id,
@@ -137,18 +91,10 @@ export async function POST(req: Request) {
             }
         }
 
-        // Send confirmation email
         try {
-            await sendOrderConfirmationEmail(
-                {
-                    ...orderData,
-                    items: cartItems
-                },
-                customer
-            );
+            await sendOrderConfirmationEmail(orderData, customer);
         } catch (emailError) {
             console.error('Failed to send confirmation email:', emailError);
-            // Don't return error here as the order was still created successfully
         }
 
         return NextResponse.json(orderData);

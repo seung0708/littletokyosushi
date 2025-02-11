@@ -40,19 +40,19 @@ export default function OrderConfirmationEmail({ order, customer }: OrderConfirm
             </Text>
             
             <Text style={sectionTitle}>Order Items:</Text>
-            {order.items.map((item: OrderItem, index) => (
+            {order.order_items.map((item: OrderItem, index) => (
               <div key={index}>
                 <Row style={itemRow}>
                   <Column>
                     <Text>
                       {item.quantity} x {item.item_name}
                     </Text>
-                    {item.modifiers?.map((modifier: OrderItemModifier) => (
-                      <Text key={modifier.name}>
-                        {modifier.name}:
-                        {modifier.options?.map((option: OrderItemModifierOption) => (
-                          <Text key={option.name}>
-                            • {option.name} (+${option.price.toFixed(2)})
+                    {item.order_item_modifiers?.map((modifier: OrderItemModifier) => (
+                      <Text key={modifier.modifier_name}>
+                        {modifier.modifier_name}:
+                        {modifier.order_item_modifier_options?.map((option: OrderItemModifierOption) => (
+                          <Text key={option.option_name}>
+                            • {option.option_name} (+${option.option_price.toFixed(2)})
                           </Text>
                         ))}
                       </Text>

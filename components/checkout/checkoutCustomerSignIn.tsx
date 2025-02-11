@@ -10,6 +10,7 @@ import { Input } from '../ui/input';
 import { Button } from '../ui/button';
 import { useCart } from '@/app/context/cartContext';
 import { useEffect, useState } from 'react';
+import { User } from '@/types/user';
 
 interface CustomerSignInProps {
     form: UseFormReturn<CheckoutFormValues>
@@ -35,38 +36,32 @@ const CheckoutCustomerSignIn: React.FC<CustomerSignInProps> = ({ form, onComplet
         try {
             setSignInError('')
             const response = await signin(customer.signinEmail, customer.password)
-            console.log('Sign in data:', response)
             if (response?.id) {
                 await updateCartCustomerId(response?.id)
                 onComplete()
             } 
         } catch (error) {
-            console.error('Sign in failed:', error)
             setSignInError('Sign in failed')
         }
     }
 
-    const handleSignUp = async () => {  // Add signup handler
+    const handleSignUp = async () => {  
         const { customer } = form.getValues()
         try {
             setSignUpError('')
             const response = await signup(customer.signinEmail, customer.password)
-            console.log('Sign up data:', response)
             if (response) {
                 await updateCartCustomerId(response?.id || '')
                 onComplete()
             }
         } catch (error) {
-            console.error('Sign up failed:', error)
         }
     }
 
-    const handleGoogleSignIn = async () => {  // Add Google handler
+    const handleGoogleSignIn = async () => {  
         try {
             await googleSignin()
-            
         } catch (error) {
-            console.error('Google sign in failed:', error)
         } finally {
             onComplete()
         }
@@ -76,21 +71,18 @@ const CheckoutCustomerSignIn: React.FC<CustomerSignInProps> = ({ form, onComplet
         const { customer } = form.getValues()
         try {
             setGuestError('')
-            const response = await signinAnonymously(customer.guestEmail, customer.guestName)
-            console.log('New user:', response)
-            if (response) {
-                await updateCartCustomerId(response?.id || '')
+            const { user } = await signinAnonymously(customer.guestEmail, customer.guestName)
+            if (user) {
+                await updateCartCustomerId(user.id || '')
                 onComplete()
             } 
         } catch (error) {
             setGuestError('Sign in failed')
-            console.error('Sign in failed:', error)
         }
     }
 
     return (
         <div className="grid md:grid-cols-2 gap-8">
-            {/* Returning Customer Column */}
             <div className="bg-black text-white p-6 rounded-lg">
                 <div className="text-center mb-6">
                     <h2 className="text-xl font-semibold">Returning Customer</h2>
@@ -196,7 +188,6 @@ const CheckoutCustomerSignIn: React.FC<CustomerSignInProps> = ({ form, onComplet
                 </div>
             </div>
 
-            {/* Guest Checkout Column */}
             <div className="bg-black p-6 rounded-lg shadow-md">
                 <div className="text-center text-white mb-6">
                     <h2 className="text-xl font-semibold">Guest Checkout</h2>

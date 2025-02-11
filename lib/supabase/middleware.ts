@@ -18,7 +18,15 @@ export async function updateSession(request: NextRequest) {
         //accepts a list of cookies
         setAll(cookiesToSet) {
           //request.cookies.set updates the request cookies
-          cookiesToSet.forEach(({ name, value, options }) => request.cookies.set(name, value))
+          cookiesToSet.forEach(({ name, value, options }) => {
+            if(name.includes('supabase')) {
+              options = {
+                ...options, 
+                maxAge: 7 * 24 * 60 * 60,
+              }
+            }
+            request.cookies.set(name, value)
+          })
           //
           supabaseResponse = NextResponse.next({
             request,

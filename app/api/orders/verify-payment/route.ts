@@ -19,7 +19,6 @@ export async function POST(req: Request) {
         }
 
         const orderId = paymentIntent.metadata.order_id;
-        console.log('Order ID:', orderId);
         if (!orderId) {
             return NextResponse.json({ error: 'No order ID found' }, { status: 400 });
         }
@@ -95,27 +94,6 @@ export async function POST(req: Request) {
 
         if (cartError) {
             console.error('Error clearing cart:', cartError);
-        }
-
-        // Clean up duplicate payment records - keep only the latest
-        const latestPayment = await supabase
-            .from('order_payments')
-            .select('created_at')
-            .eq('order_id', orderData.id)
-            .order('created_at', { ascending: false })
-            .limit(1)
-            .single();
-
-        if (latestPayment.data) {
-            const { error: deletePaymentError } = await supabase
-                .from('order_payments')
-                .delete()
-                .eq('order_id', orderData.id)
-                .lt('created_at', latestPayment.data.created_at);
-
-            if (deletePaymentError) {
-                console.error('Error cleaning up duplicate payments:', deletePaymentError);
-            }
         }
 
         // Clean up duplicate status records - keep only the latest

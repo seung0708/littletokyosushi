@@ -1,10 +1,7 @@
-'use client';
-
-import { useState, useEffect } from 'react';
 import OrderDetails from './order-details';
 import OrderFooter from './order-footer';
-import RefundSection from './refund-section';
 import { Order } from '@/types/order';
+import OrderHeader  from './order-header';
 
 interface OrderViewProps {
     order: Order;
@@ -12,7 +9,6 @@ interface OrderViewProps {
 }
 
 const OrderView: React.FC<OrderViewProps> = ({ order, onRefund }) => {
-
     if (!order) {
         return (
             <div className="flex items-center justify-center min-h-screen">
@@ -24,11 +20,11 @@ const OrderView: React.FC<OrderViewProps> = ({ order, onRefund }) => {
     }
 
     return (
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div className="ml-64 flex-1 p-8">
             <div className="bg-white shadow-lg rounded-lg overflow-hidden">
+                <OrderHeader order={order} />
                 <OrderDetails order={order} onRefund={onRefund} />
-                <RefundSection order={order} onRefund={onRefund} />
-                <OrderFooter order={order}  />
+                <OrderFooter order={order} />
             </div>
         </div>
     );

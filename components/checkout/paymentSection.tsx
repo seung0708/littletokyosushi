@@ -8,25 +8,24 @@ import { Order } from '@/types/order';
 import {CustomerAddress} from '@/types/customer';
 
 interface Props {
-    customerAddress: CustomerAddress;
+    customerAddress?: CustomerAddress | null;
     onSubmit: (data: CheckoutFormValues) => Promise<Order>; 
     form: UseFormReturn<CheckoutFormValues>; 
 }
 
 const PaymentSection = ({ customerAddress, onSubmit, form }: Props) => {
-    console.log(customerAddress);
     const stripe = useStripe();
     const elements = useElements();
     const { user } = useAuth();
-
+    
     const handleAddressSubmit = async () => {
         if (!elements) return;
-
+        
         try {
             // Get address from Stripe Elements
             const addressElement = elements.getElement('address');
             const addressDetails = await addressElement?.getValue();
-    
+            console.log('Address details:', addressDetails);
             if (!addressDetails) {
                 throw new Error('Billing address is required');
             }
@@ -37,7 +36,7 @@ const PaymentSection = ({ customerAddress, onSubmit, form }: Props) => {
                     method: 'PATCH',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
-                        customer_id: user.id,
+                        user: user,
                         address: addressDetails
                     })
                 });
@@ -45,8 +44,7 @@ const PaymentSection = ({ customerAddress, onSubmit, form }: Props) => {
                 if (!response.ok) {
                     console.error('Error saving address');
                 }
-            }
-
+            } 
             return addressDetails;
         } catch (error) {
             console.error('Error handling address:', error);
@@ -136,7 +134,7 @@ const PaymentSection = ({ customerAddress, onSubmit, form }: Props) => {
                     validation: { phone: { required: 'always' } },
                 }}
             />
-            <PaymentForm onAddressSubmit={handleAddressSubmit} onPaymentSubmit={handleSubmit} />
+            <PaymentForm stripe={stripe} elements={elements} onAddressSubmit={handleAddressSubmit} onPaymentSubmit={handleSubmit} />
         </div>
     );
 };

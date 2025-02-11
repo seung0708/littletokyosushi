@@ -14,7 +14,6 @@ interface Props {
 
 const OrderSummary = ( {form, orderTotal, orderFees}: Props) => {
     const {cartItems} = useCart();
-    console.log(cartItems);
     const deliveryMethod = form.watch('delivery.method');
     const pickupDate = new Date(form.watch('delivery.pickupDate') as string);
     const pickupTime = form.watch('delivery.pickupTime');
@@ -44,15 +43,15 @@ const OrderSummary = ( {form, orderTotal, orderFees}: Props) => {
                                 <h3><span>{item?.quantity} x </span>{item?.menu_items?.name}</h3>
                                 
                                 {item?.cart_item_modifiers?.map(modifier => (
-                                    <div key={modifier?.id}>
+                                  <div key={modifier?.id}>
                                     <p className="font-bold">{modifier.modifier?.name}</p>
                                     {modifier?.cart_item_modifier_options?.map(option => (
-                                        <>
+                                      <div key={option?.id}>  {/* Change fragment to div and add key */}
                                         <p>{option?.modifier_options?.name} +<span>${option?.modifier_options?.price.toFixed(2)}</span></p>
-                                        </>
-                                    ))}
-                                    </div>
-                                ))}
+                                      </div>
+                                    ))} 
+                                  </div>
+                                ))} 
                             </div>
                             <div>
                                 <h3>Special Instructions</h3>

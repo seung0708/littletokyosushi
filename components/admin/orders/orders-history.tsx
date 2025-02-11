@@ -18,7 +18,7 @@ export default function OrdersHistory() {
   const [searchQuery, setSearchQuery] = useState('')
   const [loading, setLoading] = useState(true)
   const supabase = createClient()
-
+  
   const fetchArchivedOrders = async () => {
     try {
       setLoading(true)
@@ -53,7 +53,6 @@ export default function OrdersHistory() {
     }
   }, [])
 
-  // Only filter if orders is an array
   const filteredOrders = Array.isArray(orders) ? orders.filter(order => {
     const searchLower = searchQuery.toLowerCase()
     return (

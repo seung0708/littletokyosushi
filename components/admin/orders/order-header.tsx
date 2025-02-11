@@ -5,9 +5,9 @@ import { Copy } from "lucide-react";
 import { format } from "date-fns";
 import { Order } from '@/types/order';
 
-export function OrderHeader({order}: {order: Order}) {
+export default function OrderHeader({order}: {order: Order}) {
     return (
-        <CardHeader className="flex flex-row items-start bg-muted/50 md:pl-64">
+        <CardHeader className="flex flex-row items-start bg-muted/50">
             <div className="grid gap-0.5">
               <CardTitle className="group flex items-center gap-2 text-lg">
                 Order {order.short_id}

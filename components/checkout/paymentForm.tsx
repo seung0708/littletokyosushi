@@ -1,16 +1,16 @@
 import { useStripe, useElements, PaymentElement } from '@stripe/react-stripe-js';
 import { Button } from '../ui/button';
 import { useState } from 'react';
-import { StripeAddressElementChangeEvent } from '@stripe/stripe-js';
+import { StripeAddressElementChangeEvent, StripeElements, Stripe } from '@stripe/stripe-js';
 
 interface Props {
+    stripe: Stripe | null;
+    elements: StripeElements | null;
     onAddressSubmit: () => Promise<Pick<StripeAddressElementChangeEvent, "value" | "complete" | "isNewAddress"> | null | undefined>;
     onPaymentSubmit: () => Promise<void>;
 }
 
-const PaymentForm = ({ onAddressSubmit, onPaymentSubmit }: Props) => {
-    const stripe = useStripe();
-    const elements = useElements();
+const PaymentForm = ({ stripe, elements, onAddressSubmit, onPaymentSubmit }: Props) => {
     const [loading, setLoading] = useState(false);
 
     const handlePayment = async () => {

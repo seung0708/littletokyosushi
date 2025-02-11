@@ -7,12 +7,11 @@ type OrderUpdate = Partial<Database['public']['Tables']['orders']['Update']>;
 export async function GET(req: Request, { params }: { params: Promise<{ orderId: string }> }) {
     const { orderId } = await params;
     const supabase = await createClient();
-    console.log(orderId)
     try {
         const {data: orderData, error: orderError} = await supabase
             .from('orders')
-            .select(`*, order_items(*, order_item_modifiers(*, order_item_modifier_options(*)))`)
-            .eq('id', orderId)
+            .select(`*, customers(*), order_items(*, order_item_modifiers(*, order_item_modifier_options(*)))`)
+            .eq('short_id', orderId)
             .single();
         
         if (orderError) {
@@ -29,75 +28,63 @@ export async function GET(req: Request, { params }: { params: Promise<{ orderId:
 
     } catch (error) {
         console.error('Error in GET /api/orders/[orderId]:', error); 
-        return NextResponse.json({ error: 'Failed to fetch order data' }, { status: 500 });
+        return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
     }
 }
 
-// app/api/orders/[orderId]/route.ts
 export async function PATCH(req: Request, { params }: { params: Promise<{ orderId: string }> }) {
     try {
       const body = await req.json();
+      const { orderId } = await params;
       const supabase = await createClient();
-      const {orderId} = await params;
-      console.log(orderId);
       const updateData: OrderUpdate = {};
       
-      // Handle status updates first
       if (body.status) {
         updateData.status = body.status;
         
-        // Add additional fields based on status
         if (body.status === 'completed') {
           updateData.archived = true;
         } else if (body.status === 'ready') {
-          // Only update status for ready
           updateData.status = 'ready';
         }
       }
       
-      // Handle prep time updates separately
       if (body.prepTime) {
         updateData.prep_time_minutes = body.prepTime;
         updateData.prep_time_confirmed_at = new Date().toISOString();
-        // Only set status to preparing if it's a prep time update
+        
         if (!body.status) {
           updateData.status = 'preparing';
         }
       }
 
-      // First get the current order with all related data
       const { data: currentOrder, error: fetchError } = await supabase
         .from('orders')
-        .select(`*`)
+        .select()
         .eq('short_id', orderId)
         .single();
 
       if (fetchError) throw fetchError;
 
-      // Remove generated columns and merge data
       const { short_id, ...cleanedOrder } = currentOrder;
       const mergedData = { 
         ...cleanedOrder,
         ...updateData,
-        type: currentOrder.type // Explicitly preserve the type field
+        type: currentOrder.type
       };
 
-      // Update with merged data
       const { data: updatedOrder, error } = await supabase
         .from('orders')
         .update(mergedData)
         .eq('short_id', orderId)
-        .select(`*`)
+        .select()
         .single();
-  
+
       if (error) throw error;
-  
+
       return NextResponse.json(updatedOrder);
     } catch (error) {
       console.error('Error updating order:', error);
-      return NextResponse.json(
-        { error: 'Failed to update order' },
-        { status: 500 }
-      );
+      return NextResponse.json({ error: 'Failed to update order' }, { status: 500 });
     }
 }

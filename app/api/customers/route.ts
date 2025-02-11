@@ -16,7 +16,6 @@ export async function GET(req: Request) {
             .eq('id', customer_id)
             .single();
 
-        console.log('customer data:', data);
         if (error && error.code !== 'PGRST116') {
             console.error('Error fetching customer:', error);
             return NextResponse.json({ address: null }, { status: 200 });
@@ -46,13 +45,27 @@ export async function GET(req: Request) {
 
 export async function PATCH(req: Request) { 
     try {
-        const { customer_id, address } = await req.json();
+        const { user, address } = await req.json();
+        //console.log('PATCH /api/customers', { user, address });
         const { line1, line2, city, state, zip, country } = address.value.address;
-        console.log('Updating customer address:', { customer_id, address });
         const supabase = await createClient();
-
-        const { data, error } = await supabase
-            .from('customers')
+        if (user.is_anonymous) {
+            const { error: updateError } = await supabase
+                .from('customers')
+                .update(
+                    {
+                        phone: address.value.phone.substring(2)
+                    }
+                )
+                .eq('id', user.id)
+        
+            if (updateError) {
+                return NextResponse.json({ error: updateError.message }, { status: 400 });
+            }
+            
+        } else {
+            const { data, error } = await supabase
+                .from('customers')
             .update({
                 line1: line1,
                 line2: line2,
@@ -60,18 +73,17 @@ export async function PATCH(req: Request) {
                 state: state,
                 postal_code: zip,
                 country: country,
-                phone: address.value.phone,
+                phone: address.value.phone.substring(2),
                 updated_at: new Date().toISOString()
             })
-            .eq('id', customer_id)
-            .select()
-            .single();
+            .eq('id', user.id)
 
-        if (error) {
-            return NextResponse.json({ error: error.message }, { status: 400 });
+            if (error) {
+                return NextResponse.json({ error: error.message }, { status: 400 });
+            }
+
         }
-
-        return NextResponse.json(data);
+        return NextResponse.json('Updated customer');
     } catch (error) {
         console.error('Error updating customer address:', error);
         return NextResponse.json(
