@@ -104,7 +104,7 @@ export async function GET(req: Request, { params }: { params: Promise<{ orderId:
     if (!data) {
         return NextResponse.json({ error: "Order not found" }, { status: 404 });
     }
-    console.log(data, error);
+    
     return NextResponse.json(data);
 }
 
@@ -179,12 +179,22 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ orderI
             .from('orders')
             .update(updateData)
             .eq('short_id', orderId)
-            .select('*, customers(*)')
+            .select(`*, 
+                customers(*), 
+                order_items(*,
+                  menu_items(*), 
+                  order_item_modifiers(*,
+                    modifiers(*),
+                    order_item_modifier_options(*, 
+                      modifier_options(*))
+                  )
+                )`)
             .single();
 
         if (updateError) throw updateError;
 
         // Send appropriate email notifications
+        console.log('PATCH /api/admin/orders', updatedOrder, updatedOrder.customers);
         if (updatedOrder && updatedOrder.customers) {
             let emailResult;
             

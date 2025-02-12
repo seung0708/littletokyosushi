@@ -33,9 +33,10 @@ const PrintReceipt = ({ order, onClose }: PrintReceiptProps) => {
                     font-size: 28px;
                 }
                 .header p {
-                    font-size: 16px;
+                    font-size: 14px;
                 }
                 .item {
+                    font-size: 14px;
                     margin-bottom: 4px;
                 }
                 .modifier {
@@ -78,13 +79,13 @@ const PrintReceipt = ({ order, onClose }: PrintReceiptProps) => {
             </div>
 
             <div class="items">
-                ${order.items.map((item: OrderItem) => `
+                ${order.order_items.map((item: OrderItem) => `
                     <div class="item">
                         <p>${item.quantity}x ${item.item_name} - $${calculateItemTotal(item).toFixed(2)}</p>
-                        ${item?.modifiers?.map((modifier: OrderItemModifier) => `
+                        ${item?.order_item_modifiers?.map((modifier: OrderItemModifier) => `
                             <div class="modifier">
-                                ${modifier.options.map((option: OrderItemModifierOption) => 
-                                    `${option.name}`
+                                ${modifier.order_item_modifier_options.map((option: OrderItemModifierOption) => 
+                                    `${option.option_name}`
                                 ).join(', ')}
                             </div>
                         `).join('')}

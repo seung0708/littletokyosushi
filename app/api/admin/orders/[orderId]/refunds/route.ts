@@ -1,6 +1,7 @@
 import { createClient } from "@/lib/supabase/server"
 import { NextResponse } from "next/server"
 import {sendRefundNotificationEmail} from '@/lib/email-smtp';
+import stripe from "@/lib/stripe/stripe";
 
 export async function GET(request: Request, { params }: { params: Promise<{ orderId: string }> }) {
     const { orderId } = await params;
@@ -24,7 +25,6 @@ export async function POST(request: Request, { params }: { params: Promise<{ ord
     try {
         const { amount, reason } = await request.json();
         const supabase = await createClient();
-
         // Validate input
         if (!amount || amount <= 0) {
             return NextResponse.json({ error: 'Invalid refund amount' }, { status: 400 });
@@ -40,22 +40,41 @@ export async function POST(request: Request, { params }: { params: Promise<{ ord
             .select(`
                 *,
                 customers(*),
+                order_payments(payment_intent_id),
                 order_refunds(amount)
             `)
             .eq('short_id', orderId)
             .single();
-
+        console.log('Order:', order);
         if (orderError) {
             throw orderError;
+        }
+
+        if(!order?.order_payments?.[0]?.payment_intent_id) {
+            return NextResponse.json({ error: 'Order has not been paid for' }, { status: 400 });
         }
 
         // Calculate total refunded amount
         const totalRefunded = order.order_refunds?.reduce((sum: number, refund: { amount: number; }) => sum + refund.amount, 0) || 0;
         const remainingAmount = order.total - totalRefunded;
-
+        console.log('Remaining amount:', remainingAmount);
+        console.log('Refund amount:', amount);
         if (amount > remainingAmount) {
             return NextResponse.json({ 
                 error: `Cannot refund more than remaining amount: $${remainingAmount.toFixed(2)}` 
+            }, { status: 400 });
+        }
+
+        const refund = await stripe.refunds.create({
+            payment_intent: order.order_payments?.[0]?.payment_intent_id,
+            amount: Math.round(amount * 100),
+            reason: 'requested_by_customer'
+        });
+        console.log('Stripe refund:', refund);
+        if (refund.status !== 'succeeded') {
+            console.error('Stripe refund failed:', refund);
+            return NextResponse.json({ 
+                error: `Stripe refund failed with status: ${refund.status}` 
             }, { status: 400 });
         }
 
@@ -63,14 +82,16 @@ export async function POST(request: Request, { params }: { params: Promise<{ ord
         const { data: newRefund, error: refundError } = await supabase
             .from('order_refunds')
             .insert({
-                order_id: order.id,
+                order_id: order.short_id,
                 amount: amount,
                 reason: reason,
-                processed_by: order.employee_id // Assuming we have this from auth
+                stripe_refund_id: refund.id, 
+                status: refund.status, 
+                refunded_by: 'admin'
             })
             .select()
             .single();
-
+        console.log('New refund:', newRefund);
         if (refundError) {
             throw refundError;
         }
@@ -84,6 +105,30 @@ export async function POST(request: Request, { params }: { params: Promise<{ ord
 
             if (updateError) throw updateError;
         }
+
+        if(newRefund && refund.status === 'succeeded') {
+            const { error: updateError } = await supabase
+                .from('orders')
+                .update({ total: remainingAmount - amount })
+                .eq('id', order.id);
+            if (updateError) throw updateError;
+
+            const { error: paymentError } = await supabase
+                .from('order_payments')
+                .update({ payment_status: 'refunded' })
+                .eq('order_id', order.id);
+            if (paymentError) throw paymentError;
+
+            const { error: orderStatusError } = await supabase
+                .from('order_status_history')
+                .insert({
+                    order_id: order.id,
+                    status: 'refunded',
+                    notes: `Refunded ${amount}`
+                })
+            if (orderStatusError) throw orderStatusError
+        }
+            
 
         // Send email notification
         if (order?.customers) {

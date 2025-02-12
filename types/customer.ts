@@ -3,6 +3,10 @@ export interface Customer {
     first_name?: string;
     last_name?: string;
     email?: string;
+    guestEmail?: string;
+    guestName?: string;
+    signinEmail?: string;
+    signinPassword?: string;
     phone?: string;
     birth_date?: string;
     line1?: string;

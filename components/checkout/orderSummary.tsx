@@ -30,38 +30,41 @@ const OrderSummary = ( {form, orderTotal, orderFees}: Props) => {
               
               <div>
               <div>
-                <h4>{customer?.guestName}</h4>
-                <p>{customer?.guestEmail || customer?.signinEmail}</p>
-                <p>{deliveryMethod}</p>
-                <p>{format(pickupDate, 'EEE MMM dd yyyy')}</p>
-                <p>{pickupTime}</p>
+                <h4><span className="text-gray-400">Name:</span> {customer?.guestName}</h4>
+                <p><span className="text-gray-400">Email:</span> {customer?.guestEmail || customer?.signinEmail}</p>
+                <p><span className="text-gray-400">Fulfillment Method:</span> {deliveryMethod.split(' ').map(word => word[0].toUpperCase() + word.slice(1)).join(' ')}</p>
+                <p><span className="text-gray-400">Date:</span> {format(pickupDate, 'EEE MMM dd yyyy')}</p>
+                <p><span className="text-gray-400">Time:</span> {pickupTime}</p>
               </div>
-              {cartItems.map((item) => (
               <ul role="list" className="divide-y divide-white divide-opacity-10 text-sm font-medium">                
+              {cartItems.map((item) => (
                     <li key={item?.id?.substring(0, 8)} className="flex items-start space-x-4 py-6">  
                             <div className="flex-auto space-y-1">
-                                <h3><span>{item?.quantity} x </span>{item?.menu_items?.name}</h3>
+                                <h3 className="text-lg"><span>{item?.quantity} x </span>{item?.menu_items?.name}</h3>
                                 
                                 {item?.cart_item_modifiers?.map(modifier => (
                                   <div key={modifier?.id}>
-                                    <p className="font-bold">{modifier.modifier?.name}</p>
+                                    <h4>{modifier.modifiers?.name}</h4>
                                     {modifier?.cart_item_modifier_options?.map(option => (
-                                      <div key={option?.id}>  {/* Change fragment to div and add key */}
-                                        <p>{option?.modifier_options?.name} +<span>${option?.modifier_options?.price.toFixed(2)}</span></p>
+                                      <div key={option?.id}>
+                                        <p className="text-gray-400">{option?.modifier_options?.name} +<span>${option?.modifier_options?.price.toFixed(2)}</span></p>
                                       </div>
                                     ))} 
                                   </div>
                                 ))} 
+                              {item?.special_instructions && (
+                              <div>
+                                  <h4>Special Instructions</h4>
+                                  <p className="text-gray-400">{item.special_instructions}</p>
+                              </div>
+                              )}
                             </div>
-                            <div>
-                                <h3>Special Instructions</h3>
-                                <p>{item.special_instructions}</p>
-                            </div>
+                
                         <p className="flex-none text-base font-medium">${(item?.quantity * item?.base_price).toFixed(2)}</p>
                     </li>
-              
+               ))} 
               </ul>
-              ))} 
+             
               <dl className="space-y-6 border-t border-red-500 border-opacity-10 pt-6 text-sm font-medium">
                 <div className="flex items-center justify-between">
                   <dt>Subtotal</dt>

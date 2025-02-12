@@ -75,7 +75,7 @@ export default function OrdersHistory() {
   // }
 
   return (
-    <div className="space-y-4 md:pl-64">
+    <div className="space-y-4">
       <div className="flex justify-between items-center">
         <h2 className="text-2xl font-bold">Order History</h2>
         <div className="relative w-64">

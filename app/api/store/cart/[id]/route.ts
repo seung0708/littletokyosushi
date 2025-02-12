@@ -30,7 +30,7 @@ export async function GET(request: Request, { params }: { params: Promise<{ id: 
     .order('created_at', { referencedTable: 'cart_items' })
     .single();
 
-    if (error) {
+    if (error && error.code !== 'PGRST116') {
         console.error('Error fetching cart items:', error);
         return NextResponse.json(
             { error: 'Failed to fetch cart items' },
@@ -113,7 +113,7 @@ export async function DELETE(request: Request, { params }: { params: Promise<{ i
             .single();
         
 
-        if (cartError) {
+        if (cartError && cartError.code !== 'PGRST116') {
             console.error('Error fetching cart items:', cartError);
             return NextResponse.json(
                 { error: 'Failed to fetch cart items' },

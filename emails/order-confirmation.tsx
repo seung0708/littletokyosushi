@@ -20,12 +20,11 @@ interface OrderConfirmationEmailProps {
 }
 
 export default function OrderConfirmationEmail({ order, customer }: OrderConfirmationEmailProps) {
-  const pickupDate = new Date(`${order.pickup_date}T${order.pickup_time}`);
-  
+
   return (
     <Html>
       <Head />
-      <Preview>Your Little Tokyo Sushi order confirmation #{order.short_id || ''}</Preview>
+      <Preview>Your Little Tokyo Sushi order confirmation #{order?.short_id?.toUpperCase() || ''}</Preview>
       <Body style={main}>
         <Container style={container}>
           <Heading style={h1}>Thank you for your order!</Heading>

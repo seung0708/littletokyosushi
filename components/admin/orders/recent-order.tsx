@@ -10,7 +10,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { format } from "date-fns";
 import { motion} from "framer-motion";
 import { useState, useEffect } from "react";
-import { OrderHeader } from "./order-header";
+import OrderHeader from "./order-header";
 import {Order, OrderItemModifier, OrderItemModifierOption} from "@/types/order";
 import { calculateItemTotal } from "@/utils/item";
 import { createClient } from "@/lib/supabase/client";
@@ -33,41 +33,57 @@ export default function RecentOrder({order}: {order: Order}) {
   })
 
   useEffect(() => {
-    const supabase = createClient();
-    
-    // Subscribe to changes on this specific order
-    const channel = supabase
-      .channel(`order-${order.short_id}`)
-      .on(
-        'postgres_changes',
-        {
-          event: '*',
-          schema: 'public',
-          table: 'orders',
-          filter: `short_id=eq.${order.short_id}`
-        },
-        (payload) => {
-          const newOrder = payload.new as Order;
-          // Update local state with the new order data
-          setCurrentOrder(newOrder);
+  const supabase = createClient();
+  
+  const channel = supabase
+    .channel(`order-${order.short_id}`)
+    .on(
+      'postgres_changes',
+      {
+        event: '*',
+        schema: 'public',
+        table: 'orders',
+        filter: `short_id=eq.${order.short_id}`
+      },
+      async (payload) => {
+        // Fetch the complete order data with all relations
+        const { data: updatedOrder } = await supabase
+          .from('orders')
+          .select(`
+            *,
+            customers(*),
+            order_items(*,
+              menu_items(*), 
+              order_item_modifiers(*,
+                modifiers(*),
+                order_item_modifier_options(*, 
+                  modifier_options(*))
+              )
+            )
+          `)
+          .eq('short_id', order.short_id)
+          .single();
+
+        if (updatedOrder) {
+          setCurrentOrder(updatedOrder);
           
           // Update isConfirmed state based on prep time confirmation
-          if (newOrder.prep_time_confirmed_at) {
+          if (updatedOrder.prep_time_confirmed_at) {
             setIsConfirmed(true);
           }
         }
-      )
-      .subscribe();
+      }
+    )
+    .subscribe();
 
-    // Cleanup subscription on unmount
-    return () => {
-      supabase.removeChannel(channel);
-    };
-  }, [order.short_id]);
+  return () => {
+    supabase.removeChannel(channel);
+  };
+}, [order.short_id]); 
 
   const onComplete = async () => {
     try {
-      const response = await fetch(`/api/orders/${order.short_id}`, { 
+      const response = await fetch(`/api/admin/orders/${order.short_id}`, { 
         method: "PATCH",
         headers: {
           'Content-Type': 'application/json',
@@ -91,8 +107,9 @@ export default function RecentOrder({order}: {order: Order}) {
   };
 
   const onRefund = async (values: { amount: number; reason: string }) => {
+    console.log(values);
     try {
-      const response = await fetch(`/api/orders/${order.short_id}/refunds`, {
+      const response = await fetch(`/api/admin/orders/${order.short_id}/refunds`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
@@ -137,7 +154,7 @@ export default function RecentOrder({order}: {order: Order}) {
 
   const onMarkReady = async () => {
     try {
-      const response = await fetch(`/api/orders/${order.short_id}`, {
+      const response = await fetch(`/api/admin/orders/${order.short_id}`, {
         method: "PATCH",
         headers: {
           'Content-Type': 'application/json',
@@ -279,7 +296,7 @@ export default function RecentOrder({order}: {order: Order}) {
         exit={{ opacity: 0, y: -20 }}
         transition={{ duration: 0.2 }}
       >
-        <Card className="overflow-hidden" x-chunk="dashboard-05-chunk-4">
+        <Card className="overflow-hidden" x-chunk="dashboard-05-chunk-4 ">
           <OrderHeader order={currentOrder} />
           <OrderDetails order={currentOrder} onRefund={onRefund} />
           <OrderFooter 

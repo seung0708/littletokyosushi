@@ -79,7 +79,7 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
         `)
         .eq('cart_id', currentCart.id);
 
-    if (cartItemsError) {
+    if (cartItemsError && cartItemsError.code !== 'PGRST116') {
         console.error('Error fetching cart items:', cartItemsError);
         return NextResponse.json(
             { error: 'Failed to fetch cart items' },

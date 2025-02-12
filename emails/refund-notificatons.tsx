@@ -30,7 +30,7 @@ import {
             </Text>
             <Section style={orderSection}>
               <Text style={text}>Refund Details:</Text>
-              <Text style={orderNumber}>Order #{order.short_id}</Text>
+              <Text style={orderNumber}>Order #{order.short_id.toUpperCase()}</Text>
               <Text style={text}>Refund Amount: ${refundAmount.toFixed(2)}</Text>
             </Section>
             <Text style={text}>

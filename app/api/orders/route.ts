@@ -6,11 +6,11 @@ import { Database } from "@/types/database.types";
 type OrderItemInsert = Partial<Database['public']['Tables']['order_items']['Insert']>;
 type OrderItemModifierInsert = Partial<Database['public']['Tables']['order_item_modifiers']['Insert']>;
 type OrderItemModifierOptionInsert = Partial<Database['public']['Tables']['order_item_modifier_options']['Insert']>;
-
+ 
 export async function POST(req: Request) {
     const { customer_id, customer, delivery, total, cartItems, fees } = await req.json();
     const supabase = await createClient();
-    
+
     try {
         if (!customer.signinEmail || !customer.guestEmail) {
             return NextResponse.json({ error: 'Customer email is required' }, { status: 400 });
@@ -31,7 +31,7 @@ export async function POST(req: Request) {
             .insert(orderInsert)
             .select()
             .single();
-    
+
         if (orderError) {
             return NextResponse.json({ error: orderError.message }, { status: 400 });
         }
@@ -61,6 +61,7 @@ export async function POST(req: Request) {
                         modifier_id: modifier.modifier_id,
                         modifier_name: modifier.modifiers.name,
                     }))
+
                     const { data: orderItemModifierData, error: orderItemModifierError } = await supabase   
                         .from('order_item_modifiers')
                         .insert(orderItemModifierInsert)
@@ -78,9 +79,10 @@ export async function POST(req: Request) {
                                 option_name: option.modifier_options.name,
                                 option_price: option.modifier_options.price
                             }))
-                            const { error: orderItemModifierOptionError } = await supabase
+                            const { data: orderItemModifierOptionData, error: orderItemModifierOptionError } = await supabase
                                 .from('order_item_modifier_options')
                                 .insert(orderItemModifierOptionInsert)
+                                .select();
                             
                             if (orderItemModifierOptionError) {
                                 return NextResponse.json({ error: orderItemModifierOptionError.message }, { status: 400 });
@@ -88,11 +90,21 @@ export async function POST(req: Request) {
                         }
                     }
                 }
-            }
+            }            
         }
-
         try {
-            await sendOrderConfirmationEmail(orderData, customer);
+
+            const {data: order, error: orderError} = await supabase
+                .from('orders')
+                .select(`*, customers(*), order_items(*, order_item_modifiers(*, order_item_modifier_options(*)))`)
+                .eq('short_id', orderData.short_id)
+                .single();
+
+            if (orderError) {
+                return NextResponse.json({ error: orderError.message }, { status: 400 });
+            }
+            
+            await sendOrderConfirmationEmail(order, customer);
         } catch (emailError) {
             console.error('Failed to send confirmation email:', emailError);
         }

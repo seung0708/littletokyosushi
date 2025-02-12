@@ -24,7 +24,7 @@ export interface CartItem  {
 export interface CartItemModifier  {
     id?: string;
     cart_items_id?: string;
-    modifier?: Modifier | null;
+    modifiers?: Modifier | null;
     created_at?: string;
     cart_item_modifier_options?: CartItemModifierOption[] | null;
 };

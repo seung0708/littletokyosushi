@@ -9,6 +9,7 @@ import Image from "next/image";
 
 const CartPage: React.FC = () => {
     const { cartItems, handleCartUpdate, removeItemFromCart } = useCart(); 
+    console.log(cartItems)
     const router = useRouter();
     
 
@@ -66,29 +67,38 @@ const CartPage: React.FC = () => {
                                                 <Image
                                                     src={`${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/menu-items/${cartItem?.menu_items?.image_urls?.[0]}`} 
                                                     alt={cartItem?.menu_items?.name || 'Item image'} 
-                                                    className="h-full w-full object-cover object-center" 
-                                                    fill
+                                                    //className="h-full w-full object-cover object-center" 
+                                                    fill={true}
+                                                    sizes="h-full w-full"
+                                                    priority={false}
                                                 />
                                             </div>
                                             <div className="ml-6 flex flex-1 flex-col">
                                                 <div className="flex justify-between">
                                                     <div className="space-y-1">
-                                                        <h3 className="text-xl font-bold">{cartItem.menu_items?.name}</h3>
-                                                        {cartItem.cart_item_modifiers?.map((modifier: CartItemModifier) => (
+                                                        <h3 className="text-xl font-bold">{cartItem?.menu_items?.name}</h3>
+                                                        {cartItem?.cart_item_modifiers?.map((modifier: CartItemModifier) => (
                                                             <div key={modifier.id} className="space-y-1">
-                                                                <h4 className="text-sm font-medium text-gray-300">{modifier?.modifier?.name}</h4>
-                                                                {modifier.cart_item_modifier_options && modifier.cart_item_modifier_options.length > 0 && (
+                                                                <h4 className="text-sm font-medium text-gray-300">{modifier?.modifiers?.name}</h4>
+                                                                {modifier?.cart_item_modifier_options && modifier?.cart_item_modifier_options?.length > 0 && (
                                                                     <ul className="space-y-1">
                                                                         {modifier.cart_item_modifier_options.map((option: CartItemModifierOption) => (
                                                                             <li key={option.id} 
-                                                                                className="text-xs text-gray-400 bg-black/20 px-2 py-1 rounded-full inline-block mr-2">
-                                                                                {option.modifier_options?.name}
+                                                                                className="text-xs text-gray-400 bg-black/20 px-2 py-1 rounded-full mr-2">
+                                                                                {option.modifier_options?.name} +{option.modifier_options?.price.toFixed(2)}
                                                                             </li>
                                                                         ))}
                                                                     </ul>
                                                                 )}
+                                                               
                                                             </div>
                                                         ))}
+                                                        {cartItem?.special_instructions && (
+                                                            <>
+                                                                <h4 className="text-sm font-medium text-gray-300">Special Instructions</h4>
+                                                                <p className="text-xs text-gray-400">{cartItem?.special_instructions}</p>
+                                                            </>
+                                                        )}
                                                     </div>
                                                     <div className="flex flex-col items-end space-y-2">
                                                         <p className="text-lg font-bold text-red-400">

@@ -3,7 +3,7 @@ import { useSearchParams, useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { useCart } from '@/app/context/cartContext';
 import { Order } from '@/types/order';
-import { format, parseISO } from 'date-fns';
+import { format } from 'date-fns';
 
 const Page: React.FC = () => {
   const searchParams = useSearchParams();
@@ -76,22 +76,22 @@ const Page: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-black text-white pt-24">
-      <div className="mx-auto max-w-3xl px-4 py-16 sm:px-6 sm:py-24 lg:px-8">
+    <div className="min-h-screen bg-black text-gray-400 pt-24">
+      <div className="mx-auto max-w-4xl px-4 py-16 sm:px-6 sm:py-24 lg:px-8">
         <div className="max-w-xl">
-          <h1 className="mt-2 text-4xl font-bold tracking-tight sm:text-5xl">Thanks for your Order!</h1>
-          <p className="mt-2 text-base">Your order #{order?.short_id?.toUpperCase()} has been successfully placed.</p>
+          <h1 className="mt-2 text-4xl text-white font-bold tracking-tight sm:text-5xl">Thanks for your Order!</h1>
+          <p className="mt-2 text-base">Your order #<span className="text-white">{order?.short_id?.toUpperCase()}</span> has been successfully placed.</p>
         </div>
 
         <div className="mt-10 border-t border-gray-200">
           <dl className="grid grid-cols-2 gap-x-6 text-sm">
             <div>
-              <dt className="font-medium">Pickup Date</dt>
-              <dd>
+              <dt className="text-lg">Pickup Date</dt>
+              <dd className="text-white">
                 {order && format(new Date(order.pickup_date), 'EEE, M/d/yy')}
               </dd> 
-              <dt className="mt-2 font-medium">Pickup Time</dt>
-              <dd>
+              <dt className="mt-2 text-lg">Pickup Time</dt>
+              <dd className="text-white">
                 {order && (
                   <>
                     {order.pickup_time && (
@@ -100,28 +100,28 @@ const Page: React.FC = () => {
                   </>
                 )}
               </dd>
-              <dt className="mt-2 font-medium">Pick up Instructions</dt>
-              <dd className="mt-2">
+              <dt className="mt-2 font-medium text-lg">Pick up Instructions</dt>
+              <dd className="mt-2 text-gray-200">
                 For new customers, we are located inside of the <strong>Little Tokyo Marketplace</strong> in Downtown Los Angeles. 
                 You can find us next to the bakery and poki place.
               </dd>
             </div>
             <div>
-              <dt className="font-medium text-md">Store Address</dt>
-              <dd>333 S Alameda St, Los Angeles, CA 90013 Ste 100-I</dd>
-              <dt className="mt-2 font-medium text-md">Store Phone</dt>
-              <dd>(213) 617-0343</dd>
+              <dt className="font-medium text-lg">Store Address</dt>
+              <dd className="text-white">333 S Alameda St, Los Angeles, CA 90013 Ste 100-I</dd>
+              <dt className="mt-2 font-medium text-lg">Store Phone</dt>
+              <dd className="text-white">(213) 617-0343</dd>
             </div>
           </dl>
         </div>
 
         <div className="mt-10 border-t border-gray-200">
-          <h2 className="my-5 text-3xl font-bold">Order Details</h2>
+          <h2 className="my-5 text-3xl font-bold text-white">Order Details</h2>
           {order?.order_items.map((item) => (  
             <div key={item.id.substring(0, 8)} className="py-6">
               <div className="flex justify-between">
-                <h4 className="font-medium">{item.item_name}<span className="ml-2 text-gray-500">× {item.quantity}</span></h4>
-                <p>${(item.quantity * item.price).toFixed(2)}</p>
+                <h4 className="font-medium text-white text-lg">{item.item_name}<span className="ml-2 text-gray-500">× {item.quantity}</span></h4>
+                <p className="text-white">${(item.quantity * item.price).toFixed(2)}</p>
               </div>
               {item.order_item_modifiers && item.order_item_modifiers.length > 0 && (
                 <div className="mt-2 flex flex-wrap gap-x-4 text-sm">
@@ -143,16 +143,16 @@ const Page: React.FC = () => {
           <dl className="space-y-6 border-t border-gray-200 pt-6 text-sm">
             <div className="flex flex-col gap-y-4">
               <div className="flex justify-end gap-x-4">
-                <dt className="font-medium">Subtotal</dt>
-                <dd>${order?.sub_total.toFixed(2)}</dd>
+                <dt className="text-lg">Subtotal</dt>
+                <dd className="text-white">${order?.sub_total.toFixed(2)}</dd>
               </div>
               <div className="flex justify-end gap-x-4">
-                <dt className="font-medium">Service fee</dt>
-                <dd>${order?.service_fee.toFixed(2)}</dd>
+                <dt className="text-lg">Service fee</dt>
+                <dd className="text-white">${order?.service_fee.toFixed(2)}</dd>
               </div>
               <div className="flex justify-end gap-x-4">
-                <dt className="font-medium">Total</dt>
-                <dd>${order?.total.toFixed(2)}</dd>
+                <dt className="text-lg">Total</dt>
+                <dd className="text-white">${order?.total.toFixed(2)}</dd>
               </div>
             </div>
           </dl>
