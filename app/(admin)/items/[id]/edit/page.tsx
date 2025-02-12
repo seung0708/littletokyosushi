@@ -123,7 +123,7 @@ export default function EditItemPage({ params }: { params: Promise<{ id: string 
   }
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)} className="space-y-4 md:pl-64">
+    <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
       <div>
         <Label htmlFor="name">Name</Label>
         <Input id="name" {...register('name')} />

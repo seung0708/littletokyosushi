@@ -4,6 +4,7 @@ import Link from "next/link"
 import { ShoppingCart, SquareMenu } from "lucide-react"
 import { usePathname } from "next/navigation"
 import clsx from "clsx"
+import OrderCounter from "./orders/order-counter";
 
 export default function Sidebar() {
   const pathname = usePathname()
@@ -37,6 +38,7 @@ export default function Sidebar() {
                       <div className="flex items-center gap-2">
                         <ShoppingCart className="h-5 w-5" />
                         Orders
+                        <OrderCounter />
                       </div>
                     </div>
                   </Link>

@@ -1,11 +1,10 @@
 import { createClient } from "@/lib/supabase/server";
 import { NextResponse } from "next/server";
 
-
-// app/api/admin/orders/route.ts
 export async function GET(req: Request) { 
   const { searchParams } = new URL(req.url);
   const archived = searchParams.get('archived') === 'true';
+  const not_started = searchParams.get('not_started') === 'true';
   
   const supabase = await createClient();
   const query = supabase
@@ -19,15 +18,18 @@ export async function GET(req: Request) {
             )
           )
         `)
-        .order('created_at', { ascending: false });
-
+      .order('created_at', { ascending: false })
   // Only apply archived filter if specified
   if (archived !== undefined) {
       query.eq('archived', archived);
   }
 
-  const { data, error } = await query;
+  if(not_started === true) {
+      query.eq('status', 'not_started');
+  }
 
+  const { data, error } = await query;
+  
   if (error) {
       return NextResponse.json({ error: error.message }, { status: 500 });
   }

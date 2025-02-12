@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { cn } from '@/utils/utils';
+import OrderCounter from './orders/order-counter';
 
 export default function MobileNav() {
     const [isOpen, setIsOpen] = useState(false);
@@ -25,8 +26,8 @@ export default function MobileNav() {
     const navItems = [
         { href: '/orders', label: 'Orders' },
         { href: '/items', label: 'Menu Items' },
-        { href: '/analytics', label: 'Analytics' },
-        { href: '/settings', label: 'Settings' },
+        // { href: '/analytics', label: 'Analytics' },
+        // { href: '/settings', label: 'Settings' },
     ];
 
     return (
@@ -46,7 +47,6 @@ export default function MobileNav() {
                 )}
             </Button>
 
-            {/* Mobile menu overlay */}
             {isOpen && (
                 <div 
                     className="fixed inset-0 bg-black/50 backdrop-blur-sm z-40 md:hidden"
@@ -54,8 +54,6 @@ export default function MobileNav() {
                     aria-hidden="true"
                 />
             )}
-
-            {/* Mobile menu panel */}
             <div
                 className={cn(
                     'fixed top-0 left-0 bottom-0 w-full max-w-xs bg-white shadow-lg z-50 transform transition-transform duration-300 ease-in-out md:hidden',
@@ -65,8 +63,7 @@ export default function MobileNav() {
                 <nav className="h-full overflow-y-auto">
                     <div className="flex flex-col p-4">
                         <div className="mb-4">
-                            <h2 className="text-lg font-semibold text-gray-900">Menu</h2>
-                            <p className="text-sm text-gray-500">Navigate the admin panel</p>
+                            <h2 className="text-lg font-semibold text-gray-900">Admin Panel</h2>
                         </div>
 
                         <ul className="space-y-3">
@@ -82,18 +79,15 @@ export default function MobileNav() {
                                                 : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
                                         )}
                                     >
-                                        {item.label}
+                                        {item.label} 
+                                        {item.label === 'Orders' && <span className="ml-2"><OrderCounter /></span>}
                                     </Link>
                                 </li>
                             ))}
                         </ul>
 
                         <div className="mt-auto pt-6 border-t">
-                            <div className="px-4 py-3 bg-gray-50 rounded-lg">
-                                <p className="text-sm text-gray-600">
-                                    Need help? Check our documentation
-                                </p>
-                            </div>
+                    
                         </div>
                     </div>
                 </nav>
