@@ -1,24 +1,28 @@
-import stripe from "@/lib/stripe/stripe";
 import { NextResponse } from "next/server";
+import stripe from "@/lib/stripe/stripe";
+import { retryOperation } from "@/lib/utils/api-retry";
 
 export async function POST(request: Request) {
     try {
         const { amount, orderId } = await request.json();
-        if (!amount) {
-            return NextResponse.json(
-                { error: 'Amount is required' },
-                { status: 400 }
-            );
-        }
-
-        const paymentIntent = await stripe.paymentIntents.create({
-            amount,
-            currency: "usd",
-            payment_method_types: ['card'],
-            metadata: {
-                order_id: orderId
-            }
-        });
+        if (!amount || amount <= 0) return NextResponse.json( { error: 'Invalid amount' }, { status: 400 });
+        
+        const idempotencyKey = `order_${orderId}`
+        const paymentIntent = await retryOperation(() => 
+            stripe.paymentIntents.create(
+                {
+                    amount,
+                    currency: "usd",
+                    payment_method_types: ['card'],
+                    metadata: {
+                        order_id: orderId
+                    }
+                },
+                {
+                    idempotencyKey: idempotencyKey //prevents from creating multiple payment intents with the same order id
+                }
+            )
+        );
         
         return NextResponse.json({ 
             clientSecret: paymentIntent.client_secret,

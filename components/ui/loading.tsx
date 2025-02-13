@@ -3,7 +3,7 @@
 import { cn } from "@/utils/utils";
 
 interface LoadingProps {
-  variant?: 'admin' | 'store';
+  variant: string;
   size?: 'sm' | 'md' | 'lg';
   className?: string;
 }

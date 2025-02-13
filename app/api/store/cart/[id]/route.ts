@@ -15,9 +15,9 @@ type Cart = Database['public']['Tables']['carts']['Row'] & {
     })[]; 
 };
 
-export async function GET(request: Request, { params }: { params: { id: string } }) {
+export async function GET(request: Request, { params }: { params: Promise<{ id: string }> }) {
     
-    const { id: cartId } = params;
+    const { id: cartId } = await params;
     const supabase = await createClient();
 
     const {data: dbCart, error} = await supabase
@@ -45,8 +45,8 @@ export async function GET(request: Request, { params }: { params: { id: string }
     return NextResponse.json(dbCart);
 }
 
-export async function PATCH(request: Request,  { params }: { params: { id: string } }) {
-    const {id} = params;
+export async function PATCH(request: Request,  { params }: { params: Promise<{ id: string }> }) {
+    const {id} = await params;
     const supabase = await createClient();
     try {
         const { customerId, cartItems } = await request.json()
@@ -62,7 +62,7 @@ export async function PATCH(request: Request,  { params }: { params: { id: strin
                 cart_item_modifier_options(id, cart_item_modifiers_id, modifier_option_id, modifier_id, modifier_option_price))))`)
             .eq('id', id)
             .single() as { data: Cart | null };
-        console.log(dbCart)
+        
         if (!dbCart?.customer_id && customerId) {
             await supabase
                 .from('carts')

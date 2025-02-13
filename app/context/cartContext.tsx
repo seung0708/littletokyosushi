@@ -2,6 +2,8 @@
 import React, { createContext,  useContext, useEffect, useState } from "react";
 import { useAuth } from "./authContext";
 import { CartItem, } from "@/types/cart";
+import { useToast } from "./toastContext";
+import { retryWithBackoff } from "@/lib/utils/api-retry";
 
 interface CartContextType {
     cartItems: CartItem[];
@@ -29,6 +31,7 @@ interface CartProviderProps {
 }
 
 export const CartProvider = ({ children }: CartProviderProps) => {
+    const { showToast } = useToast();
     const { user } = useAuth();
     const userId = user?.id;
     const [cartItems, setCartItems] = useState<CartItem[]>([]);
@@ -65,13 +68,15 @@ export const CartProvider = ({ children }: CartProviderProps) => {
         setIsCartLoading(true);
         setCartError(null);
         try {
-            const response = await fetch(`/api/store/cart/${cartId}`, {
-                method: 'GET',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
+            const response = await retryWithBackoff(async () => 
+                await fetch(`/api/store/cart/${cartId}`, {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
                 credentials: 'include',
-            });
+                })
+            );
            
             if (response.status === 404) {
                 // Cart not found in database, clear local storage
@@ -105,16 +110,19 @@ export const CartProvider = ({ children }: CartProviderProps) => {
     const updateCartCustomerId = async (customerId: string) => {
         if (!cartId) return;
         
-        const response = await fetch(`/api/store/cart/merge/${cartId}`, {
-            method: 'PATCH',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-                customerId
-            }),
-            credentials: 'include',
-        });
+        const response = await retryWithBackoff(async () => 
+            await fetch(`/api/store/cart/merge/${cartId}`, {
+                method: 'PATCH',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    customerId
+                }),
+                credentials: 'include',
+            })
+        );
+
         const data = await response.json();
         if (data.status === 200) {
             setCartId(data.cartId);
@@ -124,45 +132,55 @@ export const CartProvider = ({ children }: CartProviderProps) => {
     };
 
     const handleCartUpdate = async (item?: CartItem) => {
-        console.log(item);
+        if(!item) return;
         try {
+
+            const updatedItems = cartItems.map(cartItem => 
+                cartItem.id === item.id ? item : cartItem
+            )
+
+            setCartItems(updatedItems);
+            localStorage.setItem('cartItems', JSON.stringify(updatedItems));
+
             // Case 1: Guest adding item
             if (!userId && item) {
                 if (!cartId || cartId === '') {
-                    console.log('Guest user - create new cart');
                     await createNewCart(item);
                 } else {
-                    console.log('Guest user - update existing cart');
                     await updateExistingCart(item);
                 }
             }
             // Case 2: User just signed in
             else if (userId && user) {
                 // Check if user has an existing cart
-                console.log('Checking for existing user cart:', userId);
-                const response = await fetch('/api/store/cart/user', {
-                    headers: {
-                        'user-id': userId
-                    },
-                    credentials: 'include'
-                });
+                const response = await retryWithBackoff(async () => 
+                    await fetch('/api/store/cart/user', {
+                        headers: {
+                            'user-id': userId
+                        },
+                        credentials: 'include'
+                    })
+                );
+
                 const data = await response.json();
-                console.log('Cart check response:', data);
-                    
+        
                 if (data.status === 200) {
                     // User has existing cart - merge if anonymous cart exists
                     if (cartId) {
-                        console.log('Merging anonymous cart with user cart');
-                        const mergeResponse = await fetch(`/api/store/cart/merge/${cartId}`, {
-                            method: 'PATCH',
-                            headers: {
-                                'Content-Type': 'application/json',
-                            },
-                            body: JSON.stringify({
-                                customerId: userId
-                            }),
-                            credentials: 'include',
-                        });
+                        
+                        const mergeResponse = await retryWithBackoff(async () => 
+                            await fetch(`/api/store/cart/merge/${cartId}`, {
+                                method: 'PATCH',
+                                headers: {
+                                    'Content-Type': 'application/json',
+                                },
+                                body: JSON.stringify({
+                                    customerId: userId
+                                }),
+                                credentials: 'include',
+                            })
+                        );
+
                         const mergeData = await mergeResponse.json();
                         if (mergeData.status === 200) {
                             setCartId(mergeData.cartId);
@@ -180,18 +198,19 @@ export const CartProvider = ({ children }: CartProviderProps) => {
                     localStorage.setItem('cartId', data.cartId);
                     await fetchCart();
                 } else if (cartId) {
-                    // No existing user cart - associate anonymous cart
-                    console.log('Associate anonymous cart with user', cartId);
-                    const response = await fetch(`/api/store/cart/merge/${cartId}`, {
-                        method: 'PATCH',
-                        headers: {
-                            'Content-Type': 'application/json',
-                        },
-                        body: JSON.stringify({
-                            customerId: userId
-                        }),
-                        credentials: 'include',
-                    });
+                                        
+                    const response = await retryWithBackoff(async () => 
+                        await fetch(`/api/store/cart/merge/${cartId}`, {
+                            method: 'PATCH',
+                            headers: {
+                                'Content-Type': 'application/json',
+                            },
+                            body: JSON.stringify({
+                                customerId: userId
+                            }),
+                            credentials: 'include',
+                        })
+                    );
                     const data = await response.json();
                     if (data.status === 200) {
                         setCartId(data.cartId);
@@ -206,22 +225,26 @@ export const CartProvider = ({ children }: CartProviderProps) => {
             }
         } catch (error) {
             console.error('Error updating cart:', error);
+            showToast('Failed to update cart', 'error');
         }
     };
 
     const createNewCart = async (item: CartItem) => {
         try {
-            const response = await fetch('/api/store/cart', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({
-                    items: [item],
-                    customerId: userId
-                }),
-                credentials: 'include',
-            });
+            const response = await retryWithBackoff(async () => 
+                await fetch('/api/store/cart', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        items: [item],
+                        customerId: userId
+                    }),
+                    credentials: 'include',
+                })
+            );
+
             if (!response.ok) {
                 const error = await response.json();
                 throw new Error(error.error || 'Failed to create new cart');
@@ -232,11 +255,6 @@ export const CartProvider = ({ children }: CartProviderProps) => {
                 // Update cart ID
                 setCartId(data.cartId); 
                 localStorage.setItem('cartId', data.cartId);
-                
-                // Update cart items immediately
-                const newCartItems = [...cartItems, item];
-                setCartItems(newCartItems);
-                localStorage.setItem('cartItems', JSON.stringify(newCartItems));
                 
                 // Then fetch full cart data
                 await fetchCart();
@@ -249,17 +267,20 @@ export const CartProvider = ({ children }: CartProviderProps) => {
 
     const updateExistingCart = async (item: CartItem) => {
         try {
-            const response = await fetch(`/api/store/cart/${cartId}`, {
-                method: 'PATCH',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({
-                    cartItems: [item],
-                    customerId: userId
-                }),
-                credentials: 'include',
-            });
+            const response = await retryWithBackoff(async () => 
+                await fetch(`/api/store/cart/${cartId}`, {
+                    method: 'PATCH',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        cartItems: [item],
+                        customerId: userId
+                    }),
+                    credentials: 'include',
+                })
+            );
+
             if (!response.ok) {
                 const error = await response.json();
                 throw new Error(error.error || 'Failed to update existing cart');
@@ -270,12 +291,7 @@ export const CartProvider = ({ children }: CartProviderProps) => {
                 // Update cart ID
                 setCartId(data.cartId);
                 localStorage.setItem('cartId', data.cartId);
-                
-                // Update cart items immediately
-                const newCartItems = [...cartItems, item];
-                setCartItems(newCartItems);
-                localStorage.setItem('cartItems', JSON.stringify(newCartItems));
-                
+                            
                 // Then fetch full cart data
                 await fetchCart();
             };
@@ -286,17 +302,18 @@ export const CartProvider = ({ children }: CartProviderProps) => {
     }
 
     const removeItemFromCart = async (itemId: string) => {
-        console.log('removeItemFromCart', { cartId, itemId });
-        const response = await fetch(`/api/store/cart/${cartId}`, {
-            method: 'DELETE',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-                itemId
-            }),
+        const response = await retryWithBackoff(async () => 
+            await fetch(`/api/store/cart/${cartId}`, {
+                method: 'DELETE',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    itemId
+                }),
             credentials: 'include',
-        });
+            })
+        );
         if (!response.ok) {
             const error = await response.json();
             throw new Error(error.error || 'Failed to remove item from cart');

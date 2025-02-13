@@ -15,6 +15,9 @@ import { MinusIcon, PlusIcon } from "lucide-react";
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import Image from 'next/image';
+import { useToast } from '@/app/context/toastContext';
+import { AddToCartButton } from '@/components/ui/loadingButtons';
+import { useBackButton } from '@/app/hooks/useBackButton';
 
 const formSchema = z.object({
     quantity: z.number().min(1),
@@ -42,10 +45,21 @@ const formSchema = z.object({
 type FormData = z.infer<typeof formSchema>;
 
 export default function ItemDetailsForm({item}: {item: MenuItem}) {
+    const { showToast } = useToast();
     const { handleCartUpdate } = useCart();
     const [loading, setLoading] = useState(false);
     const [loadingImage, setLoadingImage] = useState(true);
     const [selectedImage, setSelectedImage] = useState(0);
+    const router = useBackButton(() => {
+        if(form.formState.isDirty) {
+            const confirmed = window.confirm('You have unsaved changes. Are you sure you want to leave?');
+            if (!confirmed) {
+                // Prevent navigation
+                window.history.pushState(null, '', window.location.href);
+                return;
+            }
+        }
+    });
 
     const form = useForm<z.infer<typeof formSchema>>({
         resolver: zodResolver(formSchema),
@@ -90,7 +104,8 @@ export default function ItemDetailsForm({item}: {item: MenuItem}) {
         };
         
         form.setValue('modifiers', updatedModifiers, { shouldValidate: true });
-    };
+        showToast('Modifier updated successfully!', 'success');
+    }
 
     const isFormValid = () => {
         const formValues = form.getValues();
@@ -158,6 +173,7 @@ export default function ItemDetailsForm({item}: {item: MenuItem}) {
         
         try {  
             await handleCartUpdate(cartItem);
+            showToast('Item added to cart', 'success');
             form.reset();
             if (item?.modifiers) {
                 form.setValue('modifiers', item.modifiers.map((mod: Modifier) => ({
@@ -176,6 +192,7 @@ export default function ItemDetailsForm({item}: {item: MenuItem}) {
             }
         } catch (error) {
             console.error('Error adding item to cart:', error);
+            showToast('Error adding item to cart', 'error');
         }
     };
 
@@ -210,9 +227,10 @@ export default function ItemDetailsForm({item}: {item: MenuItem}) {
                                     src={`${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/menu-items/${item.image_urls?.[selectedImage]}`}
                                     alt={item.name}
                                     fill
-                                    className="object-cover"
+                                    className="object-cover"    
                                     onLoad={handleImageLoad}
-                                    priority={false}
+                                    priority
+                                   
                                     sizes="(min-width: 1024px) 50vw, 100vw"
                                 />
                             </div>
@@ -419,13 +437,13 @@ export default function ItemDetailsForm({item}: {item: MenuItem}) {
                                             />
                                         </div>
 
-                                        <Button 
+                                        <AddToCartButton 
                                             type="submit" 
                                             className="w-full bg-red-600 hover:bg-red-700 text-white py-6 text-lg font-semibold"
-                                            disabled={!isFormValid()}
+                                            isLoading={loading}
                                         >
                                             Add to Cart
-                                        </Button>
+                                        </AddToCartButton>
                                     </form>
                                 </Form>
                             </div>

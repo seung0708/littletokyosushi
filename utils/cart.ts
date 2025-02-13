@@ -95,7 +95,6 @@ export async function createNewCartItemWithModifiers(supabase: any, cartId: stri
             special_instructions: newItems.special_instructions || '',
         })
         .select();
-    console.log('Created cart item:', cartItem);
     
     if (error || !cartItem) {
         console.error('Error creating cart item:', error);

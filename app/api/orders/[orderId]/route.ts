@@ -4,8 +4,8 @@ import { Database } from "@/types/database.types";
 
 type OrderUpdate = Partial<Database['public']['Tables']['orders']['Update']>;
 
-export async function GET(req: Request, { params }: { params: { orderId: string } }) {
-    const { orderId } = params; 
+export async function GET(req: Request, { params }: { params: Promise<{ orderId: string }> }) {
+    const { orderId } = await params; 
     const supabase = await createClient();
     try {
         const {data: orderData, error: orderError} = await supabase

@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import { useCart } from '@/app/context/cartContext';
 import { Order } from '@/types/order';
 import { format } from 'date-fns';
+import { retryWithBackoff } from '@/lib/utils/api-retry';
 
 const Page: React.FC = () => {
   const searchParams = useSearchParams();
@@ -31,31 +32,30 @@ const Page: React.FC = () => {
 
     if(paymentId && paymentIntentSecret && redirectStatus === 'succeeded' && !paymentVerified) {
       try {
-        const verifyResponse = await fetch('/api/orders/verify-payment', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
+        await retryWithBackoff(async () => {
+          const verifyResponse = await fetch('/api/orders/verify-payment', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
               paymentId,
               paymentIntentSecret
-          })
+            })
+          });
+          
+          if (!verifyResponse.ok) {
+            const errorText = await verifyResponse.text();
+            console.error('Verification response:', errorText);
+            throw new Error(`Payment verification failed: ${errorText}`);
+          }
+
+          const verifyData = await verifyResponse.json();
+          setOrderId(verifyData.orderId);
+
+          if (verifyData.clearCart) clearCart();
+
+          setPaymentVerified(true);
+          router.replace(`/order-confirmation?id=${verifyData.orderId}`);
         });
-
-        if (!verifyResponse.ok) {
-          const errorText = await verifyResponse.text();
-          console.error('Verification response:', errorText);
-          throw new Error(`Payment verification failed: ${errorText}`);
-        }
-
-        const verifyData = await verifyResponse.json();
-        setOrderId(verifyData.orderId);
-
-        if (verifyData.clearCart) {
-          clearCart();
-        }
-        
-        setPaymentVerified(true);
-        // Update URL with order ID
-        router.replace(`/order-confirmation?id=${verifyData.orderId}`);
       } catch (error) {
         console.error('Error verifying payment:', error);
       }
@@ -64,12 +64,14 @@ const Page: React.FC = () => {
 
   const fetchOrder = async (id: string) => {
     try {
-      const response = await fetch(`/api/orders/${id}`);
-      if (!response.ok) {
-        throw new Error('Failed to fetch order');
-      }
-      const data = await response.json();
-      setOrder(data.orderData);
+      await retryWithBackoff(async () => {
+        const response = await fetch(`/api/orders/${id}`);
+        if (!response.ok) {
+          throw new Error('Failed to fetch order');
+        }
+        const data = await response.json();
+        setOrder(data.orderData);
+      });
     } catch (error) {
       console.error('Error fetching order:', error);
     }

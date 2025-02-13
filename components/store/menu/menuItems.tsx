@@ -34,7 +34,7 @@ const MenuItems: React.FC<MenuItemsProps> = ({ categories }) => {
                                             fill
                                             sizes="(min-width: 1280px) 384px, (min-width: 1024px) 33vw, (min-width: 640px) 50vw, 100vw"
                                             className="rounded-t-xl object-cover object-center group-hover:scale-105 transition-transform duration-500"
-                                            priority={true}
+                                            loading="lazy"
                                         />
                                     ) : (
                                         <div className="w-full h-full bg-black/40 flex items-center justify-center rounded-t-xl">

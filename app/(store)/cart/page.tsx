@@ -1,58 +1,114 @@
 'use client'
+import { useState } from "react";
 import { useCart } from "@/app/context/cartContext";
 import { Button } from "@/components/ui/button";
 import { MinusIcon, PlusIcon, TrashIcon } from "lucide-react";
 import { CartItem, CartItemModifier, CartItemModifierOption } from "@/types/cart";
-import {useRouter} from 'next/navigation';
+
 import { calculateTotalPrice } from '@/utils/item';
 import Image from "next/image";
+import { Loading } from "@/components/ui/loading";
+import { CheckoutButton} from '@/components/ui/loadingButtons';
+import {useToast} from '@/app/context/toastContext';
+import { EmptyCart } from "@/components/store/emptyStates";
+import { useBackButton } from '@/app/hooks/useBackButton';
 
 const CartPage: React.FC = () => {
     const { cartItems, handleCartUpdate, removeItemFromCart } = useCart(); 
-    console.log(cartItems)
-    const router = useRouter();
+    const { showToast } = useToast();
+    const [loadingItems, setLoadingItems] = useState<Record<string, boolean>>({})
+    const [loadingRemoval, setLoadingRemoval] = useState<Record<string, boolean>>({})
+    const [isCheckingout, setIsCheckout] = useState(false)
+    const [error, setError] = useState<string | null>(null)
+    const router =  useBackButton(() => {
+        if(isCheckingout) {
+            const confirmed = window.confirm('You have unsaved changes. Are you sure you want to leave?');
+            if(!confirmed) {
+                window.history.pushState(null, '', window.location.href);
+                return;
+            }
+        }
+    })
     
-
     const onSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-        router.push('/checkout');
-        
+        try {
+            setIsCheckout(true);
+            setError(null);
+            
+            if(!cartItems.length) {
+                setError('Your cart is empty.');
+                return;
+            }
+
+            await router.push('/checkout');
+        } catch (error) {
+            setError('Failed to checkout. Please try again.');
+        }
+        finally {
+            setIsCheckout(false);
+        }
     }
 
-    
-    
     const handleQuantityChange = async (cartItem: CartItem, increment: boolean) => {
-        const newQuantity = increment ? cartItem.quantity + 1 : cartItem.quantity - 1;
+        if (!cartItem.id) return;
+        try {
+            setLoadingItems(prev => ({ ...prev, [cartItem.id!]: true }));
+            setError(null);
+    
+            const newQuantity = increment ? cartItem.quantity + 1 : cartItem.quantity - 1;
 
-        const updatedItem = {
-            cart_item_id: cartItem.id,
-            quantity: newQuantity,
-            base_price: cartItem.base_price,
-            total_price: calculateTotalPrice(cartItem.base_price, newQuantity, cartItem.cart_item_modifiers || []), 
-            special_instructions: cartItem.special_instructions, 
-            menu_items: {
-                name: cartItem.menu_items?.name || '',
-                image_url: cartItem.menu_items?.image_urls
-            },
-            cart_item_modifiers: cartItem.cart_item_modifiers
-        };
-        await handleCartUpdate(updatedItem);
+            const updatedItem = {
+                cart_item_id: cartItem.id,
+                quantity: newQuantity,
+                base_price: cartItem.base_price,
+                total_price: calculateTotalPrice(cartItem.base_price, newQuantity, cartItem.cart_item_modifiers || []), 
+                special_instructions: cartItem.special_instructions, 
+                menu_items: {
+                    name: cartItem.menu_items?.name || '',
+                    image_url: cartItem.menu_items?.image_urls
+                },
+                cart_item_modifiers: cartItem.cart_item_modifiers
+            };
+        
+            await handleCartUpdate(updatedItem);
+            showToast('Cart updated successfully', 'success');
+        } catch (error) {
+            setError('Failed to update quantity. Please try again.')
+            showToast('Failed to update cart', 'error');
+        }
+        finally {
+            setLoadingItems(prev => ({ ...prev, [cartItem.id!]: false }));
+        }
+    }
 
-    };
+    const handleRemoveItem = async (itemId: string) => {
+        try {
+            setLoadingRemoval(prev => ({...prev, [itemId]: true}));
+            setError(null);
+
+            await removeItemFromCart(itemId);
+            showToast('Item removed from cart', 'success');
+        }
+        catch (error) {
+            setError('Failed to remove item. Please try again.');
+            showToast('Failed to remove item from cart', 'error');
+        }
+        finally {
+            setLoadingRemoval(prev => ({...prev, [itemId]: false}));
+        }
+    }
 
     return (
         <div className="min-h-screen bg-black text-white pt-24">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-                {!cartItems || cartItems.length === 0 ? (
-                    <div className="text-center py-16">
-                        <p className="text-xl text-gray-400">Your cart is empty.</p>
-                        <Button 
-                            onClick={() => router.push('/menu')}
-                            className="mt-6 bg-red-600 hover:bg-red-700 text-white"
-                        >
-                            View Menu
-                        </Button>
+                {error && (
+                    <div className="mb-4 p-4 bg-red-900/20 border border-red-500/20 rounded-lg">
+                        <p className="text-red-400">{error}</p>
                     </div>
+                )}
+                {!cartItems || cartItems.length === 0 ? (
+                    <EmptyCart />
                 ) : (
                     <form onSubmit={onSubmit} className="lg:grid lg:grid-cols-12 lg:gap-x-12 xl:gap-x-16">
                         <section aria-labelledby="cart-heading" className="lg:col-span-7">
@@ -70,7 +126,7 @@ const CartPage: React.FC = () => {
                                                     //className="h-full w-full object-cover object-center" 
                                                     fill={true}
                                                     sizes="h-full w-full"
-                                                    priority={false}
+                                                    loading="lazy"
                                                 />
                                             </div>
                                             <div className="ml-6 flex flex-1 flex-col">
@@ -113,7 +169,8 @@ const CartPage: React.FC = () => {
                                                             variant="ghost"
                                                             size="sm"
                                                             className="text-red-400 hover:text-red-300 hover:bg-red-500/10"
-                                                            onClick={() => removeItemFromCart(cartItem.id || '')}
+                                                            disabled={loadingItems[cartItem.id!]}
+                                                            onClick={() => handleRemoveItem(cartItem.id!)}
                                                         >
                                                             <TrashIcon className="h-5 w-5" />
                                                         </Button>
@@ -126,10 +183,14 @@ const CartPage: React.FC = () => {
                                                             variant="ghost"
                                                             size="sm"
                                                             className="h-8 w-8 text-gray-300 hover:text-white hover:bg-black/30"
-                                                            disabled={cartItem.quantity <= 1}
+                                                            disabled={cartItem.quantity <= 1 || loadingItems[cartItem.id!]}
                                                             onClick={() => handleQuantityChange(cartItem, false)}
                                                         >
-                                                            <MinusIcon className="h-4 w-4" />
+                                                            {loadingItems[cartItem.id!] ? (
+                                                                <Loading size="sm" variant="store" />
+                                                            ) : (
+                                                                <MinusIcon className="h-4 w-4" />
+                                                            )}
                                                         </Button>
                                                         <span className="w-8 text-center">{cartItem.quantity}</span>
                                                         <Button
@@ -137,9 +198,14 @@ const CartPage: React.FC = () => {
                                                             variant="ghost"
                                                             size="sm"
                                                             className="h-8 w-8 text-gray-300 hover:text-white hover:bg-black/30"
+                                                            disabled={loadingItems[cartItem.id!]}
                                                             onClick={() => handleQuantityChange(cartItem, true)}
                                                         >
-                                                            <PlusIcon className="h-4 w-4" />
+                                                            {loadingItems[cartItem.id!] ? (
+                                                                <Loading size="sm" variant="store" />
+                                                            ) : (
+                                                                <PlusIcon className="h-4 w-4" />
+                                                            )}
                                                         </Button>
                                                     </div>
                                                 </div>
@@ -180,12 +246,13 @@ const CartPage: React.FC = () => {
                             </dl>
 
                             <div className="mt-6">
-                                <Button 
-                                    type="submit"
-                                    className="w-full bg-red-600 hover:bg-red-700 text-white py-6 text-lg font-semibold"
-                                >
-                                    Proceed to Checkout
-                                </Button>
+                            <CheckoutButton 
+                                type="submit"
+                                isLoading={isCheckingout}
+                                className="w-full bg-red-600 hover:bg-red-700 text-white py-6 text-lg font-semibold"
+                            >
+                                Proceed to Checkout
+                            </CheckoutButton>
                             </div>
                         </section>
                     </form>

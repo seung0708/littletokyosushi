@@ -4,6 +4,7 @@ import { poppins } from "./fonts/fonts";
 import { AuthProvider } from "./context/authContext";
 import { CartProvider } from "./context/cartContext";
 import { GoogleAnalytics } from "@/components/providers/google-analytics";
+import { ToastProvider } from "./context/toastContext";
 
 export const viewport: Viewport = {
   width: 'device-width',
@@ -41,12 +42,14 @@ export default async function RootLayout({ children, }: { children: React.ReactN
   return (
     <html lang="en">
       <body suppressHydrationWarning={true} className={poppins.className}>
-        <AuthProvider>
-          <CartProvider>
-            {children}
-            <GoogleAnalytics />
-          </CartProvider>
-        </AuthProvider>
+        <ToastProvider>
+          <AuthProvider>
+            <CartProvider>
+              {children}
+              <GoogleAnalytics />
+            </CartProvider>
+          </AuthProvider>
+        </ToastProvider>
       </body>
     </html>
   );

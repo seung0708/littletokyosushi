@@ -2,24 +2,29 @@
 
 import { useState, useEffect } from 'react';
 import MenuItems from "@/components/store/menu/menuItems";
-import { Loading } from '@/components/ui/loading';
 import { apiRequest } from "@/lib/utils/api-fetch";
 import { APIError } from "@/lib/utils/api-error";
 
 import { MenuItem} from '@/types/item';
+import { MenuCategorySkeleton } from '@/components/store/menu/menuItemSkeleton';
+import { retryWithBackoff } from '@/lib/utils/api-retry';
+import CategoryFilter from '@/components/store/menu/categoryFilter';
 
 const MenuPage: React.FC = () => {
     const [items, setItems] = useState<MenuItem[]>([]);
+    const [selectedCategory, setSelectedCategory] = useState('all');
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
 
     useEffect(() => {
         const fetchData = async () => {
             try {
-                const itemsData = await apiRequest<MenuItem[]>('/api/store/items', {
-                    timeout: 5000,
-                    retries: 3,
-                });
+                const itemsData = await retryWithBackoff(async () =>  
+                    await apiRequest<MenuItem[]>('/api/store/items', {
+                        timeout: 5000,
+                        retries: 3,
+                    })
+                );
                 setItems(itemsData);
             } catch (error) {
                 console.error('Error fetching menu data:', error);
@@ -35,8 +40,14 @@ const MenuPage: React.FC = () => {
     
     if (isLoading) {
         return (
-            <div className="bg-black flex justify-center items-center min-h-screen py-12">
-                <Loading variant="store" size="lg" />
+            <div className="min-h-screen bg-black text-white pt-24">
+                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                    <div className="space-y-12 sm:space-y-20">
+                        {[...Array(3)].map((_, i) => (
+                            <MenuCategorySkeleton key={i} />
+                        ))}
+                    </div>
+                </div>
             </div>
         );
     }
@@ -51,22 +62,27 @@ const MenuPage: React.FC = () => {
         );
     }
 
-    // Group items by category
-    const categories = items.reduce<{ name: string; items: MenuItem[] }[]>((acc, item) => {
-        const categoryName = item.categories?.name || 'Uncategorized';
-        
-        let category = acc.find(cat => cat.name === categoryName);
-        if (!category) {
-            category = {
-                name: categoryName,
-                items: []
-            };
-            acc.push(category);
+    const categories = [...new Set(items.map(item => item.categories?.name || 'uncategorized'))].sort();
+
+    const filteredItems = selectedCategory === 'all' 
+        ? items 
+        : items.filter(item => item.categories?.name === selectedCategory);
+
+    const groupedItems = filteredItems.reduce((acc, item) => {
+        const category = item.categories?.name || 'uncategorized';
+        if (!acc[category]) {
+            acc[category] = [];
         }
-        category.items.push(item);
+        acc[category].push(item);
         return acc;
-        
-    }, []);
+     }, {} as Record<string, MenuItem[]>);
+    
+    
+    const categorizedItems = Object.entries(groupedItems).map(([name, items]) => ({
+        name,
+        items
+    }));
+
 
     return (
         <>
@@ -82,9 +98,14 @@ const MenuPage: React.FC = () => {
                 </div>
             </div>
             
-            <div className="px-4 sm:px-6 lg:px-8 py-8 sm:py-12 bg-black text-white">
+            <div className="px-4 sm:px-6 lg:px-8 py-8 sm:py-12 bg-black min-h-screen text-white">
                 <div className="max-w-7xl mx-auto">
-                    <MenuItems categories={categories} />
+                    <CategoryFilter 
+                        categories={categories}
+                        selectedCategory={selectedCategory}
+                        onCategoryChange={setSelectedCategory}
+                    />
+                    <MenuItems categories={categorizedItems} />
                 </div>
             </div>
         </>
