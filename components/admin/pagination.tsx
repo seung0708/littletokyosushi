@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 import { ChevronLeftIcon, ChevronRightIcon } from 'lucide-react';
 import { usePathname, useSearchParams, useRouter } from 'next/navigation';
 
-export default function ItemsPagination ({totalPages}: {totalPages: number}) {
+export default function Pagination ({totalPages}: {totalPages: number}) {
     const searchParams = useSearchParams();
     const pathname = usePathname();
     const { replace } = useRouter();

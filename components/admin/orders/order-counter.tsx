@@ -12,9 +12,7 @@ export default function OrderCounter() {
         const fetchOrders = async () => {
             const response = await fetch('/api/admin/orders?not_started=true');
             const data = await response.json();
-            console.log(data);
-            setCount(data.length);
-             
+            setCount(data.orders.length);
         };
         fetchOrders();
 

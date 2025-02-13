@@ -1,5 +1,5 @@
 import { TableRow, TableCell } from "@/components/ui/table";
-import ActionsMenu from "./actionsmenu";
+import ActionsMenu from "@/components/admin/actionsmenu";
 import {MenuItem} from '@/types/item';
 import Image from "next/image";
 

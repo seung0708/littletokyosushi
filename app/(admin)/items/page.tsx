@@ -4,8 +4,8 @@ import {useState, useEffect} from 'react'
 import Link from 'next/link'
 import { Tabs, TabsContent } from '@/components/ui/tabs'
 import { AddButton } from '@/components/admin/actionbuttons'
-import ItemsTable from '@/components/admin/itemstable';
-import ItemsPagination from '@/components/admin/pagination';
+import ItemsTable from '@/components/admin/items/itemstable';
+import Pagination from '@/components/admin/pagination';
 import SearchBar from '@/components/admin/searchbar';
 import { MenuItem } from '@/types/item';
 import { useSearchParams } from 'next/navigation';
@@ -69,7 +69,7 @@ export default function ItemsPage() {
           <ItemsTable items={items} />
         </TabsContent>
       </Tabs>
-      <ItemsPagination totalPages={totalPages} />
+      <Pagination totalPages={totalPages} />
     </section>
   );
 }
