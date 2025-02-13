@@ -21,8 +21,8 @@ async function getItem(id: string): Promise<MenuItem> {
     return res.json();
 }
 
-export default async function ItemDetailsPage({ params }: { params: Promise<{ id: string }> }) {
-    const { id } = await params;
+export default async function ItemDetailsPage({ params }: { params: { id: string } }) {
+    const { id } = params;
     const item = await getItem(id);
     
     if (!item) {

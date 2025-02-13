@@ -24,6 +24,7 @@ export default function MobileNav() {
     };
 
     const navItems = [
+        { href: '/dashboard', label: 'Dashboard' },
         { href: '/orders', label: 'Orders' },
         { href: '/items', label: 'Menu Items' },
         // { href: '/analytics', label: 'Analytics' },

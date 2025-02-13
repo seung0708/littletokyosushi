@@ -1,7 +1,7 @@
 'use client'
 
 import Link from "next/link"
-import { ShoppingCart, SquareMenu } from "lucide-react"
+import { LayoutDashboard, ShoppingCart, SquareMenu } from "lucide-react"
 import { usePathname } from "next/navigation"
 import clsx from "clsx"
 import OrderCounter from "./orders/order-counter";
@@ -20,6 +20,33 @@ export default function Sidebar() {
         </div>
 
         <nav className="flex-grow space-y-6">
+        <div>
+            <h3 className="mb-2 text-xs font-semibold uppercase text-gray-500">Dashboard</h3>
+            <ul className="space-y-1">
+              <li>
+                <div className="relative">
+                  <Link 
+                    href="/dashboard"
+                    className={clsx(
+                      'flex items-center text-gray-700 rounded-lg px-2 w-full', 
+                      {
+                        'bg-gray-400 text-gray-800 p-2' : pathname === '/dashboard'
+                      }
+                    )}
+                  >
+                    <div className="flex items-center justify-between w-full">
+                      <div className="flex items-center gap-2">
+                        <LayoutDashboard className="h-5 w-5" />
+                        Dashboard
+                        
+                      </div>
+                    </div>
+                  </Link>
+                </div>
+              </li>
+            </ul>
+          </div>
+
           <div>
             <h3 className="mb-2 text-xs font-semibold uppercase text-gray-500">Orders</h3>
             <ul className="space-y-1">

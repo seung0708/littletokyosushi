@@ -1,8 +1,8 @@
 import {createClient} from "@/lib/supabase/server";
 import { NextResponse } from "next/server";
 
-export async function PATCH(request: Request, { params }: { params: Promise<{ id: string }> }) {
-    const { id } = await params;
+export async function PATCH(request: Request, { params }: { params: { id: string } }) {
+    const { id } = params;
     const supabase = await createClient(); 
     const { customerId } = await request.json();
     

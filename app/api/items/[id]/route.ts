@@ -3,9 +3,7 @@ import { NextResponse } from 'next/server';
 import { checkAdminAuth } from '../../../../utils/auth';
 import { revalidatePath } from 'next/cache';
 
-export async function GET(
-    request: Request,
-    { params }: { params: Promise<{ id: string }> }
+export async function GET(request: Request, { params }: { params: { id: string } }
 ) {
     const supabase = await createClient();
     const { pathname } = new URL(request.url);
@@ -64,9 +62,7 @@ export async function GET(
 }
 
 
-export async function PATCH(
-    request: Request,
-    { params }: { params: Promise<{ id: string }> }
+export async function PATCH( request: Request, { params }: { params: { id: string } }
 ) {
     const supabase = await createClient();
 

@@ -15,20 +15,15 @@ const nextConfig = {
             destination: '/:path*',
             has: [{ type: 'host', value: 'localhost' }]
           },
-          // Admin site (admin.localhost)
-          {
-            source: '/',
-            destination: '/signin',
-            has: [{ type: 'host', value: 'admin.localhost' }]
-          },
+          // Admin site (admin.localhost),
           {
             source: '/signin',
             destination: '/signin',
             has: [{ type: 'host', value: 'admin.localhost' }]
           },
           {
-            source: '/',
-            destination: '/orders',
+            source: '/dashboard',
+            destination: '/dashboard',
             has: [{ type: 'host', value: 'admin.localhost' }]
           },
           {

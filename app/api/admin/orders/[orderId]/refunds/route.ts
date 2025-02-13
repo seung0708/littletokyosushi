@@ -3,8 +3,8 @@ import { NextResponse } from "next/server"
 import {sendRefundNotificationEmail} from '@/lib/email-smtp';
 import stripe from "@/lib/stripe/stripe";
 
-export async function GET(request: Request, { params }: { params: Promise<{ orderId: string }> }) {
-    const { orderId } = await params;
+export async function GET(request: Request, { params }: { params: { orderId: string } }) {
+    const { orderId } = params;
     const supabase = await createClient();
 
     const { data, error } = await supabase
@@ -20,8 +20,8 @@ export async function GET(request: Request, { params }: { params: Promise<{ orde
   return NextResponse.json(data);
 }   
 
-export async function POST(request: Request, { params }: { params: Promise<{ orderId: string }> }) {
-    const { orderId } = await params;
+export async function POST(request: Request, { params }: { params: { orderId: string } }) {
+    const { orderId } = params;
     try {
         const { amount, reason } = await request.json();
         const supabase = await createClient();

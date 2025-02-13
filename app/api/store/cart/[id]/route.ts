@@ -15,9 +15,9 @@ type Cart = Database['public']['Tables']['carts']['Row'] & {
     })[]; 
 };
 
-export async function GET(request: Request, { params }: { params: Promise<{ id: string }> }) {
+export async function GET(request: Request, { params }: { params: { id: string } }) {
     
-    const { id: cartId } = await params;
+    const { id: cartId } = params;
     const supabase = await createClient();
 
     const {data: dbCart, error} = await supabase
@@ -45,8 +45,8 @@ export async function GET(request: Request, { params }: { params: Promise<{ id: 
     return NextResponse.json(dbCart);
 }
 
-export async function PATCH(request: Request,  { params }: { params: Promise<{ id: string }> }) {
-    const {id} = await params;
+export async function PATCH(request: Request,  { params }: { params: { id: string } }) {
+    const {id} = params;
     const supabase = await createClient();
     try {
         const { customerId, cartItems } = await request.json()

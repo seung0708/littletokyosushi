@@ -12,8 +12,8 @@ interface OrdersContainerProps {
 export default function OrdersContainer({title, orders, loading, children }: OrdersContainerProps) {
     return (
         <div>
-          <div className="flex justify-between items-center">
-            <h2 className="text-2xl font-bold">{title}</h2>
+          <div className="flex space-y-4 pb-6 justify-between items-center">
+            <h1 className="text-3xl font-bold">{title}</h1>
           </div>
           {loading ? (
             <div className="flex justify-center items-center h-32">

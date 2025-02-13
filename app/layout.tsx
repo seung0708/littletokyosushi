@@ -3,6 +3,7 @@ import "./globals.css";
 import { poppins } from "./fonts/fonts";
 import { AuthProvider } from "./context/authContext";
 import { CartProvider } from "./context/cartContext";
+import { GoogleAnalytics } from "@/components/providers/google-analytics";
 
 export const viewport: Viewport = {
   width: 'device-width',
@@ -43,6 +44,7 @@ export default async function RootLayout({ children, }: { children: React.ReactN
         <AuthProvider>
           <CartProvider>
             {children}
+            <GoogleAnalytics />
           </CartProvider>
         </AuthProvider>
       </body>
