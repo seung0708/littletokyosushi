@@ -7,7 +7,6 @@ export async function POST(request: Request) {
         const { amount, orderId } = await request.json();
         if (!amount || amount <= 0) return NextResponse.json( { error: 'Invalid amount' }, { status: 400 });
         
-        const idempotencyKey = `order_${orderId}`
         const paymentIntent = await retryOperation(() => 
             stripe.paymentIntents.create(
                 {
@@ -17,9 +16,6 @@ export async function POST(request: Request) {
                     metadata: {
                         order_id: orderId
                     }
-                },
-                {
-                    idempotencyKey: idempotencyKey //prevents from creating multiple payment intents with the same order id
                 }
             )
         );

@@ -10,34 +10,55 @@ export default function OrderCounter() {
 
     useEffect(() => {
         const fetchOrders = async () => {
-            const response = await fetch('/api/admin/orders?not_started=true');
-            const data = await response.json();
-            setCount(data.orders.length);
+            try {
+                const response = await fetch('/api/admin/orders?not_started=true');
+                if (!response.ok) throw new Error('Failed to fetch orders');
+                const data = await response.json();
+                setCount(data.orders.length);
+            } catch (error) {
+                console.error('Error fetching orders:', error);
+            }
         };
+
+        // Initial fetch
         fetchOrders();
 
+        // Subscribe to all order changes
         const channel = supabase.channel('orders')
             .on('postgres_changes', {
-                event: '*',
+                event: 'INSERT',
                 schema: 'public',
                 table: 'orders',
-            }, async (payload) => {
-                const response = await fetch('/api/admin/orders?not_started=true');
-                const data = await response.json();
-                setCount(data.length);
-            }
-        ).subscribe();
+                filter: 'status=eq.not_started'
+            }, () => {
+                fetchOrders();
+            })
+            .on('postgres_changes', {
+                event: 'UPDATE',
+                schema: 'public',
+                table: 'orders',
+                filter: 'status=eq.not_started'
+            }, () => {
+                fetchOrders();
+            })
+            .on('postgres_changes', {
+                event: 'UPDATE',
+                schema: 'public',
+                table: 'orders',
+                filter: 'old_status=eq.not_started'
+            }, () => {
+                fetchOrders();
+            })
+            .subscribe();
 
         return () => {
-            channel.unsubscribe();
+            supabase.removeChannel(channel);
         };
-
     }, []);
 
-
-
-    
-    return (
-        <Badge variant="destructive">{count}</Badge>
-    )
+    return count > 0 ? (
+        <Badge variant="destructive" className="ml-auto">
+            {count}
+        </Badge>
+    ) : null;
 }

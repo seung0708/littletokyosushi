@@ -50,6 +50,7 @@ export async function POST(req: Request) {
                 .insert(orderItemInsert)
                 .select()
 
+            
             if (orderItemError) {
                 return NextResponse.json({ error: orderItemError.message }, { status: 400 });
             }
@@ -66,7 +67,7 @@ export async function POST(req: Request) {
                         .from('order_item_modifiers')
                         .insert(orderItemModifierInsert)
                         .select();
-
+                    
                     if (orderItemModifierError) {
                         return NextResponse.json({ error: orderItemModifierError.message }, { status: 400 });
                     }

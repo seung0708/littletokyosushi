@@ -49,6 +49,7 @@ const Page: React.FC = () => {
           }
 
           const verifyData = await verifyResponse.json();
+          console.log(verifyData);
           setOrderId(verifyData.orderId);
 
           if (verifyData.clearCart) clearCart();

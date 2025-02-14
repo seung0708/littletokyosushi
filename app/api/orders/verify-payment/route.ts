@@ -20,28 +20,25 @@ export async function POST(req: Request) {
         }
 
         const orderId = paymentIntent.metadata.order_id;
+        console.log('verify-payment orderId:', orderId)
+
         if (!orderId) {
             return NextResponse.json({ error: 'No order ID found' }, { status: 400 });
         }
 
         
-        const { data: orderData, error: orderError } = await retryOperation(async () =>{ 
+        const orderData = await retryOperation(async () =>{ 
             const result = await supabase
                 .from('orders')
                 .select('*')
                 .eq('short_id', orderId)
                 .single();
 
-            if (result.error) return result.error;
-            if(!result.data) throw new Error('Order not found')
+            if (result.error) throw result.error;
+            if (!result.data) throw new Error('Order not found');
                 
-            return result.data
+            return result.data;
         });
-    
-        if (orderError) {
-            console.error('Error fetching order:', orderError);
-            throw orderError;
-        }
         
         if (!orderData) {
             return NextResponse.json({ error: 'Order not found' }, { status: 404 });

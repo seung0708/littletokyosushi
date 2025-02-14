@@ -13,7 +13,7 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
         .eq('id', id)
         .single();
     
-    if (cartError) {
+    if (cartError && cartError.code !== 'PGRST116') {
         console.error('Error fetching cart:', cartError);
         return NextResponse.json(
             { error: 'Failed to fetch cart' },

@@ -1,10 +1,11 @@
 "use client"
 
 import OrdersContainer from "./orders-container";
-
 import { useState, useEffect, useRef } from "react"
 import { createClient } from '@/lib/supabase/client'
 import { Order } from '@/types/order';
+import { Switch } from "@/components/ui/switch"
+import { Label } from "@/components/ui/label"
 
 
 export default function OrdersList() {
@@ -12,9 +13,16 @@ export default function OrdersList() {
   const [orders, setOrders] = useState<Order[]>([])
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const [loading, setLoading] = useState(true)
+  const [soundEnabled, setSoundEnabled] = useState(false)
   
   useEffect(() => {
     audioRef.current = new Audio('/sounds/mixkit-confirmation-tone-2867.wav');
+    // Try to play muted first to handle autoplay restriction
+    if (audioRef.current) {
+      audioRef.current.muted = true;
+      audioRef.current.play().catch(() => {});
+    }
+    
     const fetchOrders = async () => {
       setLoading(true)
       const response = await fetch('/api/admin/orders?not_started=true')
@@ -50,7 +58,12 @@ export default function OrdersList() {
           
         if (newOrder) {
           setOrders((prevOrders) => [newOrder, ...prevOrders]);
-          audioRef.current?.play();
+          if (soundEnabled && audioRef.current) {
+            audioRef.current.muted = false;
+            audioRef.current.play().catch((error) => {
+              console.log('Audio play failed:', error);
+            });
+          }
         }
       })
       .on('postgres_changes', {
@@ -95,15 +108,21 @@ export default function OrdersList() {
       .subscribe();
 
     return () => {
-      channel.unsubscribe();
-    };
-  }, [])
+      supabase.removeChannel(channel)
+    }
+  }, [soundEnabled])
 
-    return (
-        <OrdersContainer 
-          title="Orders" 
-          orders={orders} 
-          loading={loading} 
+  return (
+    <div className="space-y-4">
+      <div className="flex items-center space-x-2 mb-4">
+        <Switch 
+          id="sound-mode"
+          checked={soundEnabled}
+          onCheckedChange={setSoundEnabled}
         />
-    )
+        <Label htmlFor="sound-mode">Enable Sound Notifications</Label>
+      </div>
+      <OrdersContainer orders={orders} loading={loading} />
+    </div>
+  )
 }

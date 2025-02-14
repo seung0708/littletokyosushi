@@ -36,11 +36,10 @@ export async function sendEmail(to: string, subject: string, html: string) {
 }
 
 export async function sendOrderConfirmationEmail(order: Order, customer: Customer) {
-  
   const emailHtml = await render(OrderConfirmationEmail({ order, customer }));
   return sendEmail(
-    customer.email as string,
-    `Order Confirmation #${order.short_id}`,
+    order.customers.email || customer.signinEmail || customer.guestEmail as string,
+    `Order Confirmation #${order.short_id?.toUpperCase()}`,
     emailHtml
   );
 }

@@ -48,7 +48,7 @@ const MenuItems: React.FC<MenuItemsProps> = ({ categories }) => {
                                         <h3 className="text-lg sm:text-xl md:text-2xl font-bold group-hover:text-red-400 transition-colors line-clamp-2">
                                             {item.name}
                                         </h3>
-                                        <span className="text-base sm:text-lg md:text-xl font-bold text-red-400 whitespace-nowrap bg-black/30 px-2 sm:px-3 py-1 rounded-full">
+                                        <span className="text-base sm:text-lg md:text-xl font-bold text-white group-hover:text-red-400 whitespace-nowrap bg-black/30 px-2 sm:px-3 py-1 rounded-full">
                                             ${item?.price?.toFixed(2)}
                                         </span>
                                     </div>
