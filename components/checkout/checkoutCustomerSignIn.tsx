@@ -71,7 +71,7 @@ const CheckoutCustomerSignIn: React.FC<CustomerSignInProps> = ({ form, onComplet
         const { customer } = form.getValues()
         try {
             setGuestError('')
-            const { user } = await signinAnonymously(customer.guestEmail, customer.guestName)
+            const { user } = await signinAnonymously(customer.guestEmail, customer.guestName) 
             if (user) {
                 await updateCartCustomerId(user.id || '')
                 onComplete()
@@ -99,7 +99,7 @@ const CheckoutCustomerSignIn: React.FC<CustomerSignInProps> = ({ form, onComplet
                                     <FormItem>
                                         <FormLabel>Email</FormLabel>
                                         <FormControl>
-                                            <Input placeholder="Enter your email" autoComplete="email" {...field} />
+                                            <Input placeholder="Enter your email" autoComplete="email" {...field} className="text-gray-800" />
                                         </FormControl>
                                         <FormMessage />
                                     </FormItem>
@@ -112,7 +112,7 @@ const CheckoutCustomerSignIn: React.FC<CustomerSignInProps> = ({ form, onComplet
                                     <FormItem>
                                         <FormLabel>Password</FormLabel>
                                         <FormControl>
-                                            <Input type="password" placeholder="Enter your password" autoComplete="current-password" {...field} />
+                                            <Input type="password" placeholder="Enter your password" autoComplete="current-password" {...field} className="text-gray-800" />
                                         </FormControl>
                                         <FormMessage />
                                     </FormItem>
@@ -123,7 +123,7 @@ const CheckoutCustomerSignIn: React.FC<CustomerSignInProps> = ({ form, onComplet
                                 <Button onClick={handleSignIn} className="w-full bg-red-500" variant="default">
                                     Sign In
                                 </Button>
-                                <Button onClick={handleGoogleSignIn} className="w-full bg-red-500" variant="default">
+                                <Button onClick={handleGoogleSignIn} className="w-full bg-white text-black" variant="default">
                                     <Image src="/google.svg" alt="Google Logo" width={20} height={20} className="inline-block mr-2" />
                                     Continue with Google
                                 </Button>
@@ -148,7 +148,7 @@ const CheckoutCustomerSignIn: React.FC<CustomerSignInProps> = ({ form, onComplet
                                     <FormItem>
                                         <FormLabel>Email</FormLabel>
                                         <FormControl>
-                                            <Input placeholder="Enter your email" autoComplete="email" {...field} />
+                                            <Input placeholder="Enter your email" autoComplete="email" {...field} className="text-gray-800" />
                                         </FormControl>
                                         <FormMessage />
                                     </FormItem>
@@ -161,7 +161,7 @@ const CheckoutCustomerSignIn: React.FC<CustomerSignInProps> = ({ form, onComplet
                                     <FormItem>
                                         <FormLabel>Password</FormLabel>
                                         <FormControl>
-                                            <Input type="password" placeholder="Create a password" autoComplete="current-password" {...field} />
+                                            <Input type="password" placeholder="Create a password" autoComplete="current-password" {...field} className="text-gray-800" />
                                         </FormControl>
                                         <FormMessage />
                                     </FormItem>
@@ -202,7 +202,7 @@ const CheckoutCustomerSignIn: React.FC<CustomerSignInProps> = ({ form, onComplet
                             <FormItem>
                                 <FormLabel>Email</FormLabel>
                                 <FormControl>
-                                    <Input placeholder="Enter your email" autoComplete="email" {...field} />
+                                    <Input placeholder="Enter your email" autoComplete="email" {...field} className="text-gray-800" />
                                 </FormControl>
                                 <FormMessage />
                             </FormItem>

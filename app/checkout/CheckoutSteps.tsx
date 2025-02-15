@@ -183,6 +183,7 @@ const CheckoutSteps = () => {
     // }
 
     const onSubmit = async (data: CheckoutFormValues) => {
+        
         try {
             
             // Create order payload
@@ -196,6 +197,8 @@ const CheckoutSteps = () => {
                 total: orderTotal,
                 cartItems
             };
+
+            console.log('orderPayload', orderPayload);
 
             // Create order
             const orderResponse = await fetch('/api/orders', {

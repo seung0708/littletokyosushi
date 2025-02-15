@@ -2,7 +2,26 @@ import { MenuItem } from '@/types/item';
 import ItemDetailsForm from '@/components/store/menu/itemDetailsForm';
 import { notFound } from 'next/navigation';
 import { retryWithBackoff } from '@/lib/utils/api-retry';
-
+import type { Metadata, ResolvingMetadata } from 'next'
+ 
+type Props = {
+  params: Promise<{ id: string }>
+  searchParams: Promise<{ [key: string]: string | string[] | undefined }>
+}
+ 
+export async function generateMetadata({ params, searchParams }: Props, parent: ResolvingMetadata): Promise<Metadata> {
+    const id = (await params).id
+    // fetch data
+    const item = await getItem(id)
+ 
+  // optionally access and extend (rather than replace) parent metadata
+  const previousImages = (await parent).openGraph?.images || []
+ 
+  return {
+    title: item.name,
+  }
+}
+ 
 async function getItem(id: string): Promise<MenuItem> {
     const baseUrl = process.env.VERCEL_URL 
         ? `https://${process.env.VERCEL_URL}` 

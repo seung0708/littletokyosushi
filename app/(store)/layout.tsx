@@ -5,8 +5,7 @@ export default function MainLayout({children}: {children: ReactNode}) {
     return (
         <>
             <Header />
-            <main>{children}</main>
-            
+            <main className="overflow-x-hidden">{children}</main>
         </>
     )
 }

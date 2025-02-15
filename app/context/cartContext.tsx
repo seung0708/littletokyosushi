@@ -95,6 +95,7 @@ export const CartProvider = ({ children }: CartProviderProps) => {
             }
 
             const data = await response.json();
+            console.log(data);
             setCartId(data.id);
             setCartItems(data.cart_items);
             localStorage.setItem('cartId', data.id);

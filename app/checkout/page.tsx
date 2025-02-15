@@ -1,8 +1,29 @@
 'use client'
 
+import { useEffect } from 'react'
+import { useRouter } from 'next/navigation'
+import { useCart } from '@/app/context/cartContext'
 import CheckoutSteps from "./CheckoutSteps"
 
 const CheckoutPage: React.FC = () => {
+  const router = useRouter()
+  const { cartItems } = useCart()
+
+  useEffect(() => {
+    // Redirect if cart is empty
+    if (cartItems.length === 0) {
+      router.replace('/menu')
+      return
+    }
+
+    // Redirect if there's a completed order
+    const completedOrderId = localStorage.getItem('lastCompletedOrder')
+    if (completedOrderId) {
+      router.replace(`/order-confirmation?id=${completedOrderId}`)
+      return
+    }
+  }, [cartItems])
+
   return (
     <div className="min-h-screen bg-black text-white">
       <div className="w-full bg-black pt-28">

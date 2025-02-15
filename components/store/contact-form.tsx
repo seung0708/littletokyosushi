@@ -29,6 +29,7 @@ const ContactForm: React.FC = () => {
     });
 
     async function onSubmit(values: z.infer<typeof contactFormSchema>) {
+        console.log(form.getValues());
         setIsSubmitting(true);
         setSubmitStatus('idle');
 
@@ -70,7 +71,7 @@ const ContactForm: React.FC = () => {
                                         <Input 
                                             placeholder="your@email.com" 
                                             {...field} 
-                                            className="h-11 sm:h-12 text-base transition-all focus:ring-2 focus:ring-offset-2"
+                                            className="h-11 sm:h-12 text-base transition-all focus:ring-2 focus:ring-offset-2 text-black"
                                         />
                                     </FormControl>
                                     <FormMessage />
@@ -87,7 +88,7 @@ const ContactForm: React.FC = () => {
                                         <Input 
                                             placeholder="What's this about?" 
                                             {...field} 
-                                            className="h-11 sm:h-12 text-base transition-all focus:ring-2 focus:ring-offset-2"
+                                            className="h-11 sm:h-12 text-base transition-all focus:ring-2 focus:ring-offset-2 text-black"
                                         />
                                     </FormControl>
                                     <FormMessage />
@@ -104,7 +105,7 @@ const ContactForm: React.FC = () => {
                                         <Textarea 
                                             placeholder="Your message here..." 
                                             {...field}
-                                            className="min-h-[150px] text-base transition-all focus:ring-2 focus:ring-offset-2 resize-y"
+                                            className="min-h-[150px] text-base transition-all focus:ring-2 focus:ring-offset-2 resize-y text-black"
                                         />
                                     </FormControl>
                                     <FormMessage />

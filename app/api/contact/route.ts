@@ -12,11 +12,7 @@ export async function POST(request: Request) {
       <p>${message}</p>
     `;
 
-    const result = await sendEmail(
-      'littletokyosushiinc@gmail.com',
-      `Contact Form: ${subject}`,
-      htmlContent
-    );
+    const result = await sendEmail( 'littletokyosushiinc@gmail.com', `Contact Form: ${subject}`, htmlContent );
 
     if (result.success) {
       return NextResponse.json({ message: 'Email sent successfully' });

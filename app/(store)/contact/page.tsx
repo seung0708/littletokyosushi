@@ -1,4 +1,10 @@
 import ContactForm from "@/components/store/contact-form";
+import type { Metadata } from "next";
+
+export const metadata: Metadata = {
+    title: "Contact Us",
+    description: "Get in touch with Little Tokyo Sushi for any inquiries or to place an order.",
+}
 
 const Page: React.FC = () => {
     return (

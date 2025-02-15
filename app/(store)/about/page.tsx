@@ -1,4 +1,10 @@
 import Image from "next/image";
+import type { Metadata } from "next";
+
+export const metadata: Metadata = {
+    title: "About Us",
+    description: "Experience authentic Japanese cuisine at Little Tokyo Sushi.",
+}
 
 const Page: React.FC = () => {
     return (

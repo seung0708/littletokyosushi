@@ -4,6 +4,7 @@ import { usePathname } from 'next/navigation';
 import Navbar from "./navigation"
 import MobileNav from './mobilenav';
 import Logo from './ui/nav/logo';
+import CartIcon from './ui/nav/cart-icon';
 
 export default function Header() {
     const [isOpen, setIsOpen] = useState(false);
@@ -49,27 +50,28 @@ export default function Header() {
         <>
             <header 
                 className={`
-                    fixed w-full z-50
-                    px-4 sm:px-6 lg:px-8 
-                    py-3 sm:py-4
-                    bg-black/90 backdrop-blur-sm 
+                    fixed top-0 w-full z-50
+                    px-3 sm:px-4 md:px-6 xl:px-8 
+                    py-2 sm:py-3 lg:py-4
+                    bg-black/90 backdrop-blur-md 
                     text-white
-                    transition-all duration-300
-                    ${isScrolled ? 'shadow-xl' : ''}
-                    ${isScrolled ? 'py-2 sm:py-3' : ''}
+                    transition-all duration-300 ease-in-out
+                    ${isScrolled ? 'shadow-2xl bg-black/95' : ''}
+                    ${isScrolled ? 'py-2 sm:py-2.5 lg:py-3' : ''}
                 `}
             >
                 <div className="max-w-7xl mx-auto flex items-center justify-between">
                     <Logo />
                     
-                    <Navbar />
-                    
-                    <button
-                        type="button"
-                        className="md:hidden inline-flex items-center justify-center p-2 rounded-md text-white hover:text-gray-300 hover:bg-black/50 transition-colors"
-                        onClick={toggleMenu}
-                        aria-expanded={isOpen}
-                    >
+                    <div className="flex items-center md:gap-2">
+                        <Navbar />
+                        
+                        <button
+                            type="button"
+                            className="md:hidden inline-flex items-center justify-center p-2 rounded-lg text-white hover:text-red-400 hover:bg-white/10 active:bg-white/20 transition-all duration-200"
+                            onClick={toggleMenu}
+                            aria-expanded={isOpen}
+                        >
                         <span className="sr-only">Open main menu</span>
                         <svg
                             className={`${isOpen ? 'hidden' : 'block'} h-6 w-6`}
@@ -102,6 +104,8 @@ export default function Header() {
                             />
                         </svg>
                     </button>
+                    <CartIcon />
+                    </div>
                 </div>
             </header>
 

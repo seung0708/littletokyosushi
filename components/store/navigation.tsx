@@ -1,30 +1,26 @@
 import NavLink from "@/components/store/ui/nav/navLink";
-import CartIcon from "@/components/store/ui/nav/cart-icon";
 
 const Navbar: React.FC = () => {
     return(
-        <nav className="hidden md:flex items-center space-x-8">
+        <nav className="hidden md:flex items-center gap-4 lg:gap-8">
             <NavLink 
                 href="/about" 
-                className="text-sm font-medium hover:text-gray-300 transition-colors" 
+                className="font-medium text-base lg:text-lg hover:text-red-400 transition-all duration-200 hover:scale-105" 
             >
                 About
             </NavLink>       
             <NavLink 
                 href="/contact" 
-                className="text-sm font-medium hover:text-gray-300 transition-colors" 
+                className="font-medium text-base lg:text-lg hover:text-red-400 transition-all duration-200 hover:scale-105" 
             >
                 Contact
             </NavLink>
             <NavLink 
                 href="/menu" 
-                className="text-sm font-medium hover:text-gray-300 transition-colors" 
+                className="font-medium text-base lg:text-lg hover:text-red-400 transition-all duration-200 hover:scale-105" 
             >
                 Menu
             </NavLink>
-            <div className="relative">
-                <CartIcon />
-            </div>
         </nav>
     );
 }

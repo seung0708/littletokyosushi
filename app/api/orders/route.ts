@@ -9,6 +9,7 @@ type OrderItemModifierOptionInsert = Partial<Database['public']['Tables']['order
  
 export async function POST(req: Request) {
     const { customer_id, customer, delivery, total, cartItems, fees } = await req.json();
+    //console.log('customer_id', customer_id, 'customer', customer, 'delivery', delivery, 'total', total, 'cartItems', cartItems, 'fees', fees);
     const supabase = await createClient();
 
     try {
@@ -25,13 +26,13 @@ export async function POST(req: Request) {
             sub_total: fees.subTotal,
             status: 'pending'
         };
-
         const { data: orderData, error: orderError } = await supabase
             .from('orders')
             .insert(orderInsert)
             .select()
             .single();
-
+        
+        console.log('orderData', orderData, 'orderError', orderError);
         if (orderError) {
             return NextResponse.json({ error: orderError.message }, { status: 400 });
         }
@@ -93,24 +94,24 @@ export async function POST(req: Request) {
                 }
             }            
         }
+
+        const {data: order, error} = await supabase
+        .from('orders')
+        .select(`*, customers(*), order_items(*, order_item_modifiers(*, order_item_modifier_options(*)))`)
+        .eq('short_id', orderData.short_id)
+        .single();
+
+        if (error) {
+            return NextResponse.json({ error: error.message }, { status: 400 });
+        }
+
         try {
-
-            const {data: order, error: orderError} = await supabase
-                .from('orders')
-                .select(`*, customers(*), order_items(*, order_item_modifiers(*, order_item_modifier_options(*)))`)
-                .eq('short_id', orderData.short_id)
-                .single();
-
-            if (orderError) {
-                return NextResponse.json({ error: orderError.message }, { status: 400 });
-            }
-            
             await sendOrderConfirmationEmail(order, customer);
         } catch (emailError) {
             console.error('Failed to send confirmation email:', emailError);
         }
 
-        return NextResponse.json(orderData);
+        return NextResponse.json(order);
     } catch (error) {
         console.error('Error creating order:', error);
         return NextResponse.json({ error: 'Failed to create order' }, { status: 500 });

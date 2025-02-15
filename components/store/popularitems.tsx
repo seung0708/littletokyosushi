@@ -89,7 +89,7 @@ const PopularItems: React.FC = () => {
     }
 
     return (
-        <section aria-labelledby="popular-items" className="bg-black text-white py-16">
+        <section aria-labelledby="popular-items" className="bg-black text-white py-8">
             <div className=" text-center px-20 md:flex md:items-center md:justify-between mb-8">
                 <h2 id='favorites-heading' className="text-3xl md:4xl md:text-left tracking-tight">
                     Popular Items
@@ -103,13 +103,15 @@ const PopularItems: React.FC = () => {
             <div className="relative px-8">
                 <Carousel 
                     setApi={setApi}
-                    className="w-full"
                     opts={{
                         align: "start",
                         loop: true,
                         dragFree: true,
                         skipSnaps: true,
+                        containScroll: false,
+                        watchDrag: false
                     }}
+                    className="w-full"
                 >
                     <CarouselContent className="-ml-2 md:-ml-4">
                         {shuffledItems.map((item) => (
@@ -119,24 +121,23 @@ const PopularItems: React.FC = () => {
                             >
                                 <Card className="bg-black">
                                     <CardContent className="p-0">
-                                        <Link href={`menu/${item.id}`}>
-                                            <div className="relative group rounded-lg overflow-hidden aspect-[3/2]">
+                                        <Link href={`menu/${item.id}`} className="group">
+                                            <div className="relative aspect-square overflow-hidden rounded-lg">
                                                 <Image 
                                                     src={`${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/menu-items/${item?.image_urls?.[0]}`}
                                                     alt={`${item.name} image`}
-                                                    className="h-full w-full object-contain transition-transform duration-300 group-hover:scale-105"
-                                                    width={500}
-                                                    height={300}
-                                                    priority={true}
+                                                    fill
+                                                    className="object-cover transition-transform duration-300 group-hover:scale-110"
+                                                    sizes="(min-width: 1024px) 25vw, (min-width: 768px) 33vw, 50vw"
                                                 />
                                                 <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-10 transition-opacity duration-300" />
                                             </div>
-                                            <div className="m-4 text-center text-white">
-                                                <h3 className="text-lg font-medium group-hover:text-red-500">
+                                            <div className="m-4 text-center text-white h-[4.5rem] flex flex-col justify-center">
+                                                <h3 className="text-md font-medium group-hover:text-red-500 truncate px-1">
                                                     {item.name}
                                                 </h3>
                                                 <p className="mt-1 text-sm">
-                                                    ${item.price.toFixed(2)}
+                                                    ${item?.price?.toFixed(2)}
                                                 </p>
                                             </div>
                                         </Link>
@@ -150,7 +151,7 @@ const PopularItems: React.FC = () => {
                 </Carousel>
             </div>
 
-            <div className="mt-8 text-center md:hidden">
+            <div className="mt-8 mr-10 text-right md:hidden">
                 <Link href="/menu" className="text-sm font-medium text-red-500 hover:text-red-600">
                     Shop for more items
                     <span aria-hidden='true'>&rarr;</span>

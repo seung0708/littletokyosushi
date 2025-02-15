@@ -122,7 +122,7 @@ export default function OrdersList() {
         />
         <Label htmlFor="sound-mode">Enable Sound Notifications</Label>
       </div>
-      <OrdersContainer orders={orders} loading={loading} />
+      <OrdersContainer title="All Orders" orders={orders} loading={loading} />
     </div>
   )
 }
