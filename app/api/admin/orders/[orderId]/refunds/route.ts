@@ -45,7 +45,7 @@ export async function POST(request: Request, { params }: { params: Promise<{ ord
             `)
             .eq('short_id', orderId)
             .single();
-        console.log('Order:', order);
+        
         if (orderError) {
             throw orderError;
         }
@@ -57,8 +57,7 @@ export async function POST(request: Request, { params }: { params: Promise<{ ord
         // Calculate total refunded amount
         const totalRefunded = order.order_refunds?.reduce((sum: number, refund: { amount: number; }) => sum + refund.amount, 0) || 0;
         const remainingAmount = order.total - totalRefunded;
-        console.log('Remaining amount:', remainingAmount);
-        console.log('Refund amount:', amount);
+
         if (amount > remainingAmount) {
             return NextResponse.json({ 
                 error: `Cannot refund more than remaining amount: $${remainingAmount.toFixed(2)}` 
@@ -70,7 +69,7 @@ export async function POST(request: Request, { params }: { params: Promise<{ ord
             amount: Math.round(amount * 100),
             reason: 'requested_by_customer'
         });
-        console.log('Stripe refund:', refund);
+        
         if (refund.status !== 'succeeded') {
             console.error('Stripe refund failed:', refund);
             return NextResponse.json({ 
@@ -109,7 +108,9 @@ export async function POST(request: Request, { params }: { params: Promise<{ ord
         if(newRefund && refund.status === 'succeeded') {
             const { error: updateError } = await supabase
                 .from('orders')
-                .update({ total: remainingAmount - amount })
+                .update({ 
+                    total: remainingAmount - amount, 
+                })
                 .eq('id', order.id);
             if (updateError) throw updateError;
 

@@ -62,7 +62,7 @@ export async function sendPrepTimeNotificationEmail(order: Order, customer: Cust
 
   return sendEmail(
     customer.email as string,
-    `Order Update: Your order #${order.short_id} is being prepared`,
+    `Order Update: Your order #${order.short_id?.toUpperCase()} is being prepared`,
     emailHtml
   );
 }
@@ -85,7 +85,7 @@ export async function sendOrderReadyNotificationEmail(order: Order, customer: Cu
 
   return sendEmail(
     customer.email as string,
-    `Order Ready: Your order #${order.short_id} is ready for pickup`,
+    `Order Ready: Your order #${order.short_id?.toUpperCase()} is ready for pickup`,
     emailHtml
   );
 }
@@ -95,7 +95,7 @@ export async function sendOrderCompletedEmail(order: Order, customer: Customer) 
   const emailHtml = await render(OrderCompletedEmail({ order, customer }));
   return sendEmail(
     customer.email as string,
-    `Order #${order.short_id} Completed - Little Tokyo Sushi`,
+    `Order #${order.short_id?.toUpperCase()} Completed - Little Tokyo Sushi`,
     emailHtml
   );
 }
@@ -105,7 +105,7 @@ export async function sendRefundNotificationEmail(order: Order, customer: Custom
   const emailHtml = await render(RefundNotificationEmail({ order, customer, refundAmount }));
   return sendEmail(
     customer.email as string,
-    `Refund Processed for Order #${order.short_id} - Little Tokyo Sushi`,
+    `Refund Processed for Order #${order.short_id?.toUpperCase()} - Little Tokyo Sushi`,
     emailHtml
   );
 }

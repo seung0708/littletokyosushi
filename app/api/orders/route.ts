@@ -13,9 +13,6 @@ export async function POST(req: Request) {
     const supabase = await createClient();
 
     try {
-        if (!customer.signinEmail || !customer.guestEmail) {
-            return NextResponse.json({ error: 'Customer email is required' }, { status: 400 });
-        }
         
         const orderInsert: Partial<Database['public']['Tables']['orders']['Insert']> = {
             customer_id,
@@ -26,6 +23,7 @@ export async function POST(req: Request) {
             sub_total: fees.subTotal,
             status: 'pending'
         };
+        
         const { data: orderData, error: orderError } = await supabase
             .from('orders')
             .insert(orderInsert)

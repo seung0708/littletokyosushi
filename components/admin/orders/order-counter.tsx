@@ -23,36 +23,25 @@ export default function OrderCounter() {
         // Initial fetch
         fetchOrders();
 
-        // Subscribe to all order changes
+        // Subscribe to order changes
         const channel = supabase.channel('orders')
             .on('postgres_changes', {
-                event: 'INSERT',
+                event: '*',  // Listen to all events (INSERT, UPDATE, DELETE)
                 schema: 'public',
-                table: 'orders',
-                filter: 'status=eq.not_started'
-            }, () => {
-                fetchOrders();
-            })
-            .on('postgres_changes', {
-                event: 'UPDATE',
-                schema: 'public',
-                table: 'orders',
-                filter: 'status=eq.not_started'
-            }, () => {
-                fetchOrders();
-            })
-            .on('postgres_changes', {
-                event: 'UPDATE',
-                schema: 'public',
-                table: 'orders',
-                filter: 'old_status=eq.not_started'
-            }, () => {
-                fetchOrders();
+                table: 'orders'
+            }, (payload) => {
+                // Only refetch if the change involves not_started status
+                if (payload.eventType === 'INSERT' && payload.new.status === 'not_started') {
+                    fetchOrders();
+                } else if (payload.eventType === 'UPDATE' && 
+                    (payload.new.status === 'not_started' || payload.old.status === 'not_started')) {
+                    fetchOrders();
+                }
             })
             .subscribe();
 
         return () => {
-            supabase.removeChannel(channel);
+            channel.unsubscribe();
         };
     }, []);
 

@@ -78,19 +78,21 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
                 },
                 body: JSON.stringify({ email, password }),
             });
-           
-            if (!response.ok) {
-                throw new Error('Failed to sign in');
-            }
+            
             const data = await response.json();
-            console.log(data);
+            
+            if (!response.ok) {
+                return { error: data.error || 'Failed to sign in' };
+            }
+            
             if(data.user) {
                 setUser(data.user);
-                return data.user
+                return data.user;
             }
             return data;
         } catch (error) {
-            console.error('Eror signing in:', error);
+            console.error('Error signing in:', error);
+            return { error: 'An unexpected error occurred' };
         }
     };
 

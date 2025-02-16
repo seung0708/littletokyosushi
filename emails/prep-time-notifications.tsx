@@ -30,7 +30,7 @@ import {
             <Heading>Order Status Update</Heading>
             <Text>Hi {customer.first_name},</Text>
             <Text>
-              Great news! Your order #{order.short_id} is now being prepared by our kitchen.
+              Great news! Your order #{order.short_id.toUpperCase()} is now being prepared by our kitchen.
             </Text>
             <Text>
               Estimated preparation time: {order.prep_time_minutes} minutes

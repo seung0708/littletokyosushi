@@ -33,7 +33,7 @@ export default function OrderConfirmationEmail({ order, customer }: OrderConfirm
           <Text style={text}>Here are your order details:</Text>
 
           <Section style={orderDetails}>
-            <Text style={orderNumber}>Order #{order.short_id}</Text>
+            <Text style={orderNumber}>Order #{order.short_id?.toUpperCase()}</Text>
             <Text style={text}>
             Pickup Time: {format(new Date(order.pickup_date.split('+')[0]), 'EEE, M/d/yy')} at {order.pickup_time}
             </Text>

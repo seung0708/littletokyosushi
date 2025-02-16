@@ -136,6 +136,7 @@ const CheckoutSteps = () => {
         defaultValues: {
             customer: {
                 signinEmail: user?.email ?? '',
+                password: '',
                 guestEmail: user?.user_metadata?.email || '',
                 guestName: `${user?.user_metadata?.first_name || ''} ${user?.user_metadata?.last_name || ''}`.trim(),
                 phone: user?.user_metadata?.phone || '',

@@ -29,12 +29,24 @@ export async function getAnalytics(startDate: string, endDate: string): Promise<
       throw new Error('Google Analytics Property ID is not configured')
     }
 
+    // Get real-time active users first
+    const realtimeResponse = await analyticsData.properties.runRealtimeReport({
+      property: PROPERTY_ID,
+      requestBody: {
+        metrics: [
+          { name: 'activeUsers' }
+        ]
+      }
+    });
+
+    const realtimeActiveUsers = Number(realtimeResponse.data.rows?.[0]?.metricValues?.[0]?.value || 0);
+
+    // Get historical data
     const response = await analyticsData.properties.runReport({
-      property: PROPERTY_ID, // Use the formatted property ID
+      property: PROPERTY_ID,
       requestBody: {
         dateRanges: [{ startDate, endDate }],
         metrics: [
-          { name: 'activeUsers' },
           { name: 'screenPageViews' },
           { name: 'sessions' },
           { name: 'averageSessionDuration' }
@@ -45,10 +57,10 @@ export async function getAnalytics(startDate: string, endDate: string): Promise<
     const metrics = response.data.rows?.[0]?.metricValues || []
     
     return {
-      activeUsers: Number(metrics[0]?.value || 0),
-      pageViews: Number(metrics[1]?.value || 0),
-      sessions: Number(metrics[2]?.value || 0),
-      avgSessionDuration: Number(metrics[3]?.value || 0)
+      activeUsers: realtimeActiveUsers, // Use real-time active users
+      pageViews: Number(metrics[0]?.value || 0),
+      sessions: Number(metrics[1]?.value || 0),
+      avgSessionDuration: Number(metrics[2]?.value || 0)
     }
   } catch (error) {
     console.error('Error fetching analytics:', error)

@@ -46,7 +46,7 @@ export default function OrderReadyNotificationEmail({
                 Order Details:
               </Text>
               <Text className="text-black text-[14px] leading-[24px]">
-                Order Number: #{order.short_id}
+                Order Number: #{order.short_id.toUpperCase()}
               </Text>
               <Text className="text-black text-[14px] leading-[24px]">
                 Total Amount: ${order.total.toFixed(2)}

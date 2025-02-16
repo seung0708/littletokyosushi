@@ -13,7 +13,6 @@ export default function OrdersList() {
   const [orders, setOrders] = useState<Order[]>([])
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const [loading, setLoading] = useState(true)
-  const [soundEnabled, setSoundEnabled] = useState(false)
   
   useEffect(() => {
     audioRef.current = new Audio('/sounds/mixkit-confirmation-tone-2867.wav');
@@ -58,7 +57,7 @@ export default function OrdersList() {
           
         if (newOrder) {
           setOrders((prevOrders) => [newOrder, ...prevOrders]);
-          if (soundEnabled && audioRef.current) {
+          if (audioRef.current) {
             audioRef.current.muted = false;
             audioRef.current.play().catch((error) => {
               console.log('Audio play failed:', error);
@@ -110,18 +109,10 @@ export default function OrdersList() {
     return () => {
       supabase.removeChannel(channel)
     }
-  }, [soundEnabled])
+  }, [])
 
   return (
     <div className="space-y-4">
-      <div className="flex items-center space-x-2 mb-4">
-        <Switch 
-          id="sound-mode"
-          checked={soundEnabled}
-          onCheckedChange={setSoundEnabled}
-        />
-        <Label htmlFor="sound-mode">Enable Sound Notifications</Label>
-      </div>
       <OrdersContainer title="All Orders" orders={orders} loading={loading} />
     </div>
   )

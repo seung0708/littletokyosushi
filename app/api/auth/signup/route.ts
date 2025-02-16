@@ -24,7 +24,7 @@ export async function POST(req: NextRequest) {
 
     const anonymousUser = users.find(user => user.is_anonymous === true && user.user_metadata.email === email);
     const existingUser = users.find(user => user.email === email && user.is_anonymous === false);
-    console.log('existingUser',existingUser, 'anonymousUser',anonymousUser)
+  
     if (existingUser) {
       return NextResponse.json({ error: 'An account with this email already exists. Please sign in instead.' });
     }

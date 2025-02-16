@@ -25,7 +25,6 @@ const CheckoutCustomerSignIn: React.FC<CustomerSignInProps> = ({ form, onComplet
     const [signUpError, setSignUpError] = useState<string>('')
     const [guestError, setGuestError] = useState<string>('')
 
-    
     useEffect(() => {
         setSignInError('')
         setSignUpError('')
@@ -35,26 +34,39 @@ const CheckoutCustomerSignIn: React.FC<CustomerSignInProps> = ({ form, onComplet
         const { customer } = form.getValues()
         try {
             setSignInError('')
-            const response = await signin(customer.signinEmail, customer.password)
+            const response = await signin(customer.signinEmail || '', customer.password || '')
+            if ('error' in response) {
+                setSignInError(response.error)
+                return
+            }
             if (response?.id) {
                 await updateCartCustomerId(response?.id)
                 onComplete()
             } 
-        } catch (error) {
-            setSignInError('Sign in failed')
+        } catch (error: any) {
+            setSignInError('An unexpected error occurred')
         }
     }
+    
 
     const handleSignUp = async () => {  
         const { customer } = form.getValues()
         try {
             setSignUpError('')
-            const response = await signup(customer.signinEmail, customer.password)
+            const response = await signup(customer.signinEmail || '', customer.password || '')
             if (response) {
                 await updateCartCustomerId(response?.id || '')
                 onComplete()
             }
-        } catch (error) {
+        } catch (error: any) {
+            // More specific error messages based on the error
+            if (error?.message?.includes('already registered')) {
+                setSignUpError('This email is already registered. Please sign in instead.')
+            } else if (error?.message?.includes('weak password')) {
+                setSignUpError('Password is too weak. Please use a stronger password.')
+            } else {
+                setSignUpError(error?.message || 'Sign up failed. Please try again.')
+            }
         }
     }
 
@@ -71,7 +83,7 @@ const CheckoutCustomerSignIn: React.FC<CustomerSignInProps> = ({ form, onComplet
         const { customer } = form.getValues()
         try {
             setGuestError('')
-            const { user } = await signinAnonymously(customer.guestEmail, customer.guestName) 
+            const { user } = await signinAnonymously(customer.guestEmail || '', customer.guestName || '') 
             if (user) {
                 await updateCartCustomerId(user.id || '')
                 onComplete()

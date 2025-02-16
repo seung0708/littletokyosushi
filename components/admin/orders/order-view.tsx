@@ -20,7 +20,7 @@ const OrderView: React.FC<OrderViewProps> = ({ order, onRefund }) => {
     }
 
     return (
-        <div className="ml-64 flex-1 p-8">
+        <div className="flex-1">
             <div className="bg-white shadow-lg rounded-lg overflow-hidden">
                 <OrderHeader order={order} />
                 <OrderDetails order={order} onRefund={onRefund} />

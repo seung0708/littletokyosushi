@@ -10,7 +10,7 @@ export default function OrderHeader({order}: {order: Order}) {
         <CardHeader className="flex flex-row items-start bg-muted/50">
             <div className="grid gap-0.5">
               <CardTitle className="group flex items-center gap-2 text-lg">
-                Order {order.short_id}
+                Order {order.short_id?.toUpperCase()}
                 {order.status === 'preparing' && (
                   <PrepTimeTimer 
                     prepTimeMinutes={order.prep_time_minutes} 
