@@ -34,5 +34,6 @@ export interface CartItemModifierOption {
     cart_item_modifier_id?: string;
     modifier_id: number;
     modifier_option_id: number;
+    modifier_option_price: number;
     modifier_options?: ModifierOption;
 };
