@@ -12,7 +12,8 @@ import { useSearchParams } from 'next/navigation';
 import { Loading } from '@/components/ui/loading'
 import { Suspense } from 'react';
 
-export default function ItemsPage() {
+// Wrapper component that uses searchParams
+function ItemsContent() {
   const searchParams = useSearchParams();
   const [items, setItems] = useState<MenuItem[]>([]);
   const [loading, setLoading] = useState(true);
@@ -20,29 +21,27 @@ export default function ItemsPage() {
   const [totalPages, setTotalPages] = useState(0);
 
   useEffect(() => {
-    async function loadItems() {
+    const loadItems = async () => {
       try {
         setLoading(true);
+        setError(null);
+        const page = searchParams.get('page') || '1';
         const query = searchParams.get('query') || '';
-        const currentPage = Number(searchParams.get('page')) || 1;
+        const category = searchParams.get('category') || 'all';
 
-        const response = await fetch(`/api/admin/items?query=${encodeURIComponent(query)}&page=${currentPage}`);
-        const data = await response.json();
-        
+        const response = await fetch(`/api/items?page=${page}&query=${query}&category=${category}`);
         if (!response.ok) {
-          throw new Error(data.error || 'Failed to fetch items');
+          throw new Error('Failed to fetch items');
         }
-
+        const data = await response.json();
         setItems(data.items);
         setTotalPages(data.totalPages);
-        setError(null);
       } catch (err) {
-        console.error('Failed to load items:', err);
-        setError('Failed to load items. Please try again.');
+        setError(err instanceof Error ? err.message : 'An error occurred');
       } finally {
         setLoading(false);
       }
-    }
+    };
 
     loadItems();
   }, [searchParams]); // Only depend on searchParams
@@ -52,23 +51,30 @@ export default function ItemsPage() {
   }
 
   return (
-    <Suspense fallback={loading ? (
-      <div className="flex justify-center items-center h-[calc(100vh-4rem)]">
-        <Loading variant="admin" size="lg" />
-      </div>
-    ) : null}>
     <section className='grid flex-1 items-start gap-4 p-4 sm:px-6 sm:py-0 md:gap-8'>
       <Tabs defaultValue="all">
         <div className='flex items-center justify-end gap-4'>
           <SearchBar />
-          <Link href={'/items/add'}><AddButton>Add New Item</AddButton></Link>
+          <Link href="/items/new"><AddButton>Add Item</AddButton></Link>
         </div>
-        <TabsContent value="all">
-          <ItemsTable items={items} />
-        </TabsContent>
+        <ItemsTable items={items} />
       </Tabs>
       <Pagination totalPages={totalPages} />
     </section>
+  );
+}
+
+// Main page component with Suspense
+export default function ItemsPage() {
+  return (
+    <Suspense 
+      fallback={
+        <div className="flex justify-center items-center h-[calc(100vh-4rem)]">
+          <Loading variant="admin" size="lg" />
+        </div>
+      }
+    >
+      <ItemsContent />
     </Suspense>
   );
 }
