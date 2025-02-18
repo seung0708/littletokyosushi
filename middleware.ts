@@ -10,7 +10,7 @@ export async function middleware(request: NextRequest) {
       response.cookies.set({
         name: cookie.name,
         value: cookie.value,
-        domain: '.localhost', // This allows sharing between subdomains
+        //domain: 
         path: '/',
         sameSite: 'lax',
         secure: process.env.NODE_ENV === 'production'
