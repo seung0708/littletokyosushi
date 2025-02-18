@@ -1,3 +1,4 @@
+'use client'
 import { Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { Loading } from '@/components/ui/loading';
