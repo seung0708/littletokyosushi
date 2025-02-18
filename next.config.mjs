@@ -2,37 +2,37 @@
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-    async rewrites() {
-        return [
-          // Main site (localhost)
-          {
-            source: '/',
-            destination: '/store',
-            has: [{ type: 'host', value: 'localhost' }]
-          },
-          {
-            source: '/:path*',
-            destination: '/:path*',
-            has: [{ type: 'host', value: 'localhost' }]
-          },
-          // Admin site (admin.localhost),
-          {
-            source: '/signin',
-            destination: '/signin',
-            has: [{ type: 'host', value: 'admin.localhost' }]
-          },
-          {
-            source: '/dashboard',
-            destination: '/dashboard',
-            has: [{ type: 'host', value: 'admin.localhost' }]
-          },
-          {
-            source: '/:path*',
-            destination: '/:path*',
-            has: [{ type: 'host', value: 'admin.localhost' }]
-          }
-        ];
-    },
+    // async rewrites() {
+    //     return [
+    //       // Main site (localhost)
+    //       {
+    //         source: '/',
+    //         destination: '/store',
+    //         has: [{ type: 'host', value: 'localhost' }]
+    //       },
+    //       {
+    //         source: '/:path*',
+    //         destination: '/:path*',
+    //         has: [{ type: 'host', value: 'localhost' }]
+    //       },
+    //       // Admin site (admin.localhost),
+    //       {
+    //         source: '/signin',
+    //         destination: '/signin',
+    //         has: [{ type: 'host', value: 'admin.localhost' }]
+    //       },
+    //       {
+    //         source: '/dashboard',
+    //         destination: '/dashboard',
+    //         has: [{ type: 'host', value: 'admin.localhost' }]
+    //       },
+    //       {
+    //         source: '/:path*',
+    //         destination: '/:path*',
+    //         has: [{ type: 'host', value: 'admin.localhost' }]
+    //       }
+    //     ];
+    // },
     images: {
       remotePatterns: [
         {

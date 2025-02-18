@@ -23,24 +23,25 @@ export async function generateMetadata({ params, searchParams }: Props, parent: 
 }
  
 async function getItem(id: string): Promise<MenuItem> {
-    const baseUrl = process.env.VERCEL_URL 
-        ? `https://${process.env.VERCEL_URL}` 
-        : process.env.NEXT_PUBLIC_MAIN_URL || 'http://localhost:3000';
+    try {
+        const res = await retryWithBackoff(async () => 
+            await fetch(`/api/store/items/${id}`, {
+                cache: 'no-store'
+            })
+        );
         
-    const res = await retryWithBackoff(async () => 
-        await fetch(`${baseUrl}/api/store/items/${id}`, {
-            cache: 'no-store'
-        })
-    );
-    
-    if (!res.ok) {
-        if (res.status === 404) {
-            notFound();
+        if (!res.ok) {
+            if (res.status === 404) {
+                notFound();
+            }
+            throw new Error(`Failed to fetch item: ${res.status}`);
         }
-        throw new Error(`Failed to fetch item: ${res.status}`);
-    }
 
-    return res.json();
+        return res.json();
+    } catch (error) {
+        console.error('Error fetching item:', error);
+        throw error;
+    }
 }
 
 export default async function ItemDetailsPage({ params }: { params: Promise<{ id: string }> }) {
