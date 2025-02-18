@@ -80,7 +80,6 @@ export const CartProvider = ({ children }: CartProviderProps) => {
            
             if (response.status === 404) {
                 // Cart not found in database, clear local storage
-                console.log('Cart not found in database, clearing local storage');
                 localStorage.removeItem('cartId');
                 localStorage.removeItem('cartItems');
                 setCartId('');
@@ -95,7 +94,6 @@ export const CartProvider = ({ children }: CartProviderProps) => {
             }
 
             const data = await response.json();
-            console.log(data);
             setCartId(data.id);
             setCartItems(data.cart_items);
             localStorage.setItem('cartId', data.id);
@@ -191,10 +189,9 @@ export const CartProvider = ({ children }: CartProviderProps) => {
                     } 
                     // No anonymous cart - update existing user cart
                     if(item) {
-                        console.log('Update existing user cart');
                         await updateExistingCart(item);
                     }
-                    console.log('Using existing user cart');
+                    
                     setCartId(data.cartId);
                     localStorage.setItem('cartId', data.cartId);
                     await fetchCart();
@@ -220,7 +217,6 @@ export const CartProvider = ({ children }: CartProviderProps) => {
                     }
                 } else if (item) {
                     // No carts at all - create new one
-                    console.log('Create new cart for user');
                     await createNewCart(item);
                 }
             }
@@ -320,7 +316,6 @@ export const CartProvider = ({ children }: CartProviderProps) => {
             throw new Error(error.error || 'Failed to remove item from cart');
         }
         const data = await response.json();
-        console.log(data);
         
         if(data.status === 200) {
             await fetchCart();

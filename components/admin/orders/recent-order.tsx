@@ -107,7 +107,6 @@ export default function RecentOrder({order}: {order: Order}) {
   };
 
   const onRefund = async (values: { amount: number; reason: string }) => {
-    console.log(values);
     try {
       const response = await fetch(`/api/admin/orders/${order.short_id}/refunds`, {
         method: 'POST',

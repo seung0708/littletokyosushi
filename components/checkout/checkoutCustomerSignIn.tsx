@@ -35,8 +35,8 @@ const CheckoutCustomerSignIn: React.FC<CustomerSignInProps> = ({ form, onComplet
         try {
             setSignInError('')
             const response = await signin(customer.signinEmail || '', customer.password || '')
-            if ('error' in response) {
-                setSignInError(response.error)
+            if (response && typeof response === 'object' && 'error' in response) {
+                setSignInError(response.error as string)
                 return
             }
             if (response?.id) {
@@ -83,9 +83,13 @@ const CheckoutCustomerSignIn: React.FC<CustomerSignInProps> = ({ form, onComplet
         const { customer } = form.getValues()
         try {
             setGuestError('')
-            const { user } = await signinAnonymously(customer.guestEmail || '', customer.guestName || '') 
-            if (user) {
-                await updateCartCustomerId(user.id || '')
+            const response = await signinAnonymously(customer.guestEmail || '', customer.guestName || '')
+            if (response && typeof response === 'object' && 'error' in response) {
+                setGuestError(response.error as string)
+                return
+            }
+            if (response?.id) {
+                await updateCartCustomerId(response.id)
                 onComplete()
             } 
         } catch (error) {

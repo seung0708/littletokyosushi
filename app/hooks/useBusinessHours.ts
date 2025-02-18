@@ -33,7 +33,6 @@ export const useBusinessHours = () => {
         const dateStr = format(date, 'MM-dd-yyyy');
         const times: string[] = [];
         const specialSchedule = businessHours.specialSchedules.find(schedule => schedule.date === dateStr);
-        //console.log(specialSchedule);
         if (specialSchedule) {
             if (!specialSchedule.isOpen) return []
             const startTime = parse(specialSchedule.pickupStart!.slice(0, 5), 'HH:mm', date);

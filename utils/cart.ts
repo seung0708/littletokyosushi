@@ -14,12 +14,6 @@ export async function updateExistingCartItem(supabase: any, existingCartItem: an
         updatedQuantity += newItems.quantity;
     }
 
-    console.log('Updating quantity:', {
-        existingQuantity: existingCartItem.quantity,
-        newQuantity: newItems.quantity,
-        updatedQuantity
-    });
-
     const { data, error } = await supabase
         .from('cart_items')
         .update({
@@ -30,7 +24,6 @@ export async function updateExistingCartItem(supabase: any, existingCartItem: an
         .eq('id', existingCartItem.id)
         .select('id, quantity, total_price, special_instructions');
 
-    console.log('updated existing cart item:', data);
     return { data, error };
 }
 

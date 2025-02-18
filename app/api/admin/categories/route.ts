@@ -8,7 +8,6 @@ export async function GET() {
             .from('categories')
             .select('*');
         if (error) throw new Error(error.message);
-        console.log(data);
         return NextResponse.json(data);
     } catch (error) {
         console.error(error);

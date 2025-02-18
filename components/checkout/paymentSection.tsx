@@ -25,7 +25,7 @@ const PaymentSection = ({ customerAddress, onSubmit, form }: Props) => {
             // Get address from Stripe Elements
             const addressElement = elements.getElement('address');
             const addressDetails = await addressElement?.getValue();
-            console.log('Address details:', addressDetails);
+            
             if (!addressDetails) {
                 throw new Error('Billing address is required');
             }
@@ -53,7 +53,6 @@ const PaymentSection = ({ customerAddress, onSubmit, form }: Props) => {
     };
 
     const handleSubmit = async () => {
-        console.log('Payment form submitted');
         
         if (!stripe || !elements) {
             console.error('Stripe not initialized');
@@ -92,7 +91,6 @@ const PaymentSection = ({ customerAddress, onSubmit, form }: Props) => {
             }
 
             const { clientSecret } = await paymentIntentResponse.json();
-            console.log('Created payment intent with client secret');
 
             // Confirm payment with the same payment intent
             const { error: confirmError } = await stripe.confirmPayment({

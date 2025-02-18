@@ -44,7 +44,6 @@ export async function GET(request: Request) {
 
         // If ID is provided, fetch single item
         if (id) {
-            console.log('Fetching single item with ID:', id);
             const { data: item, error } = await supabase
                 .from('menu_items')
                 .select(`

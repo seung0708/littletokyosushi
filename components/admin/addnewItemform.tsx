@@ -133,9 +133,8 @@ const AddNewItemForm: React.FC = () => {
           
           if(response.ok) {
             toast.success('Item added successfully');
-            console.log('Item added successfully');
             router.push('/items')
-            router.refresh();
+            router.refresh(); 
           }
           
         } catch (error) {

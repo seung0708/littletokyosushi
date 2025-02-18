@@ -44,14 +44,12 @@ export default function EditItemPage({ params }: { params: Promise<{ id: string 
   useEffect(() => {
     const fetchItem = async () => {
       try {
-        console.log('Fetching item with ID:', typeof id);
         const response = await fetch(`/api/admin/items?id=${id}`, {
           headers: {
             'Content-Type': 'application/json',
           },
         });
         const data = await response.json();
-        console.log('Fetched item data:', data);
         
         const fetchedItem = data.item;
         if (fetchedItem) {

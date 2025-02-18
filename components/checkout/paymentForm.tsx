@@ -18,7 +18,6 @@ const PaymentForm = ({ stripe, elements, onAddressSubmit, onPaymentSubmit }: Pro
             console.error('Stripe.js has not loaded');
             return;
         }
-        console.log('Payment form submitted');
         setLoading(true);
         try {
             await onAddressSubmit();

@@ -160,10 +160,9 @@ const CheckoutSteps = () => {
             break;
         case 'delivery-pickup':
             if (!orderTotal || orderTotal <= 0) {
-                console.log('Cannot proceed - no order total');
+                
                 return;
             }
-            console.log('Moving to summary with total:', orderTotal);
             setCurrentStep('summary');
             createPaymentIntent();
             break;
@@ -198,8 +197,6 @@ const CheckoutSteps = () => {
                 total: orderTotal,
                 cartItems
             };
-
-            console.log('orderPayload', orderPayload);
 
             // Create order
             const orderResponse = await fetch('/api/orders', {

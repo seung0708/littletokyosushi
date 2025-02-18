@@ -108,7 +108,6 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
                 window.location.href = response.url;
             }
             const data = await response.json();
-            console.log(data);
         } catch (error) {
             console.error('Error signing in with Google:', error);
         }

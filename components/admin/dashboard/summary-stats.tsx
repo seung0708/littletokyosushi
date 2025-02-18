@@ -26,7 +26,6 @@ export default function DashboardSummary() {
       try {
         const response = await fetch('/api/admin/dashboard/summary')
         const { totals } = await response.json()
-        console.log(totals)
         setTotals(totals)
       } catch (error) {
         console.error('Error fetching dashboard data:', error)

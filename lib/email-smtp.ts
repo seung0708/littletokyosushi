@@ -45,7 +45,7 @@ export async function sendOrderConfirmationEmail(order: Order, customer: Custome
 }
 
 export async function sendPrepTimeNotificationEmail(order: Order, customer: Customer) {
-  console.log('sendPrepTimeNotificationEmail', order, customer);
+
   if (!order.short_id || !order.prep_time_minutes || !customer.first_name) {
     throw new Error('Missing required fields for prep time notification email');
   }
@@ -68,7 +68,6 @@ export async function sendPrepTimeNotificationEmail(order: Order, customer: Cust
 }
 
 export async function sendOrderReadyNotificationEmail(order: Order, customer: Customer) {
-  console.log('sendOrderReadyNotificationEmail',order, customer);
   if (!order.short_id || !customer.first_name) {
     throw new Error('Missing required fields for order ready notification email');
   }
@@ -91,17 +90,19 @@ export async function sendOrderReadyNotificationEmail(order: Order, customer: Cu
 }
 
 export async function sendOrderCompletedEmail(order: Order, customer: Customer) {
-  console.log('sendOrderCompletedEmail', order, customer);
+  if (!order.short_id || !customer.first_name) {
+    throw new Error('Missing required fields for order completed email');
+  }
+
   const emailHtml = await render(OrderCompletedEmail({ order, customer }));
   return sendEmail(
     customer.email as string,
     `Order #${order.short_id?.toUpperCase()} Completed - Little Tokyo Sushi`,
     emailHtml
-  );
+  );        
 }
 
 export async function sendRefundNotificationEmail(order: Order, customer: Customer, refundAmount: number) {
-  console.log('sendRefundNotificationEmail', order, customer, refundAmount);
   const emailHtml = await render(RefundNotificationEmail({ order, customer, refundAmount }));
   return sendEmail(
     customer.email as string,

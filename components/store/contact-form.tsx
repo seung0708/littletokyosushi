@@ -29,7 +29,6 @@ const ContactForm: React.FC = () => {
     });
 
     async function onSubmit(values: z.infer<typeof contactFormSchema>) {
-        console.log(form.getValues());
         setIsSubmitting(true);
         setSubmitStatus('idle');
 

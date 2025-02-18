@@ -14,10 +14,11 @@ interface Props {
 
 const OrderSummary = ( {form, orderTotal, orderFees}: Props) => {
     const {cartItems} = useCart();
-    const deliveryMethod = form.watch('delivery.method');
-    const pickupDate = new Date(form.watch('delivery.pickupDate') as string);
-    const pickupTime = form.watch('delivery.pickupTime');
-    const customer = form.watch('customer');
+    const formValues = form.watch();
+    const deliveryMethod = formValues.delivery?.method;
+    const pickupDate = formValues.delivery?.pickupDate ? new Date(formValues.delivery.pickupDate) : new Date();
+    const pickupTime = formValues.delivery?.pickupTime;
+    const customer = formValues.customer;
    
     return (
         <>
@@ -32,7 +33,7 @@ const OrderSummary = ( {form, orderTotal, orderFees}: Props) => {
               <div>
                 <h4><span className="text-gray-400">Name:</span> {customer?.guestName}</h4>
                 <p><span className="text-gray-400">Email:</span> {customer?.guestEmail || customer?.signinEmail}</p>
-                <p><span className="text-gray-400">Fulfillment Method:</span> {deliveryMethod.split(' ').map(word => word[0].toUpperCase() + word.slice(1)).join(' ')}</p>
+                <p><span className="text-gray-400">Fulfillment Method:</span> {deliveryMethod?.split(' ').map(word => word[0].toUpperCase() + word.slice(1)).join(' ')}</p>
                 <p><span className="text-gray-400">Date:</span> {format(pickupDate, 'EEE MMM dd yyyy')}</p>
                 <p><span className="text-gray-400">Time:</span> {pickupTime}</p>
               </div>

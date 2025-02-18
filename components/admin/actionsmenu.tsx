@@ -20,7 +20,6 @@ const ActionsMenu: React.FC<ActionMenuProps> = ({id}) => {
       },
     });
     
-    console.log(result);
   }
 
     return (

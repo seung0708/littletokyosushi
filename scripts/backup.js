@@ -49,7 +49,6 @@ async function backupDatabase() {
     }
 
     fs.writeFileSync(backupFile, JSON.stringify(backup, null, 2));
-    console.log(`Backup completed: ${backupFile}`);
 
     // Cleanup old backups (keep last 7 days)
     const files = fs.readdirSync(BACKUP_DIR);
@@ -60,7 +59,6 @@ async function backupDatabase() {
 
     for (const file of oldFiles) {
       fs.unlinkSync(path.join(BACKUP_DIR, file));
-      console.log(`Deleted old backup: ${file}`);
     }
 
   } catch (error) {

@@ -69,7 +69,6 @@ export default function OrdersContainer() {
           }
 
           const verifyData = await verifyResponse.json();
-          console.log(verifyData);
           setOrderId(verifyData.orderId);
 
           if (verifyData.clearCart) {

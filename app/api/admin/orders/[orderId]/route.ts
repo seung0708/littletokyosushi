@@ -40,7 +40,6 @@ export async function GET(req: Request, { params }: { params: Promise<{ orderId:
 
 export async function PATCH(req: Request, { params }: { params: Promise<{ orderId: string }> }) {
     const { orderId } = await params;
-    console.log(orderId);
     const { prepTime, status } = await req.json();
     const supabase = await createClient();
 

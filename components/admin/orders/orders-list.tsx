@@ -60,7 +60,6 @@ export default function OrdersList() {
           if (audioRef.current) {
             audioRef.current.muted = false;
             audioRef.current.play().catch((error) => {
-              console.log('Audio play failed:', error);
             });
           }
         }

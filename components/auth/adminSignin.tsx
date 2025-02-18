@@ -41,7 +41,6 @@ export default function AdminSignin() {
         },
         body: JSON.stringify(data),
       });
-      //console.log(data, response);
       const result = await response.json();
 
       if (!response.ok) {

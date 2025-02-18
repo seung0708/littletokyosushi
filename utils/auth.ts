@@ -8,7 +8,6 @@ export async function checkAdminAuth() {
         // Check authentication first
         const { data: { user } } = await supabase.auth.getUser();
         if (!user) {
-            console.log('No user found in request');
             return { error: 'Unauthorized', status: 401 };
         }
 

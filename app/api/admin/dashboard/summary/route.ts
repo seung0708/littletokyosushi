@@ -73,7 +73,6 @@ export async function GET() {
       sessions: analyticsData?.sessions || 0,
       avgSessionDuration: analyticsData?.avgSessionDuration || 0
     }
-    console.log('totals', totals)
 
     return NextResponse.json({
       totals

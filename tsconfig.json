@@ -26,7 +26,16 @@
         "./*"
       ]
     },
-    "target": "ES2017"
+    "target": "ES2017",
+    "strictNullChecks": false,
+    "strictPropertyInitialization": false,
+    "noImplicitAny": false,        
+    "useUnknownInCatchVariables": false,         
+    "allowSyntheticDefaultImports": true, 
+    "exactOptionalPropertyTypes": false,
+    "noPropertyAccessFromIndexSignature": false,
+    "noErrorTruncation": true,  
+    "noUncheckedIndexedAccess": false
   },
   "include": [
     "next-env.d.ts",

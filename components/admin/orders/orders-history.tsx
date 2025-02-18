@@ -18,9 +18,8 @@ export default function OrdersHistory() {
     try {
       setLoading(true)
       const response = await fetch(`/api/admin/orders?completed=true&page=${currentPage}`)
-      
       const data = await response.json()
-      console.log(data)
+      
       if(data) {
         setOrders(data.orders)
         setTotalPages(data.totalPages)
