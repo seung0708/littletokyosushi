@@ -6,6 +6,7 @@ import { CartProvider } from "./context/cartContext";
 import { GoogleAnalytics } from "@/components/providers/google-analytics";
 import { ToastProvider } from "./context/toastContext";
 import { Suspense } from "react";
+import { Loading } from "@/components/ui/loading";
 
 export const viewport: Viewport = {
   width: 'device-width',
@@ -46,7 +47,7 @@ export default async function RootLayout({ children, }: { children: React.ReactN
         <ToastProvider>
           <AuthProvider>
             <CartProvider>
-              <Suspense fallback={<div>Loading...</div>}>
+              <Suspense fallback={<Loading variant="store" />}>
                 <GoogleAnalytics />
                 {children}
               </Suspense>
