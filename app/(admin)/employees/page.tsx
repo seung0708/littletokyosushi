@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent } from "@/components/ui/tabs";
 import {Card, CardContent, CardHeader } from "@/components/ui/card"
 import { Table, TableBody, TableHead, TableHeader, TableRow } from "@/components/ui/table"
+import { Suspense } from 'react';
 
 // interface Employee {
 //   id: string;
@@ -21,6 +22,7 @@ import { Table, TableBody, TableHead, TableHeader, TableRow } from "@/components
 
 const EmployeesPage: React.FC = () => {
     return(
+      <Suspense fallback={<div>Loading...</div>}>
         <Tabs defaultValue="week">
             <TabsContent value="week">
               <Card x-chunk="dashboard-05-chunk-3">
@@ -68,6 +70,7 @@ const EmployeesPage: React.FC = () => {
               </Card>
             </TabsContent>
           </Tabs>
+        </Suspense>
     )
 }
 
