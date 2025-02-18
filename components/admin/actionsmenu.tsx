@@ -33,7 +33,7 @@ const ActionsMenu: React.FC<ActionMenuProps> = ({id}) => {
         <DropdownMenuContent align="end">
           <DropdownMenuLabel>Actions</DropdownMenuLabel>
             <DropdownMenuItem asChild>
-              <Link href={`/items/${id}/edit`}>Edit</Link>
+              <Link href={`/admin/items/${id}/edit`}>Edit</Link>
             </DropdownMenuItem>
           <DropdownMenuItem>
             <Button variant="ghost" onClick={() => onDelete(id)}>

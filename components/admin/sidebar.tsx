@@ -9,7 +9,7 @@ import OrderCounter from "./orders/order-counter";
 export default function Sidebar() {
   const pathname = usePathname()
   // const isMenuExpanded = pathname.startsWith('/items')
-  const isOrdersExpanded = pathname.startsWith('/orders')
+  const isOrdersExpanded = pathname.startsWith('/admin/orders')
 
   return (
     <aside className="fixed left-0 top-0 z-40 h-screen w-64 -translate-x-full border-r border-gray-200 bg-white pt-14 transition-transform md:translate-x-0 md:pt-0">
@@ -26,11 +26,11 @@ export default function Sidebar() {
               <li>
                 <div className="relative">
                   <Link 
-                    href="/dashboard"
+                    href="/admin/dashboard"
                     className={clsx(
                       'flex items-center text-gray-700 rounded-lg px-2 w-full', 
                       {
-                        'bg-gray-400 text-gray-800 p-2' : pathname === '/dashboard'
+                        'bg-gray-400 text-gray-800 p-2' : pathname === '/admin/dashboard'
                       }
                     )}
                   >
@@ -53,11 +53,11 @@ export default function Sidebar() {
               <li>
                 <div className="relative">
                   <Link 
-                    href="/orders"
+                    href="/admin/orders"
                     className={clsx(
                       'flex items-center text-gray-700 rounded-lg px-2 w-full', 
                       {
-                        'bg-gray-400 text-gray-800 p-2' : pathname === '/orders'
+                        'bg-gray-400 text-gray-800 p-2' : pathname === '/admin/orders'
                       }
                     )}
                   >
@@ -69,15 +69,14 @@ export default function Sidebar() {
                       </div>
                     </div>
                   </Link>
-                  
                   {isOrdersExpanded && (
                     <div className="mt-1 ml-4 space-y-1">
                       <Link 
-                        href="/orders/history"
+                        href="/admin/orders/history"
                         className={clsx(
                           'flex items-center text-gray-700 rounded-lg px-4 py-2 w-full',
                           {
-                            'bg-gray-200 text-gray-800': pathname === '/orders/history'
+                            'bg-gray-200 text-gray-800': pathname === '/admin/orders/history'
                           }
                         )}
                       >
@@ -95,9 +94,9 @@ export default function Sidebar() {
             <ul className="space-y-1">
               <li>
                 <Link 
-                  href="/items" 
+                  href="/admin/items" 
                   className={clsx('flex items-center rounded-lg px-3 py-2 text-sm font-medium transition-colors', 
-                    pathname === '/items' 
+                    pathname === '/admin/items' 
                       ? 'bg-gray-100 text-gray-900' 
                       : 'text-gray-700 hover:bg-gray-100 hover:text-gray-900'
                   )}

@@ -2,7 +2,7 @@
 
 import {useState, useEffect} from 'react'
 import Link from 'next/link'
-import { Tabs, TabsContent } from '@/components/ui/tabs'
+import { Tabs } from '@/components/ui/tabs'
 import { AddButton } from '@/components/admin/actionbuttons'
 import ItemsTable from '@/components/admin/items/itemstable';
 import Pagination from '@/components/admin/pagination';
@@ -29,7 +29,7 @@ function ItemsContent() {
         const query = searchParams.get('query') || '';
         const category = searchParams.get('category') || 'all';
 
-        const response = await fetch(`/api/items?page=${page}&query=${query}&category=${category}`);
+        const response = await fetch(`/api/admin/items?page=${page}&query=${query}&category=${category}`);
         if (!response.ok) {
           throw new Error('Failed to fetch items');
         }
@@ -55,7 +55,7 @@ function ItemsContent() {
       <Tabs defaultValue="all">
         <div className='flex items-center justify-end gap-4'>
           <SearchBar />
-          <Link href="/items/new"><AddButton>Add Item</AddButton></Link>
+          <Link href="/admin/items/add"><AddButton>Add Item</AddButton></Link>
         </div>
         <ItemsTable items={items} />
       </Tabs>

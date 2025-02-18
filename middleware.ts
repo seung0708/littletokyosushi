@@ -1,41 +1,22 @@
 import { type NextRequest } from 'next/server'
 import { updateSession } from '@/lib/supabase/middleware'
-import { createClient } from '@supabase/supabase-js'
+import { createClient } from '@/lib/supabase/server'
 import { NextResponse } from 'next/server'
 
 export async function middleware(request: NextRequest) {
   const response = await updateSession(request)
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
   
   if (request.nextUrl.pathname.startsWith('/admin')) {
-    const cookieStore = request.cookies
-    const supabase = createClient(
-      process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-      {
-        auth: {
-          detectSessionInUrl: true,
-          flowType: 'pkce',
-          persistSession: true,
-          storage: {
-            getItem: (key) => cookieStore.get(key)?.value ?? null,
-            setItem: (key, value) => {
-              cookieStore.set(key, value)
-              return
-            },
-            removeItem: (key) => {
-              cookieStore.delete(key)
-              return
-            },
-          },
-        },
-      }
-    )
-
-
-    const { data: { user } } = await supabase.auth.getUser()
     if (!user) {
       return NextResponse.redirect(new URL('/signin', request.url))
     }
+  }
+
+  // Redirect to admin dashboard if user is already signed in
+  if (request.nextUrl.pathname === '/signin' && user) {
+    return NextResponse.redirect(new URL('/admin/dashboard', request.url))
   }
   
   // Ensure cookies are accessible on both admin and main domains

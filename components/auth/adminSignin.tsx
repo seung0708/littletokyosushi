@@ -20,7 +20,7 @@ export default function AdminSignin() {
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const router = useRouter();
-
+  
   const form = useForm<FormData>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -48,7 +48,7 @@ export default function AdminSignin() {
       }
 
       // Redirect to admin dashboard on successful login
-      router.push('/dashboard');
+      await router.push('/admin/dashboard');
       router.refresh();
 
     } catch (err) {
@@ -83,7 +83,7 @@ export default function AdminSignin() {
               <FormItem>
                 <FormLabel>Password</FormLabel>
                 <FormControl>
-                  <Input type="password" placeholder="••••••••" autoComplete="password" {...field} />
+                  <Input type="password" autoComplete="password" {...field} />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -99,7 +99,7 @@ export default function AdminSignin() {
             className="w-full"
             disabled={loading}
           >
-            {loading ? 'Logging in...' : 'Login'}
+            {loading ? 'Signing in...' : 'Sign In'}
           </Button>
         </form>
       </Form>

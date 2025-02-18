@@ -10,7 +10,6 @@ import { retryWithBackoff } from '@/lib/utils/api-retry';
 import CategoryFilter from '@/components/store/menu/categoryFilter';
 
 export default function ItemsContainer() {
-
     const [items, setItems] = useState<MenuItem[]>([]);
     const [selectedCategory, setSelectedCategory] = useState('all');
     const [isLoading, setIsLoading] = useState(true);

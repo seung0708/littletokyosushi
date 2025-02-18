@@ -14,20 +14,19 @@ export async function GET(request: Request, { params }: { params: Promise<{ id: 
 
     try {
 
-        // Fetch the menu item with all related data
         const { data: itemWithModifiers, error: itemError } = await supabase
-            .from('menu_items')
-            .select(`
+        .from('menu_items')
+        .select(`
+            *,
+            categories(*),
+            modifiers(
                 *,
-                categories(*),
-                modifiers(
-                    *,
-                    modifier_options(*)
-                )
-            `)
-            .eq('id', id)
-            .single();
-
+                modifier_options(*)
+            )
+        `)
+        .eq('id', id)
+        .single();
+       
         if (itemError) {
             console.error('Database error fetching item:', itemError);
             throw new APIError('Failed to fetch item details', 500);
@@ -66,5 +65,5 @@ export async function GET(request: Request, { params }: { params: Promise<{ id: 
             { error: 'An unexpected error occurred while fetching the item' },
             { status: 500 }
         );
-    }
+   }
 }

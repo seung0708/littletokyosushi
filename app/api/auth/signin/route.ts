@@ -2,7 +2,7 @@ import { signinFormSchema } from '@/schema-validations/auth';
 import { createClient } from '@/lib/supabase/server';
 import { NextResponse } from 'next/server';
 
-export async function POST(req: Request) { 
+export async function POST(req: Request) {
   const body = await req.json(); 
   
   const result = signinFormSchema.safeParse(body)
@@ -15,19 +15,42 @@ export async function POST(req: Request) {
   const supabase = await createClient();
 
   try {
-    // First try to sign in
-    const { data: {user}, error: signInError } = await supabase.auth.signInWithPassword({
+    const { data, error: signInError } = await supabase.auth.signInWithPassword({
       email,
       password,
     });
 
-    if (signInError?.code === 'invalid_credentials') {
-      return NextResponse.json({error: 'Invalid email or password'})
-    } else {
-      console.error('Unexpected error during sign in:', signInError);
+    if (signInError) {
+      console.error('Sign in error:', signInError);
+      return NextResponse.json({
+        error: signInError.message
+      }, { 
+        status: signInError.status || 400 
+      });
     }
-  
-    return NextResponse.json({ user });
+
+    const response = NextResponse.json({
+      success: true,
+      session: data.session
+    });
+
+    // Set auth cookies
+    response.cookies.set('sb-access-token', data.session?.access_token || '', {
+      path: '/',
+      sameSite: 'lax',
+      secure: process.env.NODE_ENV === 'production',
+      maxAge: 60 * 60 // 1 hour
+    });
+
+    response.cookies.set('sb-refresh-token', data.session?.refresh_token || '', {
+      path: '/',
+      sameSite: 'lax',
+      secure: process.env.NODE_ENV === 'production',
+      maxAge: 60 * 60 * 24 * 7 // 1 week
+    });
+
+    return response;
+
   } catch (error) {
     console.error('Unexpected error during login:', error);
     return NextResponse.json({error: 'An unexpected error occurred'}, {status: 500})

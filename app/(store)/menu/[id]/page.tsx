@@ -9,26 +9,25 @@ type Props = {
   searchParams: Promise<{ [key: string]: string | string[] | undefined }>
 }
  
-export async function generateMetadata({ params, searchParams }: Props, parent: ResolvingMetadata): Promise<Metadata> {
-    const id = (await params).id
-    // fetch data
-    const item = await getItem(id)
+// export async function generateMetadata({ params, searchParams }: Props, parent: ResolvingMetadata): Promise<Metadata> {
+//     const id = (await params).id
+//     // fetch data
+//     const item = await getItem(id)
+    
+//   // optionally access and extend (rather than replace) parent metadata
+//   const previousImages = (await parent).openGraph?.images || []
  
-  // optionally access and extend (rather than replace) parent metadata
-  const previousImages = (await parent).openGraph?.images || []
- 
-  return {
-    title: item.name,
-  }
-}
+//   return {
+//     title: item.name,
+//   }
+// }
  
 async function getItem(id: string): Promise<MenuItem> {
     try {
         const res = await retryWithBackoff(async () => 
-            await fetch(`/api/store/items/${id}`, {
-                cache: 'no-store'
-            })
+            await fetch(`${process.env.NEXT_PUBLIC_SITE_URL}/api/store/items/${id}`)
         );
+        
         
         if (!res.ok) {
             if (res.status === 404) {
@@ -40,14 +39,13 @@ async function getItem(id: string): Promise<MenuItem> {
         return res.json();
     } catch (error) {
         console.error('Error fetching item:', error);
-        throw error;
+        throw error; // Make sure to re-throw the error
     }
 }
 
 export default async function ItemDetailsPage({ params }: { params: Promise<{ id: string }> }) {
     const { id } = await params;
     const item = await getItem(id);
-    
     if (!item) {
         notFound();
     }
