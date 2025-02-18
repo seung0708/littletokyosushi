@@ -1,7 +1,7 @@
 
 'use client'
 import { useState, useEffect, use } from 'react'
-import AdminLoading from "@/app/(admin)/loading";
+import AdminLoading from "@/app/admin/loading";
 import OrderView from "@/components/admin/orders/order-view";
 import RecentOrder from "@/components/admin/orders/recent-order";
 import { Order} from '@/types/order';
