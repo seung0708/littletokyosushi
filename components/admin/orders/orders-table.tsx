@@ -90,7 +90,7 @@ export default function OrdersTable({orders, columns}: OrdersTableProps) {
                 ${order.total}
               </TableCell>
               <TableCell>
-                      <Link href={`/orders/${order.short_id}`}>
+                      <Link href={`/admin/orders/${order.short_id}`}>
                         <Button variant="outline" size="sm">
                           View Details
                         </Button>
