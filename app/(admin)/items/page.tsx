@@ -10,6 +10,7 @@ import SearchBar from '@/components/admin/searchbar';
 import { MenuItem } from '@/types/item';
 import { useSearchParams } from 'next/navigation';
 import { Loading } from '@/components/ui/loading'
+import { Suspense } from 'react';
 
 export default function ItemsPage() {
   const searchParams = useSearchParams();
@@ -46,19 +47,16 @@ export default function ItemsPage() {
     loadItems();
   }, [searchParams]); // Only depend on searchParams
 
-  if (loading) {
-    return (
-      <div className="flex justify-center items-center h-[calc(100vh-4rem)]">
-        <Loading variant="admin" size="lg" />
-      </div>
-    )
-  }
-
   if (error) {
     return <div className="text-red-500">{error}</div>;
   }
 
   return (
+    <Suspense fallback={loading ? (
+      <div className="flex justify-center items-center h-[calc(100vh-4rem)]">
+        <Loading variant="admin" size="lg" />
+      </div>
+    ) : null}>
     <section className='grid flex-1 items-start gap-4 p-4 sm:px-6 sm:py-0 md:gap-8'>
       <Tabs defaultValue="all">
         <div className='flex items-center justify-end gap-4'>
@@ -71,5 +69,6 @@ export default function ItemsPage() {
       </Tabs>
       <Pagination totalPages={totalPages} />
     </section>
+    </Suspense>
   );
 }
