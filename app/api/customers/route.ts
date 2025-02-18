@@ -47,7 +47,7 @@ export async function PATCH(req: Request) {
     try {
         const { user, address } = await req.json();
         //console.log('PATCH /api/customers', { user, address });
-        const { line1, line2, city, state, zip, country } = address.value.address;
+        const { line1, line2, city, state, postal_code, country } = address.value.address;
         const supabase = await createClient();
         if (user.is_anonymous) {
             const { error: updateError } = await supabase
@@ -71,7 +71,7 @@ export async function PATCH(req: Request) {
                 line2: line2,
                 city: city,
                 state: state,
-                postal_code: zip,
+                postal_code: postal_code,
                 country: country,
                 phone: address.value.phone.substring(2),
                 updated_at: new Date().toISOString()

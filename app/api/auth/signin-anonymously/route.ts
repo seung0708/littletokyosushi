@@ -21,7 +21,6 @@ export async function POST(req: Request) {
             .select('*')
             .eq('email', email)
             .single()
-        
         if (customerError && customerError.code !== 'PGRST116') {
             console.error('Error fetching customer:', customerError)
             return NextResponse.json({ error: customerError.message }, { status: 400 })

@@ -20,18 +20,27 @@ export default function OrdersContainer() {
   // Prevent accessing checkout pages after order completion
   useEffect(() => {
     // If we have an orderId in localStorage, redirect from checkout pages
-    const completedOrderId = localStorage.getItem('lastCompletedOrder');
-    if (completedOrderId) {
-      // Clear it after a short delay to allow for page transitions
-      setTimeout(() => {
-        localStorage.removeItem('lastCompletedOrder');
-      }, 1000);
-      
-      // If on a checkout page, redirect to order confirmation
-      if (window.location.pathname.includes('/checkout')) {
-        router.replace(`/order-confirmation?id=${completedOrderId}`);
+    const completedOrderData = localStorage.getItem('lastCompletedOrder');
+    try {
+      if (completedOrderData) {
+        const { id, timestamp } = JSON.parse(completedOrderData);
+        const ONE_DAY = 24 * 60 * 60 * 1000; // 24 hours in milliseconds
+        if (new Date().getTime() - timestamp < ONE_DAY) {
+          setTimeout(() => {
+            localStorage.removeItem('lastCompletedOrder');
+          }, 1000);
+          // If on a checkout page, redirect to order confirmation
+          if (window.location.pathname.includes('/checkout')) {
+            router.replace(`/order-confirmation?id=${id}`);
+          }
+        } else {
+          localStorage.removeItem('lastCompletedOrder');
+        }
       }
+    } catch (error) {
+      localStorage.removeItem('lastCompletedOrder');
     }
+   
   }, []);
 
   // Check URL for order ID or handle payment verification
@@ -74,7 +83,10 @@ export default function OrdersContainer() {
           if (verifyData.clearCart) {
             clearCart();
             // Store the order ID to prevent going back to checkout
-            localStorage.setItem('lastCompletedOrder', verifyData.orderId);
+            localStorage.setItem('lastCompletedOrder', JSON.stringify({
+              id: verifyData.orderId,
+              timestamp: new Date().getTime()
+          }));
           }
 
           setPaymentVerified(true);
