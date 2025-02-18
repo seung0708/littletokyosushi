@@ -47,9 +47,9 @@ export default async function RootLayout({ children, }: { children: React.ReactN
           <AuthProvider>
             <CartProvider>
               <Suspense fallback={<div>Loading...</div>}>
+                <GoogleAnalytics />
                 {children}
               </Suspense>
-              <GoogleAnalytics />
             </CartProvider>
           </AuthProvider>
         </ToastProvider>
