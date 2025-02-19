@@ -30,12 +30,18 @@ export default function OrderCounter() {
                 schema: 'public',
                 table: 'orders'
             }, (payload) => {
-                // Only refetch if the change involves not_started status
                 if (payload.eventType === 'INSERT' && payload.new.status === 'not_started') {
-                    fetchOrders();
-                } else if (payload.eventType === 'UPDATE' && 
-                    (payload.new.status === 'not_started' || payload.old.status === 'not_started')) {
-                    fetchOrders();
+                    // Increment count for new not_started orders
+                    setCount(prevCount => prevCount + 1);
+                } else if (payload.eventType === 'UPDATE') {
+                    // If status changed to not_started, increment
+                    if (payload.old.status !== 'not_started' && payload.new.status === 'not_started') {
+                        setCount(prevCount => prevCount + 1);
+                    }
+                    // If status changed from not_started to something else, decrement
+                    else if (payload.old.status === 'not_started' && payload.new.status !== 'not_started') {
+                        setCount(prevCount => prevCount - 1);
+                    }
                 }
             })
             .subscribe();

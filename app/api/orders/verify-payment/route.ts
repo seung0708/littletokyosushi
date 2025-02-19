@@ -2,6 +2,7 @@ import {NextResponse} from "next/server";
 import Stripe from "@/lib/stripe/stripe";
 import {createClient} from "@/lib/supabase/server";
 import {retryOperation} from "@/lib/utils/api-retry";
+import { sendOrderConfirmationEmail, sendStoreOrderNotificationEmail } from "@/lib/email-smtp";
 
 export async function POST(req: Request) {
     const { paymentId, paymentIntentSecret } = await req.json();
@@ -30,7 +31,17 @@ export async function POST(req: Request) {
         const orderData = await retryOperation(async () =>{ 
             const result = await supabase
                 .from('orders')
-                .select('*')
+                .select(`
+                    *,
+                    customers (*),
+                    order_items (
+                        *,
+                        order_item_modifiers (
+                            *,
+                            order_item_modifier_options (*)
+                        )
+                    )
+                `)
                 .eq('short_id', orderId)
                 .single();
 
@@ -98,6 +109,22 @@ export async function POST(req: Request) {
                 throw orderErrorUpdate;
             }
         })
+
+        // Send confirmation emails
+        try {
+            console.log('Sending confirmation emails for order:', orderData.short_id);
+            const [customerEmailResult, storeEmailResult] = await Promise.all([
+                sendOrderConfirmationEmail(orderData, orderData.customers),
+                sendStoreOrderNotificationEmail(orderData, orderData.customers)
+            ]);
+            console.log('Email results:', {
+                customerEmail: customerEmailResult,
+                storeEmail: storeEmailResult
+            });
+        } catch (error) {
+            console.error('Error sending confirmation emails:', error);
+            // Continue processing even if emails fail
+        }
 
         // Clear the cart after successful payment verification
         await retryOperation(async () => {

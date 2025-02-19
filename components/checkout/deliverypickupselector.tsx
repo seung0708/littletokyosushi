@@ -23,10 +23,7 @@ const DeliveryPickupSelector = ({ form, onComplete}: Props) => {
 
     const handleContinue = () => {        
         if(deliveryMethod === "pickup") {
-            console.log('pickup')
              if(form.getValues('delivery.pickupDate') && form.getValues('delivery.pickupTime')) {
-                console.log('continue')
-                console.log(onComplete())
                 onComplete();
              }
         } else {

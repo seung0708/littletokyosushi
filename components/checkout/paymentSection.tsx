@@ -44,7 +44,7 @@ const PaymentSection = ({ customerAddress, onSubmit, form, orderTotal }: Props) 
 
             const addressElement = elements.getElement('address');
             const result = await addressElement.getValue();
-            console.log(result);
+            
             // Save address to customers table if user is logged in
             if (user?.id) {
                 const response = await fetch('/api/customers', {

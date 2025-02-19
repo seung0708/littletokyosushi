@@ -46,7 +46,6 @@ export async function GET(req: Request) {
 export async function PATCH(req: Request) { 
     try {
         const { user, address } = await req.json();
-        console.log(user, address)
         //console.log('PATCH /api/customers', { user, address });
         const { line1, line2, city, state, postal_code, country } = address.address;
         const supabase = await createClient();

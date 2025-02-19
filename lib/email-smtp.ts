@@ -3,6 +3,7 @@ import PrepTimeNotificationEmail from '@/emails/prep-time-notifications';
 import OrderReadyNotificationEmail from '@/emails/order-ready-notification';
 import OrderCompletedEmail from '@/emails/order-completed-notifications';
 import RefundNotificationEmail from '@/emails/refund-notificatons';
+import StoreOrderNotificationEmail from '@/emails/store-order-notification';
 import { render } from '@react-email/render';
 import nodemailer from 'nodemailer';
 import { Order } from '@/types/order';
@@ -107,6 +108,15 @@ export async function sendRefundNotificationEmail(order: Order, customer: Custom
   return sendEmail(
     customer.email as string,
     `Refund Processed for Order #${order.short_id?.toUpperCase()} - Little Tokyo Sushi`,
+    emailHtml
+  );
+}
+
+export async function sendStoreOrderNotificationEmail(order: Order, customer: Customer) {
+  const emailHtml = await render(StoreOrderNotificationEmail({ order, customer }));
+  return sendEmail(
+    'littletokyosushiinc@gmail.com', 
+    `New Order #${order.short_id?.toUpperCase()} - $${order.total.toFixed(2)}`,
     emailHtml
   );
 }

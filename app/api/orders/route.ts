@@ -1,6 +1,5 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
-import { sendOrderConfirmationEmail } from "@/lib/email-smtp";
 import { Database } from "@/types/database.types";
 
 type OrderItemInsert = Partial<Database['public']['Tables']['order_items']['Insert']>;
@@ -30,7 +29,6 @@ export async function POST(req: Request) {
             .select()
             .single();
         
-        console.log('orderData', orderData, 'orderError', orderError);
         if (orderError) {
             return NextResponse.json({ error: orderError.message }, { status: 400 });
         }
@@ -103,13 +101,7 @@ export async function POST(req: Request) {
             return NextResponse.json({ error: error.message }, { status: 400 });
         }
 
-        try {
-            await sendOrderConfirmationEmail(order, customer);
-        } catch (emailError) {
-            console.error('Failed to send confirmation email:', emailError);
-        }
-
-        return NextResponse.json(order);
+        return NextResponse.json({ order });
     } catch (error) {
         console.error('Error creating order:', error);
         return NextResponse.json({ error: 'Failed to create order' }, { status: 500 });
