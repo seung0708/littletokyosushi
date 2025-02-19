@@ -13,6 +13,11 @@ export async function GET(request: Request, { params }: { params: Promise<{ id: 
     const supabase = await createClient();
 
     try {
+        // Convert string ID to number
+        const numericId = parseInt(id, 10);
+        if (isNaN(numericId)) {
+            throw new APIError('Invalid item ID', 400);
+        }
 
         const { data: itemWithModifiers, error: itemError } = await supabase
         .from('menu_items')
@@ -24,7 +29,7 @@ export async function GET(request: Request, { params }: { params: Promise<{ id: 
                 modifier_options(*)
             )
         `)
-        .eq('id', id)
+        .eq('id', numericId)
         .single();
        
         if (itemError) {

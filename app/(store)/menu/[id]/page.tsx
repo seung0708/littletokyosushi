@@ -46,17 +46,29 @@ async function getItem(id: string): Promise<MenuItem | null> {
         return null;
     }
 
+    // Validate numeric ID
+    const numericId = parseInt(id, 10);
+    if (isNaN(numericId)) {
+        console.error('Invalid numeric ID:', id);
+        return null;
+    }
+
     try {
-        const url = `${process.env.NEXT_PUBLIC_SITE_URL}/api/store/items/${id}`;
+        const url = `${process.env.NEXT_PUBLIC_SITE_URL}/api/store/items/${numericId}`;
         console.log('Fetching item from:', url);
         
         const res = await retryWithBackoff(async () => {
             const response = await fetch(url);
+            if (response.status === 404) {
+                return null;
+            }
             if (!response.ok) {
                 throw new Error(`HTTP error! status: ${response.status}`);
             }
             return response;
         });
+
+        if (!res) return null;
 
         const data = await res.json();
         
