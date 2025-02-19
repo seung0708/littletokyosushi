@@ -26,7 +26,7 @@ export async function generateMetadata({ params, searchParams }: Props, parent: 
 async function getItem(id: string): Promise<MenuItem> {
     try {
         const res = await retryWithBackoff(async () => 
-            await fetch(`${process.env.NEXT_PUBLIC_MAIN_URL}/api/store/items/${id}`)
+            await fetch(`${process.env.NEXT_PUBLIC_SITE_URL}/api/store/items/${id}`)
         );
         
         
