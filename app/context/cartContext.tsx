@@ -40,20 +40,63 @@ export const CartProvider = ({ children }: CartProviderProps) => {
     const [cartError, setCartError] = useState<string | null>(null);
     
     useEffect(() => {
-        const savedCartId = localStorage.getItem('cartId');
-        if (savedCartId && userId) {
-            updateCartCustomerId(userId);
-        } else if (savedCartId) {
-            setCartId(savedCartId);
-            fetchCart();
-        }
-        const savedCartItems = localStorage.getItem('cartItems');
-        if (savedCartItems) {
-            setCartItems(JSON.parse(savedCartItems));  
-        } else {
-            setCartItems([]);  
-        }
-    }, [cartId,userId]);
+        const initializeCart = async () => {
+            try {
+                const savedCartId = localStorage.getItem('cartId');
+                const savedCartItems = localStorage.getItem('cartItems');
+
+                if(savedCartItems) {
+                    try { 
+                        const parsedItems = JSON.parse(savedCartItems);
+                        setCartItems(parsedItems);
+                    } catch (error) {
+                        setCartError('Error parsing cart items');
+                    }
+                }
+
+                if(savedCartId) { 
+                    if(userId) {
+                        updateCartCustomerId(userId);
+                    } else {
+                        setCartId(savedCartId)
+                        await fetchCart()
+                    }
+                }
+
+            } catch (error) {
+                setCartError(error.message);
+                console.log('Error initializing cart:', error)
+            }
+        };
+        initializeCart();
+    }, [cartId, userId]);
+
+    useEffect(() => {
+        const recoverUserCart = async () => {
+            if (userId && !cartId) {
+                try {
+                    const response = await fetch('/api/store/cart/user', {
+                        headers: {
+                            'user-id': userId
+                        },
+                        credentials: 'include'
+                    });
+                    
+                    if (response.ok) {
+                        const data = await response.json();
+                        if (data?.cart?.id) {
+                            setCartId(data.cart.id);
+                            setCartItems(data.cart.cart_items || []);
+                        }
+                    }
+                } catch (error) {
+                    console.error('Error recovering user cart:', error);
+                }
+            }
+        };
+    
+        recoverUserCart();
+    }, [userId]); 
 
     const clearCart = () => {
         localStorage.removeItem('cartId');
@@ -63,10 +106,11 @@ export const CartProvider = ({ children }: CartProviderProps) => {
     };
 
     const fetchCart = async () => {
-        
         if (!cartId) return;
+
         setIsCartLoading(true);
         setCartError(null);
+        
         try {
             const response = await retryWithBackoff(async () => 
                 await fetch(`/api/store/cart/${cartId}`, {
@@ -79,32 +123,59 @@ export const CartProvider = ({ children }: CartProviderProps) => {
             );
            
             if (response.status === 404) {
-                // Cart not found in database, clear local storage
-                localStorage.removeItem('cartId');
-                localStorage.removeItem('cartItems');
-                setCartId('');
-                setCartItems([]);
-                return;
+               setCartId('');
+               localStorage.removeItem('cartId');
+               setCartError('Cart needs to be re-created');
+               return false;
             }
 
             if (!response.ok) {
-               const errorData = await response.json();
-               console.error('Cart fetch failed:', errorData);
-               throw new Error(errorData.error || 'Failed to fetch cart');
+                const errorData = await response.json();
+                const errorMessage = errorData.error || `Error ${response.status}: ${response.statusText}`;
+                setCartError(errorMessage);
+                return false;
             }
 
             const data = await response.json();
-            setCartId(data.id);
-            setCartItems(data.cart_items);
-            localStorage.setItem('cartId', data.id);
-            localStorage.setItem('cartItems', JSON.stringify(data.cart_items));
+            if (data?.cart_items) {
+                setCartItems(data.cart_items);
+                localStorage.setItem('cartItems', JSON.stringify(data.cart_items));
+                return true;
+            }
+            return false;
         } catch (error) {
             console.error('Error fetching cart:', error);
-            setCartError(error instanceof Error ? error.message : 'Failed to fetch cart');
+            setCartError('Failed to fetch cart. Will retry later.');
+            return false;
         } finally {
             setIsCartLoading(false);
         }
     };
+
+    useEffect(() => {
+        try {
+            if (cartItems.length > 0) {
+                localStorage.setItem('cartItems', JSON.stringify(cartItems));
+            } else {
+                localStorage.removeItem('cartItems');
+            }
+        } catch (e) {
+            console.error('Error syncing cart items to localStorage:', e);
+        }
+    }, [cartItems]);
+
+    useEffect(() => {
+        try {
+            if (cartId) {
+                localStorage.setItem('cartId', cartId);
+            } else {
+                localStorage.removeItem('cartId');
+            }
+        } catch (e) {
+            console.error('Error syncing cart ID to localStorage:', e);
+        }
+    }, [cartId]);
+
 
     const updateCartCustomerId = async (customerId: string) => {
         if (!cartId) return;

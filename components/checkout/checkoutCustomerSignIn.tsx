@@ -18,7 +18,7 @@ interface CustomerSignInProps {
 }
 
 const CheckoutCustomerSignIn: React.FC<CustomerSignInProps> = ({ form, onComplete }) => { 
-    const { signup, googleSignin, signin, signinAnonymously } = useAuth()
+    const { signup, googleSignin, signin, signinAnonymously, waitForUser } = useAuth()
     const [isSignUp, setIsSignUp] = useState(false)
     const { updateCartCustomerId } = useCart()
     const [signInError, setSignInError] = useState<string>('')
@@ -34,16 +34,29 @@ const CheckoutCustomerSignIn: React.FC<CustomerSignInProps> = ({ form, onComplet
         const { customer } = form.getValues()
         try {
             setSignInError('')
-            const response = await signin(customer.signinEmail || '', customer.password || '')
-            if (response && typeof response === 'object' && 'error' in response) {
-                setSignInError(response.error as string)
+            const user = await signin(customer.signinEmail || '', customer.password || '')
+            if (!user) {
+                setSignInError('Invalid email or password')
                 return
             }
-            if (response?.id) {
-                await updateCartCustomerId(response?.id)
-                onComplete()
+            if (user?.id) {
+                console.log('Sign in successful, user:', user.id)
+                await updateCartCustomerId(user?.id)
+                console.log('Cart updated, waiting for auth state...')
+                
+                // Wait for auth context to be ready
+                try {
+                    const authUser = await waitForUser()
+                    console.log('Auth state ready, user:', authUser.id)
+                    console.log('Calling onComplete')
+                    onComplete()
+                } catch (error) {
+                    console.error('Timeout waiting for auth state')
+                    setSignInError('Error completing sign in. Please try again.')
+                }
             } 
         } catch (error: any) {
+            console.error('Sign in error:', error)
             setSignInError('An unexpected error occurred')
         }
     }
@@ -145,11 +158,7 @@ const CheckoutCustomerSignIn: React.FC<CustomerSignInProps> = ({ form, onComplet
                                 </Button>
                                 <p className="text-sm text-center">
                                     Don&apos;t have an account?{' '}
-                                    <button
-                                        type="button"
-                                        onClick={() => setIsSignUp(true)}
-                                        className="text-red-600 hover:text-red-700"
-                                    >
+                                    <button onClick={() => setIsSignUp(true)} className="text-red-600 hover:text-red-700">
                                         Sign Up
                                     </button>
                                 </p>
@@ -185,18 +194,18 @@ const CheckoutCustomerSignIn: React.FC<CustomerSignInProps> = ({ form, onComplet
                             />
                             {signUpError && <p className="text-red-500 text-sm">{signUpError}</p>}
                             <div className="space-y-4">
-                                <Button onClick={handleSignUp} className="w-full" variant="default">
+                                <Button type="button" onClick={handleSignUp} className="w-full" variant="default">
                                     Create Account
                                 </Button>
                                 <p className="text-sm text-center">
                                     Already have an account?{' '}
-                                    <button
+                                    <Button
                                         type="button"
                                         onClick={() => setIsSignUp(false)}
                                         className="text-red-600 hover:text-red-700"
                                     >
                                         Sign In
-                                    </button>
+                                    </Button>
                                 </p>
                             </div>
                         </>

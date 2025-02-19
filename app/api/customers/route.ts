@@ -46,15 +46,16 @@ export async function GET(req: Request) {
 export async function PATCH(req: Request) { 
     try {
         const { user, address } = await req.json();
+        console.log(user, address)
         //console.log('PATCH /api/customers', { user, address });
-        const { line1, line2, city, state, postal_code, country } = address.value.address;
+        const { line1, line2, city, state, postal_code, country } = address.address;
         const supabase = await createClient();
         if (user.is_anonymous) {
             const { error: updateError } = await supabase
                 .from('customers')
                 .update(
                     {
-                        phone: address.value.phone.substring(2)
+                        phone: address.phone.substring(2)
                     }
                 )
                 .eq('id', user.id)
@@ -66,18 +67,17 @@ export async function PATCH(req: Request) {
         } else {
             const { data, error } = await supabase
                 .from('customers')
-            .update({
-                line1: line1,
-                line2: line2,
-                city: city,
-                state: state,
-                postal_code: postal_code,
-                country: country,
-                phone: address.value.phone.substring(2),
+                .update({
+                line1,
+                line2,
+                city,
+                state,
+                postal_code,
+                country,
+                phone: address.phone.substring(2),
                 updated_at: new Date().toISOString()
             })
             .eq('id', user.id)
-
             if (error) {
                 return NextResponse.json({ error: error.message }, { status: 400 });
             }

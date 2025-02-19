@@ -34,12 +34,19 @@ const CheckoutSteps = () => {
     const [orderTotal, setOrderTotal] = useState<number>(0);
     const [orderFees, setOrderFees] = useState({serviceFee: 0, subTotal: 0});
     const [customerAddress, setCustomerAddress] = useState<CustomerAddress | null>(null);
+    const [isAuthReady, setIsAuthReady] = useState(false);
     
     useEffect(() => {
-        if(user && currentStep === 'signin') {
-            handleNextStep();
+        if (user !== null) {
+            setIsAuthReady(true);
         }
-    }, [user, currentStep]);
+    }, [user]);
+
+    useEffect(() => {
+        if(user && currentStep === 'signin' && isAuthReady) {
+            setCurrentStep('delivery-pickup');
+        }
+    }, [user, currentStep, isAuthReady]);
 
     useEffect(() => {
         if (user) {
@@ -158,20 +165,22 @@ const CheckoutSteps = () => {
     ]
 
     const handleNextStep = () => {
-    switch (currentStep) {
-        case 'signin': 
-            setCurrentStep('delivery-pickup');
-            break;
-        case 'delivery-pickup':
-            if (!orderTotal || orderTotal <= 0) {
-                
-                return;
-            }
-            setCurrentStep('summary');
-            createPaymentIntent();
-            break;
-    }
-};
+        switch (currentStep) {
+            case 'signin': 
+                // Only proceed if auth is ready and we have a user
+                if (user && isAuthReady) {
+                    setCurrentStep('delivery-pickup');
+                } 
+                break;
+            case 'delivery-pickup':
+                if (!orderTotal || orderTotal <= 0) {
+                    return;
+                }
+                setCurrentStep('summary');
+                createPaymentIntent();
+                break;
+        }
+    };
 
     // const handlePreviousStep = () => {
     //     switch (currentStep) {
@@ -304,13 +313,30 @@ const CheckoutSteps = () => {
                                                 spacingUnit: '4px',
                                                 borderRadius: '4px',
                                             },
-                                        },
+                                            rules: {
+                                                '.Input': {
+                                                    backgroundColor: '#000000',
+                                                    border: '1px solid rgba(255, 255, 255, 0.1)',
+                                                    color: '#ffffff'
+                                                },
+                                                '.Block': {
+                                                    backgroundColor: '#000000'
+                                                },
+                                                '.Label': {
+                                                    color: '#ffffff'
+                                                },
+                                                '.Tab': {
+                                                    color: '#ffffff'
+                                                }
+                                            }
+                                        }
                                     }}
                                 >
                                     <PaymentSection 
-                                            customerAddress={customerAddress}
-                                            onSubmit={onSubmit}
-                                            form={form}
+                                        customerAddress={customerAddress}
+                                        onSubmit={onSubmit}
+                                        form={form}
+                                        orderTotal={orderTotal}
                                     />
                                 </Elements>
                             ) : (

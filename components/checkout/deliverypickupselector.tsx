@@ -15,16 +15,20 @@ interface Props {
 }
 
 const DeliveryPickupSelector = ({ form, onComplete}: Props) => {
+    
     const {businessHours, isLoading, error, getAvailablePickupTimes} = useBusinessHours();
     const deliveryMethod = form.watch('delivery.method');
     const selectedDate = form.watch('delivery.pickupDate');
     const availableTimes = selectedDate ? getAvailablePickupTimes(new Date(selectedDate)) : [];
 
-    const handleContinue = () => {
+    const handleContinue = () => {        
         if(deliveryMethod === "pickup") {
-            if(form.getValues('delivery.pickupDate') && form.getValues('delivery.pickupTime')) {
+            console.log('pickup')
+             if(form.getValues('delivery.pickupDate') && form.getValues('delivery.pickupTime')) {
+                console.log('continue')
+                console.log(onComplete())
                 onComplete();
-            }
+             }
         } else {
             form.trigger('delivery.address');
             if(Object.values(form.getValues('delivery.address') || {}).every(Boolean)) {

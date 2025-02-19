@@ -15,7 +15,7 @@ export async function POST(req: Request) {
   const supabase = await createClient();
 
   try {
-    const { data, error: signInError } = await supabase.auth.signInWithPassword({
+    const { data: { user}, error: signInError } = await supabase.auth.signInWithPassword({
       email,
       password,
     });
@@ -29,25 +29,22 @@ export async function POST(req: Request) {
       });
     }
 
-    const response = NextResponse.json({
-      success: true,
-      session: data.session
-    });
+    const response = NextResponse.json(user);
 
-    // Set auth cookies
-    response.cookies.set('sb-access-token', data.session?.access_token || '', {
-      path: '/',
-      sameSite: 'lax',
-      secure: process.env.NODE_ENV === 'production',
-      maxAge: 60 * 60 // 1 hour
-    });
+    // // Set auth cookies
+    // response.cookies.set('sb-access-token', data.session?.access_token || '', {
+    //   path: '/',
+    //   sameSite: 'lax',
+    //   secure: process.env.NODE_ENV === 'production',
+    //   maxAge: 60 * 60 // 1 hour
+    // });
 
-    response.cookies.set('sb-refresh-token', data.session?.refresh_token || '', {
-      path: '/',
-      sameSite: 'lax',
-      secure: process.env.NODE_ENV === 'production',
-      maxAge: 60 * 60 * 24 * 7 // 1 week
-    });
+    // response.cookies.set('sb-refresh-token', data.session?.refresh_token || '', {
+    //   path: '/',
+    //   sameSite: 'lax',
+    //   secure: process.env.NODE_ENV === 'production',
+    //   maxAge: 60 * 60 * 24 * 7 // 1 week
+    // });
 
     return response;
 

@@ -21,7 +21,7 @@ export async function POST(req: Request) {
             total: total,
             service_fee: fees.serviceFee,
             sub_total: fees.subTotal,
-            status: 'pending'
+            status: 'not_started'
         };
         
         const { data: orderData, error: orderError } = await supabase

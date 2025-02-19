@@ -13,6 +13,7 @@ interface AuthContextType {
     signup: (email: string, password: string) => Promise<User | null>;
     signinAnonymously: (email: string, password: string) => Promise<User | null>;
     resetPassword: (password: string, token: string) => Promise<void>;
+    waitForUser: () => Promise<User>;
 };
 
 const AuthContext = createContext<AuthContextType | null>(null)
@@ -173,11 +174,41 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         }
     };
 
-    return (    
-        <AuthContext.Provider value={{user, isLoading, signin, signout, googleSignin, resetPassword, signup, signinAnonymously, setUser}}>
+    const waitForUser = () => {
+        return new Promise<User>((resolve, reject) => {
+            if (user) {
+                resolve(user);
+                return;
+            }
+
+            let attempts = 0;
+            const interval = setInterval(() => {
+                attempts++;
+                if (user) {
+                    clearInterval(interval);
+                    resolve(user);
+                } else if (attempts >= 10) { // 5 seconds max
+                    clearInterval(interval);
+                    reject(new Error('Timeout waiting for user'));
+                }
+            }, 500);
+        });
+    };
+
+    return (
+        <AuthContext.Provider value={{
+            user,
+            isLoading,
+            signin,
+            setUser,
+            signout,
+            googleSignin,
+            signup,
+            signinAnonymously,
+            resetPassword,
+            waitForUser
+        }}>
             {children}
         </AuthContext.Provider>
-    )
-
-    
+    );
 }
