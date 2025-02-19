@@ -45,13 +45,13 @@ const formSchema = z.object({
 
 type FormData = z.infer<typeof formSchema>;
 
-export default function ItemDetailsForm({ itemId }: { itemId: number }) {
+export default function ItemDetailsForm({ initialItem }: { initialItem: MenuItem }) {
     const { showToast } = useToast();
     const { handleCartUpdate } = useCart();
     const [loading, setLoading] = useState(false);
     const [loadingImage, setLoadingImage] = useState(true);
     const [selectedImage, setSelectedImage] = useState(0);
-    const [item, setItem] = useState<MenuItem | null>(null);
+    const [item] = useState<MenuItem>(initialItem);
     const router = useBackButton(() => {
         if(form.formState.isDirty) {
             const confirmed = window.confirm('You have unsaved changes. Are you sure you want to leave?');
@@ -63,28 +63,6 @@ export default function ItemDetailsForm({ itemId }: { itemId: number }) {
         }
     });
 
-    useEffect(() => {
-        const fetchItem = async () => {
-            try {
-                const res = await retryWithBackoff(async () => 
-                    await fetch(`/api/store/items/${itemId}`)
-                );
-                
-                if (!res.ok) {
-                    throw new Error(`Failed to fetch item: ${res.status}`);
-                }
-
-                const data = await res.json();
-                setItem(data);
-            } catch (error) {
-                console.error('Error fetching item:', error);
-                showToast('Failed to load item details', 'error');
-            }
-        };
-
-        fetchItem();
-    }, [itemId, showToast]);
-
     const form = useForm<z.infer<typeof formSchema>>({
         resolver: zodResolver(formSchema),
         defaultValues: {
@@ -95,7 +73,7 @@ export default function ItemDetailsForm({ itemId }: { itemId: number }) {
     });
 
     const handleModifierChange = (modifierId: number, option: ModifierOption, isSelected: boolean) => {
-        const {modifiers} = item!;
+        const {modifiers} = item;
         const currentModifiers = form.getValues('modifiers');
         const modifierIndex = currentModifiers.findIndex(m => m.id === modifierId);
     

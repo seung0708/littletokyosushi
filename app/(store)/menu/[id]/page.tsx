@@ -46,10 +46,13 @@ async function getItem(id: string): Promise<MenuItem> {
 
 export default async function ItemDetailsPage({ params }: { params: Promise<{ id: string }> }) {
     const { id } = await params;
+    if (!id) {
+        notFound();
+    }
     const item = await getItem(id);
-    if (!item) {
+    if (!item || !item.id) {
         notFound();
     }
     
-    return <ItemDetailsForm itemId={item.id} />;
+    return <ItemDetailsForm initialItem={item} />;
 }
