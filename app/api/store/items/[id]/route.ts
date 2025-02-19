@@ -10,15 +10,13 @@ type ModifierWithOptions = Database['public']['Tables']['modifiers']['Row'] & {
 
 export async function GET(request: Request, { params }: { params: Promise<{ id: string }> }) {
     const { id } = await params;
+    console.log('API Route - Fetching item with ID:', id);
+    
     const supabase = await createClient();
+    console.log('API Route - Supabase client created');
 
     try {
-        // Convert string ID to number
-        const numericId = parseInt(id, 10);
-        if (isNaN(numericId)) {
-            throw new APIError('Invalid item ID', 400);
-        }
-
+        console.log('API Route - Executing query for ID:', id);
         const { data: itemWithModifiers, error: itemError } = await supabase
         .from('menu_items')
         .select(`
@@ -29,17 +27,20 @@ export async function GET(request: Request, { params }: { params: Promise<{ id: 
                 modifier_options(*)
             )
         `)
-        .eq('id', numericId)
+        .eq('id', id)
         .single();
-       
+        console.log('API Route - Fetched item:', itemWithModifiers);
         if (itemError) {
             console.error('Database error fetching item:', itemError);
             throw new APIError('Failed to fetch item details', 500);
         }
 
         if (!itemWithModifiers) {
+            console.log('API Route - No item found for ID:', id);
             throw new APIError('Item not found', 404);
         }
+
+        console.log('API Route - Successfully fetched item:', itemWithModifiers.id);
 
         // Format prices as numbers
         const formattedItem = {
@@ -53,7 +54,7 @@ export async function GET(request: Request, { params }: { params: Promise<{ id: 
                 }))
             })) ?? []
         };
-
+        console.log('API Route - Formatted item:', formattedItem);
         return NextResponse.json(formattedItem);
 
     } catch (error) {
