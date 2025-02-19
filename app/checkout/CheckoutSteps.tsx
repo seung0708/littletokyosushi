@@ -20,6 +20,10 @@ import { CustomerAddress } from '@/types/customer';
 
 type CheckoutStep =  'signin' | 'delivery-pickup' | 'summary';
 
+if (!process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY) {
+    throw new Error('Missing Stripe publishable key');
+}
+
 const stripePromise = loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY!);
 
 const CheckoutSteps = () => {

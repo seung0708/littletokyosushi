@@ -6,6 +6,7 @@ import { UseFormReturn } from 'react-hook-form';
 import { CheckoutFormValues } from '@/types/checkout'; 
 import { Order } from '@/types/order';
 import {CustomerAddress} from '@/types/customer';
+import { useState, useEffect } from 'react';
 
 interface Props {
     customerAddress?: CustomerAddress | null;
@@ -17,17 +18,37 @@ const PaymentSection = ({ customerAddress, onSubmit, form }: Props) => {
     const stripe = useStripe();
     const elements = useElements();
     const { user } = useAuth();
+    const [error, setError] = useState<string | null>(null);
+    const [loading, setLoading] = useState(false);
     
+    useEffect(() => {
+        if (!stripe || !elements) {
+            setError('Stripe is not properly initialized. Please refresh the page.');
+        } else {
+            setError(null);
+        }
+    }, [stripe, elements]);
+
     const handleAddressSubmit = async () => {
-        if (!elements) return;
+        if (!elements) {
+            setError('Payment form is not properly initialized');
+            return;
+        }
         
         try {
+            setLoading(true);
             // Get address from Stripe Elements
             const addressElement = elements.getElement('address');
-            const addressDetails = await addressElement?.getValue();
+            if (!addressElement) {
+                setError('Address form is not properly initialized');
+                return;
+            }
+
+            const addressDetails = await addressElement.getValue();
             
             if (!addressDetails) {
-                throw new Error('Billing address is required');
+                setError('Billing address is required');
+                return;
             }
 
             // Save address to customers table if user is logged in
@@ -45,34 +66,38 @@ const PaymentSection = ({ customerAddress, onSubmit, form }: Props) => {
                     console.error('Error saving address');
                 }
             } 
+            setLoading(false);
             return addressDetails;
         } catch (error) {
             console.error('Error handling address:', error);
+            setError('Error processing address. Please try again.');
+            setLoading(false);
             return null;
         }
     };
 
     const handleSubmit = async () => {
-        
         if (!stripe || !elements) {
-            console.error('Stripe not initialized');
+            setError('Stripe is not properly initialized. Please refresh the page.');
             return;
         }
 
         try {
+            setLoading(true);
             // Submit the form first to validate all fields
             const { error: submitError } = await elements.submit();
             if (submitError) {
                 console.error('Error submitting form:', submitError);
+                setLoading(false);
                 return;
             }
 
-            
             const order: Order = await onSubmit(form.getValues());
 
-             // Wait for order data to be available
+            // Wait for order data to be available
             if (!order?.short_id || !order?.total) {
                 console.error('Order data not available');
+                setLoading(false);
                 return;
             }
             
@@ -104,35 +129,40 @@ const PaymentSection = ({ customerAddress, onSubmit, form }: Props) => {
             if (confirmError) {
                 throw new Error(confirmError.message);
             }
+            setLoading(false);
         } catch (error) {
             console.error('Payment error:', error);
+            setError('Error processing payment. Please try again.');
+            setLoading(false);
         }
     };
+
+    if (error) {
+        return (
+            <div className="p-4 text-red-500 bg-red-100 rounded">
+                {error}
+            </div>
+        );
+    }
+
     return (
-        <div className="space-y-4">
-            <h2 className="text-red-500 text-3xl pb-6">Billing Address</h2>
-            <AddressElement 
-                options={{
-                    mode: 'billing',
-                    allowedCountries: ['US'],
-                    autocomplete: { mode: 'automatic' },
-                    defaultValues: {
-                        name: `${user?.user_metadata?.first_name || ''} ${user?.user_metadata?.last_name || ''}`,
-                        address: {                            
-                            line1: customerAddress?.line1 || '',
-                            line2: customerAddress?.line2 || '',
-                            city: customerAddress?.city || '',
-                            state: customerAddress?.state || '',
-                            postal_code: customerAddress?.postal_code || '',
-                            country: customerAddress?.country || 'US',
-                        },
-                        phone: customerAddress?.phone || ''
-                    },
-                    fields: { phone: 'always' },
-                    validation: { phone: { required: 'always' } },
-                }}
-            />
-            <PaymentForm stripe={stripe} elements={elements} onAddressSubmit={handleAddressSubmit} onPaymentSubmit={handleSubmit} />
+        <div className="mt-6">
+            <div className="bg-black/30 backdrop-blur-sm border border-white/10 rounded-xl p-4 sm:p-6 lg:p-8">
+                <h2 className="text-xl font-semibold mb-4">Payment Information</h2>
+                {stripe && elements ? (
+                    <PaymentForm 
+                        stripe={stripe} 
+                        elements={elements} 
+                        onAddressSubmit={handleAddressSubmit}
+                        onPaymentSubmit={handleSubmit}
+                        loading={loading}
+                    />
+                ) : (
+                    <div className="text-center py-4">
+                        Loading payment form...
+                    </div>
+                )}
+            </div>
         </div>
     );
 };
