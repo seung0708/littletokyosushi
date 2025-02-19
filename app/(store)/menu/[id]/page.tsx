@@ -1,3 +1,5 @@
+'use client';
+import {use } from 'react';
 import { MenuItem } from '@/types/item';
 import ItemDetailsForm from '@/components/store/menu/itemDetailsForm';
 import { notFound } from 'next/navigation';
@@ -9,18 +11,18 @@ type Props = {
   searchParams: Promise<{ [key: string]: string | string[] | undefined }>
 }
  
-// export async function generateMetadata({ params, searchParams }: Props, parent: ResolvingMetadata): Promise<Metadata> {
-//     const id = (await params).id
-//     // fetch data
-//     const item = await getItem(id)
+export async function generateMetadata({ params, searchParams }: Props, parent: ResolvingMetadata): Promise<Metadata> {
+    const id = (await params).id
+    // fetch data
+    const item = await getItem(id)
     
-//   // optionally access and extend (rather than replace) parent metadata
-//   const previousImages = (await parent).openGraph?.images || []
+  // optionally access and extend (rather than replace) parent metadata
+  const previousImages = (await parent).openGraph?.images || []
  
-//   return {
-//     title: item.name,
-//   }
-// }
+  return {
+    title: item.name,
+  }
+}
  
 async function getItem(id: string): Promise<MenuItem> {
     try {
@@ -44,7 +46,7 @@ async function getItem(id: string): Promise<MenuItem> {
 }
 
 export default async function ItemDetailsPage({ params }: { params: Promise<{ id: string }> }) {
-    const { id } = await params;
+    const { id } = use(params);
     const item = await getItem(id);
     if (!item) {
         notFound();
