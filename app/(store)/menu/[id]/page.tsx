@@ -1,4 +1,3 @@
-'use client';
 import {use } from 'react';
 import { MenuItem } from '@/types/item';
 import ItemDetailsForm from '@/components/store/menu/itemDetailsForm';
@@ -27,7 +26,7 @@ export async function generateMetadata({ params, searchParams }: Props, parent: 
 async function getItem(id: string): Promise<MenuItem> {
     try {
         const res = await retryWithBackoff(async () => 
-            await fetch(`${process.env.NEXT_PUBLIC_SITE_URL}/api/store/items/${id}`)
+            await fetch(`${process.env.NEXT_PUBLIC_MAIN_URL}/api/store/items/${id}`)
         );
         
         
@@ -46,11 +45,11 @@ async function getItem(id: string): Promise<MenuItem> {
 }
 
 export default async function ItemDetailsPage({ params }: { params: Promise<{ id: string }> }) {
-    const { id } = use(params);
+    const { id } = await params;
     const item = await getItem(id);
     if (!item) {
         notFound();
     }
     
-    return <ItemDetailsForm item={item} />;
+    return <ItemDetailsForm itemId={item.id} />;
 }

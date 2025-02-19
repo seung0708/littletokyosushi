@@ -18,6 +18,7 @@ import Image from 'next/image';
 import { useToast } from '@/app/context/toastContext';
 import { AddToCartButton } from '@/components/ui/loadingButtons';
 import { useBackButton } from '@/app/hooks/useBackButton';
+import { retryWithBackoff } from '@/lib/utils/api-retry';
 
 const formSchema = z.object({
     quantity: z.number().min(1),
@@ -44,12 +45,13 @@ const formSchema = z.object({
 
 type FormData = z.infer<typeof formSchema>;
 
-export default function ItemDetailsForm({item}: {item: MenuItem}) {
+export default function ItemDetailsForm({ itemId }: { itemId: number }) {
     const { showToast } = useToast();
     const { handleCartUpdate } = useCart();
     const [loading, setLoading] = useState(false);
     const [loadingImage, setLoadingImage] = useState(true);
     const [selectedImage, setSelectedImage] = useState(0);
+    const [item, setItem] = useState<MenuItem | null>(null);
     const router = useBackButton(() => {
         if(form.formState.isDirty) {
             const confirmed = window.confirm('You have unsaved changes. Are you sure you want to leave?');
@@ -60,6 +62,28 @@ export default function ItemDetailsForm({item}: {item: MenuItem}) {
             }
         }
     });
+
+    useEffect(() => {
+        const fetchItem = async () => {
+            try {
+                const res = await retryWithBackoff(async () => 
+                    await fetch(`/api/store/items/${itemId}`)
+                );
+                
+                if (!res.ok) {
+                    throw new Error(`Failed to fetch item: ${res.status}`);
+                }
+
+                const data = await res.json();
+                setItem(data);
+            } catch (error) {
+                console.error('Error fetching item:', error);
+                showToast('Failed to load item details', 'error');
+            }
+        };
+
+        fetchItem();
+    }, [itemId, showToast]);
 
     const form = useForm<z.infer<typeof formSchema>>({
         resolver: zodResolver(formSchema),
@@ -255,8 +279,8 @@ export default function ItemDetailsForm({item}: {item: MenuItem}) {
                         <div className="lg:pt-8">
                             <div className="space-y-6">
                                 <div>
-                                    <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold mb-3">{item.name}</h1>
-                                    <p className="text-gray-400 text-base sm:text-lg">{item.description}</p>
+                                    <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold mb-3">{item?.name}</h1>
+                                    <p className="text-gray-400 text-base sm:text-lg">{item?.description}</p>
                                 </div>
 
                                 <div className="flex items-center justify-between">
@@ -314,18 +338,18 @@ export default function ItemDetailsForm({item}: {item: MenuItem}) {
                                             />
                                         </div>
 
-                                        {item.modifiers?.map((modifier, index) => (
-                                            <div key={modifier.id} 
+                                        {item?.modifiers?.map((modifier, index) => (
+                                            <div key={modifier?.id} 
                                                  className="bg-gradient-to-b from-black/30 to-black/40 backdrop-blur-sm 
                                                           border border-white/10 rounded-xl p-4 sm:p-6 space-y-4">
                                                 <div className="flex justify-between items-center">
-                                                    <FormLabel className="text-lg font-medium">{modifier.name}</FormLabel>
+                                                    <FormLabel className="text-lg font-medium">{modifier?.name}</FormLabel>
                                                     <span className={`text-sm px-2 py-1 rounded-full ${
-                                                        modifier.is_required 
+                                                        modifier?.is_required 
                                                             ? 'bg-red-500/10 text-red-400 border border-red-500/20' 
                                                             : 'bg-gray-500/10 text-gray-400 border border-gray-500/20'
                                                     }`}>
-                                                        {modifier.is_required ? 'Required' : 'Optional'}
+                                                        {modifier?.is_required ? 'Required' : 'Optional'}
                                                     </span>
                                                 </div>
                                                 <FormField
