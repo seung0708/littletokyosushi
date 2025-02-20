@@ -18,7 +18,7 @@ interface CustomerSignInProps {
 }
 
 const CheckoutCustomerSignIn: React.FC<CustomerSignInProps> = ({ form, onComplete }) => { 
-    const { signup, googleSignin, signin, signinAnonymously, waitForUser } = useAuth()
+    const { setUser, signup, googleSignin, signin, signinAnonymously } = useAuth()
     const [isSignUp, setIsSignUp] = useState(false)
     const { updateCartCustomerId } = useCart()
     const [signInError, setSignInError] = useState<string>('')
@@ -35,25 +35,14 @@ const CheckoutCustomerSignIn: React.FC<CustomerSignInProps> = ({ form, onComplet
         try {
             setSignInError('')
             const user = await signin(customer.signinEmail || '', customer.password || '')
+            setUser(user)
             if (!user) {
                 setSignInError('Invalid email or password')
                 return
             }
             if (user?.id) {
-                console.log('Sign in successful, user:', user.id)
                 await updateCartCustomerId(user?.id)
-                console.log('Cart updated, waiting for auth state...')
-                
-                // Wait for auth context to be ready
-                try {
-                    const authUser = await waitForUser()
-                    console.log('Auth state ready, user:', authUser.id)
-                    console.log('Calling onComplete')
-                    onComplete()
-                } catch (error) {
-                    console.error('Timeout waiting for auth state')
-                    setSignInError('Error completing sign in. Please try again.')
-                }
+                onComplete() // Go directly to next step
             } 
         } catch (error: any) {
             console.error('Sign in error:', error)

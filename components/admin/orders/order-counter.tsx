@@ -14,38 +14,42 @@ export default function OrderCounter() {
                 const response = await fetch('/api/admin/orders?not_started=true');
                 if (!response.ok) throw new Error('Failed to fetch orders');
                 const data = await response.json();
-                setCount(data.orders.length);
+                if(data?.orders) {
+                    setCount(data.orders.length);
+                }
             } catch (error) {
                 console.error('Error fetching orders:', error);
             }
         };
-
-        // Initial fetch
+    
         fetchOrders();
-
-        // Subscribe to order changes
+    
         const channel = supabase.channel('orders')
             .on('postgres_changes', {
-                event: '*',  // Listen to all events (INSERT, UPDATE, DELETE)
+                event: '*',
                 schema: 'public',
-                table: 'orders'
+                table: 'orders',
+                filter: 'status=eq.not_started'
             }, (payload) => {
                 if (payload.eventType === 'INSERT' && payload.new.status === 'not_started') {
-                    // Increment count for new not_started orders
-                    setCount(prevCount => prevCount + 1);
-                } else if (payload.eventType === 'UPDATE') {
-                    // If status changed to not_started, increment
-                    if (payload.old.status !== 'not_started' && payload.new.status === 'not_started') {
-                        setCount(prevCount => prevCount + 1);
+                    setCount(prev => prev + 1);
+                }
+                else if (payload.eventType === 'UPDATE') {
+                    // If status changed TO not_started and not completed
+                    if (payload.new.status === 'not_started' && !payload.new.completed && payload.old.status !== 'not_started') {
+                        setCount(prev => prev + 1);
                     }
-                    // If status changed from not_started to something else, decrement
-                    else if (payload.old.status === 'not_started' && payload.new.status !== 'not_started') {
-                        setCount(prevCount => prevCount - 1);
+                    // If status changed FROM not_started OR order is completed
+                    else if (
+                        (payload.old.status === 'not_started' && payload.new.status !== 'not_started') ||
+                        payload.new.completed === true
+                    ) {
+                        setCount(prev => prev - 1);
                     }
                 }
             })
             .subscribe();
-
+    
         return () => {
             channel.unsubscribe();
         };

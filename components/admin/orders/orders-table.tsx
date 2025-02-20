@@ -36,30 +36,30 @@ export default function OrdersTable({orders, columns}: OrdersTableProps) {
           </TableRow>
         </TableHeader> 
         <TableBody>
-          {orders.map((order: Order) => (
-            <TableRow key={order.short_id} className="bg-accent">
+          {orders?.map((order: Order) => (
+            <TableRow key={order?.short_id} className="bg-accent">
               <TableCell className="font-medium">
-                {order.short_id?.toUpperCase()}
+                {order?.short_id?.toUpperCase()}
               </TableCell>
               <TableCell>
-                  {order.customers.first_name} {order.customers.last_name}
+                  {order?.customers?.first_name} {order?.customers?.last_name}
               </TableCell>  
               <TableCell className="sm:table-cell">
-                {order.order_type?.toUpperCase()}
+                {order?.order_type?.toUpperCase()}
               </TableCell>
               <TableCell className="sm:table-cell">
                 <Badge className="text-xs" variant="default">
-                  {order.status.toUpperCase().split('_').join(' ')}
+                  {order?.status?.toUpperCase().split('_').join(' ')}
                 </Badge>
               </TableCell>
               <TableCell className="hidden md:table-cell">
-                  {order.order_type === 'pickup' && order.pickup_date && (
+                  {order?.order_type === 'pickup' && order?.pickup_date && (
                     <>
-                      {format(new Date(order.pickup_date), 'EEEE, MMMM d, yyyy')}{' '}
-                      {order.pickup_time && (
+                      {format(new Date(order?.pickup_date), 'EEEE, MMMM d, yyyy')}{' '}
+                      {order?.pickup_time && (
                         <>
                           {(() => {
-                            const [hours, minutes] = order.pickup_time.split(':');
+                            const [hours, minutes] = order?.pickup_time?.split(':');
                             const date = new Date();
                             date.setHours(parseInt(hours, 10));
                             date.setMinutes(parseInt(minutes, 10));
@@ -72,10 +72,10 @@ export default function OrdersTable({orders, columns}: OrdersTableProps) {
                   {order.order_type === 'delivery' && order.delivery_date && (
                     <>
                       {format(new Date(order.delivery_date), 'EEEE, MMMM d, yyyy')}{' '}
-                      {order.delivery_time && (
+                      {order?.delivery_time && (
                         <>
                           {(() => {
-                            const [hours, minutes] = order.delivery_time.split(':');
+                            const [hours, minutes] = order?.delivery_time?.split(':');
                             const date = new Date();
                             date.setHours(parseInt(hours, 10));
                             date.setMinutes(parseInt(minutes, 10));
@@ -87,10 +87,10 @@ export default function OrdersTable({orders, columns}: OrdersTableProps) {
                   )}
               </TableCell>
               <TableCell className="text-right">
-                ${order.total}
+                ${order?.total}
               </TableCell>
               <TableCell>
-                      <Link href={`/admin/orders/${order.short_id}`}>
+                      <Link href={`/admin/orders/${order?.short_id}`}>
                         <Button variant="outline" size="sm">
                           View Details
                         </Button>

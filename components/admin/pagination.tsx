@@ -10,7 +10,6 @@ export default function Pagination ({totalPages}: {totalPages: number}) {
     const { replace } = useRouter();
 
     const currentPage = Number(searchParams.get('page')) || 1;
-
     const createPageURL = (pageNumber: number) => {
         const params = new URLSearchParams(searchParams);
         params.set('page', pageNumber.toString());

@@ -32,13 +32,13 @@ interface CartProviderProps {
 
 export const CartProvider = ({ children }: CartProviderProps) => {
     const { showToast } = useToast();
-    const { user } = useAuth();
+    const { user} = useAuth();
     const userId = user?.id;
     const [cartItems, setCartItems] = useState<CartItem[]>([]);
     const [cartId, setCartId] = useState<string>(""); 
     const [isCartLoading, setIsCartLoading] = useState(false);
     const [cartError, setCartError] = useState<string | null>(null);
-    
+     
     useEffect(() => {
         const initializeCart = async () => {
             try {
@@ -137,8 +137,10 @@ export const CartProvider = ({ children }: CartProviderProps) => {
             }
 
             const data = await response.json();
+
             if (data?.cart_items) {
                 setCartItems(data.cart_items);
+                if (localStorage.getItem('lastCompletedOrder')) localStorage.removeItem('lastCompletedOrder');
                 localStorage.setItem('cartItems', JSON.stringify(data.cart_items));
                 return true;
             }

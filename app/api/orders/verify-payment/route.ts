@@ -11,7 +11,6 @@ export async function POST(req: Request) {
     try {
         // First get the payment intent to get the order ID
         const paymentIntent = await retryOperation(() => Stripe.paymentIntents.retrieve(paymentId));
-        
         if (paymentIntent.status !== 'succeeded') {
             return NextResponse.json({ error: 'Payment not successful' }, { status: 400 });
         }
@@ -21,7 +20,6 @@ export async function POST(req: Request) {
         }
 
         const orderId = paymentIntent.metadata.order_id;
-        console.log('verify-payment orderId:', orderId)
 
         if (!orderId) {
             return NextResponse.json({ error: 'No order ID found' }, { status: 400 });
@@ -50,14 +48,14 @@ export async function POST(req: Request) {
                 
             return result.data;
         });
-        
+
         if (!orderData) {
             return NextResponse.json({ error: 'Order not found' }, { status: 404 });
         }
 
         // Insert payment record
         await retryOperation(async () => {
-            const {error: paymentError } = await supabase
+            const result = await supabase
                 .from('order_payments')
                 .insert({
                     order_id: orderData.id,
@@ -66,13 +64,11 @@ export async function POST(req: Request) {
                     payment_method: paymentIntent.payment_method_types[0],
                     amount: paymentIntent.amount,
                 });
-            
-                if (paymentError) {
-                    console.log('verify-payment Error updating payment:', paymentError);
-                    throw paymentError;
-                }
-        })
 
+            if (result.error) throw result.error;
+            return result.data;
+        })
+     
         // Insert status record
         await retryOperation(async () => {
             const {error: statusError} = await supabase
@@ -82,45 +78,47 @@ export async function POST(req: Request) {
                         order_id: orderData.id,
                         status: 'paid',
                         notes: 'Payment successfully processed'
-                },
-                {
-                    order_id: orderData.id,
-                    status: 'not_started',
-                    notes: 'Order ready for kitchen'
-                }
-            ]);
-
+                    },
+                    {
+                        order_id: orderData.id,
+                        status: 'created',  // Show that order was created
+                        notes: 'Order confirmed'
+                    },
+                    {
+                        order_id: orderData.id,
+                        status: 'not_started',  // Final status for kitchen
+                        notes: 'Order ready for kitchen'
+                    }
+                ]);
+        
             if (statusError) {
                 console.error('Error updating order status:', statusError);
                 throw statusError;
             }
-        })
-        
+        });
+
         await retryOperation(async () => {
-            const {error: orderErrorUpdate} = await supabase
+            const result = await supabase
                 .from('orders')
                 .update({
                     status: 'not_started',
                 })
                 .eq('id', orderData.id);
 
-            if (orderErrorUpdate) {
-                console.error('Error updating order status:', orderErrorUpdate);
-                throw orderErrorUpdate;
+            if (result.error) {
+                console.error('Error updating order status:', result.error);
+                throw result.error;
             }
+
+            return result.data;
         })
 
         // Send confirmation emails
         try {
-            console.log('Sending confirmation emails for order:', orderData.short_id);
-            const [customerEmailResult, storeEmailResult] = await Promise.all([
+            await Promise.all([
                 sendOrderConfirmationEmail(orderData, orderData.customers),
-                sendStoreOrderNotificationEmail(orderData, orderData.customers)
+                //sendStoreOrderNotificationEmail(orderData, orderData.customers)
             ]);
-            console.log('Email results:', {
-                customerEmail: customerEmailResult,
-                storeEmail: storeEmailResult
-            });
         } catch (error) {
             console.error('Error sending confirmation emails:', error);
             // Continue processing even if emails fail
@@ -128,20 +126,22 @@ export async function POST(req: Request) {
 
         // Clear the cart after successful payment verification
         await retryOperation(async () => {
-            const { error: cartError } = await supabase
+            const result = await supabase
                 .from('carts')
                 .delete()
                 .eq('customer_id', orderData.customer_id);
 
-            if (cartError) {
-                console.error('Error clearing cart:', cartError);
-                throw cartError;
+            if (result.error) {
+                console.error('Error clearing cart:', result.error);
+                throw result.error;
             }
+
+            return result.data;
         })
 
         // Clean up duplicate status records - keep only the latest
         await retryOperation(async () => {
-            const latestStatus = await supabase
+            const result = await supabase
                 .from('order_status_history')
                 .select('created_at')
                 .eq('order_id', orderData.id)
@@ -150,24 +150,26 @@ export async function POST(req: Request) {
                 .limit(1)
                 .single();
 
-            if (latestStatus.error) {
-                console.error('Error getting latest status:', latestStatus.error);
-                throw latestStatus.error;
+            if (result.error) {
+                console.error('Error getting latest status:', result.error);
+                throw result.error;
             }
 
-            if (latestStatus.data) {
+            if (result.data) {
                 const { error: deleteStatusError } = await supabase
                 .from('order_status_history')
                 .delete()
                 .eq('order_id', orderData.id)
                 .eq('status', 'paid')
-                .lt('created_at', latestStatus.data.created_at);
+                .lt('created_at', result.data.created_at);
             
                 if (deleteStatusError) {
                     console.error('Error cleaning up duplicate statuses:', deleteStatusError);
                     throw deleteStatusError;
                 }
             }
+            
+            return result.data;
         })
 
         return NextResponse.json({ 

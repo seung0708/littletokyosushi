@@ -8,7 +8,6 @@ import { CheckoutFormValues } from '@/types/checkout';
 import { Order } from '@/types/order';
 import {CustomerAddress} from '@/types/customer';
 import { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
 
 interface Props {
     customerAddress?: CustomerAddress | null;
@@ -21,10 +20,8 @@ const PaymentSection = ({ customerAddress, onSubmit, form, orderTotal }: Props) 
     const stripe = useStripe();
     const elements = useElements();
     const { user } = useAuth();
-    const { clearCart } = useCart();
     const [error, setError] = useState<string | null>(null);
     const [loading, setLoading] = useState(false);
-    const router = useRouter();
 
     useEffect(() => {
         if (!stripe || !elements) {
@@ -76,53 +73,52 @@ const PaymentSection = ({ customerAddress, onSubmit, form, orderTotal }: Props) 
 
     const handleSubmit = async () => {
         if (!stripe || !elements) {
-            setError('Stripe is not properly initialized');
+            console.error('Stripe not initialized');
             return;
         }
+    
+        setLoading(true);
+        setError(null);
+    
         try {
-            setLoading(true);
-            setError(null);
-
+            // Submit the form first
             const { error: submitError } = await elements.submit();
             if (submitError) {
-                console.error('Error submitting form:', submitError);
-                setLoading(false);
-                return;
-            }
-            const addressDetails = await handleAddressSubmit();
-            if (!addressDetails) {
+                setError(submitError.message);
                 setLoading(false);
                 return;
             }
     
-            const { error: elementsError } = await elements.submit();
-            if (elementsError) {
-                setError(elementsError.message);
-                setLoading(false);
-                return;
+            // Create temporary order
+            const tempOrder: Order = await onSubmit(form.getValues());
+            
+            if (!tempOrder?.short_id) {
+                throw new Error('Failed to create temporary order');
             }
-
+    
+            // Create payment intent with order ID
             const paymentIntentResponse = await fetch('/api/payment-intent', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
-                    amount: Math.round(orderTotal * 100)
+                    amount: Math.round(orderTotal * 100),
+                    orderId: tempOrder.short_id
                 })
             });
-
+    
             if (!paymentIntentResponse.ok) {
                 throw new Error('Failed to create payment intent');
             }
-
+    
             const { clientSecret } = await paymentIntentResponse.json();
-
-            const { error: paymentError, paymentIntent } = await stripe.confirmPayment({
+    
+            // Confirm payment and redirect
+            const { error: paymentError } = await stripe.confirmPayment({
                 clientSecret,
                 elements,
-                redirect: 'if_required',
+                redirect: 'always',
                 confirmParams: {
                     return_url: `${window.location.origin}/order-confirmation`,
-
                 },
             });
     
@@ -132,34 +128,13 @@ const PaymentSection = ({ customerAddress, onSubmit, form, orderTotal }: Props) 
                 return;
             }
     
-
-            if (paymentIntent.status === 'succeeded') {
-                // Call the passed in onSubmit with form data
-                const order: Order = await onSubmit(form.getValues());
-                if (!order?.short_id || !order?.total) {
-                    console.error('Order data not available');
-                    setLoading(false);
-                    return;
-                }
-                // Store order ID and redirect
-                localStorage.setItem('lastCompletedOrder', order.short_id);
-                // Clear cart data
-                clearCart();
-                localStorage.removeItem('cartId');
-                localStorage.removeItem('cartItems');
-                router.replace(`/order-confirmation?id=${order.short_id}`);
-            } else {
-                setError('Payment was not completed. Please try again.');
-                setLoading(false);
-            }
-    
         } catch (error) {
             console.error('Payment error:', error);
             setError('An unexpected error occurred. Please try again.');
             setLoading(false);
         }
     };
-
+    
     return (
         <div className="mt-6">
             <div className="bg-black/30 backdrop-blur-sm border border-white/10 rounded-xl p-4 sm:p-6 lg:p-8">

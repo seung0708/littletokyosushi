@@ -34,19 +34,12 @@ const CheckoutSteps = () => {
     const [orderTotal, setOrderTotal] = useState<number>(0);
     const [orderFees, setOrderFees] = useState({serviceFee: 0, subTotal: 0});
     const [customerAddress, setCustomerAddress] = useState<CustomerAddress | null>(null);
-    const [isAuthReady, setIsAuthReady] = useState(false);
     
     useEffect(() => {
-        if (user !== null) {
-            setIsAuthReady(true);
-        }
-    }, [user]);
-
-    useEffect(() => {
-        if(user && currentStep === 'signin' && isAuthReady) {
+        if(user && currentStep === 'signin') {
             setCurrentStep('delivery-pickup');
         }
-    }, [user, currentStep, isAuthReady]);
+    }, [user, currentStep]);
 
     useEffect(() => {
         if (user) {
@@ -165,10 +158,12 @@ const CheckoutSteps = () => {
     ]
 
     const handleNextStep = () => {
+        console.log('currentStep:', currentStep);
         switch (currentStep) {
             case 'signin': 
                 // Only proceed if auth is ready and we have a user
-                if (user && isAuthReady) {
+                console.log('user:', user);
+                if (user) {
                     setCurrentStep('delivery-pickup');
                 } 
                 break;
@@ -208,7 +203,8 @@ const CheckoutSteps = () => {
                     delivery: data.delivery,
                     total: orderTotal,
                     cartItems,
-                    fees: orderFees
+                    fees: orderFees, 
+                    status: 'pending_payment'
                 }),
             });
 
@@ -274,10 +270,10 @@ const CheckoutSteps = () => {
                     <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
                     {currentStep === 'signin' && !user && (
                         <CheckoutCustomerSignIn 
-                            form={form}
-                        onComplete={handleNextStep} 
-                    />
-                )}
+                            form={form} 
+                            onComplete={handleNextStep}
+                        />
+                    )}
 
                 {currentStep === 'delivery-pickup' && (
                     <DeliveryPickupSelector

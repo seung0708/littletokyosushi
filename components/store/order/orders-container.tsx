@@ -9,8 +9,7 @@ import { retryWithBackoff } from '@/lib/utils/api-retry';
 
 
 export default function OrdersContainer() {
-
-    const searchParams = useSearchParams();
+  const searchParams = useSearchParams();
   const router = useRouter();
   const [order, setOrder] = useState<Order | null>(null);
   const [orderId, setOrderId] = useState<string | null>(null);

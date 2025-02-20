@@ -7,13 +7,20 @@ interface OrdersContainerProps {
     orders: Order[]
     loading: boolean
     children?: React.ReactNode
-  }
+    audioControl?: React.ReactNode
+}
   
-export default function OrdersContainer({title, orders, loading, children }: OrdersContainerProps) {
+export default function OrdersContainer({title, orders, loading, children, audioControl }: OrdersContainerProps) {
     return (
         <div>
-          <div className="flex space-y-4 pb-6 justify-between items-center">
+          <div className="flex pb-6 justify-between items-center">
             <h1 className="text-3xl font-bold">{title}</h1>
+            {audioControl && (
+              <div className="flex items-center gap-2">
+                <span className="text-sm text-gray-600">Notification Sound</span>
+                {audioControl}
+              </div>
+            )}
           </div>
           {loading ? (
             <div className="flex justify-center items-center h-32">
@@ -39,5 +46,5 @@ export default function OrdersContainer({title, orders, loading, children }: Ord
             </>
           )}
         </div>
-      )
-  }
+    )
+}
