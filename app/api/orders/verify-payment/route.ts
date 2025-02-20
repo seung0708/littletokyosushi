@@ -117,7 +117,7 @@ export async function POST(req: Request) {
         try {
             await Promise.all([
                 sendOrderConfirmationEmail(orderData, orderData.customers),
-                //sendStoreOrderNotificationEmail(orderData, orderData.customers)
+                sendStoreOrderNotificationEmail(orderData, orderData.customers)
             ]);
         } catch (error) {
             console.error('Error sending confirmation emails:', error);
