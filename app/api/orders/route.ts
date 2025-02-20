@@ -91,17 +91,28 @@ export async function POST(req: Request) {
             }            
         }
 
+        // Get full order data with relationships
         const {data: order, error} = await supabase
-        .from('orders')
-        .select(`*, customers(*), order_items(*, order_item_modifiers(*, order_item_modifier_options(*)))`)
-        .eq('short_id', orderData.short_id)
-        .single();
+            .from('orders')
+            .select(`
+                *,
+                customers (*),
+                order_items (
+                    *,
+                    order_item_modifiers (
+                        *,
+                        order_item_modifier_options (*)
+                    )
+                )
+            `)
+            .eq('id', orderData.id)
+            .single();
 
         if (error) {
             return NextResponse.json({ error: error.message }, { status: 400 });
         }
 
-        return NextResponse.json({ order });
+        return NextResponse.json(order);
     } catch (error) {
         console.error('Error creating order:', error);
         return NextResponse.json({ error: 'Failed to create order' }, { status: 500 });

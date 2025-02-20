@@ -195,38 +195,37 @@ const CheckoutSteps = () => {
     //     }
     // }
 
-    const onSubmit = async (data: CheckoutFormValues) => {
-        
+    const onSubmit = async (data: CheckoutFormValues): Promise<any> => {
         try {
-            
-            // Create order payload
-            const orderPayload = {
-                customer_id: user?.id || null,
-                customer: {
-                    ...data.customer,
-                },
-                delivery: data.delivery,
-                fees: orderFees,
-                total: orderTotal,
-                cartItems
-            };
-
-            // Create order
             const orderResponse = await fetch('/api/orders', {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(orderPayload)
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    customer_id: user?.id,
+                    customer: data.customer,
+                    delivery: data.delivery,
+                    total: orderTotal,
+                    cartItems,
+                    fees: orderFees
+                }),
             });
-            
+
             if (!orderResponse.ok) {
-                throw new Error('Failed to create order');
+                const errorData = await orderResponse.json();
+                throw new Error(errorData.error || 'Failed to create order');
             }
 
-            const order = await orderResponse.json();
-            return order;
-            
+            const orderData = await orderResponse.json();
+            if (!orderData?.id || !orderData?.short_id) {
+                throw new Error('Invalid order data received');
+            }
+
+            return orderData;
         } catch (error) {
             console.error('Error in checkout:', error);
+            throw error; // Re-throw to handle in payment section
         }
     };
 
