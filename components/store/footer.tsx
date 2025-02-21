@@ -48,12 +48,8 @@ export default function Footer() {
                                 <h3 className="text-xl sm:text-2xl font-semibold mb-4">Hours</h3>
                                 <div className="space-y-3 text-gray-300 text-lg">
                                     <p className="flex justify-between items-center">
-                                        <span>Mon-Sat</span>
-                                        <span>10:30 AM - 7:30 PM</span>
-                                    </p>
-                                    <p className="flex justify-between items-center">
-                                        <span>Sun</span>
-                                        <span>10:30 AM - 7:00 PM</span>
+                                        <span>Mon-Sun</span>
+                                        <span>8 AM - 6 PM</span>
                                     </p>
                                 </div>
                             </div>
