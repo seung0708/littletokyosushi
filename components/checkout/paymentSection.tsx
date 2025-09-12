@@ -17,6 +17,7 @@ interface Props {
 }
 
 const PaymentSection = ({ customerAddress, onSubmit, form, orderTotal }: Props) => {
+    console.log(form)
     const stripe = useStripe();
     const elements = useElements();
     const { user } = useAuth();
