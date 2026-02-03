@@ -29,7 +29,7 @@ const MenuItems: React.FC<MenuItemsProps> = ({ categories }) => {
                                 <div className="relative w-full h-48 sm:h-56 md:h-64">
                                     {item?.image_urls?.[0] ? (
                                         <Image
-                                            src={`${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/menu-items/${item.image_urls[0]}`}
+                                            src={`${item.image_urls[0]}`}
                                             alt={item.name}
                                             fill
                                             sizes="(min-width: 1280px) 384px, (min-width: 1024px) 33vw, (min-width: 640px) 50vw, 100vw"
@@ -49,7 +49,7 @@ const MenuItems: React.FC<MenuItemsProps> = ({ categories }) => {
                                             {item.name}
                                         </h3>
                                         <span className="text-base sm:text-lg md:text-xl font-bold text-white group-hover:text-red-400 whitespace-nowrap bg-black/30 px-2 sm:px-3 py-1 rounded-full">
-                                            ${item?.price?.toFixed(2)}
+                                            ${item?.base_price?.toFixed(2)}
                                         </span>
                                     </div>
                                     {item.description && (

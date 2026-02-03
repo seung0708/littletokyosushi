@@ -8,15 +8,15 @@ type ModifierWithOptions = Database['public']['Tables']['modifiers']['Row'] & {
     modifier_options: Database['public']['Tables']['modifier_options']['Row'][]
 };
 
-export async function GET(request: Request, { params }: { params: Promise<{ id: string }> }) {
-    const { id } = await params;
-    console.log('API Route - Fetching item with ID:', id);
+export async function GET(request: Request, { params }: { params: Promise<{ name: string }> }) {
+    const { name } = await params;
+    console.log('API Route - Fetching item with ID:', name);
     
     const supabase = await createClient();
     console.log('API Route - Supabase client created');
 
     try {
-        console.log('API Route - Executing query for ID:', id);
+        console.log('API Route - Executing query for ID:', name);
         const { data: itemWithModifiers, error: itemError } = await supabase
         .from('menu_items')
         .select(`
@@ -27,7 +27,7 @@ export async function GET(request: Request, { params }: { params: Promise<{ id: 
                 modifier_options(*)
             )
         `)
-        .eq('id', id)
+        .eq('name', name)
         .single();
         console.log('API Route - Fetched item:', itemWithModifiers);
         if (itemError) {
@@ -36,7 +36,7 @@ export async function GET(request: Request, { params }: { params: Promise<{ id: 
         }
 
         if (!itemWithModifiers) {
-            console.log('API Route - No item found for ID:', id);
+            console.log('API Route - No item found for ID:', name);
             throw new APIError('Item not found', 404);
         }
 

@@ -14,7 +14,7 @@ export async function GET() {
                     name
                 )
             `)
-            .order('category_id', { ascending: true });
+            .order('category_name', { ascending: true });
         if (error) throw error;
         
         // // Group items by category
