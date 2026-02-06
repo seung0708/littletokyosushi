@@ -226,7 +226,7 @@ export default function ItemDetailsForm({ initialItem }: { initialItem: MenuItem
                                     </div>
                                 )}
                                 <Image
-                                    src={`${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/menu-items/${item.image_urls?.[selectedImage]}`}
+                                    src={`${item.image_urls?.[selectedImage]}`}
                                     alt={item.name}
                                     fill
                                     className="object-cover"    

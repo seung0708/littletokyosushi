@@ -10,12 +10,12 @@ const ITEMS_PER_PAGE = 8;
 async function fetchCategoryId(supabase: SupabaseClient, category: string) {
     const { data, error } = await supabase
         .from("categories")
-        .select("id")
+        .select("name")
         .eq("name", category)
         .single();
 
     if (error) throw error;
-    return data.id;
+    return data.name;
 }
 
 async function uploadImageToStorage(supabase: SupabaseClient, file: ArrayBuffer, filename: string, contentType: string) {
@@ -33,7 +33,7 @@ async function uploadImageToStorage(supabase: SupabaseClient, file: ArrayBuffer,
 export async function GET(request: Request) {
     const supabase = await createClient();
     const { searchParams } = new URL(request.url);
-    const id = searchParams.get('id');
+    const name = searchParams.get('name');
     
     try {
         // Check admin authentication
@@ -43,7 +43,7 @@ export async function GET(request: Request) {
         }
 
         // If ID is provided, fetch single item
-        if (id) {
+        if (name) {
             const { data: item, error } = await supabase
                 .from('menu_items')
                 .select(`
@@ -52,7 +52,7 @@ export async function GET(request: Request) {
                         name
                     )
                 `)
-                .eq('id', id)
+                .eq('name', name)
                 .single();
 
             if (error) {

@@ -81,3 +81,5 @@ const MenuItems: React.FC<MenuItemsProps> = ({ categories }) => {
 };
 
 export default MenuItems;
+
+
