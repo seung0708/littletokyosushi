@@ -11,34 +11,20 @@ export async function checkAdminAuth() {
             return { error: 'Unauthorized', status: 401 };
         }
 
-        // Get employee record
-        const { data: employeeData, error: employeeError } = await supabase
-            .from('employees')
-            .select('id')
-            .eq('id', user.id)
+        // Get admin profile
+        const { data: adminProfile, error: profileError } = await supabase
+            .from('profiles')
+            .select('*')
+            .eq('auth_id', user.id)
+            .eq('role', 'admin')
             .single();
 
-        if (employeeError || !employeeData) {
-            console.error('No employee record found:', { error: employeeError, userId: user.id });
+        if (profileError || !adminProfile) {
+            console.error('No admin profile found:', { error: profileError, userId: user.id });
             return { error: 'Unauthorized', status: 401 };
         }
 
-        // Check admin role using employee ID
-        const { data: roleData, error: roleError } = await supabase
-            .from('employee_roles')
-            .select('roles (name)')
-            .eq('employee_id', employeeData.id);
-
-        const hasAdminRole = roleData?.some(
-            (er: any) => er.roles?.name === 'admin'
-        );
-
-        if (roleError || !hasAdminRole) {
-            console.error('Role check failed:', { error: roleError, hasAdminRole, employeeId: employeeData.id });
-            return { error: 'Unauthorized', status: 401 };
-        }
-
-        return { employeeData, user };
+        return { adminProfile, user };
     } catch (error) {
         console.error('Auth check error:', error);
         return { error: 'Internal server error', status: 500 };

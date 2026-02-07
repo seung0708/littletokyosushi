@@ -3,9 +3,11 @@ export interface MenuItem {
     name: string
     description?: string
     categories?: Category
-    price?: number
+    base_price?: number
     is_available?: boolean
     image_urls?: string[]
+    order_index?: number
+    sup_group: string
     created_at?: string
     updated_at?: string
     modifiers?: Modifier[]

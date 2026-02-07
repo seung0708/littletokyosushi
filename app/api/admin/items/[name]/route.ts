@@ -3,11 +3,12 @@ import { NextResponse } from 'next/server';
 import { checkAdminAuth } from '../../../../../utils/auth';
 import { revalidatePath } from 'next/cache';
 
-export async function GET(request: Request, { params }: { params: Promise<{ id: string }> }
+export async function GET(request: Request, { params }: { params: Promise<{ name: string }> }
 ) {
     const supabase = await createClient();
     const { pathname } = new URL(request.url);
-    const isAdminRequest = pathname.startsWith('/api/items/');
+    console.log('Received GET request for item details:', { pathname, params });
+    const isAdminRequest = pathname.startsWith('api/admin/items/');
 
     try {
         if (isAdminRequest) {
@@ -18,7 +19,7 @@ export async function GET(request: Request, { params }: { params: Promise<{ id: 
         }
 
         // Fetch the menu item
-        const { id } = await params;
+        const { name } = await params;
         const { data: item, error: itemError } = await supabase
             .from('menu_items')
             .select(`
@@ -26,18 +27,13 @@ export async function GET(request: Request, { params }: { params: Promise<{ id: 
                 categories (
                     id,
                     name
-                )${isAdminRequest ? `,
-                inventories (
-                    quantity_in_stock,
-                    low_stock_threshold,
-                    sync_status
-                )` : ''}
+                )
             `)
-            .eq('id', parseInt(id))
+            .eq('name', name)
             .single();
 
         if (itemError) {
-            console.error('Failed to fetch item:', { error: itemError, itemId: id });
+            console.error('Failed to fetch item:', { error: itemError, itemName: name });
             return NextResponse.json(
                 { error: 'Failed to fetch item' },
                 { status: 500 }

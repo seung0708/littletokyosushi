@@ -9,6 +9,7 @@ type ItemRowProps = {
 }
 
 const ItemRow: React.FC<ItemRowProps> = ({item}) => {
+  console.log('item', item)
   return (
     <TableRow>
         <TableCell className="hidden sm:table-cell w-48 h-48">
@@ -18,14 +19,14 @@ const ItemRow: React.FC<ItemRowProps> = ({item}) => {
               className="aspect-square rounded-md object-cover w-full h-full"
               height={500}
               width={500}
-              src={`${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/menu-items/${item?.image_urls?.[0]}`}
+              src={`${item?.image_urls?.[0]}`}
             />
           </div>
         </TableCell>
         <TableCell className="font-medium">{item?.name}</TableCell>
         <TableCell className="font-medium max-w-[200px] truncate">{item?.description}</TableCell>
-        <TableCell className="hidden md:table-cell">{item?.price?.toFixed(2)}</TableCell>
-        {/* <TableCell className="hidden md:table-cell">{item?.quantity_in_stock}</TableCell> */}
+        <TableCell className="hidden md:table-cell">{item?.category_name}</TableCell>
+        <TableCell className="hidden md:table-cell">{item?.base_price?.toFixed(2)}</TableCell>
         <TableCell>
           <ActionsMenu id={item.id} />
         </TableCell>
