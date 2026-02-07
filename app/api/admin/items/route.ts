@@ -177,7 +177,7 @@ export async function POST(req: Request) {
             .insert({
                 name,
                 description,
-                category_id: categoryId,
+                category_name: categoryId,
                 price,
                 image_urls: imagePaths // Supabase will handle the JSONB conversion
             });

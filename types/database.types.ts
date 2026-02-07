@@ -207,9 +207,11 @@ export interface Database {
           id?: number
           name: string
           description?: string
-          category_id: number
-          price: number
+          category_name?: string
+          base_price: number
           is_available: boolean
+          sub_group: string
+          order_index: number
           created_at?: string
           updated_at?: string
           image_urls?: string[]
@@ -218,23 +220,27 @@ export interface Database {
           id?: number
           name: string
           description?: string
-          price: number
-          category_id: number
+          base_price: number
+          category_name?: string
           is_available?: boolean
+          sub_group: string
+          order_index: number
           created_at?: string
           updated_at?: string
-          image_url?: string
+          image_urls?: string[]
         }
         Update: {
           id?: number
           name?: string
           description?: string
-          price?: number
-          category_id?: number
+          base_price?: number
+          category_name?: string
           is_available?: boolean
+          sub_group?: string
+          order_index?: number
           created_at?: string
           updated_at?: string
-          image_url?: string
+          image_urls?: string[]
         }
         Delete: {
           id?: number
@@ -246,7 +252,7 @@ export interface Database {
           menu_item_id: number
           name: string
           is_required?: boolean
-          min_selections?: number
+          min_selections?: number 
           max_selections?: number
           created_at?: string
           updated_at?: string
