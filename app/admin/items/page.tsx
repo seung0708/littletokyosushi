@@ -57,7 +57,7 @@ function ItemsContent() {
           <SearchBar />
           <Link href="/admin/items/add"><AddButton>Add Item</AddButton></Link>
         </div>
-        <ItemsTable items={items} />
+        <ItemsTable menu_items={items} />
       </Tabs>
       <Pagination totalPages={totalPages} />
     </section>

@@ -14,9 +14,6 @@ export interface Category {
 }
 
 
-
-
-
 export default interface Inventory {
     quantity_in_stock: number ;
     low_stock_threshold: number;

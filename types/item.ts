@@ -2,12 +2,12 @@ export interface MenuItem {
     id?: number
     name: string
     description?: string
-    categories?: Category
+    category_name?: string
     base_price?: number
     is_available?: boolean
     image_urls?: string[]
     order_index?: number
-    sup_group: string
+    sub_group: string
     created_at?: string
     updated_at?: string
     modifiers?: Modifier[]
