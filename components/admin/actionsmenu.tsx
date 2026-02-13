@@ -8,9 +8,10 @@ import {MenuItem} from '@/types/item';
 
 interface ActionMenuProps {
   id: MenuItem['id']
+  name: MenuItem['name']
 }
 
-const ActionsMenu: React.FC<ActionMenuProps> = ({id}) => {
+const ActionsMenu: React.FC<ActionMenuProps> = ({id, name}) => {
 
   const onDelete = async (id: MenuItem['id']) => {
     const result = await fetch(`/api/items?id=${id}`, {
@@ -33,7 +34,7 @@ const ActionsMenu: React.FC<ActionMenuProps> = ({id}) => {
         <DropdownMenuContent align="end">
           <DropdownMenuLabel>Actions</DropdownMenuLabel>
             <DropdownMenuItem asChild>
-              <Link href={`/admin/items/${id}/edit`}>Edit</Link>
+              <Link href={`/admin/items/${name}/edit`}>Edit</Link>
             </DropdownMenuItem>
           <DropdownMenuItem>
             <Button variant="ghost" onClick={() => onDelete(id)}>

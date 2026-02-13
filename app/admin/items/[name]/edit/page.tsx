@@ -26,12 +26,12 @@ const formSchema = z.object({
 
 type FormData = z.infer<typeof formSchema>;
 
-export default function EditItemPage({ params }: { params: Promise<{ id: string }> }) {
-  const { id } = use(params);
+export default function EditItemPage({ params }: { params: Promise<{ name: string }> }) {
+  const { name } = use(params);
+  console.log('name', name)
   const router = useRouter();
   const [item, setItem] = useState<Item | null>(null);
   const [loading, setLoading] = useState(true);
-
   const {
     register,
     handleSubmit,
@@ -44,14 +44,15 @@ export default function EditItemPage({ params }: { params: Promise<{ id: string 
   useEffect(() => {
     const fetchItem = async () => {
       try {
-        const response = await fetch(`/api/admin/items?id=${id}`, {
+        const response = await fetch(`/api/admin/items?name=${name}`, {
           headers: {
             'Content-Type': 'application/json',
           },
         });
         const data = await response.json();
-        
+        console.log('data',data)
         const fetchedItem = data.item;
+        console.log('fetchedItem', data.item)
         if (fetchedItem) {
           setItem(fetchedItem);
           // Set form values
@@ -73,11 +74,11 @@ export default function EditItemPage({ params }: { params: Promise<{ id: string 
     };
 
     fetchItem();
-  }, [id, setValue]);
+  }, [name, setValue]);
 
   const onSubmit = async (data: FormData) => {
     try {
-      const response = await fetch(`/api/items?id=${id}`, {
+      const response = await fetch(`/api/items?name=${name}`, {
         method: 'PATCH',
         headers: {
           'Content-Type': 'application/json',

@@ -4,10 +4,10 @@ import { Table, TableHeader, TableRow, TableHead, TableBody } from '@/components
 import { MenuItem,  } from '@/types/item';
 
 interface ItemsTableProps {
-  menu_items: MenuItem[];
+  menuItems: MenuItem[];
 }
 
-export default function ItemsTable({ menu_items }: ItemsTableProps) {
+export default function ItemsTable({ menuItems }: ItemsTableProps) {
   return (
     <Table>
       <TableHeader>
@@ -23,7 +23,7 @@ export default function ItemsTable({ menu_items }: ItemsTableProps) {
         </TableRow>
       </TableHeader>
       <TableBody>
-        {menu_items?.map((item: MenuItem) => <ItemRow key={item.id} item={item} />)}
+        {menuItems?.map((item: MenuItem) => <ItemRow key={item.id} item={item} />)}
       </TableBody>
     </Table>
   );

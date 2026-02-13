@@ -9,7 +9,6 @@ type ItemRowProps = {
 }
 
 const ItemRow: React.FC<ItemRowProps> = ({item}) => {
-  console.log('item', item)
   return (
     <TableRow>
         <TableCell className="hidden sm:table-cell w-48 h-48">
@@ -26,9 +25,9 @@ const ItemRow: React.FC<ItemRowProps> = ({item}) => {
         <TableCell className="font-medium">{item?.name}</TableCell>
         <TableCell className="font-medium max-w-[200px] truncate">{item?.description}</TableCell>
         <TableCell className="hidden md:table-cell">{item?.category_name}</TableCell>
-        <TableCell className="hidden md:table-cell">{item?.base_price?.toFixed(2)}</TableCell>
+        <TableCell className="hidden md:table-cell">${item?.base_price?.toFixed(2)}</TableCell>
         <TableCell>
-          <ActionsMenu id={item.id} />
+          <ActionsMenu id={item.id} name={item.name} />
         </TableCell>
     </TableRow>
   )

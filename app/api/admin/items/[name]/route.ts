@@ -7,7 +7,6 @@ export async function GET(request: Request, { params }: { params: Promise<{ name
 ) {
     const supabase = await createClient();
     const { pathname } = new URL(request.url);
-    console.log('Received GET request for item details:', { pathname, params });
     const isAdminRequest = pathname.startsWith('api/admin/items/');
 
     try {
@@ -30,7 +29,7 @@ export async function GET(request: Request, { params }: { params: Promise<{ name
                 )
             `)
             .eq('name', name)
-            .single();
+            .single();  
 
         if (itemError) {
             console.error('Failed to fetch item:', { error: itemError, itemName: name });
@@ -58,7 +57,7 @@ export async function GET(request: Request, { params }: { params: Promise<{ name
 }
 
 
-export async function PATCH( request: Request, { params }: { params: Promise<{ id: string }> }
+export async function PATCH( request: Request, { params }: { params: Promise<{ name: string }> }
 ) {
     const supabase = await createClient();
 
@@ -69,12 +68,12 @@ export async function PATCH( request: Request, { params }: { params: Promise<{ i
         }
 
         const body = await request.json();
-        const { id } = await params;
+        const { name } = await params;
 
         const { error: updateError } = await supabase
             .from('menu_items')
             .update(body)
-            .eq('id', parseInt(id));
+            .eq('name', name);
 
         if (updateError) {
             console.error('Failed to update item:', updateError);

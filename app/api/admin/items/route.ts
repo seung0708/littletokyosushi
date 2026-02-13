@@ -2,7 +2,7 @@ import { SupabaseClient } from '@supabase/supabase-js';
 import { createClient } from '@/lib/supabase/server';
 import { revalidatePath } from 'next/cache';
 import { NextResponse } from 'next/server';
-import { checkAdminAuth, transformItem } from '../../../../utils/auth';
+import { checkAdminAuth } from '../../../../utils/auth';
 
 const ITEMS_PER_PAGE = 8;
 
@@ -70,7 +70,7 @@ export async function GET(request: Request) {
                 );
             }
 
-            return NextResponse.json({ item: transformItem(item) });
+            return NextResponse.json({ item: item });
         }
 
         // Otherwise, fetch list of items
@@ -123,7 +123,7 @@ export async function GET(request: Request) {
         }
 
         return NextResponse.json({
-            items: items.map(transformItem),
+            items,
             totalPages: Math.ceil((count || 0) / ITEMS_PER_PAGE)
         });
     } catch (error) {

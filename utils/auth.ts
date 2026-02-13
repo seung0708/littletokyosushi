@@ -36,7 +36,7 @@ export function transformItem(item: any) {
         id: item.id,
         name: item.name,
         description: item.description,
-        price: item.price,
+        base_price: item.base_price,
         category_id: item.category_id,
         is_available: item.is_available,
         special_instructions: item.special_instructions || '',
