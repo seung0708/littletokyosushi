@@ -28,7 +28,6 @@ type FormData = z.infer<typeof formSchema>;
 
 export default function EditItemPage({ params }: { params: Promise<{ name: string }> }) {
   const { name } = use(params);
-  console.log('name', name)
   const router = useRouter();
   const [item, setItem] = useState<Item | null>(null);
   const [loading, setLoading] = useState(true);
