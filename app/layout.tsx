@@ -44,7 +44,6 @@ export default async function RootLayout({ children, }: { children: React.ReactN
   return (
     <html lang="en">
       <body suppressHydrationWarning={true} className={poppins.className}>
-        <ToastProvider>
           <AuthProvider>
             <CartProvider>
               <Suspense fallback={<Loading variant="store" />}>
@@ -53,7 +52,6 @@ export default async function RootLayout({ children, }: { children: React.ReactN
               </Suspense>
             </CartProvider>
           </AuthProvider>
-        </ToastProvider>
       </body>
     </html>
   );

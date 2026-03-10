@@ -204,7 +204,7 @@ const CheckoutSteps = () => {
                     total: orderTotal,
                     cartItems,
                     fees: orderFees, 
-                    status: 'pending_payment'
+                    status: 'pending'
                 }),
             });
 

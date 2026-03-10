@@ -7,18 +7,18 @@ type OrderItemModifierInsert = Partial<Database['public']['Tables']['order_item_
 type OrderItemModifierOptionInsert = Partial<Database['public']['Tables']['order_item_modifier_options']['Insert']>;
  
 export async function POST(req: Request) {
-    const { customer_id, customer, delivery, total, cartItems, fees, status } = await req.json();
+    const { customer, delivery, total, cartItems, fees, status } = await req.json();
     //console.log('customer_id', customer_id, 'customer', customer, 'delivery', delivery, 'total', total, 'cartItems', cartItems, 'fees', fees);
     const supabase = await createClient();
 
     try {
         
         const orderInsert: Partial<Database['public']['Tables']['orders']['Insert']> = {
-            customer_id,
-            pickup_date: delivery.pickupDate,
-            pickup_time: delivery.pickupTime,
+            name: customer.name,
+            email: customer.email,
+            phone: customer.phone,  
+            pickup_at: customer.pickupAt,
             total: total,
-            service_fee: fees.serviceFee,
             sub_total: fees.subTotal,
             status: status
         };

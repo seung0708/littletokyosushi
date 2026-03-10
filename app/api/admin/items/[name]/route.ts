@@ -7,6 +7,7 @@ export async function GET(request: Request, { params }: { params: Promise<{ name
 ) {
     const supabase = await createClient();
     const { pathname } = new URL(request.url);
+    console.log('Received GET request for item details:', { pathname, params });
     const isAdminRequest = pathname.startsWith('api/admin/items/');
 
     try {
@@ -19,6 +20,7 @@ export async function GET(request: Request, { params }: { params: Promise<{ name
 
         // Fetch the menu item
         const { name } = await params;
+        
         const { data: item, error: itemError } = await supabase
             .from('menu_items')
             .select(`
@@ -29,7 +31,9 @@ export async function GET(request: Request, { params }: { params: Promise<{ name
                 )
             `)
             .eq('name', name)
-            .single();  
+            .single();
+            
+            console.log('api/admin/items',item)
 
         if (itemError) {
             console.error('Failed to fetch item:', { error: itemError, itemName: name });

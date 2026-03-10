@@ -38,3 +38,19 @@ export interface Category {
     id?: number
     name: string
 }
+
+function findMostFrequent(string) {
+    const freq = new Map()
+    for (let letter of string) {
+        freq.set(letter, (freq.get(letter) || 0) + 1)
+    }
+    let mostFrequent;
+    let max = 0
+    for (let key in freq) {
+        if (freq[key] > max) {
+            max = freq[key] 
+            mostFrequent = key
+        }
+    }
+    return mostFrequent;
+}

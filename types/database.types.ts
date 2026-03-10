@@ -1,637 +1,346 @@
-export type Json =
-  | string
-  | number
-  | boolean
-  | null
-  | { [key: string]: Json | undefined }
-  | Json[]
-
-export interface Database {
+export type Database = {
+  // Allows to automatically instantiate createClient with right options
+  // instead of createClient<Database, { PostgrestVersion: 'XX' }>(URL, KEY)
+  __InternalSupabase: {
+    PostgrestVersion: "14.1"
+  }
   public: {
     Tables: {
-      business_hours: {
+      categories: {
         Row: {
-          id?: string
-          day?: string
-          is_open?: boolean
-          ordering_start?: string
-          ordering_end?: string
-          pickup_start?: string | null
-          pickup_end?: string | null
-          created_at?: string
+          id: string
+          is_active: boolean | null
+          name: string
+          order_index: number | null
         }
         Insert: {
           id?: string
-          day?: string
-          is_open?: boolean
-          ordering_start?: string
-          ordering_end?: string
-          pickup_start?: string | null
-          pickup_end?: string | null
-          created_at?: string
+          is_active?: boolean | null
+          name: string
+          order_index?: number | null
         }
         Update: {
           id?: string
-          day?: string
-          is_open?: boolean
-          ordering_start?: string
-          ordering_end?: string
-          pickup_start?: string | null
-          pickup_end?: string | null
-          created_at?: string
-        }
-        Delete: {
-          id?: string
-        }
-      }
-      special_schedules: {
-        Row: {
-          id?: string 
-          date?: string
-          schedule_type?: string
-          is_open?: boolean
-          ordering_start?: string
-          ordering_end?: string
-          pickup_start?: string | null
-          pickup_end?: string | null
-          note?: string | null
-          created_at?: string
-        }
-        Insert: {
-          id?: string
-          date?: string
-          schedule_type?: string
-          is_open?: boolean
-          ordering_start?: string
-          ordering_end?: string
-          pickup_start?: string | null
-          pickup_end?: string | null
-          note?: string | null
-          created_at?: string
-        }
-        Update: {
-          id?: string
-          date?: string
-          schedule_type?: string
-          is_open?: boolean
-          ordering_start?: string
-          ordering_end?: string
-          pickup_start?: string | null
-          pickup_end?: string | null
-          note?: string | null
-          created_at?: string
-        }
-        Delete: {
-          id?: string
-        }
-      }
-      employees: {
-        Row: {
-          id?: string
-          email?: string
-          first_name?: string
-          last_name?: string 
-          manager_id?: string
-          created_at?: string
-          updated_at?: string
-        }
-        Insert: {
-          id?: string
-          email?: string
-          first_name?: string
-          last_name?: string
-          manager_id?: string
-          created_at?: string
-          updated_at?: string
-        }
-        Update: {
-          id?: string
-          email?: string
-          first_name?: string
-          last_name?: string
-          manager_id?: string
-          created_at?: string
-          updated_at?: string
-        }
-        Delete: {
-          id?: string
-        }
-      }
-      roles: {
-        Row: {
-          id?: number
+          is_active?: boolean | null
           name?: string
+          order_index?: number | null
         }
-        Insert: {
-          id?: number
-          name?: string
-        }
-        Update: {
-          id?: number
-          name?: string
-        }
-        Delete: {
-          id?: number
-        }
-      }
-      employee_roles: {
-        Row: {
-          employee_id?: string
-          role_id: number
-        }
-        Insert: {
-          employee_id?: string
-          role_id: number
-        }
-        Update: {
-          employee_id?: string
-          role_id: number
-        }
-        Delete: {
-          employee_id?: string
-          role_id: number
-        }
-      }
-      customers: {
-        Row: {
-          id?: string
-          first_name?: string
-          last_name?: string
-          email?: string
-          phone?: string
-          birth_date?: string
-          line1?: string
-          line2?: string
-          city?: string
-          state?: string
-          postal_code?: string
-          country?: string
-          created_at?: string
-          updated_at?: string
-        }
-        Insert: {
-          id?: string
-          first_name?: string
-          last_name?: string
-          email?: string
-          phone?: string
-          birth_date?: string
-          line1?: string
-          line2?: string
-          city?: string
-          state?: string
-          postal_code?: string
-          country?: string
-          created_at?: string
-          updated_at?: string
-        }
-        Update: {
-          id?: string
-          first_name?: string
-          last_name?: string
-          email?: string
-          phone?: string
-          birth_date?: string
-          line1?: string
-          line2?: string
-          city?: string
-          state?: string
-          postal_code?: string
-          country?: string
-          created_at?: string
-          updated_at?: string
-        }
+        Relationships: []
       }
       menu_items: {
         Row: {
-          id?: number
+          base_price: number | null
+          category_name: string | null
+          created_at: string | null
+          description: string
+          id: string
+          image_urls: string[] | null
+          is_available: boolean | null
           name: string
-          description?: string
-          category_name?: string
-          base_price: number
-          is_available: boolean
-          sub_group: string
-          order_index: number
-          created_at?: string
-          updated_at?: string
-          image_urls?: string[]
+          order_index: number | null
+          sub_group: Database["public"]["Enums"]["sub_group"]
+          updated_at: string | null
         }
         Insert: {
-          id?: number
+          base_price?: number | null
+          category_name?: string | null
+          created_at?: string | null
+          description: string
+          id?: string
+          image_urls?: string[] | null
+          is_available?: boolean | null
           name: string
-          description?: string
-          base_price: number
-          category_name?: string
-          is_available?: boolean
-          sub_group: string
-          order_index: number
-          created_at?: string
-          updated_at?: string
-          image_urls?: string[]
+          order_index?: number | null
+          sub_group?: Database["public"]["Enums"]["sub_group"]
+          updated_at?: string | null
         }
         Update: {
-          id?: number
-          name?: string
+          base_price?: number | null
+          category_name?: string | null
+          created_at?: string | null
           description?: string
-          base_price?: number
-          category_name?: string
-          is_available?: boolean
-          sub_group?: string
-          order_index?: number
-          created_at?: string
-          updated_at?: string
-          image_urls?: string[]
+          id?: string
+          image_urls?: string[] | null
+          is_available?: boolean | null
+          name?: string
+          order_index?: number | null
+          sub_group?: Database["public"]["Enums"]["sub_group"]
+          updated_at?: string | null
         }
-        Delete: {
-          id?: number
-        }
+        Relationships: [
+          {
+            foreignKeyName: "menu_items_category_name_fkey"
+            columns: ["category_name"]
+            isOneToOne: false
+            referencedRelation: "categories"
+            referencedColumns: ["name"]
+          },
+        ]
       }
-      modifiers: {
+      modifier_groups: {
         Row: {
-          id?: number
-          menu_item_id: number
+          created_at: string | null
+          id: string
+          is_required: boolean | null
+          max_sel: number
+          menu_item_id: string
+          min_sel: number
           name: string
-          is_required?: boolean
-          min_selections?: number 
-          max_selections?: number
-          created_at?: string
-          updated_at?: string
+          updated_at: string | null
         }
         Insert: {
-          id?: number
-          menu_item_id: number
+          created_at?: string | null
+          id?: string
+          is_required?: boolean | null
+          max_sel: number
+          menu_item_id: string
+          min_sel: number
           name: string
-          is_required?: boolean
-          min_selections?: number
-          max_selections?: number
-          created_at?: string
-          updated_at?: string
+          updated_at?: string | null
         }
         Update: {
-          id?: number
-          menu_item_id?: number
+          created_at?: string | null
+          id?: string
+          is_required?: boolean | null
+          max_sel?: number
+          menu_item_id?: string
+          min_sel?: number
           name?: string
-          is_required?: boolean
-          min_selections?: number
-          max_selections?: number
-          created_at?: string
-          updated_at?: string
+          updated_at?: string | null
         }
-        Delete: {
-          id?: number
-        }
+        Relationships: [
+          {
+            foreignKeyName: "modifier_groups_menu_item_id_fkey"
+            columns: ["menu_item_id"]
+            isOneToOne: false
+            referencedRelation: "menu_items"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       modifier_options: {
         Row: {
-          id?: number
-          modifier_id: number
+          created_at: string | null
+          id: string
+          modifier_group_id: string
           name: string
           price: number
-          created_at?: string
+          updated_at: string | null
         }
         Insert: {
-          id?: number
-          modifier_id: number
+          created_at?: string | null
+          id?: string
+          modifier_group_id: string
           name: string
-          price: number
-          created_at?: string
+          price?: number
+          updated_at?: string | null
         }
         Update: {
-          id?: number
-          modifier_id?: number
+          created_at?: string | null
+          id?: string
+          modifier_group_id?: string
           name?: string
           price?: number
-          created_at?: string
+          updated_at?: string | null
         }
-        Delete: {
-          id?: number
-        }
-      }
-      carts: {
-        Row: {
-          id?: string
-          customer_id?: string
-          created_at?: string
-          updated_at?: string
-        }
-        Insert: {
-          id?: string
-          customer_id?: string
-          created_at?: string
-          updated_at?: string
-        }
-        Update: {
-          id?: string
-          customer_id?: string
-          created_at?: string
-          updated_at?: string
-        }
-      }
-      cart_items: {
-        Row: {
-          id?: string
-          cart_id: string
-          quantity: number
-          base_price: number
-          total_price: number
-          special_instructions?: string
-        }
-        Insert: {
-          id?: string
-          cart_id: string
-          menu_item_id: string
-          quantity: number
-          base_price: number
-          total_price: number
-          special_instructions?: string
-        }
-        Update: {
-          id?: string
-          cart_id: string
-          menu_item_id: string
-          quantity: number
-          base_price: number
-          total_price: number
-          special_instructions?: string
-        }
-      }
-      cart_item_modifiers: {
-        Row: {
-          id?: string
-          cart_items_id: string
-          modifier_id: string
-          created_at?: string
-        }
-        Insert: {
-          id?: string
-          cart_item_id: string
-          modifier_id: string
-          created_at?: string
-        }
-        Update: {
-          id?: string
-          cart_item_id?: string
-          modifier_id?: string
-          created_at?: string
-        }
-      }
-      cart_item_modifier_options: {
-        Row: {
-          id?: string
-          cart_item_modifier_id: string
-          modifier_id: number
-          modifier_option_id: number
-          modifier_option_price: number
-          created_at?: string
-        }
-        Insert: {
-          id?: string
-          cart_item_modifier_id: string
-          modifier_id: number
-          modifier_option_id: number
-          modifier_option_price: number
-          created_at?: string
-        }
-        Update: {
-          id?: string
-          cart_item_modifier_id: string
-          modifier_id: number
-          modifier_option_id: number
-          modifier_option_price: number
-          created_at?: string
-        }
-      }
-      orders: {
-        Row: {
-          id?: string
-          short_id?: string
-          customer_id: string
-          status: string
-          order_type: string
-          delivery_service?: string
-          delivery_date?: string
-          delivery_time?: string
-          pickup_date: string
-          pickup_time: string
-          prep_time_minutes?: number
-          prep_time_confirmed_at?: string
-          staff_notes?: string
-          total: number
-          sub_total: number
-          service_fee: number
-          created_at?: string
-          ready_at?: string
-          completed_at?: string
-          archived?: boolean
-        }
-        Insert: {
-          id?: string
-          short_id?: string
-          customer_id: string
-          status: string
-          order_type: string
-          delivery_service?: string
-          pickup_date: string
-          pickup_time: string
-          prep_time_minutes?: number
-          prep_time_confirmed_at?: string
-          staff_notes?: string
-          total: number
-          sub_total: number
-          service_fee: number
-          created_at?: string
-          ready_at?: string
-          completed_at?: string
-          archived?: boolean
-        }
-        Update: {
-          id?: string
-          short_id?: string
-          customer_id: string
-          status: string
-          order_type: string
-          delivery_service?: string
-          pickup_date: string
-          pickup_time: string
-          prep_time_minutes?: number
-          prep_time_confirmed_at?: string
-          staff_notes?: string
-          total: number
-          sub_total: number
-          service_fee: number
-          created_at?: string
-          ready_at?: string
-          completed_at?: string
-          archived?: boolean
-        }
-      }
-      order_items: {
-        Row: {
-          id?: string
-          order_id: string
-          quantity: number
-          price: number
-          item_id: number
-          item_name: string
-          created_at?: string
-          special_instructions?: string
-        }
-        Insert: {
-          id?: string
-          order_id: string
-          quantity: number
-          price: number
-          item_id: number
-          item_name: string
-          created_at?: string
-          special_instructions?: string
-        }
-        Update: {
-          id?: string
-          order_id: string
-          quantity: number
-          price: number
-          item_id: number
-          item_name: string
-          created_at?: string
-          special_instructions?: string
-        }
+        Relationships: [
+          {
+            foreignKeyName: "modifier_options_modifier_group_id_fkey"
+            columns: ["modifier_group_id"]
+            isOneToOne: false
+            referencedRelation: "modifier_groups"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       order_item_modifiers: {
         Row: {
-          id?: string
-          order_item_id: string
-          modifier_id: string
-          modifier_name: string
-          created_at?: string
-        }
-        Insert: {
-          id?: string
-          order_item_id: string
-          modifier_id: string
-          modifier_name: string
-          created_at?: string
-        }
-        Update: {
-          id?: string
-          order_item_id: string
-          modifier_id: string
-          modifier_name: string
-          created_at?: string
-        }
-      }
-      order_item_modifier_options: {
-        Row: {
-          id?: string
-          order_item_modifier_id: string
-          option_id: string
-          option_name: string
-          option_price: number
-          created_at?: string
-        }
-        Insert: {
-          id?: string
-          order_item_modifier_id: string
-          option_id: string
-          option_name: string
-          option_price: number
-          created_at?: string
-        }
-        Update: {
-          id?: string
-          order_item_modifier_id: string
-          option_id: string
-          option_name: string
-          option_price: number
-          created_at?: string
-        }
-      }
-      order_status_history: {
-        Row: {
-          id?: string
-          order_id: string
-          status: string
-          notes?: string
-          staff_id?: string
-          created_at?: string
-        }
-        Insert: {
-          id?: string
-          order_id: string
-          status: string
-          notes?: string
-          staff_id?: string
-          created_at?: string
-        }
-        Update: {
-          id?: string
-          order_id: string
-          status: string
-          notes?: string
-          staff_id?: string
-          created_at?: string
-        }
-      }
-      order_payments: {
-        Row: {
-          id?: string
-          order_id: string
-          payment_intent_id: string
-          payment_status: string
-          payment_method: string
-          amount: number
-          created_at?: string
-          updated_at?: string
-        }
-        Insert: {
-          id?: string
-          order_id: string
-          payment_intent_id: string
-          payment_status: string
-          payment_method: string
-          amount: number
-          created_at?: string
-          updated_at?: string
-        }
-        Update: {
-          id?: string
-          order_id: string
-          payment_intent_id: string
-          payment_status: string
-          payment_method: string
-          amount: number
-          created_at?: string
-          updated_at?: string
-        }
-      }
-      order_refunds: {
-        Row: {
+          created_at: string | null
           id: string
-          created_at?: string
-          order_id: string
-          amount: number
-          reason?: string
-          status: string
-          payment_intent?: string
+          modifier_option_id: string
+          order_item_id: string
+          price: number
+          updated_at: string | null
         }
         Insert: {
+          created_at?: string | null
           id?: string
-          created_at?: string
-          order_id: string
-          amount: number
-          reason?: string
-          status?: string
-          payment_intent?: string
+          modifier_option_id: string
+          order_item_id: string
+          price: number
+          updated_at?: string | null
         }
         Update: {
+          created_at?: string | null
           id?: string
-          created_at?: string
-          order_id?: string
-          amount?: number
-          reason?: string
-          status?: string
-          payment_intent?: string
+          modifier_option_id?: string
+          order_item_id?: string
+          price?: number
+          updated_at?: string | null
         }
+        Relationships: [
+          {
+            foreignKeyName: "order_item_modifiers_modifier_option_id_fkey"
+            columns: ["modifier_option_id"]
+            isOneToOne: false
+            referencedRelation: "modifier_options"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "order_item_modifiers_order_item_id_fkey"
+            columns: ["order_item_id"]
+            isOneToOne: false
+            referencedRelation: "order_items"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      order_items: {
+        Row: {
+          created_at: string | null
+          id: string
+          item_id: string
+          order_id: string
+          price: number
+          quantity: number
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          item_id: string
+          order_id: string
+          price: number
+          quantity: number
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          item_id?: string
+          order_id?: string
+          price?: number
+          quantity?: number
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "order_items_item_id_fkey"
+            columns: ["item_id"]
+            isOneToOne: false
+            referencedRelation: "menu_items"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "order_items_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: false
+            referencedRelation: "orders"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      orders: {
+        Row: {
+          address1: string | null
+          address2: string | null
+          city: string | null
+          created_at: string | null
+          email: string
+          id: string
+          name: string
+          order_type: Database["public"]["Enums"]["order_type"]
+          phone: string
+          pickup_at: string
+          state: string | null
+          status: Database["public"]["Enums"]["status"]
+          sub_total: number
+          total: number
+          updated_at: string | null
+          zip_code: string | null
+        }
+        Insert: {
+          address1?: string | null
+          address2?: string | null
+          city?: string | null
+          created_at?: string | null
+          email: string
+          id?: string
+          name: string
+          order_type?: Database["public"]["Enums"]["order_type"]
+          phone: string
+          pickup_at: string
+          state?: string | null
+          status?: Database["public"]["Enums"]["status"]
+          sub_total?: number
+          total?: number
+          updated_at?: string | null
+          zip_code?: string | null
+        }
+        Update: {
+          address1?: string | null
+          address2?: string | null
+          city?: string | null
+          created_at?: string | null
+          email?: string
+          id?: string
+          name?: string
+          order_type?: Database["public"]["Enums"]["order_type"]
+          phone?: string
+          pickup_at?: string
+          state?: string | null
+          status?: Database["public"]["Enums"]["status"]
+          sub_total?: number
+          total?: number
+          updated_at?: string | null
+          zip_code?: string | null
+        }
+        Relationships: []
+      }
+      profiles: {
+        Row: {
+          address_line1: string | null
+          address_line2: string | null
+          auth_id: string
+          city: string | null
+          created_at: string | null
+          full_name: string
+          id: string
+          phone_number: string | null
+          role: Database["public"]["Enums"]["roles"] | null
+          state: string | null
+          updated_at: string | null
+          zip_code: string | null
+        }
+        Insert: {
+          address_line1?: string | null
+          address_line2?: string | null
+          auth_id: string
+          city?: string | null
+          created_at?: string | null
+          full_name: string
+          id?: string
+          phone_number?: string | null
+          role?: Database["public"]["Enums"]["roles"] | null
+          state?: string | null
+          updated_at?: string | null
+          zip_code?: string | null
+        }
+        Update: {
+          address_line1?: string | null
+          address_line2?: string | null
+          auth_id?: string
+          city?: string | null
+          created_at?: string | null
+          full_name?: string
+          id?: string
+          phone_number?: string | null
+          role?: Database["public"]["Enums"]["roles"] | null
+          state?: string | null
+          updated_at?: string | null
+          zip_code?: string | null
+        }
+        Relationships: []
       }
     }
     Views: {
@@ -641,112 +350,141 @@ export interface Database {
       [_ in never]: never
     }
     Enums: {
+      order_type: "pickup" | "delivery"
+      roles: "admin" | "staff" | "customer"
+      status: "pending" | "scheduled" | "confirmed" | "cancelled" | "ready"
+      sub_group: "Standard" | "Special"
+    }
+    CompositeTypes: {
       [_ in never]: never
     }
   }
-  auth: {
-    Tables: {
-      users: {
-        Row: {
-          id: string
-          aud: string | null
-          role: string | null
-          email: string | null
-          encrypted_password: string | null
-          email_confirmed_at: string | null
-          invited_at: string | null
-          confirmation_token: string | null
-          confirmation_sent_at: string | null
-          recovery_token: string | null
-          recovery_sent_at: string | null
-          email_change_token_new: string | null
-          email_change: string | null
-          email_change_sent_at: string | null
-          last_sign_in_at: string | null
-          raw_app_meta_data: Json | null
-          raw_user_meta_data: Json | null
-          is_super_admin: boolean | null
-          created_at: string | null
-          updated_at: string | null
-          phone: string | null
-          phone_confirmed_at: string | null
-          phone_change: string | null
-          phone_change_token: string | null
-          phone_change_sent_at: string | null
-          confirmed_at: string | null
-          email_change_token_current: string | null
-          email_change_confirm_status: number | null
-          banned_until: string | null
-          reauthentication_token: string | null
-          reauthentication_sent_at: string | null
-        }
-        Insert: {
-          id?: string
-          aud?: string | null
-          role?: string | null
-          email?: string | null
-          encrypted_password?: string | null
-          email_confirmed_at?: string | null
-          invited_at?: string | null
-          confirmation_token?: string | null
-          confirmation_sent_at?: string | null
-          recovery_token?: string | null
-          recovery_sent_at?: string | null
-          email_change_token_new?: string | null
-          email_change?: string | null
-          email_change_sent_at?: string | null
-          last_sign_in_at?: string | null
-          raw_app_meta_data?: Json | null
-          raw_user_meta_data?: Json | null
-          is_super_admin?: boolean | null
-          created_at?: string | null
-          updated_at?: string | null
-          phone?: string | null
-          phone_confirmed_at?: string | null
-          phone_change?: string | null
-          phone_change_token?: string | null
-          phone_change_sent_at?: string | null
-          confirmed_at?: string | null
-          email_change_token_current?: string | null
-          email_change_confirm_status?: number | null
-          banned_until?: string | null
-          reauthentication_token?: string | null
-          reauthentication_sent_at?: string | null
-        }
-        Update: {
-          id?: string
-          aud?: string | null
-          role?: string | null
-          email?: string | null
-          encrypted_password?: string | null
-          email_confirmed_at?: string | null
-          invited_at?: string | null
-          confirmation_token?: string | null
-          confirmation_sent_at?: string | null
-          recovery_token?: string | null
-          recovery_sent_at?: string | null
-          email_change_token_new?: string | null
-          email_change?: string | null
-          email_change_sent_at?: string | null
-          last_sign_in_at?: string | null
-          raw_app_meta_data?: Json | null
-          raw_user_meta_data?: Json | null
-          is_super_admin?: boolean | null
-          created_at?: string | null
-          updated_at?: string | null
-          phone?: string | null
-          phone_confirmed_at?: string | null
-          phone_change?: string | null
-          phone_change_token?: string | null
-          phone_change_sent_at?: string | null
-          confirmed_at?: string | null
-          email_change_token_current?: string | null
-          email_change_confirm_status?: number | null
-          banned_until?: string | null
-          reauthentication_token?: string | null
-          reauthentication_sent_at?: string | null
-        }
-      }
-    }
-  }
 }
+
+type DatabaseWithoutInternals = Omit<Database, "__InternalSupabase">
+
+type DefaultSchema = DatabaseWithoutInternals[Extract<keyof Database, "public">]
+
+export type Tables<
+  DefaultSchemaTableNameOrOptions extends
+    | keyof (DefaultSchema["Tables"] & DefaultSchema["Views"])
+    | { schema: keyof DatabaseWithoutInternals },
+  TableName extends DefaultSchemaTableNameOrOptions extends {
+    schema: keyof DatabaseWithoutInternals
+  }
+    ? keyof (DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"] &
+        DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Views"])
+    : never = never,
+> = DefaultSchemaTableNameOrOptions extends {
+  schema: keyof DatabaseWithoutInternals
+}
+  ? (DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"] &
+      DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Views"])[TableName] extends {
+      Row: infer R
+    }
+    ? R
+    : never
+  : DefaultSchemaTableNameOrOptions extends keyof (DefaultSchema["Tables"] &
+        DefaultSchema["Views"])
+    ? (DefaultSchema["Tables"] &
+        DefaultSchema["Views"])[DefaultSchemaTableNameOrOptions] extends {
+        Row: infer R
+      }
+      ? R
+      : never
+    : never
+
+export type TablesInsert<
+  DefaultSchemaTableNameOrOptions extends
+    | keyof DefaultSchema["Tables"]
+    | { schema: keyof DatabaseWithoutInternals },
+  TableName extends DefaultSchemaTableNameOrOptions extends {
+    schema: keyof DatabaseWithoutInternals
+  }
+    ? keyof DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"]
+    : never = never,
+> = DefaultSchemaTableNameOrOptions extends {
+  schema: keyof DatabaseWithoutInternals
+}
+  ? DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"][TableName] extends {
+      Insert: infer I
+    }
+    ? I
+    : never
+  : DefaultSchemaTableNameOrOptions extends keyof DefaultSchema["Tables"]
+    ? DefaultSchema["Tables"][DefaultSchemaTableNameOrOptions] extends {
+        Insert: infer I
+      }
+      ? I
+      : never
+    : never
+
+export type TablesUpdate<
+  DefaultSchemaTableNameOrOptions extends
+    | keyof DefaultSchema["Tables"]
+    | { schema: keyof DatabaseWithoutInternals },
+  TableName extends DefaultSchemaTableNameOrOptions extends {
+    schema: keyof DatabaseWithoutInternals
+  }
+    ? keyof DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"]
+    : never = never,
+> = DefaultSchemaTableNameOrOptions extends {
+  schema: keyof DatabaseWithoutInternals
+}
+  ? DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"][TableName] extends {
+      Update: infer U
+    }
+    ? U
+    : never
+  : DefaultSchemaTableNameOrOptions extends keyof DefaultSchema["Tables"]
+    ? DefaultSchema["Tables"][DefaultSchemaTableNameOrOptions] extends {
+        Update: infer U
+      }
+      ? U
+      : never
+    : never
+
+export type Enums<
+  DefaultSchemaEnumNameOrOptions extends
+    | keyof DefaultSchema["Enums"]
+    | { schema: keyof DatabaseWithoutInternals },
+  EnumName extends DefaultSchemaEnumNameOrOptions extends {
+    schema: keyof DatabaseWithoutInternals
+  }
+    ? keyof DatabaseWithoutInternals[DefaultSchemaEnumNameOrOptions["schema"]]["Enums"]
+    : never = never,
+> = DefaultSchemaEnumNameOrOptions extends {
+  schema: keyof DatabaseWithoutInternals
+}
+  ? DatabaseWithoutInternals[DefaultSchemaEnumNameOrOptions["schema"]]["Enums"][EnumName]
+  : DefaultSchemaEnumNameOrOptions extends keyof DefaultSchema["Enums"]
+    ? DefaultSchema["Enums"][DefaultSchemaEnumNameOrOptions]
+    : never
+
+export type CompositeTypes<
+  PublicCompositeTypeNameOrOptions extends
+    | keyof DefaultSchema["CompositeTypes"]
+    | { schema: keyof DatabaseWithoutInternals },
+  CompositeTypeName extends PublicCompositeTypeNameOrOptions extends {
+    schema: keyof DatabaseWithoutInternals
+  }
+    ? keyof DatabaseWithoutInternals[PublicCompositeTypeNameOrOptions["schema"]]["CompositeTypes"]
+    : never = never,
+> = PublicCompositeTypeNameOrOptions extends {
+  schema: keyof DatabaseWithoutInternals
+}
+  ? DatabaseWithoutInternals[PublicCompositeTypeNameOrOptions["schema"]]["CompositeTypes"][CompositeTypeName]
+  : PublicCompositeTypeNameOrOptions extends keyof DefaultSchema["CompositeTypes"]
+    ? DefaultSchema["CompositeTypes"][PublicCompositeTypeNameOrOptions]
+    : never
+
+export const Constants = {
+  public: {
+    Enums: {
+      order_type: ["pickup", "delivery"],
+      roles: ["admin", "staff", "customer"],
+      status: ["pending", "scheduled", "confirmed", "cancelled", "ready"],
+      sub_group: ["Standard", "Special"],
+    },
+  },
+} as const
