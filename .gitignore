@@ -48,3 +48,4 @@ next.config.mjs
 eslintrc.json
 
 tmpclaude*
+.claude/
