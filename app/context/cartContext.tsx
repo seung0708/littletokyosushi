@@ -5,11 +5,9 @@ import { useToast } from "./toastContext";
 
 interface CartContextType {
     cartItems: CartItem[];
-    handleCartUpdate: (item: CartItem) => Promise<void>;
-    removeItemFromCart: (itemId: string) => Promise<void>;
+    handleCartUpdate: (item: CartItem) => void;
+    removeItemFromCart: (itemId: string) => void;
     clearCart: () => void;
-    isCartLoading: boolean;
-    cartError: string | null;
 }
 
 const CartContext = createContext<CartContextType | null>(null);
@@ -25,11 +23,12 @@ interface CartProviderProps {
 export const CartProvider = ({ children }: CartProviderProps) => {
     const { showToast } = useToast();
     const [cartItems, setCartItems] = useState<CartItem[]>([]);
-    const [isCartLoading, setIsCartLoading] = useState(false);
-    const [cartError, setCartError] = useState<string | null>(null);
      
     useEffect(() => {
-        const initializeCart = async () => {
+        initializeCart();
+    }, []);
+
+    const initializeCart = () => {
             try {
                 const savedCartItems = localStorage.getItem('cartItems');
 
@@ -38,57 +37,59 @@ export const CartProvider = ({ children }: CartProviderProps) => {
                         const parsedItems = JSON.parse(savedCartItems);
                         setCartItems(parsedItems);
                     } catch (error) {
-                        setCartError('Error parsing cart items');
+                        console.error(`Error parsing cart items: ${error}`);
                     }
                 }
 
             } catch (error) {
-                setCartError(error.message);
-                console.log('Error initializing cart:', error)
+                console.log(`Error initializing cart: ${error}`)
             }
         };
-        initializeCart();
-    }, []);
 
     const clearCart = () => {
-        localStorage.removeItem('cartId');
         localStorage.removeItem('cartItems');
         setCartItems([]);
     };
 
-    useEffect(() => {
-        try {
-            if (cartItems.length > 0) {
-                localStorage.setItem('cartItems', JSON.stringify(cartItems));
-            } else {
-                localStorage.removeItem('cartItems');
-            }
-        } catch (e) {
-            console.error('Error syncing cart items to localStorage:', e);
-        }
-    }, [cartItems]);
 
-
-
-    const handleCartUpdate = async (item?: CartItem) => {
+    const handleCartUpdate = (item?: CartItem) => {
         if(!item) return;
         try {
 
-            const updatedItems = cartItems.map(cartItem => 
-                cartItem.id === item.id ? item : cartItem
-            )
+            const itemIsInCart = cartItems.findIndex(cartItem => item.id === cartItem.id)
 
-            setCartItems(updatedItems);
-            localStorage.setItem('cartItems', JSON.stringify(updatedItems));
+            if (itemIsInCart !== -1) {
+                const updatedItems = cartItems.map(cartItem => 
+                    cartItem.id === item.id 
+                    ? { ...cartItem, quantity: cartItem.quantity + item.quantity } : cartItem
+                )
 
-           
+                setCartItems(updatedItems);
+                localStorage.setItem('cartItems', JSON.stringify(updatedItems));    
+            } else {
+                const updatedItems = [...cartItems, item];
+                setCartItems(updatedItems);
+                localStorage.setItem('cartItems', JSON.stringify(updatedItems));
+            }
+            showToast('Item added to cart', 'success')
+
         } catch (error) {
             console.error('Error updating cart:', error);
             showToast('Failed to update cart', 'error');
         }
     };
 
-    const removeItemFromCart = async (itemId: string) => {
+    const removeItemFromCart = (itemId: string) => {
+        if (!itemId) return;
+        try {
+            const updatedCart = cartItems.filter(cartItem => cartItem.id !== itemId)
+
+            setCartItems(updatedCart);
+            localStorage.setItem('cartItems', JSON.stringify(updatedCart));
+
+        } catch (error) {
+            console.error(`Error removing item from cart, ${error}`)
+        }
     };
 
     return (
@@ -96,9 +97,7 @@ export const CartProvider = ({ children }: CartProviderProps) => {
             cartItems,
             handleCartUpdate,
             removeItemFromCart,
-            clearCart,
-            isCartLoading,
-            cartError,
+            clearCart
         }}>
             {children}
         </CartContext.Provider>
