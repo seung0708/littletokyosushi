@@ -7,30 +7,17 @@ import CheckoutSteps from "./CheckoutSteps"
 
 const CheckoutPage: React.FC = () => {
   const router = useRouter()
-  const { cartItems, isCartLoading } = useCart()
+  const { cartItems } = useCart()
   
   useEffect(() => {
-    if (!isCartLoading) {
-      const completedOrderId = localStorage.getItem('lastCompletedOrder')
-      if (completedOrderId) {
-        router.replace(`/order-confirmation?id=${completedOrderId}`)
-        return
-      }
+    const completedOrderId = localStorage.getItem('lastCompletedOrder')
+    
+    if (completedOrderId) {
+      router.replace(`/order-confirmation?id=${completedOrderId}`)
+      return
     }
-  }, [cartItems, isCartLoading, router])
-
-  // Show loading state while cart is loading
-  if (isCartLoading) {
-    return <div className="min-h-screen bg-black text-white">
-      <div className="w-full bg-black pt-28">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center">
-            <h1 className="text-4xl font-bold text-white mb-4">Loading...</h1>
-          </div>
-        </div>
-      </div>
-    </div>
-  }
+    
+  }, [cartItems, router])
 
   return (
     <div className="min-h-screen bg-black text-white">
