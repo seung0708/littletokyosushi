@@ -20,7 +20,7 @@ interface CustomerSignInProps {
 const CheckoutCustomerSignIn: React.FC<CustomerSignInProps> = ({ form, onComplete }) => { 
     const { setUser, signup, googleSignin, signin, signinAnonymously } = useAuth()
     const [isSignUp, setIsSignUp] = useState(false)
-    const { updateCartCustomerId } = useCart()
+    //const { updateCartCustomerId } = useCart()
     const [signInError, setSignInError] = useState<string>('')
     const [signUpError, setSignUpError] = useState<string>('')
     const [guestError, setGuestError] = useState<string>('')
@@ -41,7 +41,7 @@ const CheckoutCustomerSignIn: React.FC<CustomerSignInProps> = ({ form, onComplet
                 return
             }
             if (user?.id) {
-                await updateCartCustomerId(user?.id)
+                //await updateCartCustomerId(user?.id)
                 onComplete() // Go directly to next step
             } 
         } catch (error: any) {
@@ -57,7 +57,7 @@ const CheckoutCustomerSignIn: React.FC<CustomerSignInProps> = ({ form, onComplet
             setSignUpError('')
             const response = await signup(customer.signinEmail || '', customer.password || '')
             if (response) {
-                await updateCartCustomerId(response?.id || '')
+                //await updateCartCustomerId(response?.id || '')
                 onComplete()
             }
         } catch (error: any) {
@@ -91,7 +91,7 @@ const CheckoutCustomerSignIn: React.FC<CustomerSignInProps> = ({ form, onComplet
                 return
             }
             if (response?.id) {
-                await updateCartCustomerId(response.id)
+                //await updateCartCustomerId(response.id)
                 onComplete()
             } 
         } catch (error) {
