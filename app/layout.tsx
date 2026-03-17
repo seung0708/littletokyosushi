@@ -45,12 +45,14 @@ export default async function RootLayout({ children, }: { children: React.ReactN
     <html lang="en">
       <body suppressHydrationWarning={true} className={poppins.className}>
           <AuthProvider>
-            <CartProvider>
-              <Suspense fallback={<Loading variant="store" />}>
-                <GoogleAnalytics />
-                {children}
-              </Suspense>
-            </CartProvider>
+            <ToastProvider>
+              <CartProvider>
+                <Suspense fallback={<Loading variant="store" />}>
+                  <GoogleAnalytics />
+                  {children}
+                </Suspense>
+              </CartProvider>
+            </ToastProvider>
           </AuthProvider>
       </body>
     </html>

@@ -18,7 +18,7 @@ import OrderSummary from '@/components/checkout/orderSummary';
 import PaymentSection from '@/components/checkout/paymentSection';
 import { CustomerAddress } from '@/types/customer';
 
-type CheckoutStep =  'signin' | 'delivery-pickup' | 'summary';
+type CheckoutStep =  'delivery-pickup' | 'customer-details' | 'payment' | 'confirmation';
 
 if (!process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY) {
     throw new Error('Missing Stripe publishable key');
@@ -27,55 +27,13 @@ if (!process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY) {
 const stripePromise = loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY!);
 
 const CheckoutSteps = () => {
-    const { user } = useAuth()
     const { cartItems } = useCart()
-    const [currentStep, setCurrentStep] = useState<CheckoutStep>(user ? 'delivery-pickup' : 'signin');
+    const [currentStep, setCurrentStep] = useState<CheckoutStep>('delivery-pickup');
     const [clientSecret, setClientSecret] = useState<string>('');
     const [orderTotal, setOrderTotal] = useState<number>(0);
     const [orderFees, setOrderFees] = useState({serviceFee: 0, subTotal: 0});
     const [customerAddress, setCustomerAddress] = useState<CustomerAddress | null>(null);
     
-    useEffect(() => {
-        if(user && currentStep === 'signin') {
-            setCurrentStep('delivery-pickup');
-        }
-    }, [user, currentStep]);
-
-    useEffect(() => {
-        if (user) {
-            form.setValue('customer.signinEmail', user.email || '');
-            form.setValue('customer.guestEmail', user.user_metadata?.email || '');
-            form.setValue('customer.guestName', 
-                `${user.user_metadata?.first_name || ''} ${user.user_metadata?.last_name || ''}`.trim()
-            );
-            form.setValue('customer.phone', user.user_metadata?.phone || '');
-        }
-    }, [user]);
-
-    useEffect(() => {
-        const fetchCustomerAddress = async () => {
-            if (user?.id) {
-                try {
-                    const response = await fetch(`/api/customers?customer_id=${user.id}`);
-                    const data = await response.json();
-                    // Only try to parse if data.address exists and is a string
-                    if (data?.address && typeof data.address === 'string') {
-                        setCustomerAddress(JSON.parse(data.address));
-                    } else {
-                        // Set to null or empty object if no address exists
-                        setCustomerAddress(null);
-                    }
-                } catch (error) {
-                    console.error('Error fetching customer address:', error);
-                    // Set to null or empty object on error
-                    setCustomerAddress(null);
-                }
-            }
-        };
-    
-        fetchCustomerAddress();
-    }, [user?.id]);
-
     const createPaymentIntent = async () => {
         try {
             if (!orderTotal) {
@@ -139,10 +97,9 @@ const CheckoutSteps = () => {
         resolver: zodResolver(checkoutSchema),
         defaultValues: {
             customer: {
-                email: user?.email ?? '',
-                phone: user?.phone
-                name: user?.name.trim(),
-                phone: user?.user_metadata?.phone || '',
+                email: '',
+                phone: '',
+                name: '',
             },
             delivery: {
                 method: 'pickup',
@@ -151,43 +108,28 @@ const CheckoutSteps = () => {
     });
     
     const steps = [
-        { id: 'signin', name: 'Customer Info', status: currentStep === 'signin' ? 'current' : 'complete' },
-        { id: 'delivery-pickup', name: 'Pickup Date and Time', status: currentStep === 'delivery-pickup' ? 'current' : currentStep === 'summary' ? 'complete' : 'upcoming' },
-        { id: 'summary', name: 'Review & Pay', status: currentStep === 'summary' ? 'current' : 'upcoming' }
+        { id: 'delivery-pickup', name: 'Order Type', status: currentStep === 'delivery-pickup' ? 'current' : 'complete' },
+         { id: 'customer-details', name: 'Your Details', status: currentStep === 'customer-details' ? 'current' : currentStep === 'delivery-pickup' ? 'upcoming' : 'complete' },
+        { id: 'payment', name: 'Payment', status: currentStep === 'payment' ? 'current' : currentStep === 'confirmation' ? 'complete' : 'upcoming' },
+        { id: 'confirmation', name: 'Confirmation', status: currentStep === 'confirmation' ? 'current' : 'upcoming' }
     ]
 
     const handleNextStep = () => {
         console.log('currentStep:', currentStep);
         switch (currentStep) {
-            case 'signin': 
-                // Only proceed if auth is ready and we have a user
-                console.log('user:', user);
-                if (user) {
-                    setCurrentStep('delivery-pickup');
-                } 
-                break;
             case 'delivery-pickup':
-                if (!orderTotal || orderTotal <= 0) {
-                    return;
-                }
-                setCurrentStep('summary');
+                if (!orderTotal || orderTotal <= 0) return;
+                setCurrentStep('customer-details');
+                break;
+            case 'customer-details':
+                setCurrentStep('payment');
                 createPaymentIntent();
+                break;
+            case 'payment':
+                setCurrentStep('confirmation');
                 break;
         }
     };
-
-    // const handlePreviousStep = () => {
-    //     switch (currentStep) {
-    //         case 'delivery-pickup':
-    //             setCurrentStep('signin')
-    //             break;
-    //         case 'summary':
-    //             setCurrentStep('delivery-pickup')
-    //             break;
-    //         default:
-    //             break;
-    //     }
-    // }
 
     const onSubmit = async (data: CheckoutFormValues): Promise<any> => {
         try {
@@ -197,7 +139,6 @@ const CheckoutSteps = () => {
                     'Content-Type': 'application/json',
                 },
                 body: JSON.stringify({
-                    customer_id: user?.id,
                     customer: data.customer,
                     delivery: data.delivery,
                     total: orderTotal,
@@ -267,12 +208,6 @@ const CheckoutSteps = () => {
             <div className="bg-gradient-to-b from-black/30 to-black/40 backdrop-blur-sm border border-white/10 rounded-xl p-8">
                 <Form {...form}>
                     <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
-                    {currentStep === 'signin' && !user && (
-                        <CheckoutCustomerSignIn 
-                            form={form} 
-                            onComplete={handleNextStep}
-                        />
-                    )}
 
                 {currentStep === 'delivery-pickup' && (
                     <DeliveryPickupSelector
@@ -350,23 +285,3 @@ const CheckoutSteps = () => {
 }
 
 export default CheckoutSteps;
-
- {/* Navigation buttons
-        <div className="flex justify-center space-x-4 mt-8">
-            {(currentStep !== 'signin' && currentStep !== 'summary') && (
-                <Button 
-                    variant="outline"
-                    onClick={handlePreviousStep}
-                >
-                    Back
-                </Button>
-            )}
-            {(currentStep !== 'signin' && currentStep !== 'summary') && (
-                <Button 
-                    onClick={handleNextStep}
-                    className="bg-red-600 text-white"
-                >
-                    Continue
-                </Button>
-            )}
-        </div> */}

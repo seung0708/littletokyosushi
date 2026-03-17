@@ -2,7 +2,7 @@ import {z} from 'zod'
 
 export const checkoutSchema = z.object({
     customer: z.object({
-        id: z.string().optional(),
+
         name: z.string().min(1, "Customer name is required"),
         phone: z.string().min(10, "Phone number is required"),
         email: z.email({ pattern: z.regexes.email })
