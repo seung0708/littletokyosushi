@@ -7,6 +7,8 @@ import { Button } from "@/components/ui/button"
 import { useBusinessHours } from '@/app/hooks/useBusinessHours'
 import { format, parse, isAfter } from 'date-fns';
 import { FormControl, FormField, FormItem, FormLabel, FormMessage } from '../ui/form';
+import { RadioGroup, RadioGroupItem } from '../ui/radio-group';
+import { Label } from '../ui/label';
 
 
 interface Props {
@@ -44,7 +46,7 @@ const DeliveryPickupSelector = ({ form, onComplete}: Props) => {
                     Choose Pickup Date and Time
                 </h3>
             </div>
-            {/* <FormField 
+            <FormField 
                 control={form.control}
                 name="delivery.method"
                 render={({ field }) => (
@@ -69,7 +71,7 @@ const DeliveryPickupSelector = ({ form, onComplete}: Props) => {
                         <FormMessage />
                     </FormItem>
                 )}
-            /> */}
+            />
             
             {deliveryMethod === 'pickup' && (
                 <div className="space-y-4 my-8">

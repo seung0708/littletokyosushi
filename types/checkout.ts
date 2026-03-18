@@ -8,7 +8,8 @@ export const checkoutSchema = z.object({
     }),
     delivery: z.object({
         method: z.enum(["delivery", "pickup"], {error: "Please select a delivery method"}),
-        pickupAt: z.date(),
+        pickupDate: z.date().optional(),
+        pickupTime: z.string().optional(),
         address: z.object({
             address1: z.string().min(1, "Valid street is required"),
             address2: z.string().optional(),
@@ -18,7 +19,7 @@ export const checkoutSchema = z.object({
         }).optional()
     }).refine(data => {
         if (data.method === "pickup") {
-            return data.pickupAt
+            return data.pickupTime && data.pickupTime
         }
         if(data.method === "delivery" && data.address) {
             return data.address.address1 && data.address.city && data.address.state && data.address.zipCode
