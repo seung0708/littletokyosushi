@@ -4,11 +4,11 @@ import { Database } from "@/types/database.types";
 
 type OrderItemInsert = Partial<Database['public']['Tables']['order_items']['Insert']>;
 type OrderItemModifierInsert = Partial<Database['public']['Tables']['order_item_modifiers']['Insert']>;
-type OrderItemModifierOptionInsert = Partial<Database['public']['Tables']['order_item_modifier_options']['Insert']>;
+
  
 export async function POST(req: Request) {
     const { customer, delivery, total, cartItems, fees, status } = await req.json();
-    //console.log('customer_id', customer_id, 'customer', customer, 'delivery', delivery, 'total', total, 'cartItems', cartItems, 'fees', fees);
+    
     const supabase = await createClient();
 
     try {
@@ -38,7 +38,6 @@ export async function POST(req: Request) {
                 order_id: orderData.id,
                 item_id: item.menu_items.id,
                 quantity: item.quantity,
-                item_name: item.menu_items.name,
                 price: item.base_price
             }
 
@@ -53,42 +52,20 @@ export async function POST(req: Request) {
             }
 
             if(item?.cart_item_modifiers) {
-                for (const modifier of item?.cart_item_modifiers) {
-                    const orderItemModifierInsert: OrderItemModifierInsert[] = orderItemData.map((orderItem: OrderItemInsert) => ({
-                        order_item_id: orderItem.id,
-                        modifier_id: modifier.modifier_id,
-                        modifier_name: modifier.modifiers.name,
-                    }))
+                const orderItemModifierInsert = item.cart_item_modifiers.map((modifier: any) => ({
+                    order_item_id: orderItemData[0].id,
+                    modifier_option_id: modifier.modifier_option_id,
+                    price: modifier.price ?? 0
+                }))
 
-                    const { data: orderItemModifierData, error: orderItemModifierError } = await supabase   
-                        .from('order_item_modifiers')
-                        .insert(orderItemModifierInsert)
-                        .select();
-                    
-                    if (orderItemModifierError) {
-                        return NextResponse.json({ error: orderItemModifierError.message }, { status: 400 });
-                    }
-
-                    if(modifier.cart_item_modifier_options) {
-                        for (const option of modifier.cart_item_modifier_options) {
-                            const orderItemModifierOptionInsert: OrderItemModifierOptionInsert[] = orderItemModifierData.map((orderItemModifier: OrderItemModifierInsert) => ({
-                                order_item_modifier_id: orderItemModifier.id,
-                                option_id: option.modifier_option_id,
-                                option_name: option.modifier_options.name,
-                                option_price: option.modifier_options.price
-                            }))
-                            const { data: orderItemModifierOptionData, error: orderItemModifierOptionError } = await supabase
-                                .from('order_item_modifier_options')
-                                .insert(orderItemModifierOptionInsert)
-                                .select();
-                            
-                            if (orderItemModifierOptionError) {
-                                return NextResponse.json({ error: orderItemModifierOptionError.message }, { status: 400 });
-                            }
-                        }
-                    }
-                }
-            }            
+                const { error: orderItemModifierError } = await supabase   
+                    .from('order_item_modifiers')
+                    .insert(orderItemModifierInsert)
+    
+                if (orderItemModifierError) {
+                    return NextResponse.json({ error: orderItemModifierError.message }, { status: 400 });
+                }       
+            }           
         }
 
         // Get full order data with relationships
@@ -96,12 +73,10 @@ export async function POST(req: Request) {
             .from('orders')
             .select(`
                 *,
-                customers (*),
                 order_items (
                     *,
                     order_item_modifiers (
                         *,
-                        order_item_modifier_options (*)
                     )
                 )
             `)
