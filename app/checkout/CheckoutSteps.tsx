@@ -12,7 +12,7 @@ import { Form } from '@/components/ui/form'
 import { Button } from '@/components/ui/button'
 import { useCart } from '@/app/context/cartContext'
 import { useAuth } from '@/app/context/authContext'
-import CheckoutCustomerSignIn from '@/components/checkout/checkoutCustomerSignIn'
+import CheckoutCustomerSignIn from '@/components/checkout/checkoutCustomerDetails'
 import DeliveryPickupSelector from '@/components/checkout/deliverypickupselector';  
 import OrderSummary from '@/components/checkout/orderSummary';
 import PaymentSection from '@/components/checkout/paymentSection';

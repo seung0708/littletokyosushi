@@ -1,5 +1,5 @@
 import { render, renderHook } from '@testing-library/react'
-import CheckoutCustomerSignIn from '@/components/checkout/checkoutCustomerSignIn'
+import CheckoutCustomerSignIn from '@/components/checkout/checkoutCustomerDetails'
 import { AuthProvider } from '@/app/context/authContext';
 import {CartProvider} from '@/app/context/cartContext'
 import {ToastProvider} from '@/app/context/toastContext';
