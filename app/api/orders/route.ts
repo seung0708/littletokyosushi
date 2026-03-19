@@ -17,10 +17,16 @@ export async function POST(req: Request) {
             name: customer.name,
             email: customer.email,
             phone: customer.phone,  
-            pickup_at: customer.pickupAt,
+            pickup_at: delivery.method === 'pickup' ? `${delivery.pickupDate}T${delivery.pickupTime}` : null,
             total: total,
             sub_total: fees.subTotal,
-            status: status
+            status: status,
+            order_type: delivery.method,
+            address1: delivery.method === 'delivery' ? delivery.address?.address1 : null,
+            address2: delivery.method === 'delivery' ? delivery.address?.address2 : null,
+            city: delivery.method === 'delivery' ? delivery.address?.city : null,
+            state: delivery.method === 'delivery' ? delivery.address?.state : null,
+            zip_code: delivery.method === 'delivery' ? delivery.address?.zipCode : null,
         };
         
         const { data: orderData, error: orderError } = await supabase
@@ -73,6 +79,7 @@ export async function POST(req: Request) {
             .from('orders')
             .select(`
                 *,
+
                 order_items (
                     *,
                     order_item_modifiers (

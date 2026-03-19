@@ -1,3 +1,11 @@
+export type Json =
+  | string
+  | number
+  | boolean
+  | null
+  | { [key: string]: Json | undefined }
+  | Json[]
+
 export type Database = {
   // Allows to automatically instantiate createClient with right options
   // instead of createClient<Database, { PostgrestVersion: 'XX' }>(URL, KEY)
@@ -251,7 +259,7 @@ export type Database = {
           name: string
           order_type: Database["public"]["Enums"]["order_type"]
           phone: string
-          pickup_at: string
+          pickup_at: string | null
           state: string | null
           status: Database["public"]["Enums"]["status"]
           sub_total: number
@@ -269,7 +277,7 @@ export type Database = {
           name: string
           order_type?: Database["public"]["Enums"]["order_type"]
           phone: string
-          pickup_at: string
+          pickup_at?: string | null
           state?: string | null
           status?: Database["public"]["Enums"]["status"]
           sub_total?: number
@@ -287,7 +295,7 @@ export type Database = {
           name?: string
           order_type?: Database["public"]["Enums"]["order_type"]
           phone?: string
-          pickup_at?: string
+          pickup_at?: string | null
           state?: string | null
           status?: Database["public"]["Enums"]["status"]
           sub_total?: number
