@@ -11,12 +11,10 @@ import { checkoutSchema, type CheckoutFormValues } from '@/types/checkout'
 import { Form } from '@/components/ui/form'
 import { Button } from '@/components/ui/button'
 import { useCart } from '@/app/context/cartContext'
-import { useAuth } from '@/app/context/authContext'
-import CheckoutCustomerSignIn from '@/components/checkout/checkoutCustomerDetails'
+import CheckoutCustomerDetails from '@/components/checkout/checkoutCustomerDetails'
 import DeliveryPickupSelector from '@/components/checkout/deliverypickupselector';  
 import OrderSummary from '@/components/checkout/orderSummary';
 import PaymentSection from '@/components/checkout/paymentSection';
-import { CustomerAddress } from '@/types/customer';
 
 type CheckoutStep =  'delivery-pickup' | 'customer-details' | 'payment' | 'confirmation';
 
@@ -32,7 +30,6 @@ const CheckoutSteps = () => {
     const [clientSecret, setClientSecret] = useState<string>('');
     const [orderTotal, setOrderTotal] = useState<number>(0);
     const [orderFees, setOrderFees] = useState({serviceFee: 0, subTotal: 0});
-    const [customerAddress, setCustomerAddress] = useState<CustomerAddress | null>(null);
     
     const createPaymentIntent = async () => {
         try {
@@ -167,12 +164,14 @@ const CheckoutSteps = () => {
 
 
     if (!cartItems || cartItems.length === 0) {
-      <div className="text-center py-12">
-        <h2 className="text-2xl font-semibold mb-4">Your cart is empty</h2>
-        <Button variant="default" asChild>
-          <Link href="/menu">Continue Shopping</Link>
-        </Button>
-      </div>
+        return (
+            <div className="text-center py-12">
+                <h2 className="text-2xl font-semibold mb-4">Your cart is empty</h2>
+                <Button variant="default" asChild>
+                    <Link href="/menu">Continue Shopping</Link>
+                </Button>
+            </div>
+        )
     }
 
 
@@ -215,8 +214,15 @@ const CheckoutSteps = () => {
                         onComplete={handleNextStep}
                     />
                 )}
-              
+
                 {currentStep === 'customer-details' && (
+                    <CheckoutCustomerDetails 
+                        form={form}
+                        onComplete={handleNextStep}
+                    />
+                )}
+              
+                {currentStep === 'payment' && (
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                         <div>
                             <OrderSummary
@@ -262,7 +268,6 @@ const CheckoutSteps = () => {
                                     }}
                                 >
                                     <PaymentSection 
-                                        customerAddress={customerAddress}
                                         onSubmit={onSubmit}
                                         form={form}
                                         orderTotal={orderTotal}
