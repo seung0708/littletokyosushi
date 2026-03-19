@@ -9,6 +9,7 @@ import { format, parse, isAfter } from 'date-fns';
 import { FormControl, FormField, FormItem, FormLabel, FormMessage } from '../ui/form';
 import { RadioGroup, RadioGroupItem } from '../ui/radio-group';
 import { Label } from '../ui/label';
+import { Input } from '../ui/input';
 
 
 interface Props {
@@ -23,27 +24,28 @@ const DeliveryPickupSelector = ({ form, onComplete}: Props) => {
     const selectedDate = form.watch('delivery.pickupDate');
     const availableTimes = selectedDate ? getAvailablePickupTimes(new Date(selectedDate)) : [];
 
-    const handleContinue = () => {        
+    const handleContinue = async () => {        
         if(deliveryMethod === "pickup") {
              if(form.getValues('delivery.pickupDate') && form.getValues('delivery.pickupTime')) {
                 onComplete();
              }
         } else {
-            form.trigger('delivery.address');
-            if(Object.values(form.getValues('delivery.address') || {}).every(Boolean)) {
+            await form.trigger('delivery.address');
+            const addr = form.getValues('delivery.address');
+            if (addr?.address1 && addr?.city && addr?.state && addr?.zipCode) {
                 onComplete();
             }
         }
     }
 
-    if(isLoading) return <div>Loading available times...</div> 
-    if(error) return <div>Error loading business hours</div>
+    if (isLoading) return <div>Loading available times...</div> 
+    if (error) return <div>Error loading business hours</div>
 
     return (
         <div className="w-full max-w-md mx-auto text-white">
             <div className="mb-6">
                 <h3 className="text-2xl font-bold">
-                    Choose Pickup Date and Time
+                    {deliveryMethod === "delivery" ? "Delivery" : "Pick Up"}
                 </h3>
             </div>
             <FormField 
@@ -215,14 +217,27 @@ const DeliveryPickupSelector = ({ form, onComplete}: Props) => {
                 </div>
             )}
 
-            {/* {deliveryMethod === "delivery" && (
+            {deliveryMethod === "delivery" && (
                 <div className="space-y-4">
                     <FormField
                         control={form.control}
-                        name="delivery.address.street"
+                        name="delivery.address.address1"
                         render={({ field }) => (
                             <FormItem>
                                 <FormLabel>Street Address</FormLabel>
+                                <FormControl>
+                                    <Input {...field} />
+                                </FormControl>
+                                <FormMessage />
+                            </FormItem>
+                        )}
+                    />
+                    <FormField
+                        control={form.control}
+                        name="delivery.address.address2"
+                        render={({ field }) => (
+                            <FormItem>
+                                <FormLabel>Apt, Suite, Floor</FormLabel>
                                 <FormControl>
                                     <Input {...field} />
                                 </FormControl>
@@ -272,7 +287,7 @@ const DeliveryPickupSelector = ({ form, onComplete}: Props) => {
                         )}
                     />
                 </div>
-            )} */}
+            )}
 
             <Button
                 type="button"

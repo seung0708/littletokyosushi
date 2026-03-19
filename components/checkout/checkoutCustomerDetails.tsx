@@ -50,8 +50,21 @@ const CheckoutCustomerDetails: React.FC<CustomerSignInProps> = ({ form, onComple
                             </FormItem>
                         )}
                     />
+                    <FormField
+                        control={form.control}
+                        name="customer.phone"
+                        render={({ field }) => (
+                            <FormItem>
+                                <FormLabel>Phone</FormLabel>
+                                <FormControl>
+                                    <Input placeholder="Enter your phone number" autoComplete="tel" {...field} className="text-gray-800" />
+                                </FormControl>
+                                <FormMessage />
+                            </FormItem>
+                        )}
+                    />
                     <Button onClick={onComplete} className="w-full bg-red-500" variant="default">
-                        Continue as Guest
+                        Continue
                     </Button>
                 </div>
             </div>
