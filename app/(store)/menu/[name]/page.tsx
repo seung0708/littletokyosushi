@@ -6,14 +6,14 @@ import { retryWithBackoff } from '@/lib/utils/api-retry';
 import type { Metadata, ResolvingMetadata } from 'next'
 
 type Props = {
-  params: Promise<{ id: string }>
+  params: Promise<{ name: string }>
   searchParams: Promise<{ [key: string]: string | string[] | undefined }>
 }
 
 export async function generateMetadata({ params }: Props, parent: ResolvingMetadata): Promise<Metadata> {
     try {
-        const { id } = await params;
-        const item = await getItem(id);
+        const { name } = await params;
+        const item = await getItem(name);
         
         if (!item) {
             return {
@@ -40,14 +40,14 @@ export async function generateMetadata({ params }: Props, parent: ResolvingMetad
     }
 }
 
-async function getItem(id: string): Promise<MenuItem | null> {
+async function getItem(name: string): Promise<MenuItem | null> {
     if (!process.env.NEXT_PUBLIC_SITE_URL) {
         console.error('NEXT_PUBLIC_SITE_URL is not defined');
         return null;
     }
 
     try {
-        const url = `${process.env.NEXT_PUBLIC_SITE_URL}/api/store/items/${id}`;
+        const url = `${process.env.NEXT_PUBLIC_SITE_URL}/api/store/items/${name}`;
         console.log('Fetching item from:', url);
         
         const res = await retryWithBackoff(async () => {
@@ -79,15 +79,15 @@ async function getItem(id: string): Promise<MenuItem | null> {
     }
 }
 
-export default async function ItemDetailsPage({ params }: { params: Promise<{ id: string }> }) {
+export default async function ItemDetailsPage({ params }: { params: Promise<{ name: string }> }) {
     try {
-        const { id } = await params;
-        if (!id) {
+        const { name } = await params;
+        if (!name) {
             console.error('No ID provided');
             notFound();
         }
 
-        const item = await getItem(id);
+        const item = await getItem(name);
         if (!item || !item.id) {
             console.error('Item not found or invalid:', item);
             notFound();

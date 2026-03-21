@@ -22,7 +22,7 @@ const MenuItems: React.FC<MenuItemsProps> = ({ categories }) => {
                         {category.items.map((item) => ( 
                             <Link 
                                 key={item.id} 
-                                href={`/menu/${item.id}`}
+                                href={`/menu/${item.name}`}
                                 className="group relative flex flex-col overflow-hidden rounded-xl bg-gradient-to-b from-black/30 to-black/40 backdrop-blur-sm 
                                          border border-white/10 hover:border-red-500/50 transition-all duration-300 transform hover:-translate-y-1 hover:shadow-2xl"
                             >
