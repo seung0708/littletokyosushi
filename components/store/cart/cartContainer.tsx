@@ -132,7 +132,7 @@ export default function CartContainer() {
                                         <div className="flex p-6">
                                             <div className="relative h-24 w-24 sm:h-48 sm:w-48 flex-shrink-0 overflow-hidden rounded-lg">
                                                 <Image
-                                                    src={`${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/menu-items/${cartItem?.menu_items?.image_urls?.[0]}`} 
+                                                    src={`${cartItem?.menu_items?.image_urls?.[0]}`} 
                                                     alt={cartItem?.menu_items?.name || 'Item image'} 
                                                     //className="h-full w-full object-cover object-center" 
                                                     fill={true}

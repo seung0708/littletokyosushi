@@ -164,10 +164,10 @@ export default function ItemDetailsForm({ initialItem }: { initialItem: MenuItem
                 id: item?.id || 0,
                 name: item?.name || '',
                 image_urls: item?.image_urls || [],
-                price: item?.price || 0
+                base_price: item?.base_price || 0
             },
-            base_price: item?.price || 0,
-            total_price: (item?.price || 0) * data.quantity,
+            base_price: item?.base_price || 0,
+            total_price: (item?.base_price || 0) * data.quantity,
             quantity: data.quantity,
             special_instructions: data.special_instructions,
             cart_item_modifiers: cartModifiers
@@ -263,7 +263,7 @@ export default function ItemDetailsForm({ initialItem }: { initialItem: MenuItem
 
                                 <div className="flex items-center justify-between">
                                     <div className="text-xl sm:text-2xl font-bold text-red-400">
-                                        ${item?.price?.toFixed(2)}
+                                        ${item?.base_price?.toFixed(2)}
                                     </div>
                                 </div>
 

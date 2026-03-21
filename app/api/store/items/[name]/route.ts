@@ -4,7 +4,7 @@ import { APIError } from "@/lib/utils/api-error";
 import { Database } from "@/types/database.types";
 
 type ModifierOption = Database['public']['Tables']['modifier_options']['Row'];
-type ModifierWithOptions = Database['public']['Tables']['modifiers']['Row'] & {
+type ModifierWithOptions = Database['public']['Tables']['modifier_groups']['Row'] & {
     modifier_options: Database['public']['Tables']['modifier_options']['Row'][]
 };
 
@@ -22,7 +22,7 @@ export async function GET(request: Request, { params }: { params: Promise<{ name
         .select(`
             *,
             categories(*),
-            modifiers(
+            modifier_groups(
                 *,
                 modifier_options(*)
             )

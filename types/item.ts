@@ -7,7 +7,7 @@ export interface MenuItem {
     is_available?: boolean
     image_urls?: string[]
     order_index?: number
-    sub_group: string
+    sub_group?: string
     created_at?: string
     updated_at?: string
     modifiers?: Modifier[]
