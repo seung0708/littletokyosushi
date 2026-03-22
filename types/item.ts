@@ -1,41 +1,40 @@
 export interface MenuItem {
-    id?: number
+    id?: string
     name: string
     description?: string
-    category_name?: string
     base_price?: number
-    is_available?: boolean
     image_urls?: string[]
+    is_available?: boolean
     order_index?: number
-    sub_group?: string
     created_at?: string
     updated_at?: string
-    modifiers?: Modifier[]
+    category_name?: string
+    sub_group?: string
+    modifier_groups?: ModifierGroup[]
 }
 
-export interface Modifier {
-    id: number
-    menu_item_id: number
+export interface ModifierGroup {
+    id: string
+    menu_item_id: string
     name: string
-    min_selections?: number
-    max_selections?: number
-    is_required?: boolean
+    min_sel?: number
+    max_sel?: number
+    is_required: boolean
     created_at?: string
     updated_at?: string
     modifier_options?: ModifierOption[]
 }
 
 export interface ModifierOption {
-    id: number
-    modifier_id: number
-    modifier_option_id: number
+    id: string
+    modifier_group_id: string
     name: string
     price: number
     created_at?: string
 }
 
 export interface Category {
-    id?: number
+    id?: string
     name: string
 }
 

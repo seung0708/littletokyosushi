@@ -4,7 +4,7 @@ import { useCart } from '@/app/context/cartContext';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useEffect, useState } from 'react';
-import { MenuItem, Modifier, ModifierOption } from '@/types/item';
+import { MenuItem, ModifierGroup, ModifierOption } from '@/types/item';
 import { CartItemModifier } from '@/types/cart';
 import { Loading } from '@/components/ui/loading';
 import { Form, FormControl, FormField, FormItem, FormLabel } from '@/components/ui/form';
@@ -18,23 +18,22 @@ import Image from 'next/image';
 import { useToast } from '@/app/context/toastContext';
 import { AddToCartButton } from '@/components/ui/loadingButtons';
 import { useBackButton } from '@/app/hooks/useBackButton';
-import { retryWithBackoff } from '@/lib/utils/api-retry';
+
 
 const formSchema = z.object({
     quantity: z.number().min(1),
     special_instructions: z.string(),
-    modifiers: z.array(
+    modifier_groups: z.array(
         z.object({
-            id: z.number(),
+            id: z.string(),
             name: z.string(),
-            min_selections: z.number(),
-            max_selections: z.number(),
+            min_sel: z.number(),
+            max_sel: z.number(),
             is_required: z.boolean(),
             modifier_options: z.array(
                 z.object({
-                    id: z.number(),
-                    modifier_id: z.number(),
-                    modifier_option_id: z.number(),
+                    id: z.string(),
+                    modifier_group_id: z.number(),
                     name: z.string(),
                     price: z.number()
                 })
@@ -67,29 +66,29 @@ export default function ItemDetailsForm({ initialItem }: { initialItem: MenuItem
         resolver: zodResolver(formSchema),
         defaultValues: {
             quantity: 1,
-            modifiers: []
+            modifier_groups: []
         },
         mode: "onChange"
     });
 
-    const handleModifierChange = (modifierId: number, option: ModifierOption, isSelected: boolean) => {
-        const {modifiers} = item;
-        const currentModifiers = form.getValues('modifiers');
+    const handleModifierChange = (modifierId: string, option: ModifierOption, isSelected: boolean) => {
+        const {modifier_groups} = item;
+        const currentModifiers = form.getValues('modifier_groups');
         const modifierIndex = currentModifiers.findIndex(m => m.id === modifierId);
     
         if (modifierIndex === -1) return;
         
-        const modifier = modifiers?.[modifierIndex];
+        const modifierGroup = modifier_groups?.[modifierIndex];
         const currentOptions = currentModifiers[modifierIndex].modifier_options || [];
         
         let newOptions;
-        if (modifier?.max_selections === 1) {
+        if (modifierGroup?.max_sel === 1) {
             // Radio button behavior
             newOptions = isSelected ? [option] : [];
         } else {
             // Checkbox behavior
             if (isSelected) {
-                if (currentOptions.length < (modifier?.max_selections || 1)) {
+                if (currentOptions.length < (modifierGroup?.max_sel || 1)) {
                     newOptions = [...currentOptions, option];
                 } else {
                     return; // Max selections reached
@@ -99,34 +98,34 @@ export default function ItemDetailsForm({ initialItem }: { initialItem: MenuItem
             }
         }
         
-        const updatedModifiers = [...currentModifiers];
-        updatedModifiers[modifierIndex] = {
+        const updatedModifierGroups = [...currentModifiers];
+        updatedModifierGroups[modifierIndex] = {
             ...currentModifiers[modifierIndex],
             modifier_options: newOptions
         };
         
-        form.setValue('modifiers', updatedModifiers, { shouldValidate: true });
+        form.setValue('modifier_groups', updatedModifierGroups, { shouldValidate: true });
         showToast('Modifier updated successfully!', 'success');
     }
 
     const isFormValid = () => {
         const formValues = form.getValues();
-        return formValues.modifiers.every(mod => {
+        return formValues.modifier_groups.every(mod => {
             if (mod.is_required) {
-                return mod.modifier_options.length === mod.max_selections;
+                return mod.modifier_options.length === mod.max_sel;
             }
             return true;
         });
     };
 
     useEffect(() => {
-        if (item?.modifiers) {
-            form.setValue('modifiers', item.modifiers.map((mod: Modifier) => ({
-                id: mod.id ?? 0,
+        if (item?.modifier_groups) {
+            form.setValue('modifier_groups', item.modifier_groups.map((mod: ModifierGroup) => ({
+                id: mod.id ?? '',
                 menu_item_id: mod.menu_item_id,
                 name: mod.name,
-                min_selections: mod.min_selections ?? 0,
-                max_selections: mod.max_selections ?? 1,
+                min_sel: mod.min_sel ?? 0,
+                max_sel: mod.max_sel ?? 1,
                 is_required: mod.is_required ?? false,
                 modifier_options: []  // Initialize with empty options
             })));
@@ -135,17 +134,17 @@ export default function ItemDetailsForm({ initialItem }: { initialItem: MenuItem
     
     const onSubmit = async (data: FormData) => {
         // Validate required selections
-        const invalidModifier = data.modifiers.find(mod => 
-            mod.is_required && mod.modifier_options.length !== mod.max_selections
+        const invalidModifier = data.modifier_groups.find(mod => 
+            mod.is_required && mod.modifier_options.length !== mod.max_sel
         );
 
         if (invalidModifier) {
-            console.error(`Please select exactly ${invalidModifier.max_selections} options for ${invalidModifier.name}`);
+            console.error(`Please select exactly ${invalidModifier.max_sel} options for ${invalidModifier.name}`);
             return;
         }
 
-        const cartModifiers: CartItemModifier[] = data.modifiers.map(formMod => {
-            const modifier = item?.modifiers?.find(m => m.id === formMod.id);
+        const cartModifiers: CartItemModifier[] = data.modifier_groups.map(formMod => {
+            const modifier = item?.modifier_groups?.find(m => m.id === formMod.id);
             if (!modifier) return [];
             return {
                 id: modifier.id,
@@ -161,7 +160,7 @@ export default function ItemDetailsForm({ initialItem }: { initialItem: MenuItem
 
         const cartItem = {
             menu_items: {
-                id: item?.id || 0,
+                id: item?.id || '',
                 name: item?.name || '',
                 image_urls: item?.image_urls || [],
                 base_price: item?.base_price || 0
@@ -177,17 +176,16 @@ export default function ItemDetailsForm({ initialItem }: { initialItem: MenuItem
             await handleCartUpdate(cartItem);
             showToast('Item added to cart', 'success');
             form.reset();
-            if (item?.modifiers) {
-                form.setValue('modifiers', item.modifiers.map((mod: Modifier) => ({
+            if (item?.modifier_groups) {
+                form.setValue('modifier_groups', item.modifier_groups.map((mod: ModifierGroup) => ({
                     ...mod,
-                    min_selections: mod.min_selections || 1,
-                    max_selections: mod.max_selections || 1,
+                    min_sel: mod.min_sel || 1,
+                    max_sel: mod.max_sel || 1,
                     is_required: mod.is_required || true,
                     modifier_options: [] as {
-                        id: number;
+                        id: string;
                         name: string;
-                        modifier_id: number;
-                        modifier_option_id: number;
+                        modifier_group_id: number;
                         price: number;
                     }[]
                 })));
@@ -316,7 +314,7 @@ export default function ItemDetailsForm({ initialItem }: { initialItem: MenuItem
                                             />
                                         </div>
 
-                                        {item?.modifiers?.map((modifier, index) => (
+                                        {item?.modifier_groups?.map((modifier, index) => (
                                             <div key={modifier?.id} 
                                                  className="bg-gradient-to-b from-black/30 to-black/40 backdrop-blur-sm 
                                                           border border-white/10 rounded-xl p-4 sm:p-6 space-y-4">
@@ -332,11 +330,11 @@ export default function ItemDetailsForm({ initialItem }: { initialItem: MenuItem
                                                 </div>
                                                 <FormField
                                                     control={form.control}
-                                                    name={`modifiers.${index}.modifier_options`}
+                                                    name={`modifier_groups.${index}.modifier_options`}
                                                     render={({ field }) => (
                                                         <FormItem>
                                                             <FormControl>
-                                                                {modifier.max_selections === 1 ? (
+                                                                {modifier.max_sel === 1 ? (
                                                                     <RadioGroup
                                                                         value={field.value?.[0]?.id?.toString() || ''}
                                                                         onValueChange={(value) => {
@@ -376,7 +374,7 @@ export default function ItemDetailsForm({ initialItem }: { initialItem: MenuItem
                                                                     <div className="space-y-3">
                                                                         {modifier?.modifier_options?.map((option) => {
                                                                             const isSelected = (field.value || []).some(opt => opt.id === option.id);
-                                                                            const atMaxSelections = (field.value || []).length >= (modifier?.max_selections || 1);
+                                                                            const atMaxSelections = (field.value || []).length >= (modifier?.max_sel || 1);
                                                                             const isDisabled = !isSelected && atMaxSelections;
                                                                             
                                                                             return (

@@ -23,7 +23,7 @@ export default function CartContainer() {
     const [isCheckingout, setIsCheckout] = useState(false)
     const [error, setError] = useState<string | null>(null)
     const [mounted, setMounted] = useState(false);
-
+    console.log(cartItems)
     useEffect(() => {
         setMounted(true);
     }, []);
@@ -146,7 +146,7 @@ export default function CartContainer() {
                                                         <h3 className="text-xl font-bold">{cartItem?.menu_items?.name}</h3>
                                                         {cartItem?.cart_item_modifiers?.map((modifier: CartItemModifier) => (
                                                             <div key={modifier.id} className="space-y-1">
-                                                                <h4 className="text-sm font-medium text-gray-300">{modifier?.modifiers?.name}</h4>
+                                                                <h4 className="text-sm font-medium text-gray-300">{modifier?.modifier_group?.name}</h4>
                                                                 {modifier?.cart_item_modifier_options && modifier?.cart_item_modifier_options?.length > 0 && (
                                                                     <ul className="space-y-1">
                                                                     {modifier.cart_item_modifier_options.map((option: CartItemModifierOption) => (
@@ -255,3 +255,4 @@ export default function CartContainer() {
         </div>
     )
 }
+

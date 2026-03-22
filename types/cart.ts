@@ -1,4 +1,4 @@
-import { MenuItem, Modifier, ModifierOption } from "./item";
+import { MenuItem, ModifierGroup, ModifierOption } from "./item";
 
 export interface Cart {
     id: string;
@@ -24,7 +24,7 @@ export interface CartItem  {
 export interface CartItemModifier  {
     id?: string;
     cart_items_id?: string;
-    modifiers?: Modifier | null;
+    modifier_group?: ModifierGroup | null;
     created_at?: string;
     cart_item_modifier_options?: CartItemModifierOption[] | null;
 };
