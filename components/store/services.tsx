@@ -16,7 +16,9 @@ const Services: React.FC = () => {
                                         src={'/assets/images/online-order.gif'} 
                                         height={75}
                                         width={75}
-                                        alt="" />
+                                        alt="" 
+                                        unoptimized
+                                    />
                                     </div>
                                 </div>
                             </div>
@@ -37,7 +39,9 @@ const Services: React.FC = () => {
                                         src={'/assets/images/badge.gif'} 
                                         height={75}
                                         width={75}
-                                        alt="" />
+                                        alt="" 
+                                        unoptimized
+                                    />
                                     </div>
                                 </div>
                             </div>
@@ -58,7 +62,9 @@ const Services: React.FC = () => {
                                         src={'/assets/images/fireworks.gif'} 
                                         height={75}
                                         width={75}
-                                        alt="Party tray icon" />
+                                        alt="Party tray icon" 
+                                        unoptimized
+                                    />
                                     </div>
                                 </div>
                             </div>

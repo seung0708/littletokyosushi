@@ -1,19 +1,8 @@
 import { NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import { findMatchingCartItem, createNewCartItemWithModifiers,  updateExistingCartItem } from '@/utils/cart';
-import { Database } from "@/types/database.types";
 
-type Cart = Database['public']['Tables']['carts']['Row'] & {
-    cart_items: (Database["public"]["Tables"]["cart_items"]["Row"] & {
-        menu_items: Database["public"]["Tables"]["menu_items"]["Row"];
-        cart_item_modifiers: (Database["public"]["Tables"]["cart_item_modifiers"]["Row"] & {
-          modifiers: Database["public"]["Tables"]["modifiers"]["Row"];
-          cart_item_modifier_options: (Database["public"]["Tables"]["cart_item_modifier_options"]["Row"] & {
-            modifier_options: Database["public"]["Tables"]["modifier_options"]["Row"];
-          })[];
-        })[];
-    })[]; 
-};
+
 
 export async function GET(request: Request, { params }: { params: Promise<{ id: string }> }) {
     
