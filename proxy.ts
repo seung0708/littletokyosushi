@@ -3,7 +3,7 @@ import { updateSession } from '@/lib/supabase/middleware'
 import { createClient } from '@/lib/supabase/server'
 import { NextResponse } from 'next/server'
 
-export async function middleware(request: NextRequest) {
+export async function proxy(request: NextRequest) {
   const response = await updateSession(request)
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
