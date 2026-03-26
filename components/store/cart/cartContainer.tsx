@@ -151,7 +151,7 @@ export default function CartContainer() {
                                                                     <ul className="space-y-1">
                                                                     {modifier.cart_item_modifier_options.map((option: CartItemModifierOption) => (
                                                                         <li key={option.id} className="text-xs text-gray-400 bg-black/20 px-2 py-1 rounded-full mr-2">
-                                                                            {option?.name} +{option?.price.toFixed(2)}
+                                                                            {option?.modifier_option_name} +{option?.modifier_option_price.toFixed(2)}
                                                                         </li>
                                                                     ))}
                                                                     </ul>

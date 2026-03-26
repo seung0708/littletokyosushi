@@ -25,6 +25,7 @@ export interface CartItemModifier  {
     id?: string;
     cart_items_id?: string;
     modifier_group?: ModifierGroup | null;
+    name?: string;
     created_at?: string;
     cart_item_modifier_options?: CartItemModifierOption[] | null;
 };
@@ -35,5 +36,6 @@ export interface CartItemModifierOption {
     modifier_id: number;
     modifier_option_id: number;
     modifier_option_price: number;
+    modifier_option_name: string;
     modifier_options?: ModifierOption;
 };
