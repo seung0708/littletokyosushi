@@ -14,6 +14,42 @@ export type Database = {
   }
   public: {
     Tables: {
+      business_hours: {
+        Row: {
+          created_at: string | null
+          day: string
+          id: string
+          is_open: boolean
+          ordering_end: string
+          ordering_start: string
+          pickup_end: string | null
+          pickup_start: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          day: string
+          id?: string
+          is_open?: boolean
+          ordering_end: string
+          ordering_start: string
+          pickup_end?: string | null
+          pickup_start?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          day?: string
+          id?: string
+          is_open?: boolean
+          ordering_end?: string
+          ordering_start?: string
+          pickup_end?: string | null
+          pickup_start?: string | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
       categories: {
         Row: {
           id: string
@@ -208,27 +244,33 @@ export type Database = {
           created_at: string | null
           id: string
           item_id: string
+          item_name: string | null
           order_id: string
           price: number
           quantity: number
+          special_instructions: string | null
           updated_at: string | null
         }
         Insert: {
           created_at?: string | null
           id?: string
           item_id: string
+          item_name?: string | null
           order_id: string
           price: number
           quantity: number
+          special_instructions?: string | null
           updated_at?: string | null
         }
         Update: {
           created_at?: string | null
           id?: string
           item_id?: string
+          item_name?: string | null
           order_id?: string
           price?: number
           quantity?: number
+          special_instructions?: string | null
           updated_at?: string | null
         }
         Relationships: [
@@ -248,6 +290,41 @@ export type Database = {
           },
         ]
       }
+      order_status_history: {
+        Row: {
+          changed_by: string | null
+          created_at: string | null
+          id: string
+          note: string | null
+          order_id: string
+          status: string
+        }
+        Insert: {
+          changed_by?: string | null
+          created_at?: string | null
+          id?: string
+          note?: string | null
+          order_id: string
+          status: string
+        }
+        Update: {
+          changed_by?: string | null
+          created_at?: string | null
+          id?: string
+          note?: string | null
+          order_id?: string
+          status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "order_status_history_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: false
+            referencedRelation: "orders"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       orders: {
         Row: {
           address1: string | null
@@ -260,6 +337,8 @@ export type Database = {
           order_type: Database["public"]["Enums"]["order_type"]
           phone: string
           pickup_at: string | null
+          prep_time: number | null
+          short_id: number
           state: string | null
           status: Database["public"]["Enums"]["status"]
           sub_total: number
@@ -278,6 +357,8 @@ export type Database = {
           order_type?: Database["public"]["Enums"]["order_type"]
           phone: string
           pickup_at?: string | null
+          prep_time?: number | null
+          short_id?: never
           state?: string | null
           status?: Database["public"]["Enums"]["status"]
           sub_total?: number
@@ -296,6 +377,8 @@ export type Database = {
           order_type?: Database["public"]["Enums"]["order_type"]
           phone?: string
           pickup_at?: string | null
+          prep_time?: number | null
+          short_id?: never
           state?: string | null
           status?: Database["public"]["Enums"]["status"]
           sub_total?: number
@@ -350,17 +433,138 @@ export type Database = {
         }
         Relationships: []
       }
+      refunds: {
+        Row: {
+          amount_refunded: number
+          changed_by: string | null
+          created_at: string | null
+          id: string
+          item_id: string | null
+          item_name: string | null
+          order_id: string
+          reason: string | null
+          total: number
+          updated_at: string | null
+        }
+        Insert: {
+          amount_refunded: number
+          changed_by?: string | null
+          created_at?: string | null
+          id?: string
+          item_id?: string | null
+          item_name?: string | null
+          order_id: string
+          reason?: string | null
+          total: number
+          updated_at?: string | null
+        }
+        Update: {
+          amount_refunded?: number
+          changed_by?: string | null
+          created_at?: string | null
+          id?: string
+          item_id?: string | null
+          item_name?: string | null
+          order_id?: string
+          reason?: string | null
+          total?: number
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "refunds_item_id_fkey"
+            columns: ["item_id"]
+            isOneToOne: false
+            referencedRelation: "menu_items"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "refunds_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: false
+            referencedRelation: "orders"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      settings: {
+        Row: {
+          id: string
+          online_ordering_enabled: boolean | null
+          updated_at: string | null
+        }
+        Insert: {
+          id?: string
+          online_ordering_enabled?: boolean | null
+          updated_at?: string | null
+        }
+        Update: {
+          id?: string
+          online_ordering_enabled?: boolean | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+      special_schedules: {
+        Row: {
+          created_at: string | null
+          date: string
+          id: string
+          is_open: boolean
+          note: string | null
+          ordering_end: string | null
+          ordering_start: string | null
+          pickup_end: string | null
+          pickup_start: string | null
+          schedule_type: string
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          date: string
+          id?: string
+          is_open?: boolean
+          note?: string | null
+          ordering_end?: string | null
+          ordering_start?: string | null
+          pickup_end?: string | null
+          pickup_start?: string | null
+          schedule_type: string
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          date?: string
+          id?: string
+          is_open?: boolean
+          note?: string | null
+          ordering_end?: string | null
+          ordering_start?: string | null
+          pickup_end?: string | null
+          pickup_start?: string | null
+          schedule_type?: string
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      get_my_role: { Args: never; Returns: string }
     }
     Enums: {
-      order_type: "pickup" | "delivery"
+      order_type: "pickup" | "delivery" | "catering"
       roles: "admin" | "staff" | "customer"
-      status: "pending" | "scheduled" | "confirmed" | "cancelled" | "ready"
+      status:
+        | "pending"
+        | "scheduled"
+        | "confirmed"
+        | "cancelled"
+        | "ready"
+        | "preparing"
+        | "complete"
       sub_group: "Standard" | "Special"
     }
     CompositeTypes: {
@@ -489,9 +693,17 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
-      order_type: ["pickup", "delivery"],
+      order_type: ["pickup", "delivery", "catering"],
       roles: ["admin", "staff", "customer"],
-      status: ["pending", "scheduled", "confirmed", "cancelled", "ready"],
+      status: [
+        "pending",
+        "scheduled",
+        "confirmed",
+        "cancelled",
+        "ready",
+        "preparing",
+        "complete",
+      ],
       sub_group: ["Standard", "Special"],
     },
   },
