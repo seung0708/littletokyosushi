@@ -4,27 +4,25 @@ import Link from "next/link"
 
 const Hero: React.FC = () => {
     return (
-        <section className="relative overflow-hidden">
+        <section className="relative w-full min-h=[650px] sm:min-h-[700px] lg:min-h-[800px]">
             <div className="absolute inset-0">
                 <Image
                     fill
-                    className="h-full w-full object-contain object-right" 
+                    className="object-none" 
                     src={'/assets/images/hero.jpg'}
                     alt="Little Tokyo Sushi hero image"
-                    style={{ height: '100%' }}
+                    style={{ objectPosition: '70% center' }}
                     priority
                 />
             </div>
-            <div className="absolute inset-0" style={{ height: '100%' }}>
-                <div className="h-full w-full bg-gradient-to- from-black to-transparent"></div>
-            </div>
-            <div className="relative min-h-[650px] sm:min-h-[700px] lg:min-h-[800px] flex flex-col">
-                <div className="flex-1 flex items-center pt-20 sm:pt-24 lg:pt-28">
-                    <div className="mx-auto max-w-4xl flex flex-col items-center text-center px-4 sm:px-6 lg:px-8">
+            <div className="absolute inset-0 bg-gradient-to-r from-black via-black/70 to-transparent" style={{ height: '100%' }}></div>
+            <div className="relative z=10 flex items-center h-full min-h-[650px] m:min-h-[700px] lg:min-h-[800px]">
+                <div className="px-10 sm:px-12 lg:px-20 max-w-2xl">
+                    <div className="text-center text-xl sm:text-5xl lg:text-7xl font-bold tracking-tight text-white drop-shadow-lg">
                         <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold tracking-tight text-white drop-shadow-lg motion-safe:animate-fade-in">
                             LITTLE TOKYO SUSHI
                         </h1>
-                        <p className="mt-4 sm:mt-6 lg:mt-8 text-lg sm:text-xl lg:text-2xl text-white/90 max-w-2xl motion-safe:animate-fade-in-delay font-medium">
+                        <p className="mt-4 sm:mt-6 text-lg sm:text-xl text-white/90 font-medium">
                             The only sushi takeout restaurant serving a variety of sushi and rolls
                         </p>
                         <a 
