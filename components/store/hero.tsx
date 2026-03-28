@@ -8,7 +8,7 @@ const Hero: React.FC = () => {
             <div className="absolute inset-0">
                 <Image
                     fill
-                    className="h-full w-full object-cover" 
+                    className="h-full w-full object-contain object-right" 
                     src={'/assets/images/hero.jpg'}
                     alt="Little Tokyo Sushi hero image"
                     style={{ height: '100%' }}
@@ -16,7 +16,7 @@ const Hero: React.FC = () => {
                 />
             </div>
             <div className="absolute inset-0" style={{ height: '100%' }}>
-                <div className="h-full w-full bg-gradient-to-b from-black/60 to-black/40"></div>
+                <div className="h-full w-full bg-gradient-to- from-black to-transparent"></div>
             </div>
             <div className="relative min-h-[650px] sm:min-h-[700px] lg:min-h-[800px] flex flex-col">
                 <div className="flex-1 flex items-center pt-20 sm:pt-24 lg:pt-28">
@@ -36,7 +36,16 @@ const Hero: React.FC = () => {
                     </div>
                 </div>
                 
-                {/* <div className="w-full max-w-4xl mx-auto px-4 sm:px-6 pb-8 sm:pb-10 lg:pb-12">
+
+            </div>
+        </section>
+    );
+}
+
+export default Hero
+
+
+ {/* <div className="w-full max-w-4xl mx-auto px-4 sm:px-6 pb-8 sm:pb-10 lg:pb-12">
                     <div className="grid grid-cols-1 gap-4 sm:gap-6 sm:grid-cols-2">
                         <div className="rounded-xl bg-white/10 backdrop-blur-md shadow-lg p-4 sm:p-5 lg:p-6 hover:bg-white/15 transition-all duration-300">
                             <h2 className="text-lg sm:text-xl lg:text-2xl font-semibold mb-3 sm:mb-4 text-center text-white">Order Through</h2>
@@ -116,9 +125,3 @@ const Hero: React.FC = () => {
                         </div>
                     </div>
                 </div> */}
-            </div>
-        </section>
-    );
-}
-
-export default Hero
