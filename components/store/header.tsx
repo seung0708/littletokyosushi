@@ -17,13 +17,9 @@ const navLinks = [
 
 
 export default function Header() {
-    const [isOpen, setIsOpen] = useState(false);
+    const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
     const [isScrolled, setIsScrolled] = useState(false);
     const pathname = usePathname();
-
-    useEffect(() => {
-        setIsOpen(false);
-    }, [pathname]);
 
     useEffect(() => {
         const handleScroll = () => {
@@ -35,11 +31,12 @@ export default function Header() {
 
 
     return (
-        <header className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${isScrolled ? "bg-background/95 backdrop-blur-md border-b border-border" : "bg-transparent"}`}>
+        <header className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${isScrolled ? "bg-background/95 backdrop-blur-md border-border" : "bg-transparent"}`}>
             <nav className="mx-auto flex max-w-7xl items-center justify-between px-6 py-4 md:px-12 lg:px-16">
                 <Link href="/">
                     <Logo />
                 </Link>
+                {/* Desktop Navigation */}
                 <div className="hidden items-center gap-8 md:flex">
                     {navLinks.map(link => (
                         <Link 
@@ -52,6 +49,64 @@ export default function Header() {
                     ))}
                     <CartIcon />
                 </div>
+
+                {/* Mobile Menu Button */}
+                <button
+                    onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+                    className={`md:hidden z-60 ${isScrolled ? "text-foreground" : "text-white"}`}
+                >
+                    {isMobileMenuOpen ? 
+                        <svg
+                            className="h-6 w-6"
+                            xmlns="http://www.w3.org/2000/svg"
+                            fill="none"
+                            viewBox="0 0 24 24"
+                            stroke="currentColor"
+                            aria-hidden="true"
+                        >
+                            <path
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                strokeWidth={2}
+                                d="M6 18L18 6M6 6l12 12"
+                            />
+                        </svg>
+                        :
+                         <svg
+                            className="h-6 w-6"
+                            xmlns="http://www.w3.org/2000/svg"
+                            fill="none"
+                            viewBox="0 0 24 24"
+                            stroke="currentColor"
+                            aria-hidden="true"
+                        >
+                            <path
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                strokeWidth={2}
+                                d="M4 6h16M4 12h16M4 18h16"
+                            />
+                        </svg>
+                    }
+                    {/* Mobile Menu */}
+                    {isMobileMenuOpen && (
+                        <div className="absolute top-full left-0 right-0 border-b border-border bg-background p-6 md:hidden">
+                            <div className="flex flex-col gap-4">
+                                {navLinks.map(link => (
+                                    <Link 
+                                        key={link.name}
+                                        href={link.href}
+                                        className="text-lg font-medium text-foreground"
+                                    >
+                                        {link.name}
+                                    </Link>
+                                ))}
+                                <CartIcon />
+                            </div>
+                            
+                        </div>
+                    )}
+                </button>
             </nav>
         </header>
     );
@@ -82,36 +137,7 @@ export default function Header() {
 //                             aria-expanded={isOpen}
 //                         >
 //                         <span className="sr-only">Open main menu</span>
-//                         <svg
-//                             className={`${isOpen ? 'hidden' : 'block'} h-6 w-6`}
-//                             xmlns="http://www.w3.org/2000/svg"
-//                             fill="none"
-//                             viewBox="0 0 24 24"
-//                             stroke="currentColor"
-//                             aria-hidden="true"
-//                         >
-//                             <path
-//                                 strokeLinecap="round"
-//                                 strokeLinejoin="round"
-//                                 strokeWidth={2}
-//                                 d="M4 6h16M4 12h16M4 18h16"
-//                             />
-//                         </svg>
-//                         <svg
-//                             className={`${isOpen ? 'block' : 'hidden'} h-6 w-6`}
-//                             xmlns="http://www.w3.org/2000/svg"
-//                             fill="none"
-//                             viewBox="0 0 24 24"
-//                             stroke="currentColor"
-//                             aria-hidden="true"
-//                         >
-//                             <path
-//                                 strokeLinecap="round"
-//                                 strokeLinejoin="round"
-//                                 strokeWidth={2}
-//                                 d="M6 18L18 6M6 6l12 12"
-//                             />
-//                         </svg>
+//                        
 //                     </button>
 //                     <CartIcon />
 //                     </div>
