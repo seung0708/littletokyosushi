@@ -47,7 +47,7 @@ export default function Header() {
                             {link.name}
                         </Link>
                     ))}
-                    <CartIcon />
+                    <CartIcon isScrolled={isScrolled} />
                 </div>
 
                 {/* Mobile Menu Button */}
@@ -101,7 +101,7 @@ export default function Header() {
                                         {link.name}
                                     </Link>
                                 ))}
-                                <CartIcon />
+                                <CartIcon isScrolled={isScrolled} />
                             </div>
                             
                         </div>
