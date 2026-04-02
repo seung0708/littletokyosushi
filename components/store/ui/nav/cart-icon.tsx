@@ -4,7 +4,8 @@ import Svg from "../svg";
 import { useCart } from "@/app/context/cartContext";
 import { useState, useEffect } from 'react';
 
-export default function CartIcon(isScrolled) {
+export default function CartIcon({isScrolled}) {
+    console.log(isScrolled)
     const { cartItems } = useCart();
     const [mounted, setMounted] = useState(false);
 
@@ -14,7 +15,7 @@ export default function CartIcon(isScrolled) {
 
     return (
         <div className="ml-4 flow-root lg:ml-6">
-            <Link href="/cart" className="relative group -m-2 flex items-center p-2">
+            <Link href="/cart" className="relative group flex items-center p-2">
                 <Svg
                     className={`h-6 w-6 flex-shrink-0 ${isScrolled ?"text-muted-foreground hover:text-foreground" : "text-white/70 hover:text-white"}`}
                 >

@@ -43,7 +43,7 @@ export const metadata: Metadata = {
 export default async function RootLayout({ children, }: { children: React.ReactNode; }) {
   return (
     <html lang="en">
-      <body suppressHydrationWarning={true} className={poppins.className}>
+      <body suppressHydrationWarning={true} className={`dark antialiased bg-background text-foreground ${poppins.className}`}>
           <AuthProvider>
             <ToastProvider>
               <CartProvider>
