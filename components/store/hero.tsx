@@ -1,125 +1,71 @@
 'use client';
 import Image from "next/image"
 import Link from "next/link"
+import {Button} from '@/components/ui/button'
 
 const Hero: React.FC = () => {
     return (
         <section className="relative min-h-screen w-full overflow-hidden">
-            <div className="">
+            <div className="absolute inset-0">
                 <Image
                     fill
-                    className="object-none" 
-                    src={'/assets/images/hero.jpg'}
+                    className="object-cover" 
+                    src={'/assets/images/hero-sushi.jpg'}
                     alt="Little Tokyo Sushi hero image"
                     style={{ objectPosition: '70% center' }}
                     priority
                 />
+                <div className="absolute inset-0 bg-gradient-to-r from-black/95 via-black/70 to-black/30"></div>
             </div>
-            <div className="" style={{ height: '100%' }}></div>
-            <div className="relative z-10 flex items-center h-full min-h-[650px] m:min-h-[700px] lg:min-h-[800px]">
-                <div className="px-10 sm:px-12 lg:px-20 max-w-2xl">
-                    <div className="text-center text-xl sm:text-5xl lg:text-7xl font-bold tracking-tight text-white drop-shadow-lg">
-                        <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold tracking-tight text-white drop-shadow-lg motion-safe:animate-fade-in">
+            {/* CTA Button */}
+            <div className="relative z-10 flex min-h-screen items-center">
+                <div className="mx-auto w-full mx-w-7xl px-6 py-24 md:px-12 lg:px-16">
+                    <div className="max-w-2xl sapce-y-8 ">
+                        <h1 className="text-5xl font-medium leading-tight tracking-tight text-white md:text-6xl lg:text-7xl text-balance">
                             LITTLE TOKYO SUSHI
                         </h1>
-                        <p className="mt-4 sm:mt-6 text-lg sm:text-xl text-white/90 font-medium">
+                        <p className="max-w-lg text-lg leading-relaxed text-white/70 mt-4">
                             The only sushi takeout restaurant serving a variety of sushi and rolls
                         </p>
-                        <a 
-                            href='/menu' 
-                            className="mt-8 sm:mt-10 lg:mt-12 inline-flex items-center px-8 py-3.5 text-base sm:text-lg font-semibold text-white bg-red-600 rounded-full hover:bg-red-500 active:bg-red-700 transition-all duration-300 hover:scale-105 hover:shadow-lg motion-safe:animate-fade-in-delay-2"
-                        >
-                            Order Now
-                        </a>
+                        <div className="flex flex-col gap-4 pt-2 sm:flex-row sm:items-center">
+                            <Button 
+                                asChild
+                                size="lg"
+                                className="bg-accent hover:bg-accent/90 text-white hover:bg-white/10 px-8 py-6 text-base font-medium"
+                            >
+                                <Link
+                                    href='/menu' 
+                                    className=""
+                                >
+                                    Order Now
+                                </Link>
+                            </Button>
+                        </div>
+                        
                     </div>
                 </div>
-                
-
+                {/* Scroll Indicator */}
+                <div className="absolute bottom-8 left-1/2 z-10 -translate-x-1/2 animate-bounce">
+                    <div className="flex flex-col items-center gap-2 text-white/80">
+                        <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            width="24"
+                            height="24"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="currentColor"
+                            strokeWidth="1.5"
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                        >
+                            <path d="M12 5v14" />
+                            <path d="m19 12-7 7-7-7" />
+                        </svg>
+                    </div>
+                </div>
             </div>
         </section>
     );
 }
 
 export default Hero
-
-
- {/* <div className="w-full max-w-4xl mx-auto px-4 sm:px-6 pb-8 sm:pb-10 lg:pb-12">
-                    <div className="grid grid-cols-1 gap-4 sm:gap-6 sm:grid-cols-2">
-                        <div className="rounded-xl bg-white/10 backdrop-blur-md shadow-lg p-4 sm:p-5 lg:p-6 hover:bg-white/15 transition-all duration-300">
-                            <h2 className="text-lg sm:text-xl lg:text-2xl font-semibold mb-3 sm:mb-4 text-center text-white">Order Through</h2>
-                            <div className="grid grid-cols-3 gap-3 sm:gap-4">
-                                <Link
-                                    href="https://www.ubereats.com/store/little-tokyo-sushi-la/iMFBaXJFQmCLzATUJipi0w"
-                                    target="_blank"
-                                    className="flex items-center justify-center p-2 sm:p-2.5 rounded-lg hover:bg-white/20 active:bg-white/30 transition-all duration-200 hover:scale-105"
-                                >
-                                    <Image 
-                                        src="/assets/images/ubereats.svg" 
-                                        alt="Uber Eats" 
-                                        width={32} 
-                                        height={32} 
-                                        className="w-7 h-7 sm:w-8 sm:h-8 lg:w-9 lg:h-9 filter brightness-0 invert"
-                                    />
-                                </Link>
-                                <Link
-                                    href="https://www.grubhub.com/restaurant/little-tokyo-sushi-s-alameda-st-333-s-alameda-st-ste-100-i-los-angeles/2795333"
-                                    target="_blank"
-                                    className="flex items-center justify-center p-2 sm:p-2.5 rounded-lg hover:bg-white/20 active:bg-white/30 transition-all duration-200 hover:scale-105"
-                                >
-                                    <Image 
-                                        src="/assets/images/grubhub.svg" 
-                                        alt="GrubHub" 
-                                        width={48} 
-                                        height={48} 
-                                        className="w-10 h-10 sm:w-12 sm:h-12"
-                                    />
-                                </Link>
-                                <Link 
-                                    href="https://www.doordash.com/store/little-tokyo-sushi-los-angeles-1890156" 
-                                    target="_blank"
-                                    className="flex items-center justify-center p-2 sm:p-2.5 rounded-lg hover:bg-white/20 active:bg-white/30 transition-all duration-200 hover:scale-105"
-                                >
-                                    <Image 
-                                        src="/assets/images/doordash.svg" 
-                                        alt="DoorDash" 
-                                        width={48} 
-                                        height={48} 
-                                        className="w-10 h-10 sm:w-12 sm:h-12"
-                                    />
-                                </Link>
-                            </div>
-                        </div>
-                        
-                        <div className="rounded-xl bg-white/10 backdrop-blur-md shadow-lg p-4 sm:p-5 lg:p-6 hover:bg-white/15 transition-all duration-300">
-                            <h2 className="text-lg sm:text-xl lg:text-2xl font-semibold mb-3 sm:mb-4 text-center text-white">Reviews</h2>
-                            <div className="grid grid-cols-2 gap-3 sm:gap-4">
-                                <Link 
-                                    href="https://www.yelp.com/biz/little-tokyo-sushi-los-angeles?osq=Sushi+Little+Tokyo" 
-                                    target="_blank"
-                                    className="flex items-center justify-center p-2 sm:p-2.5 rounded-lg hover:bg-white/20 active:bg-white/30 transition-all duration-200 hover:scale-105"
-                                >
-                                    <Image 
-                                        src="/assets/images/yelp.svg" 
-                                        alt="Yelp" 
-                                        width={48} 
-                                        height={48} 
-                                        className="w-10 h-10 sm:w-12 sm:h-12"
-                                    />
-                                </Link>
-                                <Link 
-                                    href="https://g.co/kgs/GdRq5QV" 
-                                    target="_blank"
-                                    className="flex items-center justify-center p-2 sm:p-2.5 rounded-lg hover:bg-white/20 active:bg-white/30 transition-all duration-200 hover:scale-105"
-                                >
-                                    <Image 
-                                        src="/assets/images/google.svg" 
-                                        alt="Google Reviews" 
-                                        width={48} 
-                                        height={48} 
-                                        className="w-10 h-10 sm:w-12 sm:h-12"
-                                    />
-                                </Link>
-                            </div>
-                        </div>
-                    </div>
-                </div> */}
