@@ -4,7 +4,7 @@ import Link from "next/link"
 
 const Hero: React.FC = () => {
     return (
-        <section className="relative min-h-screen w-full overflow-hidden bg-foreground">
+        <section className="relative min-h-screen w-full overflow-hidden">
             <div className="">
                 <Image
                     fill
@@ -16,7 +16,7 @@ const Hero: React.FC = () => {
                 />
             </div>
             <div className="" style={{ height: '100%' }}></div>
-            <div className="relative z=10 flex items-center h-full min-h-[650px] m:min-h-[700px] lg:min-h-[800px]">
+            <div className="relative z-10 flex items-center h-full min-h-[650px] m:min-h-[700px] lg:min-h-[800px]">
                 <div className="px-10 sm:px-12 lg:px-20 max-w-2xl">
                     <div className="text-center text-xl sm:text-5xl lg:text-7xl font-bold tracking-tight text-white drop-shadow-lg">
                         <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold tracking-tight text-white drop-shadow-lg motion-safe:animate-fade-in">

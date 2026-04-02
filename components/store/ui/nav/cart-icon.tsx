@@ -14,7 +14,7 @@ export default function CartIcon({isScrolled}) {
     }, []);
 
     return (
-        <div className="ml-4 flow-root lg:ml-6">
+        <div className="w-fit">
             <Link href="/cart" className="relative group flex items-center p-2">
                 <Svg
                     className={`h-6 w-6 flex-shrink-0 ${isScrolled ?"text-muted-foreground hover:text-foreground" : "text-white/70 hover:text-white"}`}

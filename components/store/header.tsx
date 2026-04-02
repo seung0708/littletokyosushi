@@ -91,7 +91,7 @@ export default function Header() {
                     {/* Mobile Menu */}
                     {isMobileMenuOpen && (
                         <div className="absolute top-full left-0 right-0 border-b border-border bg-background p-6 md:hidden">
-                            <div className="flex flex-col gap-4">
+                            <div className="flex flex-col items-center gap-4">
                                 {navLinks.map(link => (
                                     <Link 
                                         key={link.name}
@@ -101,7 +101,7 @@ export default function Header() {
                                         {link.name}
                                     </Link>
                                 ))}
-                                <CartIcon isScrolled={isScrolled} />
+                                <Link href="/cart">Cart</Link>
                             </div>
                             
                         </div>
