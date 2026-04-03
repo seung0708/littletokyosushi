@@ -5,8 +5,14 @@ import NavLink from "@/components/store/ui/nav/navLink";
 import {useState, useEffect} from 'react';
 import { usePathname } from 'next/navigation';
 import Navbar from "./navigation"
-import MobileNav from './mobilenav';
+import MobileNav from './mobile-nav';
 import Logo from './ui/nav/logo';
+
+const navLinks = [
+    {name: "Menu", href:"/menu"}, 
+    {name: "About", href: "/about"},
+    {name: "Contact Us", href: "/contact"}
+]
 
 
 export default function Header() {
@@ -29,9 +35,8 @@ export default function Header() {
                 <NavLink href="/">
                     <Logo />
                 </NavLink>
-                <Navbar isScrolled={isScrolled} />
-                
-                {/* Mobile Menu Button */}
+                <Navbar navLinks={navLinks} isScrolled={isScrolled} />
+            
                 <button
                     onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
                     className={`md:hidden z-60 ${isScrolled ? "text-foreground" : "text-white"}`}
@@ -71,21 +76,7 @@ export default function Header() {
                     }
                     {/* Mobile Menu */}
                     {isMobileMenuOpen && (
-                        <div className="absolute top-full left-0 right-0 border-b border-border bg-background p-6 md:hidden">
-                            <div className="flex flex-col items-center gap-4">
-                                {navLinks.map(link => (
-                                    <Link 
-                                        key={link.name}
-                                        href={link.href}
-                                        className="text-lg font-medium text-foreground"
-                                    >
-                                        {link.name}
-                                    </Link>
-                                ))}
-                                <Link href="/cart">Cart</Link>
-                            </div>
-                            
-                        </div>
+                        <MobileNav navLinks={navLinks} />
                     )}
                 </button>
             </nav>

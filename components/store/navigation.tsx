@@ -1,14 +1,10 @@
 import NavLink from "@/components/store/ui/nav/navLink";
 import CartIcon from './ui/nav/cart-icon';
 
-const navLinks = [
-    {name: "Menu", href:"/menu"}, 
-    {name: "About", href: "/about"},
-    {name: "Contact Us", href: "/contact"}
-]
 
 
-export default function Navbar({isScrolled}) {
+
+export default function Navbar({navLinks, isScrolled}) {
     return(
         <div className="hidden items-center gap-8 md:flex">
             {navLinks.map(link => (
