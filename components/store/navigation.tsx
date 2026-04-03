@@ -1,28 +1,26 @@
 import NavLink from "@/components/store/ui/nav/navLink";
+import CartIcon from './ui/nav/cart-icon';
 
-const Navbar: React.FC = () => {
+const navLinks = [
+    {name: "Menu", href:"/menu"}, 
+    {name: "About", href: "/about"},
+    {name: "Contact Us", href: "/contact"}
+]
+
+
+export default function Navbar({isScrolled}) {
     return(
-        <nav className="hidden md:flex items-center gap-4 lg:gap-8">
-            <NavLink 
-                href="/about" 
-                className="font-medium text-base lg:text-lg hover:text-red-400 transition-all duration-200 hover:scale-105" 
-            >
-                About
-            </NavLink>       
-            <NavLink 
-                href="/contact" 
-                className="font-medium text-base lg:text-lg hover:text-red-400 transition-all duration-200 hover:scale-105" 
-            >
-                Contact
-            </NavLink>
-            <NavLink 
-                href="/menu" 
-                className="font-medium text-base lg:text-lg hover:text-red-400 transition-all duration-200 hover:scale-105" 
-            >
-                Menu
-            </NavLink>
-        </nav>
+        <div className="hidden items-center gap-8 md:flex">
+            {navLinks.map(link => (
+                <NavLink 
+                    key={link.name}
+                    href={link.href}
+                    className={`text-sm font-medium transition-colors ${isScrolled ? "text-muted-foreground hover:text-foreground" : "text-white/70 hover:text-white"}`}
+                >
+                    {link.name}
+                </NavLink>
+            ))}
+            <CartIcon isScrolled={isScrolled} />
+        </div>
     );
 }
-
-export default Navbar;
