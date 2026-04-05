@@ -1,12 +1,11 @@
 'use client';
 
 import NavLink from "@/components/store/ui/nav/navLink";
-
 import {useState, useEffect} from 'react';
-import { usePathname } from 'next/navigation';
 import Navbar from "./navigation"
 import MobileNav from './mobile-nav';
 import Logo from './ui/nav/logo';
+import { HamburgerMenu, XMenu } from '@/components/store/ui/nav/icons';
 
 const navLinks = [
     {name: "Menu", href:"/menu"}, 
@@ -41,37 +40,9 @@ export default function Header() {
                     className={`md:hidden z-60 ${isScrolled ? "text-foreground" : "text-white"}`}
                 >
                     {isMobileMenuOpen ? 
-                        <svg
-                            className="h-6 w-6"
-                            xmlns="http://www.w3.org/2000/svg"
-                            fill="none"
-                            viewBox="0 0 24 24"
-                            stroke="currentColor"
-                            aria-hidden="true"
-                        >
-                            <path
-                                strokeLinecap="round"
-                                strokeLinejoin="round"
-                                strokeWidth={2}
-                                d="M6 18L18 6M6 6l12 12"
-                            />
-                        </svg>
+                        <HamburgerMenu />
                         :
-                         <svg
-                            className="h-6 w-6"
-                            xmlns="http://www.w3.org/2000/svg"
-                            fill="none"
-                            viewBox="0 0 24 24"
-                            stroke="currentColor"
-                            aria-hidden="true"
-                        >
-                            <path
-                                strokeLinecap="round"
-                                strokeLinejoin="round"
-                                strokeWidth={2}
-                                d="M4 6h16M4 12h16M4 18h16"
-                            />
-                        </svg>
+                        <XMenu />
                     }
                     {/* Mobile Menu */}
                     {isMobileMenuOpen && (

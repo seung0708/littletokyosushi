@@ -1,11 +1,8 @@
 import NavLink from "@/components/store/ui/nav/navLink";
-import CartIcon from "./ui/nav/cart-icon";
+import { CartIcon } from './ui/nav/icons';
 
-interface MobileNavProps {
-    navLinks
-}
 
-const MobileNav: React.FC<MobileNavProps> = ({navLinks}) => {
+const MobileNav = ({navLinks}) => {
     return (
         <div className="absolute top-full left-0 right-0 border-b border-border bg-background p-6 md:hidden">
             <div className="flex flex-col items-center gap-4">

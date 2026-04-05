@@ -1,5 +1,5 @@
 import NavLink from "@/components/store/ui/nav/navLink";
-import CartIcon from './ui/nav/cart-icon';
+import { CartIcon } from './ui/nav/icons';
 
 
 
