@@ -8,67 +8,60 @@ export const metadata: Metadata = {
 
 const Page: React.FC = () => {
     return (
-        <div className="min-h-screen bg-black text-white">
-            <div className="w-full bg-black pt-28">
-                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                    <div className="text-center">
-                        <h1 className="text-4xl font-bold text-white mb-4">About Us</h1>
-                        <div className="w-24 h-1 bg-red-600 mx-auto mb-4"></div>
-                        <p className="text-lg text-gray-300">
-                            Discover our story and passion for authentic Japanese cuisine
-                        </p>
+        <section className="py-48 text-white">
+            <div className="mx-auto max-w-7xl px-6 md:px-12 lg:px-16">
+                <div className="grid items-center gap-12 lg:grid-cols-2 lg:gap-20">
+                    {/* Image */}
+                    <div className="relative aspect-[4/3] overflow-hidden rounded-lg">
+                        <Image
+                            src={"/assets/images/sushi-making.jpg"}
+                            alt="Sushi chef preparing fresh rolls"
+                            fill
+                            className="object-cover"
+                        />
                     </div>
-                </div>
-            </div>
 
-            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
-                    <div className="space-y-6 order-2 lg:order-1">
-                        <div className="space-y-4">
-                            <div className="flex items-center space-x-4">
-                                <h2 className="text-3xl font-bold tracking-tight">Our Story</h2>
-                                <div className="flex-grow h-[1px] bg-gradient-to-r from-red-600/50 to-transparent"></div>
-                            </div>
-                            <p className="text-lg text-gray-300 leading-relaxed">
-                                Located inside the Little Tokyo Marketplace in DTLA Little Tokyo, we are a small family-owned 
-                                sushi takeout restaurant serving quality sushi and rolls everyday.
+                    {/* Content */}
+                    <div className="space-y-8">
+                        <div>
+                            <p className="mb-3 text-sm font-medium uppercase tracking-widest text-white/50">
+                                Our Story
+                            </p>
+                            <h2 className="font-serif text-4xl font-medium tracking-tight md:text-5xl text-balance">
+                                Crafted with care, made for you
+                            </h2>
+                        </div>
+
+                        <div className="space-y-4 text-white/70">
+                            <p className="leading-relaxed">
+                                We are a small sushi counter in the Little Tokyo Sushi Market and have grown into a community favorite. Every day, our team arrives early to prepare fresh sushi using traditional techniques and the finest ingredients.
+                            </p>
+                            <p className="leading-relaxed">
+                                We believe everyone deserves access to quality sushi without the wait and breaking the bank. 
+                                That's why we package our rolls fresh throughout the day, ready for you 
+                                to grab and enjoy wherever life takes you.
                             </p>
                         </div>
 
-                        <div className="space-y-4">
-                            <div className="flex items-center space-x-4">
-                                <h2 className="text-3xl font-bold tracking-tight">Our Location</h2>
-                                <div className="flex-grow h-[1px] bg-gradient-to-r from-red-600/50 to-transparent"></div>
+                        {/* Stats */}
+                        <div className="grid grid-cols-3 gap-8 border-t border-background/10 pt-8">
+                            <div>
+                                <p className="text-3xl font-medium">5+</p>
+                                <p className="mt-1 text-sm text-white/50">Years serving</p>
                             </div>
-                            <div className="bg-gradient-to-b from-black/30 to-black/40 backdrop-blur-sm 
-                                          border border-white/10 rounded-xl p-6">
-                                <p className="text-lg text-gray-300 mb-4">
-                                    Find us at Little Tokyo Marketplace
-                                </p>
-                                <address className="text-gray-400 not-italic">
-                                    333 S Alameda St <br />
-                                    Los Angeles, CA 90013
-                                </address>
+                            <div>
+                                <p className="text-3xl font-medium">50+</p>
+                                <p className="mt-1 text-sm text-white/50">Menu items</p>
                             </div>
-                        </div>
-                    </div>
-
-                    <div className="order-1 lg:order-2">
-                        <div className="relative rounded-xl overflow-hidden shadow-2xl 
-                                      border border-white/10 transform hover:scale-[1.02] transition-transform duration-500">
-                            <Image 
-                                src='/assets/images/Store Front.jpg' 
-                                height={658} 
-                                width={898} 
-                                alt="Little Tokyo Sushi storefront" 
-                                className="w-full h-auto"
-                            />
-                            <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent"></div>
-                        </div>
+                            <div>
+                                <p className="text-3xl font-medium">1000+</p>
+                                <p className="mt-1 text-sm text-white/50">Weekly orders</p>
+                            </div>
+                            </div>
                     </div>
                 </div>
             </div>
-        </div>
+        </section>
     )
 }
 
