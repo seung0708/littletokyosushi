@@ -10,7 +10,7 @@ const features = [
   {
     icon: Clock,
     title: "Quick Pickup",
-    description: "Order ahead online and pick up at our counter inside H Mart. Ready in 15 minutes or less.",
+    description: "Order ahead online and pick up at our counter inside Little Tokyo Sushi Market. Ready in 15 minutes or less.",
   },
   {
     icon: Truck,
@@ -20,7 +20,7 @@ const features = [
   {
     icon: MapPin,
     title: "Convenient Location",
-    description: "Find us inside H Mart Asian Market. Easy parking and accessible from the main entrance.",
+    description: "Find us inside the Little Tokyo Market next to Bliss Bakery and Poke. Lots of parking can be found in the parking structure. Free validation with a purchase"
   },
 ]
 
