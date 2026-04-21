@@ -19,7 +19,7 @@ const PopularItems: React.FC = () => {
     const [current, setCurrent] = useState(0);
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
-    const popularItemIds = [64, 2, 11, 19, 35, 34, 59, 64]; // IDs are strings in database
+    const popularItemIds = ["Little Tokyo Sushi Combination", "California Roll", "Toro Combo", "Spicy Tuna Roll", "Salmon Combo"]
 
     // Fetch items
     useEffect(() => {
@@ -61,7 +61,7 @@ const PopularItems: React.FC = () => {
         return () => clearInterval(intervalId);
     }, [api]);
 
-    const popularItems = items.filter(item => popularItemIds.includes(item.id || 0));
+    const popularItems = items.filter(item => popularItemIds.includes(item.name || ""));
     const shuffledItems = [...popularItems].sort(() => Math.random() - 0.5);
 
     if (isLoading) {
@@ -124,7 +124,7 @@ const PopularItems: React.FC = () => {
                                         <Link href={`menu/${item.id}`} className="group">
                                             <div className="relative aspect-square overflow-hidden rounded-lg">
                                                 <Image 
-                                                    src={`${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/menu-items/${item?.image_urls?.[0]}`}
+                                                    src={`${item?.image_urls?.[0]}`}
                                                     alt={`${item.name} image`}
                                                     fill
                                                     className="object-cover transition-transform duration-300 group-hover:scale-110"
@@ -137,7 +137,7 @@ const PopularItems: React.FC = () => {
                                                     {item.name}
                                                 </h3>
                                                 <p className="mt-1 text-sm">
-                                                    ${item?.price?.toFixed(2)}
+                                                    ${item?.base_price?.toFixed(2)}
                                                 </p>
                                             </div>
                                         </Link>
