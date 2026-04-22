@@ -12,7 +12,7 @@ export interface MenuItem {
     sub_group?: string
     modifier_groups?: ModifierGroup[]
 }
-
+ 
 export interface ModifierGroup {
     id: string
     menu_item_id: string

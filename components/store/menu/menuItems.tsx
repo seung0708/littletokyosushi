@@ -1,6 +1,6 @@
 import Image from 'next/image';
 import Link from 'next/link';
-import { MenuItem, Modifier } from '@/types/item';
+import { MenuItem, ModifierGroup } from '@/types/item';
 
 type MenuItemsProps = {
     categories: { name: string; items: MenuItem[] }[];
@@ -57,9 +57,9 @@ const MenuItems: React.FC<MenuItemsProps> = ({ categories }) => {
                                             {item.description}
                                         </p>
                                     )}
-                                    {item.modifiers && item.modifiers.length > 0 && (
+                                    {item.modifier_groups && item.modifier_groups.length > 0 && (
                                         <div className="pt-2 flex flex-wrap gap-1.5 sm:gap-2">
-                                            {item.modifiers.map((modifier: Modifier, index: number) => (
+                                            {item.modifier_groups.map((modifier: ModifierGroup, index: number) => (
                                                 <span 
                                                     key={index} 
                                                     className="inline-flex items-center px-2 sm:px-3 py-0.5 sm:py-1 rounded-full text-[10px] sm:text-xs font-medium 
