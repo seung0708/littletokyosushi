@@ -62,7 +62,6 @@ const PopularItems: React.FC = () => {
     }, [api]);
 
     const popularItems = items.filter(item => popularItemIds.includes(item.name || ""));
-    const shuffledItems = [...popularItems].sort(() => Math.random() - 0.5);
 
     if (isLoading) {
         return (
@@ -114,7 +113,7 @@ const PopularItems: React.FC = () => {
                     className="w-full"
                 >
                     <CarouselContent className="-ml-2 md:-ml-4">
-                        {shuffledItems.map((item) => (
+                        {popularItems.map((item) => (
                             <CarouselItem 
                                 key={item.id} 
                                 className="pl-2 md:pl-4 basis-1/3 md:basis-1/3 lg:basis-1/4"
@@ -146,13 +145,11 @@ const PopularItems: React.FC = () => {
                             </CarouselItem>
                         ))}
                     </CarouselContent>
-                    {/* <CarouselPrevious className="hidden md:flex" />
-                    <CarouselNext className="hidden md:flex" /> */}
                 </Carousel>
             </div>
 
             <div className="mt-8 mr-10 text-right md:hidden">
-                <Link href="/menu" className="text-sm font-medium text-red-500 hover:text-red-600">
+                <Link href="/menu" className="text-sm font-medium hover:text-red-600">
                     Shop for more items
                     <span aria-hidden='true'>&rarr;</span>
                 </Link>
