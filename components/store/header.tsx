@@ -28,13 +28,13 @@ export default function Header() {
 
 
     return (
-        <header className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${isScrolled ? "bg-background/95 backdrop-blur-md border-border" : "bg-transparent"}`}>
-            <nav className="mx-auto flex max-w-7xl items-center justify-between px-6 py-4 md:px-12 lg:px-16">
+        <header id="nav" className="fixed top-0 left-0 right-0 z-50 h-16 border-b border-transparent transition-all duration-300">
+            <div className="max-w-7xl mx-auto px-6 w-full flex items-center justify-between">
                 <NavLink href="/">
                     <Logo />
                 </NavLink>
+                 <nav className="flex items-center gap-1"> 
                 <Navbar navLinks={navLinks} isScrolled={isScrolled} />
-            
                 <button
                     onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
                     className={`md:hidden z-60 ${isScrolled ? "text-foreground" : "text-white"}`}
@@ -50,6 +50,8 @@ export default function Header() {
                     )}
                 </button>
             </nav>
+            </div>
+           
         </header>
     );
 }
