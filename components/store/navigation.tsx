@@ -6,7 +6,7 @@ import { CartIcon } from './ui/nav/icons';
 
 export default function Navbar({navLinks, isScrolled}) {
     return(
-        <div className="hidden items-center gap-8 md:flex">
+        <div className="hidden items-center gap-8">
             {navLinks.map(link => (
                 <NavLink 
                     key={link.name}
