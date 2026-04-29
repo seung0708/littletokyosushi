@@ -1,6 +1,5 @@
 'use client';
 
-import NavLink from "@/components/store/ui/nav/navLink";
 import {useState, useEffect} from 'react';
 import Navbar from "./navigation"
 import MobileNav from './mobile-nav';
