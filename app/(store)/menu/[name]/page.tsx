@@ -13,7 +13,7 @@ type Props = {
 export async function generateMetadata({ params }: Props, parent: ResolvingMetadata): Promise<Metadata> {
     try {
         const { name } = await params;
-        const item = await getItem(name);
+        const item = await getItem(decodeURIComponent(name));
         
         if (!item) {
             return {
@@ -41,17 +41,18 @@ export async function generateMetadata({ params }: Props, parent: ResolvingMetad
 }
 
 async function getItem(name: string): Promise<MenuItem | null> {
-    if (!process.env.NEXT_PUBLIC_SITE_URL) {
+    if (!process.env.NEXT_PUBLIC_SUPABASE_URL) {
         console.error('NEXT_PUBLIC_SITE_URL is not defined');
         return null;
     }
 
     try {
-        const url = `${process.env.NEXT_PUBLIC_MAIN_URL}/api/store/items/${name}`;
+        const url = `${process.env.NEXT_PUBLIC_MAIN_URL}/api/store/items/${decodeURIComponent(name)}`;
         console.log('Fetching item from:', url);
         
         const res = await retryWithBackoff(async () => {
             const response = await fetch(url);
+            
             if (!response.ok) {
                 throw new Error(`HTTP error! status: ${response.status}`);
             }
@@ -82,12 +83,15 @@ async function getItem(name: string): Promise<MenuItem | null> {
 export default async function ItemDetailsPage({ params }: { params: Promise<{ name: string }> }) {
     try {
         const { name } = await params;
+        console.log('name',name)
         if (!name) {
             console.error('No ID provided');
             notFound();
         }
 
-        const item = await getItem(name);
+        const item = await getItem(decodeURIComponent(name));
+
+        console.log('[name]/page', item)
         if (!item || !item.id) {
             console.error('Item not found or invalid:', item);
             notFound();
