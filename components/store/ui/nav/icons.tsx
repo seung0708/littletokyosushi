@@ -14,25 +14,15 @@ export const CartIcon = ({isScrolled}) => {
     }, []);
 
     return (
-        <div className="w-fit">
-            <Link href="/cart" className="relative group flex items-center p-2">
-                <Svg
-                    className={`h-6 w-6 flex-shrink-0 ${isScrolled ?"text-muted-foreground hover:text-foreground" : "text-white/70 hover:text-white"}`}
-                >
-                    <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        d="M15.75 10.5V6a3.75 3.75 0 1 0-7.5 0v4.5m11.356-1.993 1.263 12c.07.665-.45 1.243-1.119 1.243H4.25a1.125 1.125 0 0 1-1.12-1.243l1.264-12A1.125 1.125 0 0 1 5.513 7.5h12.974c.576 0 1.059.435 1.119 1.007ZM8.625 10.5a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Zm7.5 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Z"
-                    />
-                </Svg>
-                {mounted && (
-                    <span className="absolute top-0.5 -right-0.5 text-sm font-medium text-white bg-red-500 rounded-full h-5 w-5 flex items-center justify-center">
-                        {cartItems.length}
-                    </span>
-                )}
-                <span className="sr-only">items in cart, view bag</span>
-            </Link>
-        </div>
+        <Link href="/cart" className="ml-2 flex items-center gap-2 px-4 py-2 rounded-lg bg-white/[0.08] hover:bg-accent text-sm font-semibold text-white transition-colors">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg>
+          <span className="bg-white text-accent rounded-full w-[18px] h-[18px] text-[11px] font-bold flex items-center justify-center">2</span>
+        </Link>
+
+        // <a href="cart.html" class="ml-2 flex items-center gap-2 px-4 py-2 rounded-lg bg-white/[0.08] hover:bg-accent text-sm font-semibold text-white transition-colors">
+        //   <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg>
+        //   Cart <span class="bg-white text-accent rounded-full w-[18px] h-[18px] text-[11px] font-bold flex items-center justify-center">2</span>
+        // </a>
     )
 }
 
