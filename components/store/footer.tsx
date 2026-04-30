@@ -4,11 +4,10 @@ export default function Footer() {
     return (
         <footer className="bg-background text-white">
             <div className="w-full mx-auto px-4 sm:px-6 lg:px-8 py-12 sm:py-16 lg:py-20">
-    
-                {/* Top row */}
+            {/*                 
                 <div className="flex flex-col lg:flex-row gap-12 lg:gap-16 xl:gap-20">
 
-                    {/* Left: brand + map */}
+                    
                     <div className="flex flex-col gap-8 lg:w-1/2">
                         <div>
                             <p className="text-2xl font-semibold tracking-tight">Little Tokyo Sushi</p>
@@ -25,10 +24,10 @@ export default function Footer() {
                         </div>
                     </div>
 
-                    {/* Right: info grid */}
+                  
                     <div className="lg:w-1/2 grid grid-cols-1 sm:grid-cols-3 gap-4">
 
-                        {/* Address */}
+                
                         <div>
                         <h3 className="text-base font-semibold uppercase tracking-widest text-gray-400 mb-4">Address</h3>
                         <address className="not-italic text-white text-sm leading-relaxed space-y-1">
@@ -38,7 +37,7 @@ export default function Footer() {
                         </address>
                         </div>
 
-                        {/* Phone */}
+                        
                         <div>
                         <h3 className="text-base font-semibold uppercase tracking-widest text-gray-400 mb-4">Phone</h3>
                         <a
@@ -49,7 +48,7 @@ export default function Footer() {
                         </a>
                         </div>
 
-                        {/* Hours */}
+                        
                         <div>
                         <h3 className="text-base font-semibold uppercase tracking-widest text-gray-400 mb-4">Business Hours</h3>
                         <ul className="text-sm text-white space-y-1.5">
@@ -72,9 +71,10 @@ export default function Footer() {
 
                     </div>
                 </div>
+                */}
 
                 {/* Copyright */}
-                <div className="mt-16 pt-8 border-t border-gray-800 flex flex-col sm:flex-row items-center justify-center gap-2 text-gray-500 text-xs">
+                <div className="mt-16 pt-8 border-t border-gray-800 flex flex-col sm:flex-row items-center justify-center gap-2 text-gray-500 text-md">
                     <p>&copy; 2026 Little Tokyo Sushi. All rights reserved.</p>
                 
                 </div>
