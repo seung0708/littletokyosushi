@@ -88,72 +88,27 @@ const PopularItems: React.FC = () => {
     }
 
     return (
-        <section aria-labelledby="popular-items" className="bg-black text-white py-8">
-            <div className=" text-center px-20 md:flex md:items-center md:justify-between mb-8">
-                <h2 id='favorites-heading' className="text-3xl md:4xl md:text-left tracking-tight">
-                    Popular Items
-                </h2>
-                <Link href="/menu" className="hidden md:block text-sm font-medium text-red-500 hover:text-red-600">
-                    Shop for more items
-                    <span aria-hidden='true'>&rarr;</span>
-                </Link>
-            </div>
-
-            <div className="relative px-8">
-                <Carousel 
-                    setApi={setApi}
-                    opts={{
-                        align: "start",
-                        loop: true,
-                        dragFree: true,
-                        skipSnaps: true,
-                        containScroll: false,
-                        watchDrag: false
-                    }}
-                    className="w-full"
-                >
-                    <CarouselContent className="-ml-2 md:-ml-4">
-                        {popularItems.map((item) => (
-                            <CarouselItem 
-                                key={item.id} 
-                                className="pl-2 md:pl-4 basis-1/3 md:basis-1/3 lg:basis-1/4"
-                            >
-                                <Card className="bg-black">
-                                    <CardContent className="p-0">
-                                        <Link href={`menu/${item.id}`} className="group">
-                                            <div className="relative aspect-square overflow-hidden rounded-lg">
-                                                <Image 
-                                                    src={`${item?.image_urls?.[0]}`}
-                                                    alt={`${item.name} image`}
-                                                    fill
-                                                    className="object-cover transition-transform duration-300 group-hover:scale-110"
-                                                    sizes="(min-width: 1024px) 25vw, (min-width: 768px) 33vw, 50vw"
-                                                />
-                                                <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-10 transition-opacity duration-300" />
-                                            </div>
-                                            <div className="m-4 text-center text-white h-[4.5rem] flex flex-col justify-center">
-                                                <h3 className="text-md font-medium group-hover:text-red-500 truncate px-1">
-                                                    {item.name}
-                                                </h3>
-                                                <p className="mt-1 text-sm">
-                                                    ${item?.base_price?.toFixed(2)}
-                                                </p>
-                                            </div>
-                                        </Link>
-                                    </CardContent>
-                                </Card>
-                            </CarouselItem>
-                        ))}
-                    </CarouselContent>
-                </Carousel>
-            </div>
-
-            <div className="mt-8 mr-10 text-right md:hidden">
-                <Link href="/menu" className="text-sm font-medium hover:text-red-600">
-                    Shop for more items
-                    <span aria-hidden='true'>&rarr;</span>
-                </Link>
-            </div>
+        <section aria-labelledby="popular-items" className="bg-dark py-20 px-6">
+            <div className="max-w-7xl mx-auto">
+                <div className="flex items-baseline justify-between mb-9">
+                    <h2 id='favorites-heading' className="font-serif font-normal text-white tracking-tight" style={{fontSize: 'clamp(28px, 3vw, 40px'}}>Popular Items</h2>
+                    <Link href="/menu" className="text-sm font-medium text-accent flex items-center gap-1.5 hover:gap-2.5 transition-all">View full menu <span>→</span></Link>
+                </div>
+                <div className="grid grid-cols-5 gap-4">
+                    {popularItems.map(item => (
+                        <a href="menu.html" className="group cursor-pointer">
+                            <div className="aspect-square rounded-[10px] overflow-hidden border-2 border-transparent group-hover:border-accent group-hover:-translate-y-1 transition-all duration-200 flex items-center justify-center" style={{background: "repeating-linear-gradient(45deg,#222 0,#222 1px,#1a1a1a 1px,#1a1a1a 14px)"}}>
+                                <Image src={item.image_urls[0] || "/placeholder.png"} alt={item.name || "Menu Item"} width={300} height={300} className="object-cover w-full h-full" /> 
+                            </div>
+                            <div className="mt-2.5 text-center">
+                                <p className="text-[13px] font-medium text-white group-hover:text-accent transition-colors mb-0.5">{item.name}</p>
+                                <p className="text-xs text-white/40">${item.base_price.toFixed(2)}</p>
+                            </div>
+                       </a>
+                       
+                    ))}
+                </div>
+            </div>       
         </section>
     );
 };
