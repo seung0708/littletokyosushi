@@ -9,69 +9,39 @@ type MenuItemsProps = {
 const MenuItems: React.FC<MenuItemsProps> = ({ categories }) => {
     
     return (
-        <div className="space-y-12 sm:space-y-20">
+        <div className="max-w-7xl mx-auto px-6 pt-10 pb-20">
             {categories.map((category) => (
-                <div key={category.name} className="space-y-6 sm:space-y-8">
-                    <div className="flex items-center space-x-4">
-                        <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold tracking-tight">
+                <div key={category.name} className="mb-14">
+                    <div className="flex items-baseline gap-4 mb-7">
+                        <h2 className="font-serif font-normal text-white text-[28px] tracking-tight">
                             {category.name.split('')[0].toUpperCase() + category.name.substring(1)}
                         </h2>
-                        <div className="flex-grow h-[1px] bg-gradient-to-r from-red-600/50 to-transparent"></div>
+                        <div className="flex-1 h-px bg-[#2a2a2a]"></div>
                     </div>
-                    <div className="grid grid-cols-1 gap-4 sm:gap-6 md:gap-8 sm:grid-cols-2 lg:grid-cols-3">
-                        {category.items.map((item) => ( 
-                            <Link 
-                                key={item.id} 
-                                href={`/menu/${encodeURIComponent(item.name)}`}
-                                className="group relative flex flex-col overflow-hidden rounded-xl bg-gradient-to-b from-black/30 to-black/40 backdrop-blur-sm 
-                                         border border-white/10 hover:border-red-500/50 transition-all duration-300 transform hover:-translate-y-1 hover:shadow-2xl"
-                            >
-                                <div className="relative w-full h-48 sm:h-56 md:h-64">
-                                    {item?.image_urls?.[0] ? (
-                                        <Image
-                                            src={`${item.image_urls[0]}`}
-                                            alt={item.name}
-                                            fill
-                                            sizes="(min-width: 1280px) 384px, (min-width: 1024px) 33vw, (min-width: 640px) 50vw, 100vw"
-                                            className="rounded-t-xl object-cover object-center group-hover:scale-105 transition-transform duration-500"
-                                            loading="lazy"
-                                        />
-                                    ) : (
-                                        <div className="w-full h-full bg-black/40 flex items-center justify-center rounded-t-xl">
-                                            <span className="text-sm text-gray-400">No image available</span>
-                                        </div>
-                                    )}
-                                    <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent"></div>
+                    <div className="grid grid-cols-3 gap-4">
+                        {category.items.map((item) => (
+                        <Link key={item.id} href={`/menu/${encodeURIComponent(item.name)}`}
+                        >
+                            <article className="group bg-white rounded-xl overflow-hidden cursor-pointer transition-all duration-200 hover:-translate-y-0.5 hover:shadow-[0_16px_40px_rgba(0,0,0,0.5)] flex flex-col">
+                                <div className="h-[180px] flex items-center justify-center shrink-0" style={{ background: '#ede9e4' }}>
+                                    <Image src={item.image_urls[0]} alt={item.name} width={200} height={200} />
+                                    
                                 </div>
-                                <div className="relative p-4 sm:p-5 md:p-6 space-y-2 sm:space-y-3 flex-grow">
-                                    <div className="flex justify-between items-start gap-3 sm:gap-4">
-                                        <h3 className="text-lg sm:text-xl md:text-2xl font-bold group-hover:text-red-400 transition-colors line-clamp-2">
-                                            {item.name}
-                                        </h3>
-                                        <span className="text-base sm:text-lg md:text-xl font-bold text-white group-hover:text-red-400 whitespace-nowrap bg-black/30 px-2 sm:px-3 py-1 rounded-full">
-                                            ${item?.base_price?.toFixed(2)}
-                                        </span>
+                                <div className="p-4 flex flex-col gap-1.5 flex-1">
+                                    <div className="flex justify-between items-start gap-2">
+                                        <h3 className="text-[15px] font-semibold text-[#111] leading-snug">{item.name}</h3>
+                                        <span className="text-sm font-semibold text-accent shrink-0">${item.base_price?.toFixed(2)}</span>
                                     </div>
-                                    {item.description && (
-                                        <p className="text-gray-300/90 text-xs sm:text-sm line-clamp-2">
-                                            {item.description}
-                                        </p>
-                                    )}
-                                    {item.modifier_groups && item.modifier_groups.length > 0 && (
-                                        <div className="pt-2 flex flex-wrap gap-1.5 sm:gap-2">
-                                            {item.modifier_groups.map((modifier: ModifierGroup, index: number) => (
-                                                <span 
-                                                    key={index} 
-                                                    className="inline-flex items-center px-2 sm:px-3 py-0.5 sm:py-1 rounded-full text-[10px] sm:text-xs font-medium 
-                                                             bg-red-500/10 text-red-300 border border-red-500/20"
-                                                >
-                                                    {modifier.name}
-                                                </span>
-                                            ))}
-                                        </div>
-                                    )}
+                                    <p className="text-xs text-[#888] leading-relaxed flex-1 line-clamp-2">Shrimp tempura, cucumber, avocado on top with eel sauce</p>
+                                    <div className="flex justify-between items-center mt-auto pt-2.5">
+                                        {/* <div className="flex flex-wrap gap-1">
+                                            <span className="text-[10px] font-medium bg-accent-light text-accent border border-accent-border rounded-full px-2 py-0.5">Spicy</span>
+                                            <span className="text-[10px] font-medium bg-accent-light text-accent border border-accent-border rounded-full px-2 py-0.5">No Avocado</span>
+                                        </div> */}
+                                    </div>
                                 </div>
-                            </Link>
+                            </article>
+                        </Link>
                         ))}
                     </div>
                 </div>
