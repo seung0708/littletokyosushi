@@ -11,6 +11,7 @@ export interface MenuItem {
     category_name?: string
     sub_group?: string
     modifier_groups?: ModifierGroup[]
+    categories?: Category | null 
 }
  
 export interface ModifierGroup {
