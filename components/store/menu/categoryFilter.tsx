@@ -14,8 +14,7 @@ const CategoryFilter: React.FC<CategoryFilterProps> = ({
     onCategoryChange
 }) => {
     return (
-        <div className="flex justify-center flex-wrap gap-2 mb-8">
-            <button
+        <button
                 onClick={() => onCategoryChange('all')}
                 className={`px-4 py-2 rounded-full transition-all duration-300 ${
                     selectedCategory === 'all'
@@ -38,7 +37,6 @@ const CategoryFilter: React.FC<CategoryFilterProps> = ({
                     {category.charAt(0).toUpperCase() + category.slice(1)}
                 </button>
             ))}
-        </div>
     );
 };
 

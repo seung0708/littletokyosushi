@@ -84,15 +84,21 @@ export default function ItemsContainer() {
 
 
     return (
-        <div className="px-4 sm:px-6 lg:px-8 py-8 sm:py-12 bg-black min-h-screen text-white">
-            <div className="max-w-7xl mx-auto">
-                <CategoryFilter 
-                    categories={categories}
-                    selectedCategory={selectedCategory}
-                    onCategoryChange={setSelectedCategory}
-                />
-                <MenuItems categories={categorizedItems} />
+        <div className="bg-dark border-b border-[#222] pt-16">
+            <div className="max-w-7xl mx-auto px-6 py-10 pb-0">
+                <p className="text-[11px] font-semibold text-accent tracking-[0.18em] uppercase mb-2.5">Takeout only</p>
+                <h1 className="font-serif font-normal text-white tracking-tight mb-8" style={{fontSize: 'clamp(36px, 5vw, 60px)'}}>Our Menu</h1>
+                {/* Category tabs */}
+                <div className="flex gap-2">
+                    <CategoryFilter 
+                        categories={categories}
+                        selectedCategory={selectedCategory}
+                        onCategoryChange={setSelectedCategory}
+                    />
+                    <MenuItems categories={categorizedItems} />
+                </div>
             </div>
         </div>
+        
     )
 }
