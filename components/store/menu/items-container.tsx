@@ -95,8 +95,8 @@ export default function ItemsContainer() {
                         selectedCategory={selectedCategory}
                         onCategoryChange={setSelectedCategory}
                     />
-                    <MenuItems categories={categorizedItems} />
                 </div>
+                <MenuItems categories={categorizedItems} />
             </div>
         </div>
         
