@@ -13,14 +13,13 @@ const Page: React.FC = () => {
 
     return (
         <>
-            <div className="w-full bg-black pt-20 sm:pt-28">
-                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                    <div className="text-center">
-                        <h1 className="text-3xl sm:text-4xl font-bold text-white mb-3 sm:mb-4">Our Menu</h1>
-                        <div className="w-16 sm:w-24 h-1 bg-red-600 mx-auto mb-3 sm:mb-4"></div>
-                        <p className="text-base sm:text-lg text-gray-300 pb-4">
-                            Discover our selection of authentic Japanese dishes
-                        </p>
+            <div className="bg-dark border-b border-[#222] pt-16">
+                <div className="max-w-7xl mx-auto px-6 py-10 pb-0">
+                    <p className="text-[11px] font-semibold text-accent tracking-[0.18em] uppercase mb-2.5">Takeout only</p>
+                    <h1 className="font-serif font-normal text-white tracking-tight mb-8" style={{fontSize: 'clamp(36px, 5vw, 60px)'}}>Our Menu</h1>
+                    {/* Category tabs */}
+                    <div>
+
                     </div>
                 </div>
             </div>
