@@ -4,6 +4,7 @@ import ItemDetailsForm from '@/components/store/menu/itemDetailsForm';
 import { notFound } from 'next/navigation';
 import { retryWithBackoff } from '@/lib/utils/api-retry';
 import type { Metadata, ResolvingMetadata } from 'next'
+import Breadcrumbs from '@/components/breadcrumbs';
 
 type Props = {
   params: Promise<{ name: string }>
@@ -81,25 +82,25 @@ async function getItem(name: string): Promise<MenuItem | null> {
 }
 
 export default async function ItemDetailsPage({ params }: { params: Promise<{ name: string }> }) {
-    try {
-        const { name } = await params;
-        console.log('name',name)
-        if (!name) {
-            console.error('No ID provided');
-            notFound();
-        }
-
-        const item = await getItem(decodeURIComponent(name));
-
-        console.log('[name]/page', item)
-        if (!item || !item.id) {
-            console.error('Item not found or invalid:', item);
-            notFound();
-        }
-
-        return <ItemDetailsForm initialItem={item} />;
-    } catch (error) {
-        console.error('Error in ItemDetailsPage:', error);
-        throw error; // Let Next.js handle the error
+    const { name } = await params;
+    
+    if (!name) {
+        console.error('No ID provided');
+        notFound();
     }
+
+    const item = await getItem(decodeURIComponent(name));
+
+    if (!item || !item.name) {
+        console.error('Item not found or invalid:', item);
+        notFound();
+    }
+   
+    return (
+        <div className="pt-16">
+            <Breadcrumbs />
+            <ItemDetailsForm initialItem={item} />
+        </div>
+    )
+    
 }

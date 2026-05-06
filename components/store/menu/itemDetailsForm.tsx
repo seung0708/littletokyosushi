@@ -44,7 +44,7 @@ const formSchema = z.object({
 
 type FormData = z.infer<typeof formSchema>;
 
-export default function ItemDetailsForm({ initialItem }: { initialItem: MenuItem }) {
+export default function ItemDetailsForm({initialItem}) {
     const { showToast } = useToast();
     const { handleCartUpdate } = useCart();
     const [loading, setLoading] = useState(false);
