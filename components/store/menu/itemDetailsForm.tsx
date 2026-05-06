@@ -46,7 +46,7 @@ type FormData = z.infer<typeof formSchema>;
 
 export default function ItemDetailsForm({initialItem}) {
     const { showToast } = useToast();
-    const { handleCartUpdate } = useCart();
+    const { handleCartUpdate } = useCart(); 
     const [loading, setLoading] = useState(false);
     const [loadingImage, setLoadingImage] = useState(true);
     const [selectedImage, setSelectedImage] = useState(0);
@@ -210,212 +210,190 @@ export default function ItemDetailsForm({initialItem}) {
 
     
     return (
-        <div className="min-h-screen bg-black text-white">
-            <div className="w-full bg-black pt-20 sm:pt-28">
-                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12">
-                        {/* Image Section */}
-                        <div className="space-y-6">
-                            <div className="relative aspect-square w-full overflow-hidden rounded-xl bg-gradient-to-b from-black/30 to-black/40 backdrop-blur-sm 
-                                          border border-white/10">
-                                {loadingImage && (
-                                    <div className="absolute inset-0 flex items-center justify-center bg-black/20 backdrop-blur-sm">
-                                        <div className="w-8 h-8 border-t-2 border-red-500 rounded-full animate-spin"></div>
-                                    </div>
-                                )}
-                                <Image
-                                    src={`${item.image_urls?.[selectedImage]}`}
-                                    alt={item.name}
-                                    fill
-                                    className="object-cover"    
-                                    onLoad={handleImageLoad}
-                                    priority
-                                   
-                                    sizes="(min-width: 1024px) 50vw, 100vw"
+        <div className="grid gap-12 mb-20" style={{ gridTemplateColumns: "1fr 1fr" }}>
+            {/* Left Gallery */}
+            <div className="sticky top-24 self-start">
+                <div id="main-image" className="aspect-square rounded-2xl overflow-hidden mb-3 flex items-center justify-center" style={{ background:"repeating-linear-gradient(45deg,#222 0,#222 1px,#1a1a1a 1px,#1a1a1a 14px)"}}>
+                    <Image
+                        src={`${item.image_urls?.[selectedImage]}`}
+                        alt={item.name}
+                        fill
+                        className="object-contain object-center"    
+                        onLoad={handleImageLoad}
+                        priority            
+                    />
+                    <span className="font-mono text-xs text-[#444]" id="main-image-label">dragon-roll-1.jpg</span>
+                </div>
+                {/* Thumbnail Images */}
+                <div className="grid grid-cols-4 gap-2.5">
+                    <button className="gallery-thumb active aspect-square rounded-lg overflow-hidden border-2 transition-all flex items-center justify-center" style={{ background:"repeating-linear-gradient(45deg,#222 0,#222 1px,#1a1a1a 1px,#1a1a1a 14px)" }}>
+                        <span className ="font-mono text-[9px] text-[#444]">01</span>
+                    </button>
+                    <button className="gallery-thumb aspect-square rounded-lg overflow-hidden border-2 border-transparent transition-all flex items-center justify-center" style={{ background:"repeating-linear-gradient(135deg,#222 0,#222 1px,#1a1a1a 1px,#1a1a1a 14px)" }}>
+                        <span className="font-mono text-[9px] text-[#444]">02</span>
+                    </button>
+                    <button className="gallery-thumb aspect-square rounded-lg overflow-hidden border-2 border-transparent transition-all flex items-center justify-center" style={{ background:"repeating-linear-gradient(45deg,#1f1f1f 0,#1f1f1f 1px,#181818 1px,#181818 14px)" }}>
+                        <span className="font-mono text-[9px] text-[#444]">03</span>
+                    </button>
+                    <button className="gallery-thumb aspect-square rounded-lg overflow-hidden border-2 border-transparent transition-all flex items-center justify-center" style={{ background:"repeating-linear-gradient(135deg,#1f1f1f 0,#1f1f1f 1px,#181818 1px,#181818 14px)" }}>
+                        <span className="font-mono text-[9px] text-[#444]">04</span>
+                    </button>
+                </div>
+            </div>
+            {/* Right Details */}
+            <div>
+                {/* Item Header */}
+                <div className="mb-8 pb-8 border-b border-[#242424]">
+                    {/* <div className="flex flex-wrap gap-1.5 mb-3">
+                        <span className="text-[10px] font-medium bg-accent/15 text-accent border border-accent/30 rounded-full px-2.5 py-1 uppercase tracking-wider">Rolls</span>
+                        <span className="text-[10px] font-medium bg-white/5 text-white/60 border border-white/10 rounded-full px-2.5 py-1">Contains shellfish</span>
+                    </div> */}
+                    <h1 className="font-serif font-normal text-white tracking-tight mb-3" style={{ fontSize: 'clamp(36px,4.5vw,52px)', lineHeight: 1.1 }}>{item?.name}</h1>
+                    <p className="text-base text-white/60 leading-relaxed mb-4 max-w-[480px]">{item?.description}</p>
+                    <p className="font-serif text-[32px] text-white" id="base-price-display">${item?.base_price?.toFixed(2)}</p>
+                </div>
+                {/* Item Form */}
+                <Form {...form}>
+                    <form 
+                        onSubmit={(e) => {
+                            e.preventDefault();
+                            const data = form.getValues();
+                            onSubmit(data);
+                        }} 
+                        className="space-y-8"
+                    >
+                        
+                        {item?.modifier_groups?.map((modifier, index) => (
+                            <div 
+                                key={modifier?.id} 
+                                className="bg-gradient-to-b from-black/30 to-black/40 backdrop-blur-sm border border-white/10 rounded-xl p-4 sm:p-6 space-y-4"
+                            >
+                                <div className="flex justify-between items-center">
+                                    <FormLabel className="text-lg font-medium">{modifier?.name}</FormLabel>
+                                    <span className={`text-sm px-2 py-1 rounded-full ${
+                                        modifier?.is_required 
+                                            ? 'bg-red-500/10 text-red-400 border border-red-500/20' 
+                                            : 'bg-gray-500/10 text-gray-400 border border-gray-500/20'
+                                        }`}
+                                    >
+                                        {modifier?.is_required ? 'Required' : 'Optional'}
+                                    </span>
+                                </div>
+                                <FormField
+                                    control={form.control}
+                                    name={`modifier_groups.${index}.modifier_options`}
+                                    render={({ field }) => (
+                                        <FormItem>
+                                            <FormControl>
+                                            {modifier.max_sel === 1 ? (
+                                                <RadioGroup
+                                                    value={field.value?.[0]?.id?.toString() || ''}
+                                                    onValueChange={(value) => {
+                                                        const selectedOption = modifier?.modifier_options?.find(opt => opt.id.toString() === value);
+                                                        if (selectedOption) {
+                                                            handleModifierChange(modifier.id, selectedOption, true);
+                                                        }
+                                                    }}
+                                                    className="space-y-3"
+                                                >
+                                                    {modifier?.modifier_options?.map((option) => (
+                                                        <div 
+                                                            key={option.id} 
+                                                            className="flex items-center space-x-3 bg-black/20 rounded-lg p-3 hover:bg-black/30 transition-colors"
+                                                        >
+                                                            <RadioGroupItem 
+                                                                value={option.id.toString()} 
+                                                                id={`${modifier.id}-${option.id}`}
+                                                                className="border-white/20"
+                                                            />
+                                                            <Label 
+                                                                htmlFor={`${modifier.id}-${option.id}`} 
+                                                                className="flex justify-between w-full text-sm sm:text-base"
+                                                            >
+                                                                <span>{option.name}</span>
+                                                                <span className="text-red-400">+${option.price.toFixed(2)}</span>
+                                                            </Label>
+                                                        </div>
+                                                    ))}
+                                                </RadioGroup>
+                                            ) : (
+                                                <div className="space-y-3">
+                                                {modifier?.modifier_options?.map((option) => {
+                                                    const isSelected = (field.value || []).some(opt => opt.id === option.id);
+                                                    const atMaxSelections = (field.value || []).length >= (modifier?.max_sel || 1);
+                                                    const isDisabled = !isSelected && atMaxSelections;
+                                                    return (
+                                                        <div 
+                                                            key={option.id} 
+                                                            className={`flex items-center space-x-3 bg-black/20 rounded-lg p-3 transition-colors ${isDisabled ? 'opacity-50 cursor-not-allowed' : 'hover:bg-black/30'}`}
+                                                        >
+                                                            <Checkbox
+                                                                id={`${modifier.id}-${option.id}`}
+                                                                checked={isSelected}
+                                                                disabled={isDisabled}
+                                                                onCheckedChange={(checked) => {
+                                                                    handleModifierChange(modifier.id, option, checked as boolean);
+                                                                }}
+                                                                className="border-white/20"
+                                                            />
+                                                                <Label 
+                                                                    htmlFor={`${modifier.id}-${option.id}`}
+                                                                    className="flex justify-between w-full text-sm sm:text-base"
+                                                                >
+                                                                    <span>{option.name}</span>
+                                                                    <span className="text-red-400">+${option.price.toFixed(2)}</span>
+                                                                </Label>
+                                                        </div>
+                                                    );
+                                                })}
+                                                </div>
+                                            )}
+                                            </FormControl>
+                                        </FormItem>
+                                    )}
                                 />
                             </div>
-                            {item?.image_urls && item?.image_urls?.length > 1 && (
-                                <div className="flex justify-center space-x-3">
-                                    {item?.image_urls?.map((_, index) => (
-                                        <button
-                                            key={index}
-                                            onClick={() => setSelectedImage(index)}
-                                            className={`w-2 h-2 rounded-full transition-colors ${
-                                                selectedImage === index 
-                                                    ? 'bg-red-500' 
-                                                    : 'bg-gray-600 hover:bg-gray-500'
-                                            }`}
-                                        />
-                                    ))}
-                                </div>
-                            )}
-                        </div>
-
-                        {/* Content Section */}
-                        <div className="lg:pt-8">
-                            <div className="space-y-6">
-                                <div>
-                                    <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold mb-3">{item?.name}</h1>
-                                    <p className="text-gray-400 text-base sm:text-lg">{item?.description}</p>
-                                </div>
-
-                                <div className="flex items-center justify-between">
-                                    <div className="text-xl sm:text-2xl font-bold text-red-400">
-                                        ${item?.base_price?.toFixed(2)}
+                        ))}
+                        <div className="bg-gradient-to-b from-black/30 to-black/40 backdrop-blur-sm border border-white/10 rounded-xl p-4 sm:p-6">
+                        <FormField
+                            control={form.control}
+                            name="quantity"
+                            render={({ field }) => (
+                                <FormItem>
+                                    <FormLabel className="text-lg font-medium mb-3">Quantity</FormLabel>
+                                    <div className="flex items-center space-x-4 bg-black/20 rounded-lg p-2 w-fit">
+                                        <Button
+                                            type="button"
+                                            variant="ghost"
+                                            size="sm"
+                                            className="h-8 w-8 text-gray-300 hover:text-white hover:bg-black/30"
+                                            onClick={() => {
+                                                const newQuantity = Math.max(1, field.value - 1);
+                                                form.setValue('quantity', newQuantity);
+                                            }}
+                                        >
+                                            <MinusIcon className="h-4 w-4" />
+                                        </Button>
+                                        <span className="w-8 text-center text-lg">{field.value}</span>
+                                        <Button
+                                            type="button"
+                                            variant="ghost"
+                                            size="sm"
+                                            className="h-8 w-8 text-gray-300 hover:text-white hover:bg-black/30"
+                                            onClick={() => {
+                                                const newQuantity = field.value + 1;
+                                                form.setValue('quantity', newQuantity);
+                                            }}
+                                        >
+                                            <PlusIcon className="h-4 w-4" />
+                                        </Button>
                                     </div>
-                                </div>
+                                </FormItem>
+                            )}
+                        />
+                    </div>
 
-                                <Form {...form}>
-                                    <form 
-                                        onSubmit={(e) => {
-                                            e.preventDefault();
-                                            const data = form.getValues();
-                                            onSubmit(data);
-                                        }} 
-                                        className="space-y-8"
-                                    >
-                                        <div className="bg-gradient-to-b from-black/30 to-black/40 backdrop-blur-sm 
-                                                      border border-white/10 rounded-xl p-4 sm:p-6">
-                                            <FormField
-                                                control={form.control}
-                                                name="quantity"
-                                                render={({ field }) => (
-                                                    <FormItem>
-                                                        <FormLabel className="text-lg font-medium mb-3">Quantity</FormLabel>
-                                                        <div className="flex items-center space-x-4 bg-black/20 rounded-lg p-2 w-fit">
-                                                            <Button
-                                                                type="button"
-                                                                variant="ghost"
-                                                                size="sm"
-                                                                className="h-8 w-8 text-gray-300 hover:text-white hover:bg-black/30"
-                                                                onClick={() => {
-                                                                    const newQuantity = Math.max(1, field.value - 1);
-                                                                    form.setValue('quantity', newQuantity);
-                                                                }}
-                                                            >
-                                                                <MinusIcon className="h-4 w-4" />
-                                                            </Button>
-                                                            <span className="w-8 text-center text-lg">{field.value}</span>
-                                                            <Button
-                                                                type="button"
-                                                                variant="ghost"
-                                                                size="sm"
-                                                                className="h-8 w-8 text-gray-300 hover:text-white hover:bg-black/30"
-                                                                onClick={() => {
-                                                                    const newQuantity = field.value + 1;
-                                                                    form.setValue('quantity', newQuantity);
-                                                                }}
-                                                            >
-                                                                <PlusIcon className="h-4 w-4" />
-                                                            </Button>
-                                                        </div>
-                                                    </FormItem>
-                                                )}
-                                            />
-                                        </div>
-
-                                        {item?.modifier_groups?.map((modifier, index) => (
-                                            <div key={modifier?.id} 
-                                                 className="bg-gradient-to-b from-black/30 to-black/40 backdrop-blur-sm 
-                                                          border border-white/10 rounded-xl p-4 sm:p-6 space-y-4">
-                                                <div className="flex justify-between items-center">
-                                                    <FormLabel className="text-lg font-medium">{modifier?.name}</FormLabel>
-                                                    <span className={`text-sm px-2 py-1 rounded-full ${
-                                                        modifier?.is_required 
-                                                            ? 'bg-red-500/10 text-red-400 border border-red-500/20' 
-                                                            : 'bg-gray-500/10 text-gray-400 border border-gray-500/20'
-                                                    }`}>
-                                                        {modifier?.is_required ? 'Required' : 'Optional'}
-                                                    </span>
-                                                </div>
-                                                <FormField
-                                                    control={form.control}
-                                                    name={`modifier_groups.${index}.modifier_options`}
-                                                    render={({ field }) => (
-                                                        <FormItem>
-                                                            <FormControl>
-                                                                {modifier.max_sel === 1 ? (
-                                                                    <RadioGroup
-                                                                        value={field.value?.[0]?.id?.toString() || ''}
-                                                                        onValueChange={(value) => {
-                                                                            const selectedOption = modifier?.modifier_options?.find(
-                                                                                opt => opt.id.toString() === value
-                                                                            );
-                                                                            if (selectedOption) {
-                                                                                handleModifierChange(
-                                                                                    modifier.id,
-                                                                                    selectedOption,
-                                                                                    true
-                                                                                );
-                                                                            }
-                                                                        }}
-                                                                        className="space-y-3"
-                                                                    >
-                                                                        {modifier?.modifier_options?.map((option) => (
-                                                                            <div key={option.id} 
-                                                                                 className="flex items-center space-x-3 bg-black/20 rounded-lg p-3 
-                                                                                          hover:bg-black/30 transition-colors">
-                                                                                <RadioGroupItem 
-                                                                                    value={option.id.toString()} 
-                                                                                    id={`${modifier.id}-${option.id}`}
-                                                                                    className="border-white/20"
-                                                                                />
-                                                                                <Label 
-                                                                                    htmlFor={`${modifier.id}-${option.id}`} 
-                                                                                    className="flex justify-between w-full text-sm sm:text-base"
-                                                                                >
-                                                                                    <span>{option.name}</span>
-                                                                                    <span className="text-red-400">+${option.price.toFixed(2)}</span>
-                                                                                </Label>
-                                                                            </div>
-                                                                        ))}
-                                                                    </RadioGroup>
-                                                                ) : (
-                                                                    <div className="space-y-3">
-                                                                        {modifier?.modifier_options?.map((option) => {
-                                                                            const isSelected = (field.value || []).some(opt => opt.id === option.id);
-                                                                            const atMaxSelections = (field.value || []).length >= (modifier?.max_sel || 1);
-                                                                            const isDisabled = !isSelected && atMaxSelections;
-                                                                            
-                                                                            return (
-                                                                                <div key={option.id} 
-                                                                                     className={`flex items-center space-x-3 bg-black/20 rounded-lg p-3 
-                                                                                              transition-colors ${
-                                                                                                  isDisabled 
-                                                                                                      ? 'opacity-50 cursor-not-allowed' 
-                                                                                                      : 'hover:bg-black/30'
-                                                                                              }`}>
-                                                                                    <Checkbox
-                                                                                        id={`${modifier.id}-${option.id}`}
-                                                                                        checked={isSelected}
-                                                                                        disabled={isDisabled}
-                                                                                        onCheckedChange={(checked) => {
-                                                                                            handleModifierChange(
-                                                                                                modifier.id,
-                                                                                                option,
-                                                                                                checked as boolean
-                                                                                            );
-                                                                                        }}
-                                                                                        className="border-white/20"
-                                                                                    />
-                                                                                    <Label 
-                                                                                        htmlFor={`${modifier.id}-${option.id}`}
-                                                                                        className="flex justify-between w-full text-sm sm:text-base"
-                                                                                    >
-                                                                                        <span>{option.name}</span>
-                                                                                        <span className="text-red-400">+${option.price.toFixed(2)}</span>
-                                                                                    </Label>
-                                                                                </div>
-                                                                            );
-                                                                        })}
-                                                                    </div>
-                                                                )}
-                                                            </FormControl>
-                                                        </FormItem>
-                                                    )}
-                                                />
-                                            </div>
-                                        ))}
+                                        
 
                                         <div className="bg-gradient-to-b from-black/30 to-black/40 backdrop-blur-sm 
                                                       border border-white/10 rounded-xl p-4 sm:p-6">
@@ -446,10 +424,6 @@ export default function ItemDetailsForm({initialItem}) {
                                         </AddToCartButton>
                                     </form>
                                 </Form>
-                            </div>
-                        </div>
-                    </div>
-                </div>
             </div>
         </div>
     )
