@@ -264,21 +264,14 @@ export default function ItemDetailsForm({initialItem}) {
                     >
                         
                         {item?.modifier_groups?.map((modifier, index) => (
-                            <div 
-                                key={modifier?.id} 
-                                className="bg-gradient-to-b from-black/30 to-black/40 backdrop-blur-sm border border-white/10 rounded-xl p-4 sm:p-6 space-y-4"
-                            >
-                                <div className="flex justify-between items-center">
-                                    <FormLabel className="text-lg font-medium">{modifier?.name}</FormLabel>
-                                    <span className={`text-sm px-2 py-1 rounded-full ${
-                                        modifier?.is_required 
-                                            ? 'bg-red-500/10 text-red-400 border border-red-500/20' 
-                                            : 'bg-gray-500/10 text-gray-400 border border-gray-500/20'
-                                        }`}
-                                    >
+                            <div key={modifier?.id} className="mb-8" >
+                                <div className="flex items-center justify-between mb-1">
+                                    <FormLabel className="text-base font-semibold text-white">{modifier?.name}</FormLabel>
+                                    <span className="text-[10px] font-semibold text-accent uppercase tracking-wider px-2 py-0.5 bg-accent/10 rounded">
                                         {modifier?.is_required ? 'Required' : 'Optional'}
                                     </span>
                                 </div>
+                                <p className="text-[14px] text-white/40 mb-4">Choose one</p>
                                 <FormField
                                     control={form.control}
                                     name={`modifier_groups.${index}.modifier_options`}
@@ -297,10 +290,7 @@ export default function ItemDetailsForm({initialItem}) {
                                                     className="space-y-3"
                                                 >
                                                     {modifier?.modifier_options?.map((option) => (
-                                                        <div 
-                                                            key={option.id} 
-                                                            className="flex items-center space-x-3 bg-black/20 rounded-lg p-3 hover:bg-black/30 transition-colors"
-                                                        >
+                                                        <div key={option.id} className="flex items-center space-x-3 bg-black/20 rounded-lg p-3 hover:bg-black/30 transition-colors">
                                                             <RadioGroupItem 
                                                                 value={option.id.toString()} 
                                                                 id={`${modifier.id}-${option.id}`}
@@ -392,28 +382,25 @@ export default function ItemDetailsForm({initialItem}) {
                             )}
                         />
                     </div>
-
-                                        
-
-                                        <div className="bg-gradient-to-b from-black/30 to-black/40 backdrop-blur-sm 
-                                                      border border-white/10 rounded-xl p-4 sm:p-6">
-                                            <FormField
-                                                control={form.control}
-                                                name="special_instructions"
-                                                render={({ field }) => (
-                                                    <FormItem>
-                                                        <FormLabel className="text-lg font-medium mb-3">Special Instructions</FormLabel>
-                                                        <FormControl>
-                                                            <Textarea
-                                                                {...field}
-                                                                placeholder="Any special requests?"
-                                                                className="bg-black/20 border-white/10 resize-none focus:ring-red-500"
-                                                            />
-                                                        </FormControl>
-                                                    </FormItem>
-                                                )}
-                                            />
-                                        </div>
+                    {/* Special Instructions */}
+                    <div className="mb-8">
+                        <FormField
+                            control={form.control}
+                            name="special_instructions"
+                            render={({ field }) => (
+                                <FormItem>
+                                    <FormLabel className="text-base font-semibold text-white mb-1">Special Instructions</FormLabel>
+                                    <FormControl>
+                                        <Textarea
+                                            {...field}
+                                            placeholder="e.g. No wasabi, extra spicy mayo, etc."
+                                            className="w-full px-3.5 py-3 rounded-lg bg-surface border border-[#2e2e2e] focus:border-accent text-white text-sm outline-none transition-colors placeholder:text-white/25 resize-none"
+                                        />
+                                    </FormControl>
+                                </FormItem>
+                            )}
+                        />
+                    </div>
 
                                         <AddToCartButton 
                                             type="submit" 
