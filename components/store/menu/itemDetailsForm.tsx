@@ -271,7 +271,7 @@ export default function ItemDetailsForm({initialItem}) {
                                         {modifier?.is_required ? 'Required' : 'Optional'}
                                     </span>
                                 </div>
-                                <p className="text-[14px] text-white/40 mb-4">Choose one</p>
+                                <p className="text-[13px] text-white/40 mb-4">Choose one</p>
                                 <FormField
                                     control={form.control}
                                     name={`modifier_groups.${index}.modifier_options`}
@@ -290,7 +290,7 @@ export default function ItemDetailsForm({initialItem}) {
                                                     className="space-y-3"
                                                 >
                                                     {modifier?.modifier_options?.map((option) => (
-                                                        <div key={option.id} className="flex items-center space-x-3 bg-black/20 rounded-lg p-3 hover:bg-black/30 transition-colors">
+                                                        <div key={option.id} className="cursor-pointer flex items-start gap-1.5 border border-[#2e2e2e] hover:border-white/30">
                                                             <RadioGroupItem 
                                                                 value={option.id.toString()} 
                                                                 id={`${modifier.id}-${option.id}`}
