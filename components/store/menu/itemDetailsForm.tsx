@@ -222,7 +222,7 @@ export default function ItemDetailsForm({initialItem}) {
                         onLoad={handleImageLoad}
                         priority            
                     />
-                    <span className="font-mono text-xs text-[#444]" id="main-image-label">dragon-roll-1.jpg</span>
+                    
                 </div>
                 {/* Thumbnail Images */}
                 <div className="grid grid-cols-4 gap-2.5">
@@ -317,7 +317,7 @@ export default function ItemDetailsForm({initialItem}) {
                                                     return (
                                                         <div 
                                                             key={option.id} 
-                                                            className={`flex items-center space-x-3 bg-black/20 rounded-lg p-3 transition-colors ${isDisabled ? 'opacity-50 cursor-not-allowed' : 'hover:bg-black/30'}`}
+                                                            className={`flex items-center space-x-3 rounded-lg transition-colors ${isDisabled && 'opacity-50 cursor-not-allowed'}`}
                                                         >
                                                             <Checkbox
                                                                 id={`${modifier.id}-${option.id}`}
