@@ -243,7 +243,7 @@ export default function ItemDetailsForm({initialItem}) {
             {/* Right Details */}
             <div>
                 {/* Item Header */}
-                <div className="mb-8 pb-8 border-b border-[#242424]">
+                <div className="mb-8 pb-8 border-b border-[#555555]">
                     {/* <div className="flex flex-wrap gap-1.5 mb-3">
                         <span className="text-[10px] font-medium bg-accent/15 text-accent border border-accent/30 rounded-full px-2.5 py-1 uppercase tracking-wider">Rolls</span>
                         <span className="text-[10px] font-medium bg-white/5 text-white/60 border border-white/10 rounded-full px-2.5 py-1">Contains shellfish</span>
@@ -263,7 +263,7 @@ export default function ItemDetailsForm({initialItem}) {
                     >
                         
                         {item?.modifier_groups?.map((modifier, index) => (
-                            <div key={modifier?.id} className="mb-8" >
+                            <div key={modifier?.id} className="mb-12 p-4 bg-white/[0.03] border-l-2 border-accent rounded " >
                                 <div className="flex items-center justify-between mb-1">
                                     <FormLabel className="text-base font-semibold text-white">{modifier?.name}</FormLabel>
                                     {modifier?.is_required ? (
