@@ -260,18 +260,21 @@ export default function ItemDetailsForm({initialItem}) {
                             const data = form.getValues();
                             onSubmit(data);
                         }} 
-                        className="space-y-8"
                     >
                         
                         {item?.modifier_groups?.map((modifier, index) => (
                             <div key={modifier?.id} className="mb-8" >
                                 <div className="flex items-center justify-between mb-1">
                                     <FormLabel className="text-base font-semibold text-white">{modifier?.name}</FormLabel>
-                                    <span className="text-[10px] font-semibold text-accent uppercase tracking-wider px-2 py-0.5 bg-accent/10 rounded">
-                                        {modifier?.is_required ? 'Required' : 'Optional'}
-                                    </span>
+                                    {modifier?.is_required ? (
+                                        <span className="text-[10px] font-semibold text-accent uppercase tracking-wider px-2 py-0.5 bg-accent/10 rounded">Required</span>
+                                    ) : (
+                                        <span className="text-[10px] font-medium text-white/40 uppercase tracking-wider">Optional</span>
+                                    )}
                                 </div>
-                                <p className="text-[13px] text-white/40 mb-4">Choose one</p>
+                                <p className="text-[13px] text-white/40 mb-4">
+                                    {modifier.max_sel === 1 ? 'Choose one' : `Choose up to ${modifier.max_sel}`}
+                                </p>
                                 <FormField
                                     control={form.control}
                                     name={`modifier_groups.${index}.modifier_options`}
@@ -290,11 +293,10 @@ export default function ItemDetailsForm({initialItem}) {
                                                     className="space-y-3"
                                                 >
                                                     {modifier?.modifier_options?.map((option) => (
-                                                        <div key={option.id} className="cursor-pointer flex items-start gap-1.5 border border-[#2e2e2e] hover:border-white/30">
+                                                        <div key={option.id} className="cursor-pointer flex items-center gap-2">
                                                             <RadioGroupItem 
                                                                 value={option.id.toString()} 
                                                                 id={`${modifier.id}-${option.id}`}
-                                                                className="border-white/20"
                                                             />
                                                             <Label 
                                                                 htmlFor={`${modifier.id}-${option.id}`} 
