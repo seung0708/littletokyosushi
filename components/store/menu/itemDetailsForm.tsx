@@ -210,7 +210,7 @@ export default function ItemDetailsForm({initialItem}) {
 
     
     return (
-        <div className="grid gap-12 mb-20" style={{ gridTemplateColumns: "1fr 1fr" }}>
+        <div className="grid gap-12 mb-20 px-8" style={{ gridTemplateColumns: "1fr 1fr" }}>
             {/* Left Gallery */}
             <div className="sticky top-24 self-start">
                 <div id="main-image" className="aspect-square rounded-2xl overflow-hidden mb-3 flex items-center justify-center" style={{ background:"repeating-linear-gradient(45deg,#222 0,#222 1px,#1a1a1a 1px,#1a1a1a 14px)"}}>
