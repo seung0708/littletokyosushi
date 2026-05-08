@@ -346,14 +346,14 @@ export default function ItemDetailsForm({initialItem}) {
                                 />
                             </div>
                         ))}
-                        <div className="bg-gradient-to-b from-black/30 to-black/40 backdrop-blur-sm border border-white/10 rounded-xl p-4 sm:p-6">
+                        <div className="mb-12 p-4 bg-white/[0.03] border-l-2 border-accent rounded ">
                         <FormField
                             control={form.control}
                             name="quantity"
                             render={({ field }) => (
-                                <FormItem>
-                                    <FormLabel className="text-lg font-medium mb-3">Quantity</FormLabel>
-                                    <div className="flex items-center space-x-4 bg-black/20 rounded-lg p-2 w-fit">
+                                <FormItem className="flex justify-between items-center">
+                                    <FormLabel className="text-base font-semibold text-white">Quantity</FormLabel>
+                                    <div className="flex items-center space-x-4 rounded-lg p-2 w-fit">
                                         <Button
                                             type="button"
                                             variant="ghost"
@@ -385,18 +385,20 @@ export default function ItemDetailsForm({initialItem}) {
                         />
                     </div>
                     {/* Special Instructions */}
-                    <div className="mb-8">
+                    <div className="mb-12 p-4 bg-white/[0.03] border-l-2 border-accent rounded ">
                         <FormField
                             control={form.control}
                             name="special_instructions"
                             render={({ field }) => (
                                 <FormItem>
-                                    <FormLabel className="text-base font-semibold text-white mb-1">Special Instructions</FormLabel>
+                                    <FormLabel className="text-base font-semibold text-white">Special Instructions</FormLabel>
                                     <FormControl>
                                         <Textarea
                                             {...field}
+                                            rows={8}
+                                            
                                             placeholder="e.g. No wasabi, extra spicy mayo, etc."
-                                            className="w-full px-3.5 py-3 rounded-lg bg-surface border border-[#2e2e2e] focus:border-accent text-white text-sm outline-none transition-colors placeholder:text-white/25 resize-none"
+                                            className="w-full px-3.5 py-3 rounded-lg border border-[#2e2e2e] focus:border-accent text-white text-sm outline-none transition-colors placeholder:text-white/25 resize-none"
                                         />
                                     </FormControl>
                                 </FormItem>
