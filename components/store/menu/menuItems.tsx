@@ -16,9 +16,9 @@ const MenuItems: React.FC<MenuItemsProps> = ({ categories }) => {
                         <h2 className="font-serif font-normal text-white text-[28px] tracking-tight">
                             {category.name.split('')[0].toUpperCase() + category.name.substring(1)}
                         </h2>
-                        <div className="flex-1 h-px bg-[#2a2a2a]"></div>
+                        <div className="flex-1 h-px bg-[#555555]"></div>
                     </div>
-                    <div className="grid grid-cols-3 gap-4">
+                    <div className="grid md:grid-cols-3 gap-4">
                         {category.items.map((item) => (
                         <Link key={item.id} href={`/menu/${encodeURIComponent(item.name)}`}
                         >
