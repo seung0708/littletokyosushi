@@ -49,7 +49,6 @@ async function getItem(name: string): Promise<MenuItem | null> {
 
     try {
         const url = `${process.env.NEXT_PUBLIC_MAIN_URL}/api/store/items/${decodeURIComponent(name)}`;
-        console.log('Fetching item from:', url);
         
         const res = await retryWithBackoff(async () => {
             const response = await fetch(url);
