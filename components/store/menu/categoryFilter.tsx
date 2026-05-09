@@ -17,7 +17,7 @@ const CategoryFilter: React.FC<CategoryFilterProps> = ({
         <>
         <button
             onClick={() => onCategoryChange('all')}
-            className={`menu-tab px-5 py-2 rounded-t-md border text-white text-medium ${
+            className={`menu-tab px-5 py-2 rounded-t-md border text-white md:text-medium ${
                 selectedCategory === 'all' 
                 ? 'bg-accent border-accent'
                 : 'border-white/10 bg-black/30 hover:bg-red-600/50'
@@ -29,7 +29,7 @@ const CategoryFilter: React.FC<CategoryFilterProps> = ({
                 <button
                     key={category}
                     onClick={() => onCategoryChange(category)}
-                    className={`menu-tab px-5 py-2 rounded-t-md border border-white/10 text-white text-medium transition-all ${
+                    className={`menu-tab px-5 py-2 rounded-t-md border border-white/10 text-white text-sm md:text-medium transition-all ${
                         selectedCategory === category
                             ? 'bg-accent border-accent'
                             : 'bg-black/30 hover:bg-red-600/50'

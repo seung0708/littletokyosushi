@@ -86,7 +86,7 @@ export default function ItemsContainer() {
     return (
         <div className="bg-dark pt-16">
             <div className="max-w-7xl mx-auto px-6 py-10 pb-0">
-                <p className="text-[11px] font-semibold text-accent tracking-[0.18em] uppercase mb-2.5">Takeout only</p>
+                <p className="text-center md:text-left text-[11px] font-semibold text-accent tracking-[0.18em] uppercase mb-2.5">Takeout only</p>
                 <h1 className="font-serif font-normal text-white tracking-tight mb-8 text-center md:text-left" style={{fontSize: 'clamp(36px, 5vw, 60px)'}}>Our Menu</h1>
                 {/* Category tabs */}
                 <div className="flex gap-2">
