@@ -7,7 +7,7 @@ type MenuItemsProps = {
 };
 
 const MenuItems: React.FC<MenuItemsProps> = ({ categories }) => {
-    
+    //console.log(categories);
     return (
         <div className="max-w-7xl mx-auto px-6 pt-10 pb-20">
             {categories.map((category) => (
@@ -32,7 +32,7 @@ const MenuItems: React.FC<MenuItemsProps> = ({ categories }) => {
                                         <h3 className="text-[15px] font-semibold text-[#111] leading-snug">{item.name}</h3>
                                         <span className="text-sm font-semibold text-accent shrink-0">${item.base_price?.toFixed(2)}</span>
                                     </div>
-                                    <p className="text-xs text-[#888] leading-relaxed flex-1 line-clamp-2">Shrimp tempura, cucumber, avocado on top with eel sauce</p>
+                                    <p className="text-xs text-[#888] leading-relaxed flex-1 line-clamp-2">{item.description}</p>
                                     <div className="flex justify-between items-center mt-auto pt-2.5">
                                         {/* <div className="flex flex-wrap gap-1">
                                             <span className="text-[10px] font-medium bg-accent-light text-accent border border-accent-border rounded-full px-2 py-0.5">Spicy</span>
