@@ -43,7 +43,7 @@ export default function Header() {
                         }
                         {/* Mobile Menu */}
                         {isMobileMenuOpen && (
-                            <MobileNav navLinks={navLinks} />
+                            <MobileNav navLinks={navLinks} isScrolled={isScrolled} />
                         )}
                     </button>
                 </nav>

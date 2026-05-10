@@ -2,7 +2,7 @@ import NavLink from "@/components/store/ui/nav/navLink";
 import { CartIcon } from './ui/nav/icons';
 
 
-const MobileNav = ({navLinks}) => {
+const MobileNav = ({navLinks, isScrolled}) => {
     return (
         <div className="absolute top-full left-0 right-0 border-b border-border bg-background p-6 md:hidden">
             <div className="flex flex-col items-center gap-4">
@@ -15,7 +15,7 @@ const MobileNav = ({navLinks}) => {
                         {link.name}
                     </NavLink>
                 ))}
-                <NavLink href="/cart">Cart</NavLink>
+                <CartIcon isScrolled={isScrolled} />
             </div>                            
         </div>
     );

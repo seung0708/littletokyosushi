@@ -1,8 +1,12 @@
 import Link from "next/link";
 import { useCart } from "@/app/context/cartContext";
 
+type CartIconProps = {
+    isScrolled: boolean;
+}
 
-export const CartIcon = ({isScrolled}) => {
+
+export const CartIcon = ({isScrolled}: CartIconProps) => {
     const { cartItems } = useCart();
     return (
         <Link href="/cart" className="ml-2 flex items-center gap-2 px-4 py-2 rounded-lg bg-white/[0.08] hover:bg-accent text-sm font-semibold text-white transition-colors">
