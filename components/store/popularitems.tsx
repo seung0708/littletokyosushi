@@ -94,11 +94,16 @@ const PopularItems: React.FC = () => {
                     <h2 id='favorites-heading' className="font-serif font-normal text-white tracking-tight" style={{fontSize: 'clamp(28px, 3vw, 40px'}}>Popular Items</h2>
                     <Link href="/menu" className="text-sm font-medium text-accent flex items-center gap-1.5 hover:gap-2.5 transition-all">View full menu <span>→</span></Link>
                 </div>
-                <div className="grid grid-cols-5 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-4">
                     {popularItems.map(item => (
                         <a href={'/menu/' + item.name} className="group cursor-pointer">
                             <div className="aspect-square rounded-[10px] overflow-hidden border-2 border-transparent group-hover:border-accent group-hover:-translate-y-1 transition-all duration-200 flex items-center justify-center" style={{background: "repeating-linear-gradient(45deg,#222 0,#222 1px,#1a1a1a 1px,#1a1a1a 14px)"}}>
-                                <Image src={item.image_urls[0] || "/placeholder.png"} alt={item.name || "Menu Item"} width={300} height={300} className="object-cover w-full h-full" /> 
+                                <Image 
+                                    src={item.image_urls[0] || "/placeholder.png"} 
+                                    alt={item.name || "Menu Item"} 
+                                    width={200}
+                                    height={200}
+                                    className="object-fit w-full  md:object-cover" /> 
                             </div>
                             <div className="mt-2.5 text-center">
                                 <p className="text-[13px] font-medium text-white group-hover:text-accent transition-colors mb-0.5">{item.name}</p>
