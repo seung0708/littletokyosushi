@@ -210,22 +210,22 @@ export default function ItemDetailsForm({initialItem}) {
 
     
     return (
-        <div className="grid gap-12 mb-20 px-8" style={{ gridTemplateColumns: "1fr 1fr" }}>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-12 mb-20 px-8">
             {/* Left Gallery */}
             <div className="sticky top-24 self-start">
-                <div id="main-image" className="aspect-square rounded-2xl overflow-hidden mb-3 flex items-center justify-center" style={{ background:"repeating-linear-gradient(45deg,#222 0,#222 1px,#1a1a1a 1px,#1a1a1a 14px)"}}>
+                <div id="main-image" className="bg-[#222] aspect-square border-2 rounded-2xl overflow-hidden mb-3 flex items-center justify-center">
                     <Image
                         src={`${item.image_urls?.[selectedImage]}`}
                         alt={item.name}
                         fill
-                        className="object-contain object-center"    
+                        className="object-contain object-top rounded-lg"    
                         onLoad={handleImageLoad}
                         priority            
                     />
                     
                 </div>
                 {/* Thumbnail Images */}
-                <div className="grid grid-cols-4 gap-2.5">
+                <div className="hidden md:grid grid-cols-4 gap-2.5">
                     <button className="gallery-thumb active aspect-square rounded-lg overflow-hidden border-2 transition-all flex items-center justify-center" style={{ background:"repeating-linear-gradient(45deg,#222 0,#222 1px,#1a1a1a 1px,#1a1a1a 14px)" }}>
                         <span className ="font-mono text-[9px] text-[#444]">01</span>
                     </button>
