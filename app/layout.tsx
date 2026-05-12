@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from "next";
-import "./globals.css";
+import "@/app/globals.css";
 import { poppins } from "./fonts/fonts";
 import { AuthProvider } from "./context/authContext";
 import { CartProvider } from "./context/cartContext";

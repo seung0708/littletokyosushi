@@ -2,8 +2,8 @@ import Copyright from "./ui/footer/copyright";
 
 export default function Footer() {
     return (
-        <footer className="bg-background text-white">
-            <div className="w-full mx-auto px-4 sm:px-6 lg:px-8 py-12 sm:py-16 lg:py-20">
+        <footer className="max-w-7xl mx-auto bg-background text-white">
+            <div className="px-4 sm:px-6 lg:px-8 py-12 sm:py-16 lg:py-20">
             {/*                 
                 <div className="flex flex-col lg:flex-row gap-12 lg:gap-16 xl:gap-20">
 
