@@ -10,16 +10,16 @@ const Page: React.FC = () => {
     return (
         <>
             <div className="max-w-7xl mx-auto border-b border-[#555] pt-16">
-                <div className="px-6 pt-10 pb-10">
+                <div className="text-center md:text-left px-6 pt-10 pb-10">
                     <p className="text-[11px] font-semibold text-accent tracking-[0.18em] uppercase">Get in touch</p>
                     <h1 className="font-serif normal text-white tracking-tight" style={{fontSize: "clamp(36px, 5vw, 60px"}}>Contact Us</h1>
                 </div>
             </div>
             <section className="bg-background py-16 px-6 pb-20">
-                <div className="max-w-7xl mx-auto grid grid-cols-2 gap-20">
+                <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-20">
                     {/* Form */}
-                    <div>
-                        <h2 className="font-serif font-normal text-white text-[28px] tracking-tight mb-8">Send us a message</h2>
+                    <div className="order-2 md:order-1">
+                        <h2 className="text-center md:text-left font-serif font-normal text-white text-[28px] tracking-tight mb-8">Send us a message</h2>
                         <form id="contact-form" className="flex flex-col gap-5">
                             <div className="flex flex-col gap-2">
                                 <label className="text-[13px] font-medium text-white/60" htmlFor="email">Email: </label>
@@ -33,13 +33,13 @@ const Page: React.FC = () => {
                                 <label className="text-[13px] font-medium text-white/60" htmlFor="message">Message</label>
                                 <textarea id="message" rows={6} placeholder="Your message here..." required className="w-full px-3.5 py-3 rounded-lg bg-black border border-[#2e2e2e] focus:border-accent text-white text-[15px] outline-none transition-colors placeholder:text-white/25" />
                             </div>
-                            <button type="submit" id="submit-btn" className="self-start px-7 py-3.5 rounded-lg bg-accent hover:bg-accent-hover text-white text-[15px] font-semibold outline-none transition-colors placeholder:text-white/25 resize-y">Send Message</button>
+                            <button type="submit" id="submit-btn" className="self-center px-7 py-3.5 rounded-lg bg-accent hover:bg-accent-hover text-white text-[15px] font-semibold outline-none transition-colors placeholder:text-white/25 resize-y">Send Message</button>
                         </form>
                         {/* Success / Fail message */}
                         <p id="success-msg" className="hidden mt-4 text-sm text-green-400">Message sent successfully!</p>
                     </div>
                     {/* Info Left Column */}
-                    <div>
+                    <div className="order-1 md:order-2 text-center md:text-left">
                         <h2 className="font-serif font-normal text-white text-[28px] tracking-tight mb-8">Find us</h2>
                         <div className="flex flex-col gap-7 mb-6">
                             <div>
