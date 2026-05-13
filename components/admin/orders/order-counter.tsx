@@ -29,19 +29,19 @@ export default function OrderCounter() {
                 event: '*',
                 schema: 'public',
                 table: 'orders',
-                filter: 'status=eq.pending'
+                filter: 'status=eq.confirmed'
             }, (payload) => {
                 if (payload.eventType === 'INSERT' && payload.new.status === 'pending') {
                     setCount(prev => prev + 1);
                 }
                 else if (payload.eventType === 'UPDATE') {
-                    // If status changed TO pending and not completed
-                    if (payload.new.status === 'pending' && !payload.new.completed && payload.old.status !== 'pending') {
+                    // If status changed TO confirmed and not completed
+                    if (payload.new.status === 'confirmed' && !payload.new.completed && payload.old.status !== 'confirmed') {
                         setCount(prev => prev + 1);
                     }
-                    // If status changed FROM not_started OR order is completed
+                    // If status changed FROM pending OR order is completed
                     else if (
-                        (payload.old.status === 'not_started' && payload.new.status !== 'not_started') ||
+                        (payload.old.status === 'confirmed' && payload.new.status !== 'confirmed') ||
                         payload.new.completed === true
                     ) {
                         setCount(prev => prev - 1);

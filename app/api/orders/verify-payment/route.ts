@@ -96,7 +96,7 @@ export async function POST(req: Request) {
             const result = await supabase
                 .from('orders')
                 .update({
-                    status: 'not_started',
+                    status: 'confirmed',
                 })
                 .eq('id', orderData.id);
 
