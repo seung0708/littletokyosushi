@@ -12,7 +12,6 @@ export enum OrderStatus {
     READY = 'ready',
     COMPLETED = 'completed',
     CANCELLED = 'cancelled',
-    NOT_STARTED = 'not_started',
     PROCESSING = 'processing',
     REFUNDED = 'refunded'
   }

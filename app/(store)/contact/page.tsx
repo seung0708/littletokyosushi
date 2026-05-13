@@ -9,7 +9,7 @@ export const metadata: Metadata = {
 const Page: React.FC = () => {
     return (
         <>
-            <div className="max-w-7xl mx-auto border-b border-[#555] pt-16">
+            <div className=" md:max-w-7xl mx-auto border-b border-[#555] pt-16">
                 <div className="text-center md:text-left px-6 pt-10 pb-10">
                     <p className="text-[11px] font-semibold text-accent tracking-[0.18em] uppercase">Get in touch</p>
                     <h1 className="font-serif normal text-white tracking-tight" style={{fontSize: "clamp(36px, 5vw, 60px"}}>Contact Us</h1>

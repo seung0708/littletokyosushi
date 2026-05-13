@@ -3,7 +3,7 @@ import { NextResponse } from "next/server";
 
 export async function GET(req: Request) { 
   const { searchParams } = new URL(req.url);
-  const not_started = searchParams.get('not_started');
+  const pending = searchParams.get('pending');
   const completed = searchParams.get('completed');
   const page = Number(searchParams.get('page')) || 1;
   const per_page = 10;
@@ -28,8 +28,8 @@ export async function GET(req: Request) {
     if (completed === 'true') {
       query.eq('status', 'completed')
           .eq('archived', true);
-    } else if (not_started) {
-      query.eq('status', 'not_started');
+    } else if (pending) {
+      query.eq('status', 'pending');
     }
     
     const { data, error, count } = await query;

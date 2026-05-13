@@ -46,7 +46,7 @@ export default function OrdersList() {
     const fetchOrders = async () => {
       setLoading(true)
       try {
-        const response = await fetch('/api/admin/orders?not_started=true')
+        const response = await fetch('/api/admin/orders?pending=true')
         const data = await response.json()
         if (data?.orders) {
           setOrders(data.orders)
@@ -65,7 +65,7 @@ export default function OrdersList() {
         event: 'INSERT',
         schema: 'public',
         table: 'orders',
-        filter: 'status=eq.not_started'
+        filter: 'status=eq.pending'
       }, async (payload) => { 
         const { data: newOrder } = await supabase 
           .from('orders')
@@ -93,10 +93,10 @@ export default function OrdersList() {
         event: 'UPDATE',
         schema: 'public',
         table: 'orders',
-        filter: 'status=eq.not_started'
+        filter: 'status=eq.pending'
       }, async (payload) => {
-        // If status changed TO not_started and not archived
-        if (payload.new.status === 'not_started' && !payload.new.archived && payload.old.status !== 'not_started') {
+        // If status changed TO pending and not archived
+        if (payload.new.status === 'pending' && !payload.new.archived && payload.old.status !== 'pending') {
           const { data: newOrder } = await supabase
             .from('orders')
             .select(`
@@ -119,9 +119,9 @@ export default function OrdersList() {
             playNotificationSound();
           }
         }
-        // If status changed FROM not_started OR order is archived
+        // If status changed FROM pending OR order is archived
         else if (
-          (payload.old.status === 'not_started' && payload.new.status !== 'not_started') ||
+          (payload.old.status === 'pending' && payload.new.status !== 'pending') ||
           payload.new.archived === true
         ) {
           removeOrder(payload.old.id);
@@ -131,7 +131,7 @@ export default function OrdersList() {
         event: 'DELETE',
         schema: 'public',
         table: 'orders',
-        filter: 'status=eq.not_started'
+        filter: 'status=eq.pending'
       }, (payload) => {
         removeOrder(payload.old.id);
       })

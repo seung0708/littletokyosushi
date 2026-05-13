@@ -83,11 +83,6 @@ export async function POST(req: Request) {
                         order_id: orderData.id,
                         status: 'created',  // Show that order was created
                         notes: 'Order confirmed'
-                    },
-                    {
-                        order_id: orderData.id,
-                        status: 'not_started',  // Final status for kitchen
-                        notes: 'Order ready for kitchen'
                     }
                 ]);
         

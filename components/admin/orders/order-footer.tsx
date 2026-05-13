@@ -73,7 +73,7 @@ export default function OrderFooter({order, onMarkReady, onPrint, isConfirmed, f
                   )}
                 />
                 <AnimatePresence>
-                  {!isConfirmed && order.status === 'not_started' && (
+                  {!isConfirmed && order.status === 'pending' && (
                     <motion.div
                       initial={{ opacity: 0, height: 0 }}
                       animate={{ opacity: 1, height: 'auto' }}
