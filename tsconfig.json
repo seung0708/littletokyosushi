@@ -27,9 +27,9 @@
       ]
     },
     "target": "ES2017",
-    "strictNullChecks": false,
-    "strictPropertyInitialization": false,
-    "noImplicitAny": false,
+    "strictNullChecks": true,
+    "strictPropertyInitialization": true,
+    "noImplicitAny": true,
     "useUnknownInCatchVariables": false,
     "allowSyntheticDefaultImports": true,
     "exactOptionalPropertyTypes": false,
