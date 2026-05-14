@@ -13,7 +13,11 @@ interface CartContextType {
 const CartContext = createContext<CartContextType | null>(null);
 
 export const useCart = () => {
-    return useContext(CartContext);
+    const conext = useContext(CartContext);
+    if (!conext) {
+        throw new Error("useCart must be used within a CartProvider");
+    }
+    return conext;
 };
 
 interface CartProviderProps {
