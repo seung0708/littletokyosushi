@@ -4,10 +4,10 @@ export const checkoutSchema = z.object({
     customer: z.object({
         name: z.string().min(1, "Customer name is required"),
         phone: z.string().min(10, "Phone number is required"),
-        email: z.email({ pattern: z.regexes.email })
+        email: z.string().email("Valid email is required")
     }),
     delivery: z.object({
-        method: z.enum(["delivery", "pickup"], {error: "Please select a delivery method"}),
+        method: z.enum(["delivery", "pickup"] as const),
         pickupDate: z.date().optional(),
         pickupTime: z.string().optional(),
         address: z.object({
