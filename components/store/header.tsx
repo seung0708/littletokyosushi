@@ -12,6 +12,10 @@ const navLinks = [
     {name: "Contact Us", href: "/contact"}
 ]
 
+export interface NavProps {
+    navLinks: { name: string; href: string }[];
+    isScrolled: boolean;
+}
 
 export default function Header() {
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)

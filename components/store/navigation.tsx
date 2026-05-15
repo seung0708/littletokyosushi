@@ -1,12 +1,8 @@
 import NavLink from "@/components/store/ui/nav/navLink";
+import { NavProps } from "./header";
 import { CartIcon } from './ui/nav/icons';
 
-interface NavbarProps {
-    navLinks: { name: string; href: string }[];
-    isScrolled: boolean;
-}
-
-export default function Navbar({navLinks, isScrolled}: NavbarProps)
+export default function Navbar({navLinks, isScrolled}: NavProps)
  {
     return(
         <div className="hidden sm:flex items-center gap-8">
