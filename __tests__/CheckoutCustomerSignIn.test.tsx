@@ -5,11 +5,12 @@ import {CartProvider} from '@/app/context/cartContext'
 import {ToastProvider} from '@/app/context/toastContext';
 
 import {useForm} from 'react-hook-form';
+import { CheckoutFormValues } from '@/types/checkout';
 
 
 describe('Does the component render', () => {
     it('should render the component', () => {
-        const {result} = renderHook(() => useForm())
+        const {result} = renderHook(() => useForm<CheckoutFormValues>())
         const mockOnComplete = jest.fn();
         // const mockForm = {
         //     getValues: jest.fn(),

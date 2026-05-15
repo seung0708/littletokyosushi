@@ -99,7 +99,7 @@ const PopularItems: React.FC = () => {
                         <a href={'/menu/' + item.name} className="group cursor-pointer">
                             <div className="aspect-square rounded-[10px] overflow-hidden border-2 border-transparent group-hover:border-accent group-hover:-translate-y-1 transition-all duration-200 flex items-center justify-center" style={{background: "repeating-linear-gradient(45deg,#222 0,#222 1px,#1a1a1a 1px,#1a1a1a 14px)"}}>
                                 <Image 
-                                    src={item.image_urls[0] || "/placeholder.png"} 
+                                    src={item.image_urls?.[0] || "/placeholder.png"} 
                                     alt={item.name || "Menu Item"} 
                                     width={200}
                                     height={200}
@@ -107,7 +107,7 @@ const PopularItems: React.FC = () => {
                             </div>
                             <div className="mt-2.5 text-center">
                                 <p className="text-[13px] font-medium text-white group-hover:text-accent transition-colors mb-0.5">{item.name}</p>
-                                <p className="text-xs text-white/40">${item.base_price.toFixed(2)}</p>
+                                <p className="text-xs text-white/40">${item.base_price?.toFixed(2)}</p>
                             </div>
                        </a>
                        

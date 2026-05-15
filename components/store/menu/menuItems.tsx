@@ -25,7 +25,7 @@ const MenuItems: React.FC<MenuItemsProps> = ({ categories }) => {
                             <article className="group bg-white rounded-xl overflow-hidden cursor-pointer transition-all duration-200 hover:-translate-y-0.5 hover:shadow-[0_16px_40px_rgba(0,0,0,0.5)] flex flex-col">
                                 <div className="h-[180px] flex items-center justify-center shrink-0" style={{ background: '#ede9e4' }}>
                                     <Image 
-                                        src={item.image_urls[0]} 
+                                        src={item.image_urls?.[0] || "/placeholder.png"} 
                                         alt={item.name} 
                                         width={200}
                                         height={200}
