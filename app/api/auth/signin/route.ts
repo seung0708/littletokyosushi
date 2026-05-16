@@ -7,8 +7,8 @@ export async function POST(req: Request) {
   
   const result = signinFormSchema.safeParse(body)
   if(!result.success) {
-    console.error('Validation error:', result.error.errors);
-    return NextResponse.json({error: result.error.errors}, {status: 400})
+    console.error('Validation error:', result.error.message);
+    return NextResponse.json({error: result.error.message}, {status: 400})
   }
 
   const {email, password} = result.data; 
