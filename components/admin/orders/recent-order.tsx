@@ -65,10 +65,9 @@ export default function RecentOrder({order}: {order: Order}) {
           .single();
 
         if (updatedOrder) {
-          setCurrentOrder(updatedOrder as unknown as Order );
-          
-          // Update isConfirmed state based on prep time confirmation
-          if (updatedOrder.prep_time_started_at) {
+          const typedOrder = updatedOrder as unknown as Order;
+          setCurrentOrder(typedOrder);
+          if (typedOrder.prep_time_started_at) {
             setIsConfirmed(true);
           }
         }
