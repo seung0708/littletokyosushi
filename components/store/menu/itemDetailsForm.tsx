@@ -33,7 +33,7 @@ const formSchema = z.object({
             modifier_options: z.array(
                 z.object({
                     id: z.string(),
-                    modifier_group_id: z.number(),
+                    modifier_group_id: z.string(),
                     name: z.string(),
                     price: z.number()
                 })
@@ -44,7 +44,7 @@ const formSchema = z.object({
 
 type FormData = z.infer<typeof formSchema>;
 
-export default function ItemDetailsForm({initialItem}) {
+export default function ItemDetailsForm({initialItem}: {initialItem: MenuItem}) {
     const { showToast } = useToast();
     const { handleCartUpdate } = useCart(); 
     const [loading, setLoading] = useState(false);
@@ -185,7 +185,7 @@ export default function ItemDetailsForm({initialItem}) {
                     modifier_options: [] as {
                         id: string;
                         name: string;
-                        modifier_group_id: number;
+                        modifier_group_id: string;
                         price: number;
                     }[]
                 })));
