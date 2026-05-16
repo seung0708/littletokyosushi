@@ -41,18 +41,11 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ orderI
       
       if (body.status) {
         updateData.status = body.status;
-        
-        if (body.status === 'completed') {
-          updateData.archived = true;
-        } else if (body.status === 'ready') {
-          updateData.status = 'ready';
-        }
       }
       
       if (body.prepTime) {
-        updateData.prep_time_minutes = body.prepTime;
-        updateData.prep_time_confirmed_at = new Date().toISOString();
-        
+        updateData.prep_time = body.prepTime;
+
         if (!body.status) {
           updateData.status = 'preparing';
         }
