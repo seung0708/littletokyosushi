@@ -45,6 +45,7 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ orderI
       
       if (body.prepTime) {
         updateData.prep_time = body.prepTime;
+        updateData.prep_time_started_at = new Date().toISOString();
 
         if (!body.status) {
           updateData.status = 'preparing';
