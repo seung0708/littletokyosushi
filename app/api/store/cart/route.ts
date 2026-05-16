@@ -1,9 +1,10 @@
 import { createClient } from "@/lib/supabase/server";
 import { NextResponse } from "next/server"; 
+import { CartItem } from "@/types/cart";
 
 export async function POST(request: Request) {
     const supabase = await createClient();
-    const { customer_id, items } = await request.json();
+    const { customer_id, items }: { customer_id: string; items: CartItem[] } = await request.json();
     console.log('Creating new cart', { customer_id, items });
     try {
     
@@ -65,7 +66,7 @@ export async function POST(request: Request) {
                 .from('cart_item_modifier_options')
                 .insert(
                     items[0].cart_item_modifiers.flatMap((modifier, index: number) => 
-                        modifier.cart_item_modifier_options.map((option) => ({
+                        modifier.cart_item_modifier_options?.map((option) => ({
                             cart_item_modifiers_id: createItemModifiers?.[index]?.id, 
                             modifier_option_id: option.modifier_option_id,
                             modifier_option_price: option.modifier_option_price,
