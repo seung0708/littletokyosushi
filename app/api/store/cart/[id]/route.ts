@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import { findMatchingCartItem, createNewCartItemWithModifiers,  updateExistingCartItem } from '@/utils/cart';
-
+import { Cart } from '@/types/cart';
 
 
 export async function GET(request: Request, { params }: { params: Promise<{ id: string }> }) {
