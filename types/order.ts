@@ -28,7 +28,7 @@ export interface Order {
     delivery_date?: string;
     delivery_time?: string;
     prep_time_minutes?: number;
-    prep_time_confirmed_at?: string;
+    prep_time_started_at?: string;
     staff_notes?: string;
     total: number;
     sub_total: number;

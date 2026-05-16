@@ -55,7 +55,7 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ orderI
         }
 
         if (status) {
-            if (status === 'ready' && !currentOrder.prep_time_confirmed_at) {
+            if (status === 'ready' && !currentOrder.prep_time_started_at) {
                 return NextResponse.json({ 
                     error: 'Cannot mark order as ready before setting prep time' 
                 }, { status: 400 });

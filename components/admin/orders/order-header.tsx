@@ -14,7 +14,7 @@ export default function OrderHeader({order}: {order: Order}) {
                 {order.status === 'preparing' && (
                   <PrepTimeTimer 
                     prepTimeMinutes={order.prep_time_minutes} 
-                    startTime={order.prep_time_confirmed_at} 
+                    startTime={order.prep_time_started_at} 
                     status={order.status}
                   />
                 )}

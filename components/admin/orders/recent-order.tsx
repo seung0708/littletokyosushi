@@ -18,7 +18,7 @@ import { createClient } from "@/lib/supabase/client";
 export default function RecentOrder({order}: {order: Order}) {
   const [currentOrder, setCurrentOrder] = useState(order);
   const [isConfirmed, setIsConfirmed] = useState(false);
-  
+
   const prepTimeSchema = z.object({
     prepTime: z.number()
       .min(5, "Prep time must be at least 5 minutes")
@@ -61,14 +61,14 @@ export default function RecentOrder({order}: {order: Order}) {
               )
             )
           `)
-          .eq('short_id', order.short_id)
+          .eq('short_id', order.short_id!)
           .single();
 
         if (updatedOrder) {
-          setCurrentOrder(updatedOrder);
+          setCurrentOrder(updatedOrder as unknown as Order );
           
           // Update isConfirmed state based on prep time confirmation
-          if (updatedOrder.prep_time_confirmed_at) {
+          if (updatedOrder.prep_time_started_at) {
             setIsConfirmed(true);
           }
         }
@@ -80,6 +80,10 @@ export default function RecentOrder({order}: {order: Order}) {
     supabase.removeChannel(channel);
   };
 }, [order.short_id]); 
+
+  if (!order.short_id) {
+    return null; 
+  }
 
   const onComplete = async () => {
     try {
