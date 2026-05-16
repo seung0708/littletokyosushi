@@ -338,6 +338,7 @@ export type Database = {
           phone: string
           pickup_at: string | null
           prep_time: number | null
+          prep_time_started_at: number
           short_id: number
           state: string | null
           status: Database["public"]["Enums"]["status"]
@@ -358,6 +359,7 @@ export type Database = {
           phone: string
           pickup_at?: string | null
           prep_time?: number | null
+          prep_time_started_at?: number
           short_id?: never
           state?: string | null
           status?: Database["public"]["Enums"]["status"]
@@ -378,6 +380,7 @@ export type Database = {
           phone?: string
           pickup_at?: string | null
           prep_time?: number | null
+          prep_time_started_at?: number
           short_id?: never
           state?: string | null
           status?: Database["public"]["Enums"]["status"]
