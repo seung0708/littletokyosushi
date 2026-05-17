@@ -41,7 +41,7 @@ const PaymentSection = ({ customerAddress, onSubmit, form, orderTotal }: Props) 
             setLoading(true);
 
             const addressElement = elements.getElement('address');
-            const result = await addressElement.getValue();
+            const result = await addressElement?.getValue();
             
             // Save address to customers table if user is logged in
             if (user?.id) {
@@ -50,7 +50,7 @@ const PaymentSection = ({ customerAddress, onSubmit, form, orderTotal }: Props) 
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
                         user: user,
-                        address: result.value
+                        address: result?.value
                     })
                 });
 
@@ -60,8 +60,8 @@ const PaymentSection = ({ customerAddress, onSubmit, form, orderTotal }: Props) 
             } 
             setLoading(false);
             return {
-                value: result.value,
-                complete: result.complete,
+                value: result?.value,
+                complete: result?.complete,
                 isNewAddress: true // Since we're saving it, we can consider it new
             };
         } catch (error) {
@@ -85,7 +85,7 @@ const PaymentSection = ({ customerAddress, onSubmit, form, orderTotal }: Props) 
             // Submit the form first
             const { error: submitError } = await elements.submit();
             if (submitError) {
-                setError(submitError.message);
+                setError(submitError?.message ?? null);
                 setLoading(false);
                 return;
             }
@@ -102,7 +102,7 @@ const PaymentSection = ({ customerAddress, onSubmit, form, orderTotal }: Props) 
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
-                    amount: Math.round(orderTotal * 100),
+                    amount: Math.round((orderTotal ?? 0) * 100), // Convert to cents
                     orderId: tempOrder.short_id
                 })
             });
@@ -124,7 +124,7 @@ const PaymentSection = ({ customerAddress, onSubmit, form, orderTotal }: Props) 
             });
     
             if (paymentError) {
-                setError(paymentError.message);
+                setError(paymentError?.message ?? null);
                 setLoading(false);
                 return;
             }

@@ -31,8 +31,8 @@ const OrderSummary = ( {form, orderTotal, orderFees}: Props) => {
               
               <div>
               <div>
-                <h4><span className="text-gray-400">Name:</span> {customer?.guestName}</h4>
-                <p><span className="text-gray-400">Email:</span> {customer?.guestEmail || customer?.signinEmail}</p>
+                <h4><span className="text-gray-400">Name:</span> {customer?.name}</h4>
+                <p><span className="text-gray-400">Email:</span> {customer?.email}</p>
                 <p><span className="text-gray-400">Fulfillment Method:</span> {deliveryMethod?.split(' ').map(word => word[0].toUpperCase() + word.slice(1)).join(' ')}</p>
                 <p><span className="text-gray-400">Date:</span> {format(pickupDate, 'EEE MMM dd yyyy')}</p>
                 <p><span className="text-gray-400">Time:</span> {pickupTime}</p>
@@ -45,7 +45,7 @@ const OrderSummary = ( {form, orderTotal, orderFees}: Props) => {
                                 
                                 {item?.cart_item_modifiers?.map(modifier => (
                                   <div key={modifier?.id}>
-                                    <h4>{modifier.modifiers?.name}</h4>
+                                    <h4>{modifier.modifier_group?.name}</h4>
                                     {modifier?.cart_item_modifier_options?.map(option => (
                                       <div key={option?.id}>
                                         <p className="text-gray-400">{option?.modifier_options?.name} +<span>${option?.modifier_options?.price.toFixed(2)}</span></p>
