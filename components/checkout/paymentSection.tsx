@@ -59,6 +59,7 @@ const PaymentSection = ({ customerAddress, onSubmit, form, orderTotal }: Props) 
                 }
             } 
             setLoading(false);
+            if (!result) return null;
             return {
                 value: result?.value,
                 complete: result?.complete,
@@ -151,7 +152,7 @@ const PaymentSection = ({ customerAddress, onSubmit, form, orderTotal }: Props) 
                         onAddressSubmit={handleAddressSubmit}
                         onPaymentSubmit={handleSubmit}
                         form={form}
-                        customerAddress={customerAddress}
+                        customerAddress={customerAddress ?? null}
                     />
             </div>
         </div>
