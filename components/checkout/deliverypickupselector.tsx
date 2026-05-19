@@ -11,6 +11,8 @@ import { RadioGroup, RadioGroupItem } from '../ui/radio-group';
 import { Label } from '../ui/label';
 import { Input } from '../ui/input';
 
+import { cn } from "@/utils/utils"
+import { buttonVariants } from "@/components/ui/button"
 
 interface Props {
     form: UseFormReturn<CheckoutFormValues>
@@ -142,23 +144,28 @@ const DeliveryPickupSelector = ({ form, onComplete}: Props) => {
                                             classNames={{
                                                 months: "space-y-4",
                                                 month: "space-y-4",
-                                                caption: "flex justify-center pt-1 relative items-center text-white",
+                                                month_caption: "flex justify-center pt-1 relative items-center text-white",
                                                 caption_label: "text-sm font-medium text-white",
-                                                nav: "space-x-1 flex items-center",
-                                                nav_button: "h-7 w-7 bg-transparent p-0 opacity-50 hover:opacity-100 text-white",
-                                                nav_button_previous: "absolute left-1",
-                                                nav_button_next: "absolute right-1",
-                                                table: "w-full border-collapse space-y-1",
-                                                head_row: "flex justify-center",
-                                                head_cell: "text-gray-400 rounded-md w-9 font-normal text-[0.8rem]",
-                                                row: "flex w-full mt-2 justify-center",
-                                                cell: "h-9 w-9 text-center text-sm relative p-0 focus-within:relative focus-within:z-20",
-                                                day: "h-9 w-9 p-0 font-normal text-white hover:bg-red-500 hover:text-white rounded-md",
-                                                day_selected: "bg-red-600 text-white hover:bg-red-600 hover:text-white focus:bg-red-600 focus:text-white rounded-md",
-                                                day_today: "bg-red-100 text-red-600 rounded-md",
-                                                day_outside: "text-gray-600",
-                                                day_disabled: "text-gray-600 opacity-50 cursor-not-allowed",
-                                                day_hidden: "invisible",
+                                                nav: "space-x-1 flex items-center h-7 w-7 bg-transparent p-0 opacity-50 hover:opacity-100 text-white",
+                                                button_previous: cn(
+                                                    buttonVariants({ variant: "outline" }),
+                                                    "absolute left-1"
+                                                ),
+                                                button_next: cn(
+                                                    buttonVariants({ variant: "outline" }),
+                                                    "absolute right-1"
+                                                ),
+                                                month_grid: "w-full border-collapse space-y-1",
+                                                weekdays: "flex justify-center",
+                                                weekday: "text-gray-400 rounded-md w-9 font-normal text-[0.8rem]",
+                                                week: "flex w-full mt-2 justify-center",
+                                                day: "h-9 w-9 text-center text-sm relative p-0 focus-within:relative focus-within:z-20",
+                                                day_button: "h-9 w-9 p-0 font-normal text-white hover:bg-red-500 hover:text-white rounded-md",
+                                                selected: "bg-red-600 text-white hover:bg-red-600 hover:text-white focus:bg-red-600 focus:text-white rounded-md",
+                                                today: "bg-red-100 text-red-600 rounded-md",
+                                                outside: "text-gray-600",
+                                                disabled: "text-gray-600 opacity-50 cursor-not-allowed",
+                                                hidden: "invisible",
                                             }}
                                         />
                                         <div className="p-3 border-t border-white/10">
