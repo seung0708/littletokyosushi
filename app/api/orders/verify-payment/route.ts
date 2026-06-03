@@ -74,16 +74,17 @@ export async function POST(req: Request) {
             const {error: statusError} = await supabase
                 .from('order_status_history')
                 .insert([
-                    {
-                        order_id: orderData.id,
-                        status: 'paid',
-                        notes: 'Payment successfully processed'
+                    { 
+                        order_id: orderData.id, 
+                        status: 'pending', 
+                        notes: 'Order created, awaiting payment' 
                     },
-                    {
-                        order_id: orderData.id,
-                        status: 'created',  // Show that order was created
-                        notes: 'Order confirmed'
+                    { 
+                        order_id: orderData.id, 
+                        status: 'confirmed', 
+                        notes: 'Payment successfully processed' 
                     }
+
                 ]);
         
             if (statusError) {
