@@ -7,7 +7,7 @@ type OrderItemModifierInsert = Partial<Database['public']['Tables']['order_item_
 
  
 export async function POST(req: Request) {
-    const { customer, delivery, total, cartItems, fees, status } = await req.json();
+    const { customer, delivery, total, cartItems, fees } = await req.json();
     
     const supabase = await createClient();
 
@@ -20,7 +20,7 @@ export async function POST(req: Request) {
             pickup_at: delivery.method === 'pickup' ? `${delivery.pickupDate}T${delivery.pickupTime}` : null,
             total: total,
             sub_total: fees.subTotal,
-            status: status,
+            status: 'pending',
             order_type: delivery.method,
             address1: delivery.method === 'delivery' ? delivery.address?.address1 : null,
             address2: delivery.method === 'delivery' ? delivery.address?.address2 : null,
