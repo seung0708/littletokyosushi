@@ -11,9 +11,6 @@ export async function POST(req: Request) {
     try {
         // First get the payment intent to get the order ID
         const paymentIntent = await retryOperation(() => Stripe.paymentIntents.retrieve(paymentId));
-        if (paymentIntent.status !== 'succeeded') {
-            return NextResponse.json({ error: 'Payment not successful' }, { status: 400 });
-        }
         
         if(paymentIntent.status !== 'succeeded' || paymentIntent.client_secret !== paymentIntentSecret) {
             return NextResponse.json({ error: 'Payment verification failed' }, { status: 400 });
