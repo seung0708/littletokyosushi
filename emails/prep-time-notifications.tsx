@@ -12,7 +12,7 @@ import {
   interface PrepTimeNotificationEmailProps {
     order: {
       short_id: string;
-      prep_time_minutes: number;
+      prep_time: number;
     };
     customer: {
       first_name: string;
@@ -33,7 +33,7 @@ import {
               Great news! Your order #{order.short_id.toUpperCase()} is now being prepared by our kitchen.
             </Text>
             <Text>
-              Estimated preparation time: {order.prep_time_minutes} minutes
+              Estimated preparation time: {order.prep_time} minutes
             </Text>
             <Text>
               We'll notify you when your order is ready for pickup.
