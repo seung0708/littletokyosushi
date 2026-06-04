@@ -24,7 +24,10 @@ export const createdOrderSchema = z.object({
     }),
     cartItems: z.array(z.object({
         quantity: z.number().int().positive(),
-        base_price: z.object({id: z.string()}),
+        base_price: z.number().nonnegative(),
+        menu_items: z.object({
+            id: z.string(),
+        }),
         cart_item_modifiers: z.array(z.object({
             modifier_option_id: z.string(),
             price: z.number().nonnegative(),
