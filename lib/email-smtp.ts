@@ -39,7 +39,7 @@ export async function sendEmail(to: string, subject: string, html: string) {
 export async function sendOrderConfirmationEmail(order: Order, customer: Customer) {
   const emailHtml = await render(OrderConfirmationEmail({ order, customer }));
   return sendEmail(
-    order.customers.email || customer.signinEmail || customer.guestEmail as string,
+    order.email,
     `Order Confirmation #${order.short_id?.toUpperCase()}`,
     emailHtml
   );
@@ -47,14 +47,14 @@ export async function sendOrderConfirmationEmail(order: Order, customer: Custome
 
 export async function sendPrepTimeNotificationEmail(order: Order, customer: Customer) {
 
-  if (!order.short_id || !order.prep_time_minutes || !customer.first_name) {
+  if (!order.short_id || !order.prep_time || !customer.first_name) {
     throw new Error('Missing required fields for prep time notification email');
   }
 
   const emailHtml = await render(PrepTimeNotificationEmail({
     order: {
       short_id: order.short_id,
-      prep_time_minutes: order.prep_time_minutes
+      prep_time_minutes: order.prep_time
     },
     customer: {
       first_name: customer.first_name

@@ -21,13 +21,14 @@ export interface Order {
     short_id?: string;
     customers: Customer;
     status: OrderStatus;
+    email: string;
     order_type: OrderType;
     delivery_service?: string;
     pickup_date: string;
     pickup_time: string;
     delivery_date?: string;
     delivery_time?: string;
-    prep_time_minutes?: number;
+    prep_time?: number;
     prep_time_started_at?: string;
     staff_notes?: string;
     total: number;
