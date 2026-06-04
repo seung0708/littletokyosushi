@@ -1,13 +1,21 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { Database } from "@/types/database.types";
+import { createdOrderSchema } from "@/schema-validations/order";
 
 type OrderItemInsert = Partial<Database['public']['Tables']['order_items']['Insert']>;
 type OrderItemModifierInsert = Partial<Database['public']['Tables']['order_item_modifiers']['Insert']>;
 
  
 export async function POST(req: Request) {
-    const { customer, delivery, total, cartItems, fees } = await req.json();
+    const body = await req.json();
+    const result = createdOrderSchema.safeParse(body);
+
+    if (!result.success) {
+        return NextResponse.json({ error: 'Invalid order data', details: result.error }, { status: 400 });
+    }
+
+    const { customer, delivery, cartItems, fees, total } = result.data;
     
     const supabase = await createClient();
 
