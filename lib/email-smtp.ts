@@ -53,8 +53,8 @@ export async function sendPrepTimeNotificationEmail(order: Order, customer: Cust
 
   const emailHtml = await render(PrepTimeNotificationEmail({
     order: {
-      short_id: order.short_id,
-      prep_time: order.prep_time
+        short_id: order.short_id,
+        prep_time: order.prep_time
     },
     customer: {
       first_name: customer.first_name

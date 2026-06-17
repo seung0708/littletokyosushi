@@ -9,7 +9,7 @@ export async function middleware(request: NextRequest) {
   const { data: { user } } = await supabase.auth.getUser()
   
   if (request.nextUrl.pathname.startsWith('/admin')) {
-    if (!user) {
+    if (!user || user.is_anonymous) {
       return NextResponse.redirect(new URL('/signin', request.url))
     }
   }

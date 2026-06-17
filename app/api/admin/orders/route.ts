@@ -27,7 +27,6 @@ export async function GET(req: Request) {
     // If completed is true, show only completed orders
     if (completed === 'true') {
       query.eq('status', 'completed')
-          .eq('archived', true);
     } else if (pending) {
       query.eq('status', 'pending');
     }
