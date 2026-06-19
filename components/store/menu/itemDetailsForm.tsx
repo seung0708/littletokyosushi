@@ -149,16 +149,18 @@ export default function ItemDetailsForm({initialItem}: {initialItem: MenuItem}) 
             return {
                 id: modifier.id,
                 modifier_id: modifier.id,
-                modifier_option_name: modifier.name,
+                name: modifier.name,               
                 cart_item_modifier_options: formMod.modifier_options.map(opt => ({
                     modifier_option_id: opt.id,
-                    name: opt.name,
+                    modifier_option_name: opt.name,
                     modifier_option_price: opt.price
                 }))
             }
+
         }).filter(Boolean) as CartItemModifier[];
 
         const cartItem = {
+            id: crypto.randomUUID(),
             menu_items: {
                 id: item?.id || '',
                 name: item?.name || '',
