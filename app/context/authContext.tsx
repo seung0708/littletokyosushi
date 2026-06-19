@@ -44,28 +44,6 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         fetchUser();
     }, []);
 
-    const signup = async (email: string, password: string) => {
-        try {
-           const response = await fetch('/api/auth/signup', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({ email, password }),
-            });
-            const data = await response.json();
-            if(data.user) {
-                setUser(data.user);
-            }
-            
-            if (!response.ok) {
-                throw new Error(data.error || 'Failed to sign up');
-            }
-            return data;
-        } catch (error) {
-            console.error('Eror signing up:', error);
-        }
-    };
     
     const signin = async (email: string, password: string) => {
         try {
@@ -94,23 +72,6 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         }
     };
 
-    const googleSignin = async () => {
-        try {
-            const response = await fetch('/api/auth/oauth', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-            });
-            if (response.redirected) {
-                window.location.href = response.url;
-            }
-            const data = await response.json();
-        } catch (error) {
-            console.error('Error signing in with Google:', error);
-        }
-    };
-
     const signout = async () => {
         try {
             const response = await fetch('/api/auth/signout', {
@@ -131,26 +92,6 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
             console.error('Error signing out:', error);
         }
     };  
-
-    const signinAnonymously = async (email: string, name: string) => {
-        try {
-            const response = await fetch('/api/auth/signin-anonymously', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({ email, name }),
-                credentials: 'include',
-            });
-            const data = await response.json();
-            setUser(data.user); 
-
-            return data; 
-        } catch (error) {
-            console.error('Error signing in anonymously:', error);
-            throw error; 
-        }
-    };
 
     const resetPassword = async (newPassword: string) => {
         try {
