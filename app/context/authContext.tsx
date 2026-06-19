@@ -9,9 +9,6 @@ interface AuthContextType {
     signin: (email: string, password: string) => Promise<User | null>;
     setUser: (user: User | null) => void;
     signout: () => Promise<void>;
-    googleSignin: () => Promise<void>;
-    signup: (email: string, password: string) => Promise<User | null>;
-    signinAnonymously: (email: string, password: string) => Promise<User | null>;
     resetPassword: (password: string, token: string) => Promise<void>;
     waitForUser: () => Promise<User>;
 };
@@ -202,9 +199,6 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
             signin,
             setUser,
             signout,
-            googleSignin,
-            signup,
-            signinAnonymously,
             resetPassword,
             waitForUser
         }}>
