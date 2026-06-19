@@ -44,46 +44,50 @@ export async function POST(request: Request) {
                 { status: 500 }
             );
         }
-        
-        if (items[0].cart_item_modifiers && items[0].cart_item_modifiers.length > 0) {
-            const { data: createItemModifiers, error: createCartItemModifiersError } = await supabase
-                .from('cart_item_modifiers')
-                .insert(
-                    items[0].cart_item_modifiers.map((modifier) => ({
-                        cart_items_id: cartItems?.[0].id,
-                        modifier_id: modifier.id,
-                    }))
-                ).select();
-
-            if (createCartItemModifiersError) {
-                console.error('Error creating cart item modifiers:', createCartItemModifiersError);
-                return NextResponse.json(
-                    { error: 'Failed to create cart item modifiers' },
-                    { status: 500 }
-                );
-            }
-            const {error: createCartItemModifierOptionsError} = await supabase
-                .from('cart_item_modifier_options')
-                .insert(
-                    items[0].cart_item_modifiers.flatMap((modifier, index: number) => 
-                        modifier.cart_item_modifier_options?.map((option) => ({
-                            cart_item_modifiers_id: createItemModifiers?.[index]?.id, 
-                            modifier_option_id: option.modifier_option_id,
-                            modifier_option_price: option.modifier_option_price,
+        for (let i = 0; i < items.length; i++) {
+            const item = items[i];
+            if (item.cart_item_modifiers && item.cart_item_modifiers.length > 0) {
+                const { data: createItemModifiers, error: createCartItemModifiersError } = await supabase
+                    .from('cart_item_modifiers')
+                    .insert(
+                        item.cart_item_modifiers.map((modifier) => ({
+                            cart_items_id: cartItems?.[0].id,
                             modifier_id: modifier.id,
                         }))
+                ).select();
+
+                if (createCartItemModifiersError) {
+                    console.error('Error creating cart item modifiers:', createCartItemModifiersError);
+                    return NextResponse.json(
+                        { error: 'Failed to create cart item modifiers' },
+                        { status: 500 }
+                    );
+                }
+            
+                const {error: createCartItemModifierOptionsError} = await supabase
+                    .from('cart_item_modifier_options')
+                    .insert(
+                        item.cart_item_modifiers.flatMap((modifier, index: number) => 
+                            modifier.cart_item_modifier_options?.map((option) => ({
+                                cart_item_modifiers_id: createItemModifiers?.[index]?.id, 
+                                modifier_option_id: option.modifier_option_id,
+                                modifier_option_price: option.modifier_option_price,
+                                modifier_id: modifier.id,
+                            }))
+                        )
                     )
-                )
-            if (createCartItemModifierOptionsError) {
-                console.error('Error creating cart item modifier options:', createCartItemModifierOptionsError);
-                return NextResponse.json(
-                    { error: 'Failed to create cart item modifier options' },
-                    { status: 500 }
-                );
+
+                if (createCartItemModifierOptionsError) {
+                    console.error('Error creating cart item modifier options:', createCartItemModifierOptionsError);
+                    return NextResponse.json(
+                        { error: 'Failed to create cart item modifier options' },
+                        { status: 500 }
+                    );
+                }
+
             }
-
         }
-
+        
         return NextResponse.json(
             { message: 'Cart created successfully', cartId: cart.id, cartItems , status: 200 }
         );
