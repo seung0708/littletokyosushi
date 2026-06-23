@@ -35,7 +35,8 @@
     "exactOptionalPropertyTypes": false,
     "noPropertyAccessFromIndexSignature": false,
     "noErrorTruncation": true,
-    "noUncheckedIndexedAccess": false
+    "noUncheckedIndexedAccess": false,
+    "types": ["jest"]
   },
   "include": [
     "next-env.d.ts",
@@ -47,5 +48,5 @@
   "exclude": [
     "node_modules"
   ], 
-  "types": ["jest"]
+  
 }
