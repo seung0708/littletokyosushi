@@ -80,8 +80,8 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ orderI
 
         if (prepTime) {
             updateData = {
-                prep_time_minutes: prepTime,
-                prep_time_confirmed_at: new Date(),
+                prep_time: prepTime,
+                prep_time_started_at: new Date(),
                 status: 'preparing'
             };
         } else if (status === 'ready') {
@@ -92,8 +92,7 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ orderI
         } else if (status === 'completed') {
             updateData = {
                 status: 'completed',
-                completed_at: new Date(),
-                archived: true
+                completed_at: new Date()
             };
         }
 
