@@ -5,6 +5,7 @@ import {
     sendPrepTimeNotificationEmail,
     sendOrderReadyNotificationEmail
 } from '@/lib/email-smtp';
+import { isValidTransition } from "@/utils/orderState";
 
 export async function GET(req: Request, { params }: { params: Promise<{ orderId: string }> }) {
     const { orderId } = await params;
@@ -54,18 +55,10 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ orderI
             return NextResponse.json({ error: 'Order not found' }, { status: 404 });
         }
 
-        if (status) {
-            if (status === 'ready' && !currentOrder.prep_time_started_at) {
-                return NextResponse.json({ 
-                    error: 'Cannot mark order as ready before setting prep time' 
-                }, { status: 400 });
-            }
-
-            if (status === 'completed' && currentOrder.status !== 'ready') {
-                return NextResponse.json({ 
-                    error: 'Can only complete orders that are ready' 
-                }, { status: 400 });
-            }
+        if (status && !isValidTransition(currentOrder.status, status)) {
+            return NextResponse.json({ 
+                error: `Invalid transition from ${currentOrder.status} to ${status}` 
+            }, { status: 400 });
         }
 
         if (prepTime) {
@@ -92,9 +85,9 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ orderI
         } else if (status === 'completed') {
             updateData = {
                 status: 'completed',
-                completed_at: new Date()
+                completed_at: new Date(),
             };
-        }
+        }   
 
         const { data: updatedOrder, error: updateError } = await supabase
             .from('orders')
