@@ -1,16 +1,15 @@
 /** @jest-environment node */
 
-import {POST} from "@/app/api/orders/route";
+import { POST } from "../../app/api/orders/route";
 
 const mockSingle = jest.fn();
-const mockSelect = jest.fn(() => ({ single: mockSingle }));
-const mockInsert = jest.fn(() => ({ select: mockSelect }));
-const mockFrom = jest.fn(() => ({ insert: mockInsert }));
+const mockEq = jest.fn();
+const mockSelect = jest.fn();
+const mockInsert = jest.fn();
+const mockFrom = jest.fn();
 
 jest.mock("../../lib/supabase/server", () => ({
-    createClient: jest.fn(() => ({
-        from: mockFrom,
-    })),
+    createClient: jest.fn(() => ({ from: mockFrom })),
 }));
 
 const validBody = {
@@ -27,15 +26,28 @@ const validBody = {
     }]
 };
 
+
 describe('POST /api/orders', () => {
-    beforeEach(() => jest.clearAllMocks());
+    beforeEach(() => {
+        jest.clearAllMocks();
+
+        mockEq.mockReturnValue({ single: mockSingle });
+    mockFrom.mockReturnValue({ insert: mockInsert, select: mockSelect });
+    mockInsert.mockReturnValue({ select: mockSelect });
+
+    // Call 1 — orders insert chain
+    mockSelect.mockReturnValueOnce({ single: mockSingle, eq: mockEq });
+    // Call 2 — order_items insert (awaited directly, no .single())
+    mockSelect.mockResolvedValueOnce({ data: [{ id: 'item-123' }], error: null });
+    // Call 3 — final orders select chain
+    mockSelect.mockReturnValue({ single: mockSingle, eq: mockEq });
+
+    mockSingle
+        .mockResolvedValueOnce({ data: { id: '123', short_id: 'abc123' }, error: null })
+        .mockResolvedValueOnce({ data: { id: '123', order_items: [] }, error: null });
+    });
 
     it('creates an order with valid data', async () => {
-        mockSingle
-            .mockResolvedValueOnce({ data: { id: '123', short_id: 'abc123' }, error: null })
-            .mockResolvedValueOnce({ data: { id: '123', order_items: [] }, error: null });
-        mockSelect.mockReturnValue({ single: mockSingle });
-
         const req = new Request('http://localhost/api/orders', {
             method: 'POST',
             body: JSON.stringify(validBody),
