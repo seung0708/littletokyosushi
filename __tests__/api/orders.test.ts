@@ -1,3 +1,5 @@
+/** @jest-environment node */
+
 import {POST} from "@/app/api/orders/route";
 
 const mockSingle = jest.fn();
@@ -5,7 +7,7 @@ const mockSelect = jest.fn(() => ({ single: mockSingle }));
 const mockInsert = jest.fn(() => ({ select: mockSelect }));
 const mockFrom = jest.fn(() => ({ insert: mockInsert }));
 
-jest.mock("@/lib/supabase", () => ({
+jest.mock("../../lib/supabase/server", () => ({
     createClient: jest.fn(() => ({
         from: mockFrom,
     })),
@@ -48,6 +50,8 @@ describe('POST /api/orders', () => {
         });
 
         const res = await POST(req);
+        const body = await res.json();
+        console.log(body);
         expect(res.status).toBe(200);
     });
 
