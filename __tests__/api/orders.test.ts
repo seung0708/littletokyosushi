@@ -14,25 +14,18 @@ jest.mock("../../lib/supabase/server", () => ({
 }));
 
 const validBody = {
-    customer: {
-        name: "John Doe",
-        email: "john@example.com",
-        phone: "1234567890",
-    },
-    delivery: {
-        medthod: 'pickup',
-        pickupDate: "2026-06-30",
-
-    },
+    customer: { name: 'John Doe', email: 'john@example.com', phone: '2135551234' },
+    delivery: { method: 'pickup', pickupDate: '2026-06-30', pickupTime: '12:00' },
     total: 21.00,
+    fees: { subTotal: 19.00 },
     cartItems: [{
-         id: 'abc',
+        id: 'abc',
         quantity: 1,
         base_price: 19.00,
         total_price: 19.00,
         menu_items: { id: 'item-123' },
     }]
-}
+};
 
 describe('POST /api/orders', () => {
     beforeEach(() => jest.clearAllMocks());

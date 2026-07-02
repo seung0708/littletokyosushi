@@ -7,14 +7,14 @@ export const createdOrderSchema = z.object({
         phone: z.string().min(1, 'Customer phone number is required')
     }),
     delivery: z.object({
-        method: z.enum(['pickup', 'delivery']),
+        method: z.enum(['pickup', 'delivery'] as const),
         pickupDate: z.string().optional(), 
         pickupTime: z.string().optional(),
         address: z.object({
             address1: z.string().min(1),
             address2: z.string().optional(),
             city: z.string().min(1),
-            state: z.string().length(1),
+            state: z.string().length(2),
             zipCode: z.string().min(5).max(5),
         }).optional()
     }), 
