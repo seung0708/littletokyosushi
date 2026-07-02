@@ -56,7 +56,6 @@ describe('POST /api/orders', () => {
 
         const res = await POST(req);
         const body = await res.json();
-        console.log(body);
         expect(res.status).toBe(200);
     });
 
