@@ -9,7 +9,6 @@ type OrderItemModifierInsert = Partial<Database['public']['Tables']['order_item_
  
 export async function POST(req: Request) {
     const body = await req.json();
-    console.log(body, 'orders route')
     const result = createdOrderSchema.safeParse(body);
 
     if (!result.success) {
