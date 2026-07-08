@@ -28,17 +28,17 @@ describe('PATCH /api/admin/orders/[orderId]', () => {
     });
 
     it('updates status from pending to confirmed', async () => {
-    mockSingle
-        .mockResolvedValueOnce({ data: { id: '123', status: 'pending', customers: { email: 'john@example.com' } }, error: null })
-        .mockResolvedValueOnce({ data: { id: '123', status: 'confirmed', customers: { email: 'john@example.com' } }, error: null });
+        mockSingle
+            .mockResolvedValueOnce({ data: { id: '123', status: 'pending', customers: { email: 'john@example.com' } }, error: null })
+            .mockResolvedValueOnce({ data: { id: '123', status: 'confirmed', customers: { email: 'john@example.com' } }, error: null });
 
-    const req = new Request('http://localhost/api/admin/orders/abc123', {
-        method: 'PATCH',
-        body: JSON.stringify({ status: 'confirmed' }),
-        headers: { 'Content-Type': 'application/json' }
+        const req = new Request('http://localhost/api/admin/orders/abc123', {
+            method: 'PATCH',
+            body: JSON.stringify({ status: 'confirmed' }),
+            headers: { 'Content-Type': 'application/json' }
+        });
+
+        const res = await PATCH(req, { params: Promise.resolve({ orderId: 'abc123' }) });
+        expect(res.status).toBe(200);
     });
-
-    const res = await PATCH(req, { params: Promise.resolve({ orderId: 'abc123' }) });
-    expect(res.status).toBe(200);
-});
 });
