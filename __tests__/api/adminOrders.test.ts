@@ -54,5 +54,5 @@ describe('PATCH /api/admin/orders/[orderId]', () => {
 
         const res = await PATCH(req, { params: Promise.resolve({ orderId: 'bad-id' }) });
         expect(res.status).toBe(404);
-});
+    });
 });
