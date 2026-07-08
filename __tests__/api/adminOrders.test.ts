@@ -55,4 +55,18 @@ describe('PATCH /api/admin/orders/[orderId]', () => {
         const res = await PATCH(req, { params: Promise.resolve({ orderId: 'bad-id' }) });
         expect(res.status).toBe(404);
     });
+
+    it('returns 400 for an invalid status transition', async () => {
+        mockSingle
+            .mockResolvedValueOnce({ data: { id: '123', status: 'completed', customers: null }, error: null });
+
+        const req = new Request('http://localhost/api/admin/orders/abc123', {
+            method: 'PATCH',
+            body: JSON.stringify({ status: 'confirmed' }),
+            headers: { 'Content-Type': 'application/json' }
+        });
+
+        const res = await PATCH(req, { params: Promise.resolve({ orderId: 'abc123' }) });
+        expect(res.status).toBe(400);
+});
 });
