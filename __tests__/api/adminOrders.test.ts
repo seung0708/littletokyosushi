@@ -41,4 +41,18 @@ describe('PATCH /api/admin/orders/[orderId]', () => {
         const res = await PATCH(req, { params: Promise.resolve({ orderId: 'abc123' }) });
         expect(res.status).toBe(200);
     });
+
+    it('returns 404 if order is not found', async () => {
+        mockSingle
+            .mockResolvedValueOnce({ data: null, error: null });
+
+        const req = new Request('http://localhost/api/admin/orders/bad-id', {
+            method: 'PATCH',
+            body: JSON.stringify({ status: 'confirmed' }),
+            headers: { 'Content-Type': 'application/json' }
+        });
+
+        const res = await PATCH(req, { params: Promise.resolve({ orderId: 'bad-id' }) });
+        expect(res.status).toBe(404);
+});
 });
