@@ -50,4 +50,4 @@ eslintrc.json
 tmpclaude*
 .claude/
 
-claude.md
+*.md

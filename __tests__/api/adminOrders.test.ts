@@ -68,5 +68,5 @@ describe('PATCH /api/admin/orders/[orderId]', () => {
 
         const res = await PATCH(req, { params: Promise.resolve({ orderId: 'abc123' }) });
         expect(res.status).toBe(400);
-});
+    });
 });
