@@ -28,7 +28,6 @@ export async function POST(req: Request) {
                 .from('orders')
                 .select(`
                     *,
-                    customers (*),
                     order_items (
                         *,
                         order_item_modifiers (
@@ -117,20 +116,6 @@ export async function POST(req: Request) {
             // Continue processing even if emails fail
         }
 
-        // Clear the cart after successful payment verification
-        await retryOperation(async () => {
-            const result = await supabase
-                .from('carts')
-                .delete()
-                .eq('customer_id', orderData.customer_id);
-
-            if (result.error) {
-                console.error('Error clearing cart:', result.error);
-                throw result.error;
-            }
-
-            return result.data;
-        })
 
         // Clean up duplicate status records - keep only the latest
         await retryOperation(async () => {
