@@ -16,9 +16,7 @@ export async function GET(req: Request) {
       .select(`
         *,
         items:order_items(*,
-          order_item_modifiers(*,
-              order_item_modifier_options(*)
-          )
+          order_item_modifiers(*)
         )
       `, { count: 'exact' })
       .order('created_at', { ascending: false });
