@@ -7,15 +7,16 @@ import { checkAdminAuth } from '../../../../utils/auth';
 const ITEMS_PER_PAGE = 8;
 
 // Helper functions
-async function fetchCategoryId(supabase: SupabaseClient, categoryId: string) {
+async function fetchCategoryId(supabase: SupabaseClient, category: string) {
     const { data, error } = await supabase
         .from("categories")
-        .select("id")
-        .eq("id", categoryId)
+        .select("*")
+        .eq("name", category)
         .single();
 
     if (error) throw error;
-    return data.id;
+
+    return data.id; 
 }
 
 async function uploadImageToStorage(supabase: SupabaseClient, file: ArrayBuffer, filename: string, contentType: string) {
@@ -177,7 +178,7 @@ export async function POST(req: Request) {
             .insert({
                 name,
                 description,
-                category_name: categoryId,
+                category_id: categoryId,
                 price,
                 image_urls: imagePaths // Supabase will handle the JSONB conversion
             });
