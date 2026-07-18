@@ -15,7 +15,6 @@ export async function GET(req: Request) {
       .from('orders')
       .select(`
         *,
-        customers(*),
         items:order_items(*,
           order_item_modifiers(*,
               order_item_modifier_options(*)
