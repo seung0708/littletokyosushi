@@ -126,7 +126,7 @@ const AddNewItemForm: React.FC = () => {
         }
         
         try {
-          const response = await fetch('/api/items', {
+          const response = await fetch('/api/admin/items', {
             method: 'POST',
             body: formData
           });
