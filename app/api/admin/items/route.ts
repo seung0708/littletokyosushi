@@ -7,15 +7,15 @@ import { checkAdminAuth } from '../../../../utils/auth';
 const ITEMS_PER_PAGE = 8;
 
 // Helper functions
-async function fetchCategoryId(supabase: SupabaseClient, category: string) {
+async function fetchCategoryId(supabase: SupabaseClient, categoryId: string) {
     const { data, error } = await supabase
         .from("categories")
-        .select("name")
-        .eq("name", category)
+        .select("id")
+        .eq("id", categoryId)
         .single();
 
     if (error) throw error;
-    return data.name;
+    return data.id;
 }
 
 async function uploadImageToStorage(supabase: SupabaseClient, file: ArrayBuffer, filename: string, contentType: string) {
