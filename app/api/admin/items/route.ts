@@ -49,8 +49,7 @@ export async function GET(request: Request) {
                 .from('menu_items')
                 .select(`
                     *,
-                    categories (
-                        name
+                    categories(id)
                     )
                 `)
                 .eq('name', name)
@@ -83,9 +82,7 @@ export async function GET(request: Request) {
             .from('menu_items')
             .select(`
                 *,
-                categories (
-                    name
-                )
+                categories (id)
             `);
 
         if (query) {

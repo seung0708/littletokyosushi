@@ -30,7 +30,7 @@ export const addNewItemSchema = z.object({
     name: z.string()
         .min(4, 'Must be at least 4 characters'), 
     description: z.string()
-        .min(20, 'Must be at least 20 characters'), 
+        .min(4, 'Must be at least 20 characters'), 
     category: z.string()
         .min(1, "Category is required"),
     price: z.preprocess(
