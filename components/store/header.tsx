@@ -39,6 +39,8 @@ export default function Header() {
                     <button
                         onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
                         className={`md:hidden z-60 ${isScrolled ? "text-foreground" : "text-white"}`}
+                        aria-label={isMobileMenuOpen ? "Close menu" : "Open menu"}
+                        aria-expanded={isMobileMenuOpen}
                     >
                         {isMobileMenuOpen ? 
                             <HamburgerMenu />
