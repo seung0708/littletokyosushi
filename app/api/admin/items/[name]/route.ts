@@ -7,8 +7,7 @@ export async function GET(request: Request, { params }: { params: Promise<{ name
 ) {
     const supabase = await createClient();
     const { pathname } = new URL(request.url);
-    console.log('Received GET request for item details:', { pathname, params });
-    const isAdminRequest = pathname.startsWith('api/admin/items/');
+    const isAdminRequest: boolean = pathname.startsWith('api/admin/items/');
 
     try {
         if (isAdminRequest) {

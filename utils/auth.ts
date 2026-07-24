@@ -31,19 +31,3 @@ export async function checkAdminAuth() {
     }
 }
 
-export function transformItem(item: any) {
-    return {
-        id: item.id,
-        name: item.name,
-        description: item.description,
-        base_price: item.base_price,
-        category_id: item.category_id,
-        is_available: item.is_available,
-        special_instructions: item.special_instructions || '',
-        image_urls: item.image_urls || [],
-        category_name: item.categories?.name || '',
-        quantity_in_stock: 0,
-        low_stock_threshold: 0,
-        sync_status: false
-    };
-}
