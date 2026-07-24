@@ -6,15 +6,15 @@ import { format } from "date-fns"
 
 export async function GET() {
   const supabase = await createClient()
-  const days = 7 // Last 7 days
+  const days: number = 7 // Last 7 days
 
   try {
     // Use endOfDay for the current date to include today's data
-    const endDate = endOfDay(new Date())
+    const endDate: Date = endOfDay(new Date())
     // Start date is 7 days ago
-    const startDate = startOfDay(subDays(endDate, days))
+    const startDate: Date = startOfDay(subDays(endDate, days))
     // Previous period starts 14 days ago
-    const previousStartDate = startOfDay(subDays(startDate, days))
+    const previousStartDate: Date = startOfDay(subDays(startDate, days))
 
     const analyticsData = await getAnalytics(
       format(startDate, 'yyyy-MM-dd'),
@@ -43,13 +43,13 @@ export async function GET() {
     if (currentError || previousError) throw currentError || previousError
 
     // Calculate totals and changes
-    const currentTotals = {
+    const currentTotals: {revenue: number; sales: number; orders: number} = {
       revenue: currentOrders?.reduce((sum, order) => sum + (order.total || 0), 0) || 0,
       sales: currentOrders?.reduce((sum, order) => sum + (order.sub_total || 0), 0) || 0,
       orders: currentOrders?.length || 0
     }
     
-    const previousTotals = {
+    const previousTotals: {revenue: number; sales: number; orders: number} = {
       revenue: previousOrders?.reduce((sum, order) => sum + (order.total || 0), 0) || 0,
       sales: previousOrders?.reduce((sum, order) => sum + (order.sub_total || 0), 0) || 0,
       orders: previousOrders?.length || 0
