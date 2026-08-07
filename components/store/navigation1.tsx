@@ -409,12 +409,6 @@ export default function Navigation1() {
                       <span className="sr-only">Open menu</span>
                       <Bars3Icon aria-hidden="true" className="size-6" />
                     </button>
-
-                    {/* Search */}
-                    <a href="#" className="ml-2 p-2 text-gray-400 hover:text-gray-500">
-                      <span className="sr-only">Search</span>
-                      <MagnifyingGlassIcon aria-hidden="true" className="size-6" />
-                    </a>
                   </div>
 
                   {/* Logo (lg-) */}
@@ -429,24 +423,6 @@ export default function Navigation1() {
 
                   <div className="flex flex-1 items-center justify-end">
                     <div className="flex items-center lg:ml-8">
-                      <div className="flex space-x-8">
-                        <div className="hidden lg:flex">
-                          <a href="#" className="-m-2 p-2 text-gray-400 hover:text-gray-500">
-                            <span className="sr-only">Search</span>
-                            <MagnifyingGlassIcon aria-hidden="true" className="size-6" />
-                          </a>
-                        </div>
-
-                        <div className="flex">
-                          <a href="#" className="-m-2 p-2 text-gray-400 hover:text-gray-500">
-                            <span className="sr-only">Account</span>
-                            <UserIcon aria-hidden="true" className="size-6" />
-                          </a>
-                        </div>
-                      </div>
-
-                      <span aria-hidden="true" className="mx-4 h-6 w-px bg-gray-200 lg:mx-6" />
-
                       <div className="flow-root">
                         <a href="#" className="group -m-2 flex items-center p-2">
                           <ShoppingCartIcon
