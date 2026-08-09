@@ -8,16 +8,17 @@ import {
 import {navigation} from './navConfig';
 import { Bars3Icon, ShoppingCartIcon, XMarkIcon } from '@heroicons/react/24/outline'
 
+import Logo from './logo';
+
 export default function DesktopNav() {
     const [open, setOpen] = useState(false)
-    return (
-         
+    return (     
         <div className="bg-black">
             <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
                 <div className="border-b border-gray-200">
                     <div className="flex h-16 items-center justify-between">
                         {/* Logo (lg+) */}
-                       
+                        <Logo />
         
                         <div className="hidden h-full lg:flex">
                             {/* Mega menus */}
