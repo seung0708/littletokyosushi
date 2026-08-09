@@ -48,16 +48,7 @@ export default function Header() {
                             <div className="border-b border-gray-200">
                                 <div className="flex h-16 items-center justify-between">
                                     {/* Logo (lg+) */}
-                                    <div className="hidden lg:flex lg:items-center">
-                                        <a href="#">
-                                            <span className="sr-only">Your Company</span>
-                                            <img
-                                                alt="Little Tokyo Sushi logo"
-                                                src="/assets/images/logo.png"
-                                                className="h-12 w-auto"
-                                            />
-                                        </a>
-                                    </div>
+                                    <Logo />
                                     <div className="hidden h-full lg:flex">
                                         {/* Mega menus */}
                                         <PopoverGroup className="inset-x-0 bottom-0 px-4">
@@ -178,49 +169,35 @@ export default function Header() {
                                         </PopoverGroup>
                                     </div>
         
-                          {/* Mobile menu and search (lg-) */}
-                          <div className="flex flex-1 items-center lg:hidden">
-                            <button
-                              type="button"
-                              onClick={() => setOpen(true)}
-                              className="-ml-2 rounded-md bg-white p-2 text-gray-400"
-                            >
-                              <span className="sr-only">Open menu</span>
-                              <Bars3Icon aria-hidden="true" className="size-6" />
-                            </button>
-                          </div>
+                                    {/* Mobile menu and search (lg-) */}
+                                    <div className="flex flex-1 items-center lg:hidden">
+                                        <button
+                                            type="button"
+                                            onClick={() => setOpen(true)}
+                                            className="-ml-2 rounded-md bg-white p-2 text-gray-400"
+                                        >
+                                            <span className="sr-only">Open menu</span>
+                                            <Bars3Icon aria-hidden="true" className="size-6" />
+                                        </button>
+                                    </div>
         
-                          {/* Logo (lg-) */}
-                          <a href="#" className="lg:hidden">
-                            <span className="sr-only">Your Company</span>
-                            <img
-                              alt=""
-                              src="/assets/images/logo.png"
-                              className="h-8 w-auto"
-                            />
-                          </a>
-        
-                          <div className="flex flex-1 items-center justify-end">
-                            <div className="flex items-center lg:ml-8">
-                              <div className="flow-root">
-                                <a href="#" className="group -m-2 flex items-center p-2">
-                                  <ShoppingCartIcon
-                                    aria-hidden="true"
-                                    className="size-6 shrink-0 text-gray-400 group-hover:text-gray-500"
-                                  />
-                                  <span className="ml-2 text-sm font-medium text-gray-700 group-hover:text-gray-800">0</span>
-                                  <span className="sr-only">items in cart, view bag</span>
-                                </a>
-                              </div>
+                                    {/* Logo (lg-) */}
+                                    <a href="#" className="lg:hidden">
+                                        <span className="sr-only">Your Company</span>
+                                        <img
+                                            alt=""
+                                            src="/assets/images/logo.png"
+                                            className="h-8 w-auto"
+                                        />
+                                    </a>
+                                    {/* Shopping Cart */}
+                                </div>
                             </div>
-                          </div>
                         </div>
-                      </div>
                     </div>
-                  </div>
                 </nav>
-              </header>
-            </div>
+            </header>
+        </div>
     );
 }
 
