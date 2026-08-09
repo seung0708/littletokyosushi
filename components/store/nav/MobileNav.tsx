@@ -18,10 +18,10 @@ export default function MobileNav() {
     const [open, setOpen] = useState(false)
     return (
         <Dialog open={open} onClose={setOpen} className="relative z-40 lg:hidden">
-                <DialogBackdrop
-                  transition
-                  className="fixed inset-0 bg-black/25 transition-opacity duration-300 ease-linear data-closed:opacity-0"
-                />
+            <DialogBackdrop
+                transition
+                className="fixed inset-0 bg-black/25 transition-opacity duration-300 ease-linear data-closed:opacity-0"
+            />
                 <div className="fixed inset-0 z-40 flex">
                   <DialogPanel
                     transition

@@ -25,8 +25,6 @@ export default function Navigation1() {
 
   return (
     <div className="bg-white">
-      
-
       <header className="relative">
         <nav aria-label="Top">
           {/* Banner */}
