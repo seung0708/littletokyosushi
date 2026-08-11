@@ -16,7 +16,7 @@ export default function DesktopNav() {
     return (     
         <div className="bg-black relative">
             <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-                <div className="border-b border-gray-200">
+                <div>
                     <div className="flex h-16 items-center justify-between">
                         {/* Logo (lg+) */}
                         <Logo />
@@ -26,8 +26,8 @@ export default function DesktopNav() {
                                 <div className="flex h-full justify-center space-x-8">
                                     {navigation.pages.map((page, pageIdx) => (
                                         page.categories ? (
-                                            <Popover key={page.name} className="flex">
-                                                <div className="relative flex">
+                                            <Popover key={page.name} className="relative flex">
+                                                <div className="flex">
                                                     <PopoverButton className="group relative flex items-center justify-center text-sm font-medium text-white transition-colors duration-200 ease-out hover:text-red data-open:text-indigo-600">
                                                         {page.name}
                                                         <span
@@ -38,17 +38,14 @@ export default function DesktopNav() {
                                                 </div>
                                                 <PopoverPanel
                                                     transition
-                                                    className="absolute inset-x-0 top-full z-20 w-full bg-white text-sm text-gray-500 transition data-closed:opacity-0 data-enter:duration-200 data-enter:ease-out data-leave:duration-150 data-leave:ease-in"
+                                                    className="absolute left-0 top-full z-20 mt-2 w-56 rounded-md bg-white text-sm text-gray-500 shadow-lg ring-1 ring-black/5 transition data-closed:opacity-0 data-enter:duration-200 data-enter:ease-out data-leave:duration-150 data-leave:ease-in"
                                                 >
-                                                    <div aria-hidden="true" className="absolute inset-0 top-1/2 bg-white shadow-sm" />
-                                                    <div className="relative bg-white">
-                                                        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-                                                            {page.categories.map((item) => (
-                                                                <a key={item.name} href={item.href} className="hover:text-gray-800 block">
-                                                                    {item.name}
-                                                                </a>
-                                                            ))}
-                                                        </div>
+                                                    <div className="py-2">
+                                                        {page.categories.map((item) => (
+                                                            <a key={item.name} href={item.href} className="block px-4 py-2 hover:bg-gray-50 hover:text-gray-900">
+                                                                {item.name}
+                                                            </a>
+                                                        ))}
                                                     </div>
                                                 </PopoverPanel>
                                             </Popover>
@@ -60,48 +57,46 @@ export default function DesktopNav() {
                                     ))}
                               </div>
                             </PopoverGroup>
-                          </div>
-        
-                          {/* Mobile menu and search (lg-) */}
-                          <div className="flex flex-1 items-center lg:hidden">
+                        </div>
+                        {/* Mobile menu and search (lg-) */}
+                        <div className="flex flex-1 items-center lg:hidden">
                             <button
-                              type="button"
-                              onClick={() => setOpen(true)}
-                              className="-ml-2 rounded-md bg-white p-2 text-gray-400"
+                                type="button"
+                                onClick={() => setOpen(true)}
+                                className="-ml-2 rounded-md p-2 text-gray-400"
                             >
-                              <span className="sr-only">Open menu</span>
-                              <Bars3Icon aria-hidden="true" className="size-6" />
+                                <span className="sr-only">Open menu</span>
+                                <Bars3Icon aria-hidden="true" className="size-6" />
                             </button>
-                          </div>
-        
-                          {/* Logo (lg-) */}
-                          <a href="#" className="lg:hidden">
+                        </div>
+                        {/* Logo (lg-) */}
+                        <a href="#" className="lg:hidden">
                             <span className="sr-only">Your Company</span>
                             <img
-                              alt=""
-                              src="/assets/images/logo.png"
-                              className="h-8 w-auto"
+                                alt=""
+                                src="/assets/images/logo.png"
+                                className="h-8 w-auto"
                             />
-                          </a>
-        
-                          <div className="flex flex-1 items-center justify-end">
+                        </a>
+                        {/* Shopping cart */}
+                        <div className="flex flex-1 items-center justify-end">
                             <div className="flex items-center lg:ml-8">
-                              <div className="flow-root">
-                                <a href="#" className="group -m-2 flex items-center p-2">
-                                  <ShoppingCartIcon
-                                    aria-hidden="true"
-                                    className="size-6 shrink-0 text-gray-400 group-hover:text-gray-500"
-                                  />
-                                  <span className="ml-2 text-sm font-medium text-gray-700 group-hover:text-gray-800">0</span>
-                                  <span className="sr-only">items in cart, view bag</span>
-                                </a>
-                              </div>
+                                <div className="flow-root">
+                                    <a href="#" className="group -m-2 flex items-center p-2">
+                                        <ShoppingCartIcon
+                                            aria-hidden="true"
+                                            className="size-6 shrink-0 text-white group-hover:text-gray-500"
+                                        />
+                                        <span className="ml-2 text-sm font-medium text-white group-hover:text-gray-800">0</span>
+                                        <span className="sr-only">items in cart, view bag</span>
+                                    </a>
+                                </div>
                             </div>
-                          </div>
                         </div>
-                      </div>
                     </div>
-                  </div>
+                </div>
+            </div>
+        </div>
     ) 
 }
 
