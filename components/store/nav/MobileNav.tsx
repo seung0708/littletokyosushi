@@ -43,37 +43,37 @@ export default function MobileNav() {
                     <TabGroup className="mt-2">
                       <div className="border-b border-gray-200">
                         <TabList className="-mb-px flex space-x-8 px-4">
-                          {navigation.categories.map((category) => (
+                          {navigation.pages.map((page) => (
                             <Tab
-                              key={category.name}
+                              key={page.name}
                               className="flex-1 border-b-2 border-transparent px-1 py-4 text-base font-medium whitespace-nowrap text-gray-900 data-selected:border-indigo-600 data-selected:text-indigo-600"
                             >
-                              {category.name}
+                              {page.name}
                             </Tab>
                           ))}
                         </TabList>
                       </div>
                       <TabPanels as={Fragment}>
-                        {navigation.categories.map((category, categoryIdx) => (
-                          <TabPanel key={category.name} className="space-y-12 px-4 pt-10 pb-6">
+                        {navigation.pages.map((page, pageIdx) => (
+                          <TabPanel key={page.name} className="space-y-12 px-4 pt-10 pb-6">
                             <div className="grid grid-cols-1 items-start gap-x-6 gap-y-10">
                               <div className="grid grid-cols-1 gap-x-6 gap-y-10">
                                 <div>
-                                  <p id={`mobile-featured-heading-${categoryIdx}`} className="font-medium text-gray-900">
+                                  <p id={`mobile-featured-heading-${pageIdx}`} className="font-medium text-gray-900">
                                     Featured
                                   </p>
                                   <ul
                                     role="list"
-                                    aria-labelledby={`mobile-featured-heading-${categoryIdx}`}
+                                    aria-labelledby={`mobile-featured-heading-${pageIdx}`}
                                     className="mt-6 space-y-6"
                                   >
-                                    {category.featured.map((item) => (
+                                    {/* {category.featured.map((item) => (
                                       <li key={item.name} className="flex">
                                         <a href={item.href} className="text-gray-500">
                                           {item.name}
                                         </a>
                                       </li>
-                                    ))}
+                                    ))} */}
                                   </ul>
                                 </div>
                                 <div>
@@ -81,13 +81,13 @@ export default function MobileNav() {
                                     Categories
                                   </p>
                                   <ul role="list" aria-labelledby="mobile-categories-heading" className="mt-6 space-y-6">
-                                    {category.categories.map((item) => (
+                                    {/* {category.categories.map((item) => (
                                       <li key={item.name} className="flex">
                                         <a href={item.href} className="text-gray-500">
                                           {item.name}
                                         </a>
                                       </li>
-                                    ))}
+                                    ))} */}
                                   </ul>
                                 </div>
                               </div>
@@ -97,13 +97,13 @@ export default function MobileNav() {
                                     Collection
                                   </p>
                                   <ul role="list" aria-labelledby="mobile-collection-heading" className="mt-6 space-y-6">
-                                    {category.collection.map((item) => (
+                                    {/* {category.collection.map((item) => (
                                       <li key={item.name} className="flex">
                                         <a href={item.href} className="text-gray-500">
                                           {item.name}
                                         </a>
                                       </li>
-                                    ))}
+                                    ))} */}
                                   </ul>
                                 </div>
         
@@ -112,13 +112,13 @@ export default function MobileNav() {
                                     Brands
                                   </p>
                                   <ul role="list" aria-labelledby="mobile-brand-heading" className="mt-6 space-y-6">
-                                    {category.brands.map((item) => (
+                                    {/* {category.brands.map((item) => (
                                       <li key={item.name} className="flex">
                                         <a href={item.href} className="text-gray-500">
                                           {item.name}
                                         </a>
                                       </li>
-                                    ))}
+                                    ))} */}
                                   </ul>
                                 </div>
                               </div>

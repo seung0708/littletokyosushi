@@ -23,11 +23,11 @@ export default function DesktopNav() {
                             {/* Mega menus */}
                             <PopoverGroup className="inset-x-0 bottom-0 px-4">
                                 <div className="flex h-full justify-center space-x-8">
-                                    {navigation.categories.map((category, categoryIdx) => (
-                                        <Popover key={category.name} className="flex">
+                                    {navigation.pages.map((page, pageIdx) => (
+                                        <Popover key={page.name} className="flex">
                                             <div className="relative flex">
                                                 <PopoverButton className="group relative flex items-center justify-center text-sm font-medium text-white transition-colors duration-200 ease-out hover:text-gray-800 data-open:text-indigo-600">
-                                                    {category.name}
+                                                    {page.name}
                                                     <span
                                                         aria-hidden="true"
                                                         className="absolute inset-x-0 -bottom-px z-30 h-0.5 transition duration-200 ease-out group-data-open:bg-indigo-600"/>
@@ -45,23 +45,23 @@ export default function DesktopNav() {
                                                             <div className="grid grid-cols-2 gap-x-8 gap-y-10">
                                                                 <div>
                                                                     <p
-                                                                        id={`desktop-featured-heading-${categoryIdx}`}
+                                                                        id={`desktop-featured-heading-${pageIdx}`}
                                                                         className="font-medium text-gray-900"
                                                                     >
                                                                         Featured
                                                                     </p>
                                                                     <ul
                                                                         role="list"
-                                                                        aria-labelledby={`desktop-featured-heading-${categoryIdx}`}
+                                                                        aria-labelledby={`desktop-featured-heading-${pageIdx}`}
                                                                       className="mt-6 space-y-6 sm:mt-4 sm:space-y-4"
                                                                     >
-                                                                        {category.featured.map((item) => (
+                                                                        {/* {category.featured.map((item) => (
                                                                             <li key={item.name} className="flex">
                                                                                 <a href={item.href} className="hover:text-gray-800">
                                                                                     {item.name}
                                                                                 </a>
                                                                             </li>
-                                                                        ))}
+                                                                        ))} */}
                                                                     </ul>
                                                                 </div>
                                                                 <div>
@@ -73,13 +73,13 @@ export default function DesktopNav() {
                                                                           aria-labelledby="desktop-categories-heading"
                                                                         className="mt-6 space-y-6 sm:mt-4 sm:space-y-4"
                                                                     >
-                                                                        {category.categories.map((item) => (
+                                                                        {/* {category.categories.map((item) => (
                                                                             <li key={item.name} className="flex">
                                                                                 <a href={item.href} className="hover:text-gray-800">
                                                                                     {item.name}
                                                                                 </a>
                                                                             </li>
-                                                                        ))}
+                                                                        ))} */}
                                                                     </ul>
                                                                 </div>
                                                             </div>
@@ -93,13 +93,13 @@ export default function DesktopNav() {
                                                                         aria-labelledby="desktop-collection-heading"
                                                                         className="mt-6 space-y-6 sm:mt-4 sm:space-y-4"
                                                                     >
-                                                                        {category.collection.map((item) => (
+                                                                        {/* {category.collection.map((item) => (
                                                                             <li key={item.name} className="flex">
                                                                                 <a href={item.href} className="hover:text-gray-800">
                                                                                     {item.name}
                                                                                 </a>
                                                                             </li>
-                                                                        ))}
+                                                                        ))} */}
                                                                     </ul>
                                                                 </div>
                                                                 <div>
@@ -111,13 +111,13 @@ export default function DesktopNav() {
                                                                         aria-labelledby="desktop-brand-heading"
                                                                         className="mt-6 space-y-6 sm:mt-4 sm:space-y-4"
                                                                     >
-                                                                        {category.brands.map((item) => (
+                                                                        {/* {category.brands.map((item) => (
                                                                             <li key={item.name} className="flex">
                                                                                 <a href={item.href} className="hover:text-gray-800">
                                                                                     {item.name}
                                                                                 </a>
                                                                             </li>
-                                                                        ))}
+                                                                        ))} */}
                                                                      </ul>
                                                                 </div>
                                                             </div>
