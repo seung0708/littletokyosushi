@@ -14,7 +14,7 @@ export default function DesktopNav() {
     const [open, setOpen] = useState(false)
     console.log('navigation', navigation)
     return (     
-        <div className="bg-black">
+        <div className="bg-black relative">
             <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
                 <div className="border-b border-gray-200">
                     <div className="flex h-16 items-center justify-between">
@@ -38,18 +38,18 @@ export default function DesktopNav() {
                                                 </div>
                                                 <PopoverPanel
                                                     transition
-                                                    className="absolute inset-x-0 top-full left-80 z-20 w-100 bg-white text-sm text-gray-500 transition data-closed:opacity-0 data-enter:duration-200 data-enter:ease-out data-leave:duration-150 data-leave:ease-in"
+                                                    className="absolute inset-x-0 top-full z-20 w-full bg-white text-sm text-gray-500 transition data-closed:opacity-0 data-enter:duration-200 data-enter:ease-out data-leave:duration-150 data-leave:ease-in"
                                                 >
-                                                      <div aria-hidden="true" className="absolute inset-0 top-1/2 bg-white shadow-sm" />
-                                                        <div className="relative bg-white">
-                                                             {page.categories.map((item) => (
-                                                                        <li key={item.name} className="flex">
-                                                                        <a href={item.href} className="hover:text-gray-800">
-                                                                            {item.name}
-                                                                        </a>
-                                                                        </li>
-                                                                    ))}
+                                                    <div aria-hidden="true" className="absolute inset-0 top-1/2 bg-white shadow-sm" />
+                                                    <div className="relative bg-white">
+                                                        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+                                                            {page.categories.map((item) => (
+                                                                <a key={item.name} href={item.href} className="hover:text-gray-800 block">
+                                                                    {item.name}
+                                                                </a>
+                                                            ))}
                                                         </div>
+                                                    </div>
                                                 </PopoverPanel>
                                             </Popover>
                                         ) : (
