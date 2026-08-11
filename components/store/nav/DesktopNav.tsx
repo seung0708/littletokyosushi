@@ -38,7 +38,7 @@ export default function DesktopNav() {
                                                 </div>
                                                 <PopoverPanel
                                                     transition
-                                                    className="absolute inset-x-0 top-full z-20 w-full bg-white text-sm text-gray-500 transition data-closed:opacity-0 data-enter:duration-200 data-enter:ease-out data-leave:duration-150 data-leave:ease-in"
+                                                    className="absolute inset-x-0 top-full left-80 z-20 w-100 bg-white text-sm text-gray-500 transition data-closed:opacity-0 data-enter:duration-200 data-enter:ease-out data-leave:duration-150 data-leave:ease-in"
                                                 >
                                                       <div aria-hidden="true" className="absolute inset-0 top-1/2 bg-white shadow-sm" />
                                                         <div className="relative bg-white">
