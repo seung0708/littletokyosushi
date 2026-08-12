@@ -1,10 +1,4 @@
 import {useState} from 'react'
-import {
-    Popover,
-    PopoverButton,
-    PopoverGroup,
-    PopoverPanel,
-} from '@headlessui/react'
 import {navigation} from './navConfig';
 import { Bars3Icon, ShoppingCartIcon, XMarkIcon } from '@heroicons/react/24/outline'
 
@@ -22,25 +16,21 @@ export default function DesktopNav() {
                         <Logo />
                         <div className="hidden h-full lg:flex">
                             {/* Mega menus */}
-                            <PopoverGroup className="inset-x-0 bottom-0 px-4">
+                            <div className="inset-x-0 bottom-0 px-4">
                                 <div className="flex h-full justify-center space-x-8">
                                     {navigation.pages.map((page, pageIdx) => (
                                         page.categories ? (
-                                            <Popover key={page.name} className="group relative flex">
+                                            <div key={page.name} className="group relative flex">
                                                 <div className="flex">
-                                                    <PopoverButton className="group relative flex items-center justify-center text-sm font-medium text-white transition-colors duration-200 ease-out hover:text-red data-open:text-indigo-600">
+                                                    <button className="group relative flex items-center justify-center text-sm font-medium text-white transition-colors duration-200 ease-out hover:text-red data-open:text-indigo-600">
                                                         {page.name}
                                                         <span
                                                             aria-hidden="true"
                                                             className="absolute inset-x-0 -bottom-px z-30 h-0.5 transition duration-200 ease-out group-data-open:bg-indigo-600"
                                                         />
-                                                    </PopoverButton>
+                                                    </button>
                                                 </div>
-                                                <PopoverPanel
-                                                    static
-                                                    className="absolute left-0 top-full z-20 w-56 rounded-md bg-white text-sm text-black shadow-lg ring-1 ring-black/5 opacity-0 pointer-events-none transition-opacity duration-150 group-hover:opacity-100 group-hover:pointer-events-auto"
-
-                                                >
+                                                <div className="absolute left-0 top-full z-20 w-56 rounded-md bg-white text-sm text-black shadow-lg ring-1 ring-black/5 opacity-0 pointer-events-none transition-opacity duration-150 group-hover:opacity-100 group-hover:pointer-events-auto">
                                                     <div className="py-2">
                                                         {page.categories.map((item) => (
                                                             <a key={item.name} href={item.href} className="block px-4 py-2 hover:bg-gray-50 hover:text-gray-900">
@@ -48,8 +38,8 @@ export default function DesktopNav() {
                                                             </a>
                                                         ))}
                                                     </div>
-                                                </PopoverPanel>
-                                            </Popover>
+                                                </div>
+                                            </div>
                                         ) : (
                                             <a key={page.name} href={page.href} className="flex items-center text-sm font-medium text-white hover: text-gray-300">
                                                 {page.name}
@@ -57,7 +47,7 @@ export default function DesktopNav() {
                                         )
                                     ))}
                               </div>
-                            </PopoverGroup>
+                            </div>
                         </div>
                         {/* Mobile menu and search (lg-) */}
                         <div className="flex flex-1 items-center lg:hidden">
