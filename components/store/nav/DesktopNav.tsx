@@ -4,7 +4,7 @@ import { Bars3Icon, ShoppingCartIcon, XMarkIcon } from '@heroicons/react/24/outl
 
 import Logo from './logo';
 
-export default function DesktopNav() {
+export default function DesktopNav({categories}) {
     const [open, setOpen] = useState(false)
     console.log('navigation', navigation)
     return (     

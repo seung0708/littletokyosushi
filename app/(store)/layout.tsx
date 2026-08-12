@@ -2,10 +2,20 @@ import {ReactNode} from 'react';
 import Header from '../../components/store/header';
 import Footer from "@/components/store/footer"
 
-export default function MainLayout({children}: {children: ReactNode}) {
+import {createClient} from '@/lib/supabase/client'
+
+const supabase = createClient();
+
+export default async function MainLayout({children}: {children: ReactNode}) {
+    const supabase = await createClient();
+
+    const {data: categories, error} = await supabase
+        .from('categories')
+        .select('*')
+
     return (
         <>
-            <Header />
+            <Header catogires={categories} />
             <main className="overflow-x-hidden">{children}</main>
             <Footer />
         </>
