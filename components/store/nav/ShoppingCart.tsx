@@ -1,6 +1,9 @@
+import { useCart } from "@/app/context/cartContext";
 import {ShoppingCartIcon } from '@heroicons/react/24/outline'
 
 export default function ShoppingCart() {
+    const { cartItems } = useCart();
+
     return (
         <div className="flex flex-1 items-center justify-end">
             <div className="flex items-center lg:ml-8">
