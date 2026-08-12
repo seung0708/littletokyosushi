@@ -26,7 +26,7 @@ export default function DesktopNav() {
                                 <div className="flex h-full justify-center space-x-8">
                                     {navigation.pages.map((page, pageIdx) => (
                                         page.categories ? (
-                                            <Popover key={page.name} className="relative flex">
+                                            <Popover key={page.name} className="group relative flex">
                                                 <div className="flex">
                                                     <PopoverButton className="group relative flex items-center justify-center text-sm font-medium text-white transition-colors duration-200 ease-out hover:text-red data-open:text-indigo-600">
                                                         {page.name}
@@ -37,8 +37,9 @@ export default function DesktopNav() {
                                                     </PopoverButton>
                                                 </div>
                                                 <PopoverPanel
-                                                    transition
-                                                    className="absolute left-0 top-full z-20 mt-2 w-56 rounded-md bg-white text-sm text-gray-500 shadow-lg ring-1 ring-black/5 transition data-closed:opacity-0 data-enter:duration-200 data-enter:ease-out data-leave:duration-150 data-leave:ease-in"
+                                                    static
+                                                    className="absolute left-0 top-full z-20 w-56 rounded-md bg-white text-sm text-black shadow-lg ring-1 ring-black/5 opacity-0 pointer-events-none transition-opacity duration-150 group-hover:opacity-100 group-hover:pointer-events-auto"
+
                                                 >
                                                     <div className="py-2">
                                                         {page.categories.map((item) => (
