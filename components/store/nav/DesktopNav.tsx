@@ -2,9 +2,11 @@ import {useState} from 'react'
 import {navigation} from './navConfig';
 import { Bars3Icon, ShoppingCartIcon, XMarkIcon } from '@heroicons/react/24/outline'
 
+import {Category} from '@/types/category';
+
 import Logo from './logo';
 
-export default function DesktopNav({categories}) {
+export default function DesktopNav({categories}: {categories: Category[]}) {
     const [open, setOpen] = useState(false)
     console.log('navigation', navigation)
     return (     
