@@ -12,7 +12,7 @@ export default async function MainLayout({children}: {children: ReactNode}) {
 
     return (
         <>
-            <Header categories={categories} />
+            <Header categories={categories ?? []} />
             <main className="overflow-x-hidden">{children}</main>
             <Footer />
         </>
