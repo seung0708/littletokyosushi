@@ -1,18 +1,9 @@
 export const navigation = {
   pages: [
-    { name: 'About', href: '#' },
-    { name: 'Menu', 
-      href: '#',
-      categories: [
-        {name: 'Sushi', href: '#'},
-        {name: 'Rolls', href: '#'},
-        {name: 'Combos', href: '#'},
-        {name: 'Bowls', href: '#'},
-        {name: 'Party Trays', href: '#'},
-        {name: 'Extras', href: '#'}
-      ]
+    { name: 'About', href: '/about' },
+    { name: 'Menu',  href: '/menu'
      },
-     {name: 'Contact Us', href: '#'}
+     {name: 'Contact Us', href: '/contact'}
     ]
     
 }
