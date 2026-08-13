@@ -3,14 +3,16 @@
 import {useState, useEffect} from 'react';
 import Navbar from "./navigation"
 
+import {Category} from '@/types/category'
 
-export default function Header() {
+
+export default function Header({categories}: {categories: Category[]}) {
     const [open, setOpen] = useState(false)
 
     return (
         <div className="bg-white">
             <header className="relative">
-                <Navbar />
+                <Navbar categories={categories} />
             </header>
         </div>
     );

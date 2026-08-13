@@ -1,10 +1,7 @@
 import {ReactNode} from 'react';
 import Header from '../../components/store/header';
 import Footer from "@/components/store/footer"
-
-import {createClient} from '@/lib/supabase/client'
-
-const supabase = createClient();
+import {createClient} from '@/lib/supabase/server'
 
 export default async function MainLayout({children}: {children: ReactNode}) {
     const supabase = await createClient();
@@ -15,7 +12,7 @@ export default async function MainLayout({children}: {children: ReactNode}) {
 
     return (
         <>
-            <Header catogires={categories} />
+            <Header categories={categories} />
             <main className="overflow-x-hidden">{children}</main>
             <Footer />
         </>
