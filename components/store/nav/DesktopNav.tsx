@@ -1,10 +1,12 @@
 import {useState} from 'react'
 import {navigation} from './navConfig';
-import { Bars3Icon, ShoppingCartIcon } from '@heroicons/react/24/outline'
+import { Bars3Icon } from '@heroicons/react/24/outline'
 
 import Link from 'next/link'
 
 import {Category} from '@/types/category';
+
+import ShoppingCart from '@/components/store/nav/ShoppingCart';
 
 import Logo from './logo';
 
@@ -66,28 +68,14 @@ export default function DesktopNav({categories}: {categories: Category[]}) {
                         </div>
                         {/* Logo (lg-) */}
                         <a href="#" className="lg:hidden">
-                            <span className="sr-only">Your Company</span>
+                            <span className="sr-only">Little Tokyo Sushi</span>
                             <img
                                 alt=""
                                 src="/assets/images/logo.png"
                                 className="h-8 w-auto"
                             />
                         </a>
-                        {/* Shopping cart */}
-                        <div className="flex flex-1 items-center justify-end">
-                            <div className="flex items-center lg:ml-8">
-                                <div className="flow-root">
-                                    <a href="#" className="group -m-2 flex items-center p-2">
-                                        <ShoppingCartIcon
-                                            aria-hidden="true"
-                                            className="size-6 shrink-0 text-white group-hover:text-gray-500"
-                                        />
-                                        <span className="ml-2 text-sm font-medium text-white group-hover:text-gray-800">0</span>
-                                        <span className="sr-only">items in cart, view bag</span>
-                                    </a>
-                                </div>
-                            </div>
-                        </div>
+                        <ShoppingCart />
                     </div>
                 </div>
             </div>
