@@ -2,13 +2,15 @@ import {useState} from 'react'
 import {navigation} from './navConfig';
 import { Bars3Icon, ShoppingCartIcon } from '@heroicons/react/24/outline'
 
+import Link from 'next/link'
+
 import {Category} from '@/types/category';
 
 import Logo from './logo';
 
 export default function DesktopNav({categories}: {categories: Category[]}) {
     const [open, setOpen] = useState(false)
-    console.log('navigation', navigation)
+    
     return (     
         <div className="bg-black relative">
             <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
@@ -24,13 +26,13 @@ export default function DesktopNav({categories}: {categories: Category[]}) {
                                         page.name === 'Menu' ? (
                                             <div key={page.name} className="group relative flex">
                                                 <div className="flex">
-                                                    <button className="group relative flex items-center justify-center text-sm font-medium text-white transition-colors duration-200 ease-out hover:text-red data-open:text-indigo-600">
+                                                    <Link href="/menu" className="group relative flex items-center justify-center text-sm font-medium text-white transition-colors duration-200 ease-out hover:text-red data-open:text-indigo-600">
                                                         {page.name}
                                                         <span
                                                             aria-hidden="true"
                                                             className="absolute inset-x-0 -bottom-px z-30 h-0.5 transition duration-200 ease-out group-data-open:bg-indigo-600"
                                                         />
-                                                    </button>
+                                                    </Link>
                                                 </div>
                                                 <div className="absolute left-0 top-full z-20 w-56 rounded-md bg-white text-sm text-black shadow-lg ring-1 ring-black/5 opacity-0 pointer-events-none transition-opacity duration-150 group-hover:opacity-100 group-hover:pointer-events-auto">
                                                     <div className="py-2">
