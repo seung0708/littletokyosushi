@@ -47,7 +47,7 @@ export default function DesktopNav({categories}: {categories: Category[]}) {
                                                 </div>
                                             </div>
                                         ) : (
-                                            <a key={page.name} href={page.href} className="flex items-center text-sm font-medium text-white hover: text-gray-300">
+                                            <a key={page.name} href={page.href} className="flex items-center text-sm font-medium text-white hover:text-gray-300">
                                                 {page.name}
                                             </a> 
                                         )
