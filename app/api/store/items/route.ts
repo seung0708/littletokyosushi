@@ -14,20 +14,9 @@ export async function GET() {
                     name
                 )
             `)
-            .order('category_name', { ascending: true });
-        if (error) throw error;
         
-        // // Group items by category
-        // const groupedData = data.reduce((acc: Record<string, any[]>, item) => {
-        //     const categoryId = item.category_id;
-        //     const categoryName = item.categories?.name || 'Uncategorized';
-            
-        //     if (!acc[categoryId]) {
-        //         acc[categoryId] = [];
-        //     }
-        //     acc[categoryId].push(item);
-        //     return acc;
-        // }, {});
+        
+        if (error) throw error;
 
         return NextResponse.json(data);
 
