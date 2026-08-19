@@ -25,32 +25,18 @@ export default function DesktopNav({categories}: {categories: Category[]}) {
                             <div className="inset-x-0 bottom-0 px-4">
                                 <div className="flex h-full justify-center space-x-8">
                                     {navigation.pages.map((page, pageIdx) => (
-                                        page.name === 'Menu' ? (
-                                            <div key={page.name} className="group relative flex">
-                                                <div className="flex">
-                                                    <Link href="/menu" className="group relative flex items-center justify-center text-sm font-medium text-white transition-colors duration-200 ease-out hover:text-red data-open:text-indigo-600">
-                                                        {page.name}
-                                                        <span
-                                                            aria-hidden="true"
-                                                            className="absolute inset-x-0 -bottom-px z-30 h-0.5 transition duration-200 ease-out group-data-open:bg-indigo-600"
+                                        <div key={page.name} className="group relative flex">
+                                            <div className="flex">
+                                                <Link href="/menu" className="group relative flex items-center justify-center text-sm font-medium text-white transition-colors duration-200 ease-out hover:text-red data-open:text-indigo-600">
+                                                    {page.name}
+                                                    <span
+                                                        aria-hidden="true"
+                                                        className="absolute inset-x-0 -bottom-px z-30 h-0.5 transition duration-200 ease-out group-data-open:bg-indigo-600"
                                                         />
-                                                    </Link>
-                                                </div>
-                                                <div className="absolute left-0 top-full z-20 w-56 rounded-md bg-white text-sm text-black shadow-lg ring-1 ring-black/5 opacity-0 pointer-events-none transition-opacity duration-150 group-hover:opacity-100 group-hover:pointer-events-auto">
-                                                    <div className="py-2">
-                                                        {categories.map((item) => (
-                                                            <a key={item.name} href={`menu/${item.name}`} className="block px-4 py-2 hover:bg-gray-50 hover:text-gray-900">
-                                                                {item.name.split(' ').map(word => word[0].toUpperCase() + word.slice(1)).join(' ')}
-                                                            </a>
-                                                        ))}
-                                                    </div>
-                                                </div>
+                                                </Link>
                                             </div>
-                                        ) : (
-                                            <a key={page.name} href={page.href} className="flex items-center text-sm font-medium text-white hover:text-gray-300">
-                                                {page.name}
-                                            </a> 
-                                        )
+                                        </div>
+                                        
                                     ))}
                               </div>
                             </div>
