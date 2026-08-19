@@ -9,7 +9,7 @@ export default function Navbar({categories}: {categories: Category[]})
         <nav aria-label="Top">
             <Banner />
             <MobileNav />
-            <DesktopNav categories={categories} />
+            <DesktopNav />
         </nav>
     );
 }
