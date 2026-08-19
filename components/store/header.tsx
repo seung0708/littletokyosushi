@@ -6,13 +6,13 @@ import Navbar from "./navigation"
 import {Category} from '@/types/category'
 
 
-export default function Header({categories}: {categories: Category[]}) {
+export default function Header() {
     const [open, setOpen] = useState(false)
 
     return (
         <div className="bg-white">
             <header className="relative">
-                <Navbar categories={categories} />
+                <Navbar />
             </header>
         </div>
     );
