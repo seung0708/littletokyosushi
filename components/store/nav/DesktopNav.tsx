@@ -7,9 +7,9 @@ import Link from 'next/link'
 import ShoppingCart from '@/components/store/nav/ShoppingCart';
 
 import Logo from './logo';
+import {NavProps} from './navConfig'
 
-export default function DesktopNav() {
-    const [open, setOpen] = useState(false)
+const DesktopNav: React.FC<NavProps> = ({open, setOpen}) => {
     
     return (     
         <div className="bg-black relative">
@@ -67,3 +67,4 @@ export default function DesktopNav() {
     ) 
 }
 
+export default DesktopNav

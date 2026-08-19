@@ -7,3 +7,8 @@ export const navigation = {
     ]
     
 }
+
+export interface NavProps {
+    open: boolean, 
+    setOpen: (open: boolean) => void;
+}

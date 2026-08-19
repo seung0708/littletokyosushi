@@ -1,4 +1,4 @@
-import {Fragment, useState} from 'react';
+import {Fragment} from 'react';
 import {
   Dialog,
   DialogBackdrop,
@@ -13,9 +13,10 @@ import {navigation} from './navConfig';
 
 import {XMarkIcon } from '@heroicons/react/24/outline'
 import { ChevronDownIcon } from '@heroicons/react/20/solid';
+import {NavProps} from './navConfig'
 
-export default function MobileNav() {
-    const [open, setOpen] = useState(false)
+
+const MobileNav: React.FC<NavProps> = ({open, setOpen}) => {
     return (
         <Dialog open={open} onClose={setOpen} className="relative z-40 lg:hidden">
             <DialogBackdrop
@@ -177,3 +178,5 @@ export default function MobileNav() {
               </Dialog>
     )
 }
+
+export default MobileNav;
