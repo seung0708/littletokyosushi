@@ -26,7 +26,7 @@ const MobileNav: React.FC<NavProps> = ({open, setOpen}) => {
                 <div className="fixed inset-0 z-40 flex">
                   <DialogPanel
                     transition
-                    className="relative flex w-full max-w-xs transform flex-col overflow-y-auto bg-white pb-12 shadow-xl transition duration-300 ease-in-out data-closed:-translate-x-full"
+                    className="relative flex w-full max-h-52 transform flex-col bg-white pb-12 shadow-xl transition duration-300 ease-in-out data-closed:-translate-y-full"
                   >
                     <div className="flex px-4 pt-5 pb-2">
                       <button
