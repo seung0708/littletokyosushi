@@ -29,6 +29,7 @@ const MenuItems: React.FC<MenuItemsProps> = ({ categories }) => {
                                         alt={item.name} 
                                         width={200}
                                         height={200}
+                                        className="h-[200px] w-[200px]"
                                         loading="eager"
                                     />
                                     
