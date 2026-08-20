@@ -1,7 +1,3 @@
-'use client';
-
-import { useState } from 'react';
-
 interface CategoryFilterProps {
     categories: string[];
     selectedCategory: string;
@@ -14,7 +10,7 @@ const CategoryFilter: React.FC<CategoryFilterProps> = ({
     onCategoryChange
 }) => {
     return (
-        <>
+        <div className='grid grid-cols-1 sm:hidden'>
         <button
             onClick={() => onCategoryChange('all')}
             className={`menu-tab px-5 py-2 rounded-t-md border text-white md:text-medium ${
@@ -38,7 +34,7 @@ const CategoryFilter: React.FC<CategoryFilterProps> = ({
                     {category.charAt(0).toUpperCase() + category.slice(1)}
                 </button>
             ))}
-        </>
+        </div>
     );
 };
 
