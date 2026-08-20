@@ -89,7 +89,7 @@ export default function ItemsContainer() {
                 <p className="text-center md:text-left text-[11px] font-semibold text-accent tracking-[0.18em] uppercase mb-2.5">Takeout only</p>
                 <h1 className="font-serif font-normal text-white tracking-tight mb-8 text-center md:text-left" style={{fontSize: 'clamp(36px, 5vw, 60px)'}}>Our Menu</h1>
                 {/* Category tabs */}
-                <div className="mt-3 sm:mt-4">
+                <div className="flex gap-2">
                     <CategoryFilter 
                         categories={categories}
                         selectedCategory={selectedCategory}
