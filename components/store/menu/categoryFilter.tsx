@@ -27,7 +27,7 @@ const CategoryFilter: React.FC<CategoryFilterProps> = ({
                 <button
                     key={category}
                     onClick={() => onCategoryChange(category)}
-                    className={`menu-tab px-5 py-2 rounded-t-md border border-white/10 text-white text-sm md:text-medium transition-all ${
+                    className={`menu-tab px-5 py-2 rounded-t-md border border-white/40 text-white text-sm md:text-medium transition-all ${
                         selectedCategory === category
                             ? 'bg-accent border-accent'
                             : 'bg-black/30 hover:bg-red-600/50'
