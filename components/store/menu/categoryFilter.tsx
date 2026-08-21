@@ -18,7 +18,7 @@ const CategoryFilter: React.FC<CategoryFilterProps> = ({
             className={`menu-tab px-5 py-2 rounded-t-md border text-white md:text-medium ${
                 selectedCategory === 'all' 
                 ? 'bg-accent border-accent'
-                : 'border-white/10 bg-black/30 hover:bg-red-600/50'
+                : 'border-white/10 bg-black/30 hover:bg-red-600'
             }`}
         >
             All
@@ -30,7 +30,7 @@ const CategoryFilter: React.FC<CategoryFilterProps> = ({
                     className={`menu-tab px-5 py-2 rounded-t-md border border-white/40 text-white text-sm md:text-medium transition-all ${
                         selectedCategory === category
                             ? 'bg-accent border-accent'
-                            : 'bg-black/30 hover:bg-red-600/50'
+                            : 'bg-black/30 hover:bg-red-600'
                     }`}
                 >
                     {category.charAt(0).toUpperCase() + category.slice(1)}
